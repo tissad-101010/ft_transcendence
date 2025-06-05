@@ -1,0 +1,19 @@
+services:
+  web:
+    image: web
+    container_name: web
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
+    ports:
+      - "8080:80"
+    environment:
+      - NODE_ENV=production
+    volumes:
+      - ./srcs:/usr/share/nginx/html
+    networks:
+      - transcendence
+    restart: unless-stopped
+networks:
+    transcendence:
+      driver: bridge
