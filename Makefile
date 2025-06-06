@@ -19,4 +19,7 @@ clean :
 prune :
 	docker system prune -fa
 
+test_crs:
+	bash test_tools/test_modsec.sh
+
 .PHONY: start down restart up clean prune
