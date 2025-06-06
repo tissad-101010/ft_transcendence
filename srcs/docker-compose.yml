@@ -5,12 +5,14 @@ services:
     build:
       context: ./nginx
       dockerfile: Dockerfile
-    ports:
-      - "8080:80"
     environment:
       - NODE_ENV=production
     volumes:
-      - ./srcs:/usr/share/nginx/html
+      - ./html:/usr/share/nginx/html:ro
+    ports:
+      - "8443:443"                         # ajout essentiel
+      - "8080:80"
+      - "8000:80"      
     networks:
       - transcendence
     restart: unless-stopped
