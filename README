@@ -1,1 +1,3 @@
-#
+Satrt nginx : make start
+The application is accessible from http://127.0.0.1:8000/
+Exemple to test the ModSecurity : curl -v "http://127.0.0.1:8000/?id=<script>alert('xss')</script>"
