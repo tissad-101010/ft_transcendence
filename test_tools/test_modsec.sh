@@ -1,6 +1,6 @@
 #!/bin/bash
 
-URL="http://127.0.0.1:8000"
+URL="http://127.0.0.1:8443"
 
 declare -A tests=(
 	["XSS"]="<script>alert('xss')</script>"

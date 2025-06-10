@@ -111,6 +111,6 @@ RUN cp /etc/nginx/crs/crs-setup.conf.example /etc/nginx/crs/crs-setup.conf
 COPY config/nginx.conf /etc/nginx/nginx.conf
 
 # Exposer port HTTP
-EXPOSE 80
+EXPOSE 443
 
 CMD ["nginx", "-g", "daemon off;"]

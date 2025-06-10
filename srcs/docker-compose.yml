@@ -10,9 +10,7 @@ services:
     volumes:
       - ./html:/usr/share/nginx/html:ro
     ports:
-      - "8443:443"                         # ajout essentiel
-      - "8080:80"
-      - "8000:80"      
+      - "8443:443"                         # ajout essentiel      
     networks:
       - transcendence
     restart: unless-stopped

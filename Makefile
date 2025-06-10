@@ -3,7 +3,7 @@ SRCS=./srcs
 COMPOSE=$(SRCS)/docker-compose.yml
 
 start :
-	docker-compose -f $(COMPOSE) up --build
+	docker-compose -f $(COMPOSE) up -d --build
 
 down :
 	docker-compose -f $(COMPOSE) down -v
