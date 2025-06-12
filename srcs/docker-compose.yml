@@ -1,14 +1,23 @@
 services:
   web:
-    image: web
-    container_name: web
-    build:
-      context: ./nginx
-      dockerfile: Dockerfile
+    image: owasp/modsecurity:nginx
+    container_name: nginx_modsec
     environment:
       - NODE_ENV=production
     volumes:
-      - ./html:/usr/share/nginx/html:ro
+      # Fichiers NGINX
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/conf.d/default.conf:/etc/nginx/conf.d/default.conf:ro
+
+      # Fichier principal ModSecurity
+      - ./modsecurity/modsecurity.conf:/etc/modsecurity/modsecurity.conf:ro
+
+      # Règles CRS
+      - ./modsecurity/crs-setup.conf:/etc/modsecurity/crs-setup.conf:ro
+      - ./modsecurity/rules:/etc/modsecurity/rules:ro
+
+      # Dossier web
+      - ./www:/var/www/html
     ports:
       - "8443:443"                         # ajout essentiel      
     networks:
