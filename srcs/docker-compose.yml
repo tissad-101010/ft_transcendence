@@ -2,27 +2,41 @@ services:
   web:
     image: owasp/modsecurity:nginx
     container_name: nginx_modsec
+
     environment:
-      - NODE_ENV=production
+      - SSL_CERT=/etc/nginx/ssl/server.crt
+      - SSL_CERT_KEY=/etc/nginx/ssl/server.key
     volumes:
-      # Fichiers NGINX
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./nginx/conf.d/default.conf:/etc/nginx/conf.d/default.conf:ro
-
-      # Fichier principal ModSecurity
-      - ./modsecurity/modsecurity.conf:/etc/modsecurity/modsecurity.conf:ro
-
-      # Règles CRS
-      - ./modsecurity/crs-setup.conf:/etc/modsecurity/crs-setup.conf:ro
-      - ./modsecurity/rules:/etc/modsecurity/rules:ro
-
-      # Dossier web
-      - ./www:/var/www/html
+      - ./html:/usr/share/nginx/html
+      - ./nginx_modsec/nginx/certs/server.crt:/etc/nginx/ssl/server.crt:ro
+      - ./nginx_modsec/nginx/certs/server.key:/etc/nginx/ssl/server.key:ro
+      # Nginx configuration files
+      - ./nginx_modsec/nginx/nginx.conf:/etc/nginx/templates/nginx.conf.template
+      - ./nginx_modsec/nginx/conf.d/default.conf:/etc/nginx/templates/conf.d/default.conf.template
+      - ./nginx_modsec/nginx/conf.d/modsecurity.conf:/etc/nginx/templates/conf.d/modsecurity.conf.template
+      # ModSecurity configuration files
+      - ./nginx_modsec/modsecurity/modsecurity.conf:/etc/nginx/modsecurity.d/modsecurity.conf
+      - ./nginx_modsec/modsecurity/modsecurity-override.conf:/etc/nginx/templates/modsecurity.d/modsecurity-override.conf.template
+      - ./nginx_modsec/modsecurity/setup.conf:/etc/nginx/templates/modsecurity.d/setup.conf.template
+      - ./nginx_modsec/modsecurity/crs:/etc/nginx/modsecurity.d/crs
     ports:
-      - "8443:443"                         # ajout essentiel      
+      - "8443:443"
+      - "8080:80"
     networks:
       - transcendence
     restart: unless-stopped
+  vault:
+    image: hashicorp/vault
+    container_name: vault
+    volumes:
+      - ./vault/data:/vault/data
+      - ./vault/config:/vault/config
+    ports:
+      - "8200:8200"
+    cap_add:
+      - IPC_LOCK
+    # desactiver le mode de développement pour la production
+    command: server -config=/vault/config/vault.hcl 
 networks:
     transcendence:
       driver: bridge

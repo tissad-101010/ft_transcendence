@@ -1,6 +1,6 @@
 #!/bin/bash
 
-URL="http://127.0.0.1:8443"
+URL="https://127.0.0.1:8443"
 
 declare -A tests=(
 	["XSS"]="<script>alert('xss')</script>"
@@ -69,8 +69,8 @@ encoded_payload=$(printf '%s' "$payload" | jq -sRr @uri)
 
 echo -e "\nTest: $name"
 echo "Payload: $payload"
-# echo "$URL/?test=$encoded_payload"
-response=$(curl -s -o /dev/null -w "%{http_code}" "$URL/?test=$encoded_payload")
+#echo "$URL/?test=$encoded_payload"
+response=$(curl  -s -o /dev/null -w "%{http_code}" -k "$URL/?test=$encoded_payload")
 
 if [[ "$response" == "403" ]]; then
 	echo "RESPONSE: Blocked  by ModSecurity (code HTTP 403 - Forbidden)" 

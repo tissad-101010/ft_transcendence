@@ -4,15 +4,19 @@ COMPOSE=$(SRCS)/docker-compose.yml
 
 start :
 	docker-compose -f $(COMPOSE) up -d --build
+build :
+	docker-compose -f $(COMPOSE) build
+
+
 
 down :
 	docker-compose -f $(COMPOSE) down -v
 
 restart : down start
 
-
 up :
-	docker-compose -f $(COMPOSE) up 
+	docker-compose -f $(COMPOSE) up
+
 
 clean :
 	docker-compose -f $(COMPOSE) down --rmi all --volumes --remove-orphans
