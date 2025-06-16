@@ -26,4 +26,7 @@ prune :
 test_crs:
 	bash test_tools/test_modsec.sh
 
+tls_gen:
+	bash srcs/vault/tools/vault-tls-gen.sh
+
 .PHONY: start down restart up clean prune

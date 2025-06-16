@@ -1,4 +1,25 @@
 services:
+  hashicorp_vault:
+    image: hashicorp/vault
+    container_name: hashicorp_vault
+    volumes:
+      - LocalVaultData:/vault/data
+      - ./vault/config/vault.config.hcl:/vault/config/vault.config.hcl:ro
+      - ./vault/certs/vault.key:/etc/vault/certs/vault.key:ro
+      - ./vault/certs/vault.crt:/etc/vault/certs/vault.crt:ro
+    environment:
+      - VAULT_ADDR=https://hashicorp_vault:8220
+      - VAULT_CACERT=/etc/vault/certs/vault.crt
+      - VAULT_KEY=/etc/vault/certs/vault.key
+    cap_add:
+      - IPC_LOCK
+    ports:
+      - "8220:8220"  # API de Vault
+      - "8221:8221"  # Cluster comm
+    command: server -config=/vault/config/vault.config.hcl
+    networks:
+      - transcendence
+    restart: unless-stopped
   web:
     image: owasp/modsecurity:nginx
     container_name: nginx_modsec
@@ -7,7 +28,9 @@ services:
       - SSL_CERT=/etc/nginx/ssl/server.crt
       - SSL_CERT_KEY=/etc/nginx/ssl/server.key
     volumes:
+      # Nginx HTML files
       - ./html:/usr/share/nginx/html
+      # Nginx SSL certificates
       - ./nginx_modsec/nginx/certs/server.crt:/etc/nginx/ssl/server.crt:ro
       - ./nginx_modsec/nginx/certs/server.key:/etc/nginx/ssl/server.key:ro
       # Nginx configuration files
@@ -25,18 +48,18 @@ services:
     networks:
       - transcendence
     restart: unless-stopped
-  vault:
-    image: hashicorp/vault
-    container_name: vault
-    volumes:
-      - ./vault/data:/vault/data
-      - ./vault/config:/vault/config
-    ports:
-      - "8200:8200"
-    cap_add:
-      - IPC_LOCK
-    # desactiver le mode de développement pour la production
-    command: server -config=/vault/config/vault.hcl 
+
 networks:
     transcendence:
       driver: bridge
+volumes:
+    # Volume pour les données de Vault
+    # Utilisation d'un volume local pour éviter les problèmes de permission  
+  LocalVaultData:
+    driver: local
+    driver_opts:
+      type: none
+      device: ./vault/data
+      o: bind
+    # pour éviter les problèmes de permission avec le volume local
+  #
