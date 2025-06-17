@@ -1,6 +1,6 @@
 #!/bin/bash
 
-CERTS_DIR="vault/certs"
+CERTS_DIR="srcs/vault/certs"
 mkdir -p "$CERTS_DIR"
 
 openssl req -x509 -nodes -newkey rsa:2048 \
@@ -8,7 +8,7 @@ openssl req -x509 -nodes -newkey rsa:2048 \
   -out "$CERTS_DIR/vault.crt" \
   -days 365 \
   -subj "/CN=localhost" \
-  -addext "subjectAltName=DNS:0.0.0.0,DNS:localhost,DNS:hashicorp_vault"
+  -addext "subjectAltName=DNS:localhost,DNS:hashicorp_vault,DNS:vault.local,DNS:127.0.1"
 
 chmod 644 "$CERTS_DIR/vault.crt"
 chmod 644 "$CERTS_DIR/vault.key"

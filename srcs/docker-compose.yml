@@ -1,25 +1,25 @@
 services:
+
   hashicorp_vault:
     image: hashicorp/vault
     container_name: hashicorp_vault
     volumes:
       - LocalVaultData:/vault/data
-      - ./vault/config/vault.config.hcl:/vault/config/vault.config.hcl:ro
-      - ./vault/certs/vault.key:/etc/vault/certs/vault.key:ro
-      - ./vault/certs/vault.crt:/etc/vault/certs/vault.crt:ro
-    environment:
-      - VAULT_ADDR=https://hashicorp_vault:8220
-      - VAULT_CACERT=/etc/vault/certs/vault.crt
-      - VAULT_KEY=/etc/vault/certs/vault.key
+      - ./vault/config/vault.hcl:/vault/config/vault.hcl:ro
+      - ./vault/certs/vault.crt:/vault/certs/vault.crt:ro
+      - ./vault/certs/vault.key:/vault/certs/vault.key:ro
     cap_add:
       - IPC_LOCK
+    # environment:
+    #   - VAULT_ADDR=http://localhost:8200
     ports:
-      - "8220:8220"  # API de Vault
-      - "8221:8221"  # Cluster comm
-    command: server -config=/vault/config/vault.config.hcl
+      - "8200:8200"
+      - "8201:8201"
     networks:
       - transcendence
     restart: unless-stopped
+    entrypoint: ["vault", "server", "-config=/vault/config/vault.hcl"]
+
   web:
     image: owasp/modsecurity:nginx
     container_name: nginx_modsec
@@ -44,7 +44,7 @@ services:
       - ./nginx_modsec/modsecurity/crs:/etc/nginx/modsecurity.d/crs
     ports:
       - "8443:443"
-      - "8080:80"
+      # - "8080:80"
     networks:
       - transcendence
     restart: unless-stopped
