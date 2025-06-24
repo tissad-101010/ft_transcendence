@@ -20,28 +20,48 @@ services:
     restart: unless-stopped
     entrypoint: ["vault", "server", "-config=/vault/config/vault.hcl"]
 
-  web:
-    image: owasp/modsecurity:nginx
-    container_name: nginx_modsec
-
+  frontend:
+    image : frontend
+    container_name: frontend
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    depends_on:
+      - hashicorp_vault
+    volumes:
+      - frontend-build:/app/build:rw
+    networks:
+      - transcendence
+    ports:
+      - "3000:3000"
+    restart: unless-stopped
+      
+  proxy:
+    image: proxy
+    build:
+      context: ./proxy
+      dockerfile: Dockerfile
+    container_name: proxy
+    depends_on:
+      - frontend
     environment:
       - SSL_CERT=/etc/nginx/ssl/server.crt
       - SSL_CERT_KEY=/etc/nginx/ssl/server.key
     volumes:
       # Nginx HTML files
-      - ./html:/usr/share/nginx/html
+      - ./frontend/build:/usr/share/nginx/html
       # Nginx SSL certificates
-      - ./nginx_modsec/nginx/certs/server.crt:/etc/nginx/ssl/server.crt:ro
-      - ./nginx_modsec/nginx/certs/server.key:/etc/nginx/ssl/server.key:ro
+      - ./proxy/nginx/certs/server.crt:/etc/nginx/ssl/server.crt:ro
+      - ./proxy/nginx/certs/server.key:/etc/nginx/ssl/server.key:ro
       # Nginx configuration files
-      - ./nginx_modsec/nginx/nginx.conf:/etc/nginx/templates/nginx.conf.template
-      - ./nginx_modsec/nginx/conf.d/default.conf:/etc/nginx/templates/conf.d/default.conf.template
-      - ./nginx_modsec/nginx/conf.d/modsecurity.conf:/etc/nginx/templates/conf.d/modsecurity.conf.template
+      - ./proxy/nginx/nginx.conf:/etc/nginx/templates/nginx.conf.template
+      - ./proxy/nginx/conf.d/default.conf:/etc/nginx/templates/conf.d/default.conf.template
+      - ./proxy/nginx/conf.d/modsecurity.conf:/etc/nginx/templates/conf.d/modsecurity.conf.template
       # ModSecurity configuration files
-      - ./nginx_modsec/modsecurity/modsecurity.conf:/etc/nginx/modsecurity.d/modsecurity.conf
-      - ./nginx_modsec/modsecurity/modsecurity-override.conf:/etc/nginx/templates/modsecurity.d/modsecurity-override.conf.template
-      - ./nginx_modsec/modsecurity/setup.conf:/etc/nginx/templates/modsecurity.d/setup.conf.template
-      - ./nginx_modsec/modsecurity/crs:/etc/nginx/modsecurity.d/crs
+      - ./proxy/modsecurity/modsecurity.conf:/etc/nginx/modsecurity.d/modsecurity.conf
+      - ./proxy/modsecurity/modsecurity-override.conf:/etc/nginx/templates/modsecurity.d/modsecurity-override.conf.template
+      - ./proxy/modsecurity/setup.conf:/etc/nginx/templates/modsecurity.d/setup.conf.template
+      - ./proxy/modsecurity/crs:/etc/nginx/modsecurity.d/crs
     ports:
       - "8443:443"
       # - "8080:80"
@@ -62,4 +82,10 @@ volumes:
       device: ./vault/data
       o: bind
     # pour éviter les problèmes de permission avec le volume local
+  frontend-build:
+    driver: local
+    driver_opts:
+      type: none
+      device: ./frontend/build
+      o: bind
   #
