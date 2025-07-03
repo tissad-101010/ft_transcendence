@@ -35,7 +35,21 @@ services:
     ports:
       - "3000:3000"
     restart: unless-stopped
-      
+  
+  backend:
+      image: backend
+      build:
+        context: ./backend
+        dockerfile: Dockerfile
+      restart: unless-stopped
+      container_name: backend
+      volumes:
+        - ./backend/app:/app
+        - /app/node_modules
+      # command: npm run dev
+      ports: 
+        - "4000:4000"
+
   proxy:
     image: proxy
     build:
