@@ -2,25 +2,25 @@
 SRCS=./srcs
 COMPOSE=$(SRCS)/docker-compose.yml
 
-start :
-	docker-compose -f $(COMPOSE) up -d --build
+start : local
+	docker-compose -f $(COMPOSE) up --build
 build :
 	docker-compose -f $(COMPOSE) build
 
 
 
-down :
+down : 
 	docker-compose -f $(COMPOSE) down -v
 
 restart : down start
 
-up :
+up : local
 	docker-compose -f $(COMPOSE) up
 
 
 clean :
 	docker-compose -f $(COMPOSE) down --rmi all --volumes --remove-orphans
-prune :
+prune : clean
 	docker system prune -fa
 
 test_crs:
@@ -29,4 +29,6 @@ test_crs:
 tls_gen:
 	bash srcs/vault/tools/vault-tls-gen.sh
 
+local:
+	mkdir -p ./srcs/vault/data
 .PHONY: start down restart up clean prune
