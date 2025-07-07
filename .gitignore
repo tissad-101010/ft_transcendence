@@ -1,5 +1,4 @@
 *.o
-*.env
 *.log
 *.tmp
 *test
