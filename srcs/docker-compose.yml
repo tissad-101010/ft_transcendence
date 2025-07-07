@@ -26,8 +26,8 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
-    depends_on:
-      - hashicorp_vault
+    # depends_on:
+    #   - hashicorp_vault
     volumes:
       - frontend-build:/app/build:rw
     networks:
