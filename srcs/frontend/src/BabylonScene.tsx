@@ -38,18 +38,26 @@ const BabylonScene = () => {
         camera.attachControl(canvasRef.current, true);
         camera.speed = 0.5;
 
+      const light = new HemisphericLight("light", new Vector3(0, 1, 0), scene);
+      light.intensity = 0.8;
+
         // Charge la texture HDR (.env) et l'assigne à la scène
-        const hdrTexture = CubeTexture.CreateFromPrefilteredData("/background.env", scene);
-        scene.environmentTexture = hdrTexture;
+        // const hdrTexture = CubeTexture.CreateFromPrefilteredData("/background.env", scene);
+        // scene.environmentTexture = hdrTexture;
 
         // Crée la skybox avec la texture HDR, taille 1000, parametre intensite HDRI
-        scene.createDefaultSkybox(hdrTexture, true, 1000, 0);
+        // scene.createDefaultSkybox(hdrTexture, true, 1000, 0);
+
+
 
       //----------------------------TEST IMPORT TSHIRT----------------------------
       
-        SceneLoader.Append("/vestiary/", "tableVestiary.glb", scene);
-        SceneLoader.Append("/vestiary/", "structVestiary.glb", scene);
-        SceneLoader.Append("/vestiary/", "maillot.glb", scene);
+        SceneLoader.Append("/field/", "terrain.glb", scene);
+        SceneLoader.Append("/field/", "raquetteLeft.glb", scene);
+        SceneLoader.Append("/field/", "raquetteRight.glb", scene);
+        SceneLoader.Append("/field/", "cageLeft.glb", scene);
+        SceneLoader.Append("/field/", "cageRight.glb", scene);
+        SceneLoader.Append("/field/", "ballPong.glb", scene);
           // const myMesh = scene.getMeshByName("shirt");
         //   if (myMesh){
         //     // fetch('http://localhost:3001/profile') //appel vers le backend via CORS
@@ -99,4 +107,5 @@ const BabylonScene = () => {
     return <canvas ref={canvasRef} style={{ width: '100%', height: '100vh' }} />;
 
 };
+
 export default BabylonScene;
