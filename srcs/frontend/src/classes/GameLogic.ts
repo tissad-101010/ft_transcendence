@@ -1,7 +1,7 @@
 let keys = new Set<string>();
 
-import PlayerLogic from './PlayerLogic';
-import BallLogic from './BallLogic';
+import PlayerLogic from './PlayerLogic.ts';
+import BallLogic from './BallLogic.ts';
 
 interface IControl
 {
@@ -82,7 +82,7 @@ class Game
             this.#ctx.fillText("Jeu en pause !", this.#canvas.width / 2 - this.#ctx.measureText(text).width / 2, 50);
         }
 
-        if (this.#state != 3)
+        if (this.#state !== 3)
             this.#ball.render(this.#ctx);
         else
         {
@@ -133,14 +133,14 @@ class Game
     // Methode qui met a jour l'etat de la partie a chaque appel de window.requestAnimationFrame
     update() : void
     {
-        if (this.#state != 3)
+        if (this.#state !== 3)
         {
             this.handleKeys();
             if (this.#state === 1)
             {
                 this.#ball.move();
                 let tmp = this.#ball.goal;
-                if (tmp != 0)
+                if (tmp !== 0)
                 {
                     if (tmp === 1)
                         this.goal(this.#player1);
@@ -223,25 +223,28 @@ function keyUpHandler(e : KeyboardEvent) : void
     keys.delete(e.key);   
 }
 
-try {
-    let rules = {
-            scoreMax: 1,
-            timeLimit: 5,
-            ballSpeed: 8,
-            playerSpeed: 10,
-            allowPause: true,
-            countDownGoalTime: 3
-        };
-    let game = new Game(rules);
-    document.addEventListener("keydown", keyDownHandler, false); // Detecte quand une touche est appuyee
-    document.addEventListener("keyup", keyUpHandler, false); // Detecte quand une touche est relachee
-    game.start(); // Lance la partie
-} catch (err : unknown)
+export function pong(): void
 {
-    if (err instanceof Error)
-        console.error("Error : ", err.message);
-    else
-        console.error("Error : unknown");
+    try {
+        let rules = {
+                scoreMax: 1,
+                timeLimit: 5,
+                ballSpeed: 8,
+                playerSpeed: 10,
+                allowPause: true,
+                countDownGoalTime: 3
+            };
+        let game = new Game(rules);
+        document.addEventListener("keydown", keyDownHandler, false); // Detecte quand une touche est appuyee
+        document.addEventListener("keyup", keyUpHandler, false); // Detecte quand une touche est relachee
+        game.start(); // Lance la partie
+    } catch (err : unknown)
+    {
+        if (err instanceof Error)
+            console.error("Error : ", err.message);
+        else
+            console.error("Error : unknown");
+    }
 }
 
 

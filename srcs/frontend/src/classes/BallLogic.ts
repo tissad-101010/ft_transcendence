@@ -1,4 +1,4 @@
-import PlayerLogic from './PlayerLogic'; 
+import PlayerLogic from './PlayerLogic.ts'; 
 
 export default class BallLogic
 {
