@@ -1,5 +1,3 @@
-let keys = new Set<string>();
-
 import PlayerLogic from './PlayerLogic.ts';
 import BallLogic from './BallLogic.ts';
 
@@ -26,7 +24,7 @@ interface IRules
     allowPause: boolean
 }
 
-class Game
+export default class GameLogic
 {
     #player1: PlayerLogic;
     #player2: PlayerLogic;
@@ -131,11 +129,11 @@ class Game
     };
 
     // Methode qui met a jour l'etat de la partie a chaque appel de window.requestAnimationFrame
-    update() : void
+    update(keys: Set<string>) : void
     {
         if (this.#state !== 3)
         {
-            this.handleKeys();
+            this.handleKeys(keys);
             if (this.#state === 1)
             {
                 this.#ball.move();
@@ -162,12 +160,10 @@ class Game
                 this.#ball.hit(this.#player2);
             }
         }
-        this.render();
-        window.requestAnimationFrame(() => this.update());
     };
 
     // Methode qui gere les actions selon les touches appuyees
-    handleKeys() : void
+    handleKeys(keys: Set<string>) : void
     {
         if (this.#state >= 1 && this.#state <= 2)
         {
@@ -201,51 +197,47 @@ class Game
         }
     };
 
-
-    // Methode qui lance la partie
-    start() : void
+    get player1() : PlayerLogic
     {
-        this.#state = 1;
-        window.requestAnimationFrame(() => this.update());
-    };
+        return (this.#player1);
+    }
+
+    get player2() : PlayerLogic
+    {
+        return (this.#player2)
+    }
+
+    get ball() : BallLogic
+    {
+        return (this.#ball);
+    }
+
+    set state(val: number)
+    {
+        this.#state = val;
+    }
+
 };
 
-
-// Fonction de gestion pour une touche appuyee
-function keyDownHandler(e : KeyboardEvent) : void
-{
-    keys.add(e.key);
-}
-
-// Fonction de gestion pour une touche relachee
-function keyUpHandler(e : KeyboardEvent) : void 
-{
-    keys.delete(e.key);   
-}
-
-export function pong(): void
-{
-    try {
-        let rules = {
-                scoreMax: 1,
-                timeLimit: 5,
-                ballSpeed: 8,
-                playerSpeed: 10,
-                allowPause: true,
-                countDownGoalTime: 3
-            };
-        let game = new Game(rules);
-        document.addEventListener("keydown", keyDownHandler, false); // Detecte quand une touche est appuyee
-        document.addEventListener("keyup", keyUpHandler, false); // Detecte quand une touche est relachee
-        game.start(); // Lance la partie
-    } catch (err : unknown)
-    {
-        if (err instanceof Error)
-            console.error("Error : ", err.message);
-        else
-            console.error("Error : unknown");
-    }
-}
+// export function pong(): void
+// {
+//     try {
+//         let rules = {
+//                 scoreMax: 3,
+//                 timeLimit: 5,
+//                 ballSpeed: 8,
+//                 playerSpeed: 10,
+//                 allowPause: true,
+//                 countDownGoalTime: 3
+//             };
+//     } catch (err : unknown)
+//     {
+//         if (err instanceof Error)
+//             console.error("Error : ", err.message);
+//         else
+//             console.error("Error : unknown");
+//     }
+// }
 
 
 
