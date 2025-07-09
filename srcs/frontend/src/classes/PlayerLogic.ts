@@ -4,6 +4,12 @@ interface IControl
     down: string
 }
 
+interface IField
+{
+    width: number,
+    height: number
+}
+
 export default class PlayerLogic 
 {
     #width: number;
@@ -14,18 +20,18 @@ export default class PlayerLogic
     #speed: number;
     #score: number;
     #color: string;
-    #canvas: HTMLCanvasElement;
     #control: IControl;
-    #ctx: CanvasRenderingContext2D;
-    constructor(id: number, color: string, canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D, speed: number)
+    #field: IField;
+    constructor(id: number, color: string, speed: number, field: IField)
     {
         if (id < 1 || id > 2)
             throw new Error("id incorrect : " + id);
         this.#id = id;
-        this.#height = 50;
+        this.#height = 5;
         this.#width = 10;
         this.#color = color;
-        this.#canvas = canvas;
+        this.#field = field;
+        this.#posX = 0;
         if (id === 1)
         {
             this.#posX = 20;
@@ -33,29 +39,29 @@ export default class PlayerLogic
         }
         else
         {
-            this.#posX = this.#canvas.width - 20 - this.#width;
+            this.#posX = this.#field.width - 20 - this.#width;
             this.#control = {up: "ArrowUp", down: "ArrowDown"};
         }
-        this.#posY = (720 / 2) - (this.#height / 2);
+        this.#posY = (this.#field.height / 2) - (this.#height / 2);
+        // this.#posY = 0;
         this.#speed = speed;
         this.#score = 0;
-        this.#ctx = ctx;
     };
 
 
     // Methode de rendu graphique pour le canvas
-    render() : void
-    {
-        this.#ctx.fillStyle = this.#color;
-        this.#ctx.fillRect(this.#posX, this.#posY, this.#width, this.#height);
-    };
+    // render() : void
+    // {
+    //     this.#ctx.fillStyle = this.#color;
+    //     this.#ctx.fillRect(this.#posX, this.#posY, this.#width, this.#height);
+    // };
 
     // Methode qui met a jour la position de la barre du player
     update(dep: number) : void
     {
         if (dep === -1 && this.#posY + dep * this.#speed >= 0)
             this.#posY += dep * this.#speed;
-        else if (dep === 1 && (this.#posY + dep * this.#speed) + this.#height <= this.#canvas.height)
+        else if (dep === 1 && (this.#posY + dep * this.#speed) + this.#height <= this.#field.height)
             this.#posY += dep * this.#speed;
     };
 

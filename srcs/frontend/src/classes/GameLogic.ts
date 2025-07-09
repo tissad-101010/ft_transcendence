@@ -24,6 +24,12 @@ interface IRules
     allowPause: boolean
 }
 
+interface IField
+{
+    width: number,
+    height: number
+}
+
 export default class GameLogic
 {
     #player1: PlayerLogic;
@@ -36,6 +42,7 @@ export default class GameLogic
     #countDownGoal: ICountDownGoal; // Utile pour le compteur de l'engagement
     #rules: IRules;
     #winner: PlayerLogic | null;
+    #field: IField;
     constructor(rules : IRules)
     {
         this.#rules = rules;
@@ -44,61 +51,62 @@ export default class GameLogic
             this.#ctx = this.#canvas.getContext("2d") as CanvasRenderingContext2D;
         else
             throw new Error("canvas not compatible");
-        this.#player1 = new PlayerLogic(1, "rgb(255, 255, 255)", this.#canvas, this.#ctx, this.#rules.playerSpeed);
-        this.#player2 = new PlayerLogic(2, "rgb(255, 255, 255)", this.#canvas, this.#ctx, this.#rules.playerSpeed);
-        this.#ball = new BallLogic("rgb(255, 255, 255)", this.#canvas, this.#ctx, this.#rules.ballSpeed);
+        this.#field = {width: 1280, height: 720};
+        this.#player1 = new PlayerLogic(1, "rgb(255, 255, 255)", this.#rules.playerSpeed, this.#field);
+        this.#player2 = new PlayerLogic(2, "rgb(255, 255, 255)", this.#rules.playerSpeed, this.#field);
+        this.#ball = new BallLogic("rgb(255, 255, 255)", this.#rules.ballSpeed, this.#field);
         this.#state = 0;
         this.#control = {pause: "p"};
         this.#countDownGoal = {active: false, value: this.#rules.countDownGoalTime, id: 0};
         this.#winner = null;
     };
 
-    // Methode de rendu pour le compteur lors de l'engagement
-    renderCountDown() : void
-    {
-        this.#ctx.font = "50px Arial";
-        this.#ctx.fillStyle = "rgb(75, 75, 75)";
-        if (this.#countDownGoal.value !== 0)
-            this.#ctx.fillText(`${this.#countDownGoal.value}`, this.#canvas.width / 2, this.#canvas.height / 2);
-    }
+    // // Methode de rendu pour le compteur lors de l'engagement
+    // renderCountDown() : void
+    // {
+    //     this.#ctx.font = "50px Arial";
+    //     this.#ctx.fillStyle = "rgb(75, 75, 75)";
+    //     if (this.#countDownGoal.value !== 0)
+    //         this.#ctx.fillText(`${this.#countDownGoal.value}`, this.#canvas.width / 2, this.#canvas.height / 2);
+    // }
 
     // Methode de rendu graphique pour le canvas
-    render() : void
-    {
-        this.#ctx.clearRect(0, 0, this.#canvas.width, this.#canvas.height);
-        this.#ctx.fillStyle = "rgb(0, 0, 0)";
-        this.#ctx.fillRect(0, 0, this.#canvas.width, this.#canvas.height);
+    // render() : void
+    // {
+    //     this.#ctx.clearRect(0, 0, this.#canvas.width, this.#canvas.height);
+    //     this.#ctx.fillStyle = "rgb(0, 0, 0)";
+    //     this.#ctx.fillRect(0, 0, this.#canvas.width, this.#canvas.height);
 
-        if (this.#countDownGoal.active === true)
-            this.renderCountDown();
+    //     if (this.#countDownGoal.active === true)
+    //         this.renderCountDown();
 
-        if (this.#state === 0)
-        {
-            this.#ctx.fillStyle = "rgb(255, 255, 255)";
-            this.#ctx.font = "30px Arial";
-            let text = "Jeu en pause !"
-            this.#ctx.fillText("Jeu en pause !", this.#canvas.width / 2 - this.#ctx.measureText(text).width / 2, 50);
-        }
+    //     if (this.#state === 0)
+    //     {
+    //         this.#ctx.fillStyle = "rgb(255, 255, 255)";
+    //         this.#ctx.font = "30px Arial";
+    //         let text = "Jeu en pause !"
+    //         this.#ctx.fillText("Jeu en pause !", this.#canvas.width / 2 - this.#ctx.measureText(text).width / 2, 50);
+    //     }
 
-        if (this.#state !== 3)
-            this.#ball.render(this.#ctx);
-        else
-        {
-            this.#ctx.fillStyle = "rgb(255, 255, 255)";
-            this.#ctx.font = "30px Arial";
-            let text = "undefinied";
-            if (this.#winner)
-                text = `Player ${this.#winner.id} wins!`;
-            this.#ctx.fillText(text, this.#canvas.width / 2 - this.#ctx.measureText(text).width / 2, this.#canvas.height / 2);
-        }
+    //     if (this.#state !== 3)
+    //         this.#ball.render(this.#ctx);
+    //     else
+    //     {
+    //         this.#ctx.fillStyle = "rgb(255, 255, 255)";
+    //         this.#ctx.font = "30px Arial";
+    //         let text = "undefinied";
+    //         if (this.#winner)
+    //             text = `Player ${this.#winner.id} wins!`;
+    //         this.#ctx.fillText(text, this.#canvas.width / 2 - this.#ctx.measureText(text).width / 2, this.#canvas.height / 2);
+    //     }
         
-        this.#player1.render();
-        this.#player2.render();
+    //     this.#player1.render();
+    //     this.#player2.render();
         
-        this.#ctx.font = "30px Arial";
-        this.#ctx.fillText(`${this.#player1.score}`, this.#canvas.width / 2 - this.#canvas.width / 4, this.#canvas.height / 2);
-        this.#ctx.fillText(`${this.#player2.score}`, this.#canvas.width / 2 + this.#canvas.width / 4, this.#canvas.height / 2);
-    };
+    //     this.#ctx.font = "30px Arial";
+    //     this.#ctx.fillText(`${this.#player1.score}`, this.#canvas.width / 2 - this.#canvas.width / 4, this.#canvas.height / 2);
+    //     this.#ctx.fillText(`${this.#player2.score}`, this.#canvas.width / 2 + this.#canvas.width / 4, this.#canvas.height / 2);
+    // };
 
     startCountDown() : void
     {
@@ -212,10 +220,25 @@ export default class GameLogic
         return (this.#ball);
     }
 
+    get width() : number
+    {
+        return this.#field.width;
+    }
+
+    get height(): number
+    {
+        return this.#field.height;
+    }
+
     set state(val: number)
     {
         this.#state = val;
     }
+
+    set field(size : IField)
+    {
+        this.#field = {width: size.width, height: size.height};
+    };
 
 };
 

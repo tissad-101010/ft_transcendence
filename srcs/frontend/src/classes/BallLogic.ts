@@ -1,5 +1,11 @@
 import PlayerLogic from './PlayerLogic.ts'; 
 
+interface IField
+{
+    width: number,
+    height: number
+}
+
 export default class BallLogic
 {
     #width: number;
@@ -9,19 +15,17 @@ export default class BallLogic
     #color: string;
     #directionX : number;
     #directionY: number;
-    #canvas: HTMLCanvasElement;
-    #ctx: CanvasRenderingContext2D;
-    constructor(color: string, canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D, speed: number)
+    #field: IField;
+    constructor(color: string, speed: number, field: IField)
     {
-        this.#width = 20;
-        this.#canvas = canvas;
-        this.#posX = this.#canvas.width / 2;
-        this.#posY = this.#canvas.height / 2;
+        this.#width = 3;
+        this.#posX = 0;
+        this.#posY = 0;
         this.#speed = speed;
         this.#color = color;
         this.#directionX = 1;
         this.#directionY = 1;
-        this.#ctx = ctx;
+        this.#field = field;
     };
 
     // Methode qui deplace la balle
@@ -34,7 +38,7 @@ export default class BallLogic
     // Methode qui verifie si la balle touche un mur
     bounce() : void
     {
-        if (this.#posY >= this.#canvas.height || this.#posY <= 0)
+        if (this.#posY >= this.#field.height || this.#posY <= 0)
             this.#directionY = -this.#directionY;
     };
 
@@ -57,10 +61,10 @@ export default class BallLogic
         return this.#width;
     }
 
-    get canvas() : HTMLCanvasElement
-    {
-        return this.#canvas;
-    }
+    // get canvas() : HTMLCanvasElement
+    // {
+    //     return this.#canvas;
+    // }
 
     get posX() : number
     {
@@ -92,17 +96,17 @@ export default class BallLogic
         return this.#directionY;
     }
 
-    get ctx() : CanvasRenderingContext2D
-    {
-        return this.#ctx;
-    }
+    // get ctx() : CanvasRenderingContext2D
+    // {
+    //     return this.#ctx;
+    // }
 
     /*
     *   Si Player1 marque -> 1, Si Player2 marque -> 2, Sinon 0
     */
     get goal() : number
     {
-        if (this.#posX >= this.#canvas.width)
+        if (this.#posX >= this.#field.width)
             return (1);
         else if (this.#posX <= 0)
             return (2);
@@ -115,11 +119,11 @@ export default class BallLogic
     */
     reset() : void
     {
-            if (this.#posY > this.#canvas.height - 20)
-                this.#posY = this.#canvas.height - 20;
+            if (this.#posY > this.#field.height - 20)
+                this.#posY = this.#field.height - 20;
             if (this.#posY < 20)
                 this.#posY = 20;
-            this.#posX = this.#canvas.width / 2; // La balle repart du centre du terrain
+            this.#posX = this.#field.width; // La balle repart du centre du terrain
     };
 
     // Methode de rendu graphique dans le canvas

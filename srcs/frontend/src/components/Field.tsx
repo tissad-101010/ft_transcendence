@@ -7,28 +7,59 @@ import GameLogic from '../classes/GameLogic.ts'
 function Field() {
     const pong3D = useRef<HTMLCanvasElement | null>(null);
     useEffect(() => {
-        if (pong3D.current) {
+        if (!pong3D.current) return;
+
+        let scene: Pong3DScene | null = null;
+        const canvas = pong3D.current;
+
+        const initScene = () => {
+            const context = canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
+            if (!context) {
+                console.error("WebGL context not supported or canvas not ready");
+                return;
+            }
+
             const rules = {
-                scoreMax: 3,
+                scoreMax: 10,
                 timeLimit: 5,
-                ballSpeed: 8,
+                ballSpeed: 5,
                 playerSpeed: 10,
                 allowPause: true,
-                countDownGoalTime: 3
+                countDownGoalTime: 1,
             };
+
             const game = new GameLogic(rules);
-            const scene = new Pong3DScene(pong3D.current, game);
+            scene = new Pong3DScene(canvas, game);
             scene.init();
             scene.start();
-            return () => {
-                scene.dispose(); // Clean up si démonté
-            };
-        }
+        };
+
+        // Différer d'un frame pour que le canvas soit prêt
+        const rafId = requestAnimationFrame(initScene);
+
+        return () => {
+            if (scene) {
+                scene.dispose();
+            }
+            cancelAnimationFrame(rafId);
+        };
     }, []);
 
     return (
-        <canvas id="bkgdPong" ref={pong3D} width={1280} height={720}></canvas>
-    );
+        <>
+        <canvas id="bkgdPong" ref={pong3D} style={{ width: '100%', height: '100vh' }}></canvas>
+        <div id="camPosition" style={{
+            position: 'absolute',
+            top: 10,
+            left: 10,
+            background: 'rgba(0,0,0,0.5)',
+            color: 'white',
+            padding: '5px',
+            fontFamily: 'monospace',
+            zIndex: 10}}>
+        </div>
+    </>
+);
 }
 
 export default Field;
