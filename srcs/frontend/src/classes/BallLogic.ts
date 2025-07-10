@@ -18,7 +18,7 @@ export default class BallLogic
     #field: IField;
     constructor(color: string, speed: number, field: IField)
     {
-        this.#width = 3;
+        this.#width = 8;
         this.#posX = 0;
         this.#posY = 0;
         this.#speed = speed;
@@ -114,6 +114,16 @@ export default class BallLogic
             return (0);
     };
 
+    set posX(value: number)
+    {
+        this.#posX = value;
+    }
+
+    set posY(value: number)
+    {
+        this.#posY = value; 
+    }
+
     /*
     * Methode qui permet de reinitialiser la balle apres un but, lance un compteur de 3 secondes pour le coup d'envoi
     */
@@ -123,7 +133,7 @@ export default class BallLogic
                 this.#posY = this.#field.height - 20;
             if (this.#posY < 20)
                 this.#posY = 20;
-            this.#posX = this.#field.width; // La balle repart du centre du terrain
+            this.#posX = this.#field.width / 2; // La balle repart du centre du terrain
     };
 
     // Methode de rendu graphique dans le canvas

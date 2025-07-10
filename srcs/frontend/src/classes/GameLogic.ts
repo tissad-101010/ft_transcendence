@@ -51,7 +51,7 @@ export default class GameLogic
             this.#ctx = this.#canvas.getContext("2d") as CanvasRenderingContext2D;
         else
             throw new Error("canvas not compatible");
-        this.#field = {width: 1280, height: 720};
+        this.#field = {width: 250, height: 125};
         this.#player1 = new PlayerLogic(1, "rgb(255, 255, 255)", this.#rules.playerSpeed, this.#field);
         this.#player2 = new PlayerLogic(2, "rgb(255, 255, 255)", this.#rules.playerSpeed, this.#field);
         this.#ball = new BallLogic("rgb(255, 255, 255)", this.#rules.ballSpeed, this.#field);
@@ -144,7 +144,7 @@ export default class GameLogic
             this.handleKeys(keys);
             if (this.#state === 1)
             {
-                this.#ball.move();
+                // this.#ball.move();
                 let tmp = this.#ball.goal;
                 if (tmp !== 0)
                 {
@@ -169,6 +169,19 @@ export default class GameLogic
             }
         }
     };
+
+    setStartPosition() : void
+    {
+        this.#ball.posX = this.#field.width / 2;
+        this.#ball.posY = this.#field.height / 2;
+
+        this.#player1.posX = 20;
+        this.#player1.posY = this.#field.height / 2;
+    
+        this.#player2.posX = this.#field.width - 20;
+        this.#player2.posY = this.#field.height / 2;
+    };
+
 
     // Methode qui gere les actions selon les touches appuyees
     handleKeys(keys: Set<string>) : void

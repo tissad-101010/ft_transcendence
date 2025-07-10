@@ -27,25 +27,19 @@ export default class PlayerLogic
         if (id < 1 || id > 2)
             throw new Error("id incorrect : " + id);
         this.#id = id;
-        this.#height = 5;
-        this.#width = 10;
+        this.#height = 2;
+        this.#width = 2;
         this.#color = color;
         this.#field = field;
         this.#posX = 0;
-        if (id === 1)
-        {
-            this.#posX = 20;
-            this.#control = {up: "q", down: "a"};
-        }
-        else
-        {
-            this.#posX = this.#field.width - 20 - this.#width;
-            this.#control = {up: "ArrowUp", down: "ArrowDown"};
-        }
-        this.#posY = (this.#field.height / 2) - (this.#height / 2);
-        // this.#posY = 0;
-        this.#speed = speed;
+        this.#posY = 0;
         this.#score = 0;
+        this.#speed = speed;
+        if (id === 1)
+            this.#control = {up: "q", down: "a"};
+        else
+            this.#control = {up: "ArrowUp", down: "ArrowDown"};
+        // this.#posY = 0;
     };
 
 
@@ -110,5 +104,15 @@ export default class PlayerLogic
     get up() : string
     {
         return this.#control.up;
+    }
+
+    set posX(value: number)
+    {
+        this.#posX = value;
+    }
+
+    set posY(value : number)
+    {
+        this.#posY = value;
     }
 };

@@ -12,6 +12,7 @@ import {
   Color3,
   CubeTexture,
   AbstractMesh,
+  Matrix,
   Mesh
 } from '@babylonjs/core';
 
@@ -59,7 +60,7 @@ function getWorldSize(mesh: Mesh): { width: number; height: number; depth: numbe
     const depth = Math.abs(maxWorld.z - minWorld.z);
 
     return { width, height, depth };
-}
+};
 
 export default class Pong3DScene
 {
@@ -111,10 +112,11 @@ export default class Pong3DScene
                 this.#scene
             );
             const meshes = result.meshes;
-            if (meshes.length > 0)
-                this.#players[pos].mesh = meshes[0];
+            const playerMesh = meshes.find(m => m.getTotalVertices() > 0 && m.name === "MancheRaquette");
+            if (playerMesh)
+                this.#players[pos].mesh = playerMesh;
             else
-                console.warn("No mesh for field");
+                console.warn("Player mesh non trouvé !");
         } catch (error: unknown)
         {
             console.error("Error loadPlayerMesh");
@@ -132,10 +134,11 @@ export default class Pong3DScene
                 this.#scene
             );
             const meshes = result.meshes;
-            if (meshes.length > 0)
-                this.#ball.mesh = meshes[0];
+            const ballMesh = meshes.find(m => m.getTotalVertices() > 0 && m.name === "BallPong");
+            if (ballMesh)
+                this.#ball.mesh = ballMesh;
             else
-                console.warn("No mesh for field");
+                console.warn("Ball mesh non trouvé !");
         } catch (error: unknown)
         {
             console.error("Error loadBallMesh");
@@ -149,11 +152,10 @@ export default class Pong3DScene
             const result = await SceneLoader.ImportMeshAsync(
                 "",
                 "/field/",
-                "terrain.glb",
+                "terraintest.glb",
                 this.#scene
             );
             const meshes = result.meshes;
-            console.log(meshes);
             const terrainMesh = meshes.find(m => m.getTotalVertices() > 0 && m.name === "Terrain");
             if (terrainMesh)
                 this.#game.mesh = terrainMesh;
@@ -182,10 +184,11 @@ export default class Pong3DScene
         //     new Vector3(0, 50, 20), // target
         //     this.#scene
         // );
-        this.#camera = new FreeCamera("freeCamera", new Vector3(0.5, 46.77, -118.65), this.#scene);
+        // Centrer explicitement (normalement, par défaut c’est déjà à 0,0,0)
+        this.#camera = new FreeCamera("freeCamera", new Vector3(0.75, 115, -190.75), this.#scene);
         this.#camera.setTarget(Vector3.Zero());
-        this.#camera.attachControl(this.#canvas, true);
-        this.#camera.speed = 1;
+        // this.#camera.attachControl(this.#canvas, true);
+        // this.#camera.speed = 1;
         // const axes = new AxesViewer(this.#scene, 10);
         // const box = MeshBuilder.CreateBox("centerBox", { size: 2 }, this.#scene);
         // box.position = new Vector3(0, 1, 0); // Légèrement au-dessus du sol
@@ -196,49 +199,85 @@ export default class Pong3DScene
         await this.loadPlayerMesh(0);
         await this.loadPlayerMesh(1);
 
+        console.log(this.#game.mesh.getBoundingInfo());
+        let bounding = this.#game.mesh.getBoundingInfo().boundingBox;
         let size = getWorldSize(this.#game.mesh);
         let desiredWidth = this.#game.logic.width;
-        let scaleFactor = desiredWidth / size.width;
-        this.#game.mesh.scaling = new Vector3(scaleFactor, scaleFactor, scaleFactor);
+        let desiredHeight = this.#game.logic.height;
+        let scaleX = desiredWidth / size.width;
+        let scaleY = desiredHeight / size.depth;
+        this.#game.mesh.scaling = new Vector3(scaleX, scaleX, scaleY);
+        let center = bounding.centerWorld;
+        this.#game.mesh.bakeTransformIntoVertices(Matrix.Translation(-center.x, -center.y, -center.z));
+        this.#game.mesh.position = new Vector3(0,0,0);
+
 
         size = getWorldSize(this.#players[0].mesh);
         desiredWidth = this.#players[0].logic.width;
-        scaleFactor = desiredWidth / size.width;
-        this.#players[0].mesh.scaling = new Vector3(scaleFactor, scaleFactor, scaleFactor);
-        this.#players[1].mesh.scaling = new Vector3(scaleFactor, scaleFactor, scaleFactor);
+        scaleX = desiredWidth / size.width;
+        bounding = this.#players[0].mesh.getBoundingInfo().boundingBox;
+        this.#players[0].mesh.scaling = new Vector3(scaleX, scaleX, scaleX);
+        center = bounding.centerWorld
+        this.#players[0].mesh.bakeTransformIntoVertices(Matrix.Translation(-center.x, -center.y, -center.z));
+        bounding = this.#players[1].mesh.getBoundingInfo().boundingBox;
+        this.#players[1].mesh.scaling = new Vector3(scaleX, scaleX, scaleX);
+        center = bounding.centerWorld;
+        this.#players[1].mesh.bakeTransformIntoVertices(Matrix.Translation(-center.x, -center.y, -center.z));
 
+        bounding = this.#ball.mesh.getBoundingInfo().boundingBox;
         size = getWorldSize(this.#ball.mesh);
         desiredWidth = this.#ball.logic.width;
-        scaleFactor = desiredWidth / size.width;
-        this.#ball.mesh.scaling = new Vector3(scaleFactor, scaleFactor, scaleFactor);
+        scaleX = desiredWidth / size.width;
+        this.#ball.mesh.scaling = new Vector3(scaleX, scaleX, scaleX);
+        center = bounding.centerWorld;
+        this.#ball.mesh.bakeTransformIntoVertices(Matrix.Translation(-center.x, -center.y, -center.z));
     };
 
     start() : void
     {
+        // this.#game.logic.state = 1;
+        // this.#game.logic.setStartPosition();
+        // this.#engine.runRenderLoop(() => {
+        //     const camDiv = document.getElementById("camPosition");
+
+        //     this.#scene.registerBeforeRender(() => {
+        //         if (camDiv) {
+        //             const pos = this.#camera.position;
+        //             camDiv.innerText = `x: ${pos.x.toFixed(2)}\ny: ${pos.y.toFixed(2)}\nz: ${pos.z.toFixed(2)}`;
+        //         }
+        //     });
+        //     this.#game.logic.update(this.#keys);
+        //     /* TEST D'UPDATE DES TEXTURES */
+        //     if (this.#players[0].mesh)
+        //         this.#players[0].mesh.position = new Vector3(this.#game.logic.player1.posX, 2, this.#game.logic.player1.posY)
+        //     if (this.#players[1].mesh)
+        //         this.#players[1].mesh.position = new Vector3(this.#game.logic.player2.posX, 2, this.#game.logic.player2.posY)
+
+        //     if (this.#ball.mesh)
+        //         this.#ball.mesh.position = new Vector3(this.#game.logic.ball.posX, 2, this.#game.logic.ball.posY);
+        //     this.#scene.render();
+        // })
+
         this.#game.logic.state = 1;
-        this.#engine.runRenderLoop(() => {
-            const camDiv = document.getElementById("camPosition");
+    this.#game.logic.setStartPosition();
 
-            this.#scene.registerBeforeRender(() => {
-                if (camDiv) {
-                    const pos = this.#camera.position;
-                    camDiv.innerText = `x: ${pos.x.toFixed(2)}\ny: ${pos.y.toFixed(2)}\nz: ${pos.z.toFixed(2)}`;
-                }
-            });
-            this.#game.logic.update(this.#keys);
-            /* TEST D'UPDATE DES TEXTURES */
-            if (this.#players[0].mesh)
-            this.#players[0].mesh.position.z = this.#game.logic.player1.posY; // Adapter facteur
-            if (this.#players[1].mesh)
-                this.#players[1].mesh.position.z = this.#game.logic.player2.posY;
+    // Déplace la logique dans un seul callback, avant le render
+    this.#scene.onBeforeRenderObservable.add(() => {
+        // Update logique
+        this.#game.logic.update(this.#keys);
 
-            if (this.#ball.mesh)
-            {
-                this.#ball.mesh.position.x = this.#game.logic.ball.posX;
-                this.#ball.mesh.position.z = this.#game.logic.ball.posY;
-            }
-            this.#scene.render();
-        })
+        // Update visuel
+        if (this.#players[0].mesh)
+            this.#players[0].mesh.position = new Vector3(this.#game.logic.player1.posX, 2, this.#game.logic.player1.posY);
+        if (this.#players[1].mesh)
+            this.#players[1].mesh.position = new Vector3(this.#game.logic.player2.posX, 2, this.#game.logic.player2.posY);
+        if (this.#ball.mesh)
+            this.#ball.mesh.position = new Vector3(this.#game.logic.ball.posX, 2, this.#game.logic.ball.posY);
+    });
+
+    this.#engine.runRenderLoop(() => {
+        this.#scene.render();
+    });
     };
 
     dispose() : void

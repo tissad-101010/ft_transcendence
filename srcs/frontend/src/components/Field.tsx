@@ -22,7 +22,7 @@ function Field() {
             const rules = {
                 scoreMax: 10,
                 timeLimit: 5,
-                ballSpeed: 5,
+                ballSpeed: 1,
                 playerSpeed: 10,
                 allowPause: true,
                 countDownGoalTime: 1,
