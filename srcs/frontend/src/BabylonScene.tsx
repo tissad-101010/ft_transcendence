@@ -52,12 +52,7 @@ const BabylonScene = () => {
 
       //----------------------------TEST IMPORT TSHIRT----------------------------
       
-        SceneLoader.Append("/field/", "terrain.glb", scene);
-        SceneLoader.Append("/field/", "raquetteLeft.glb", scene);
-        SceneLoader.Append("/field/", "raquetteRight.glb", scene);
-        SceneLoader.Append("/field/", "cageLeft.glb", scene);
-        SceneLoader.Append("/field/", "cageRight.glb", scene);
-        SceneLoader.Append("/field/", "ballPong.glb", scene);
+        SceneLoader.Append("/babylon/", "scene.glb", scene);
           // const myMesh = scene.getMeshByName("shirt");
         //   if (myMesh){
         //     // fetch('http://localhost:3001/profile') //appel vers le backend via CORS

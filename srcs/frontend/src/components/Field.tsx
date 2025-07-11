@@ -12,7 +12,7 @@ function Field() {
         let scene: Pong3DScene | null = null;
         const canvas = pong3D.current;
 
-        const initScene = () => {
+        const initScene = async () => {
             const context = canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
             if (!context) {
                 console.error("WebGL context not supported or canvas not ready");
@@ -23,14 +23,14 @@ function Field() {
                 scoreMax: 10,
                 timeLimit: 5,
                 ballSpeed: 1,
-                playerSpeed: 10,
+                playerSpeed: 3,
                 allowPause: true,
                 countDownGoalTime: 1,
             };
 
             const game = new GameLogic(rules);
             scene = new Pong3DScene(canvas, game);
-            scene.init();
+            await scene.init();
             scene.start();
         };
 
@@ -47,8 +47,8 @@ function Field() {
 
     return (
         <>
-        <canvas id="bkgdPong" ref={pong3D} style={{ width: '100%', height: '100vh' }}></canvas>
-        <div id="camPosition" style={{
+        <canvas id="bkgdPong" ref={pong3D} style={{ width: '100%', height: '99vh' }}></canvas>
+        {/* <div id="camPosition" style={{
             position: 'absolute',
             top: 10,
             left: 10,
@@ -57,7 +57,7 @@ function Field() {
             padding: '5px',
             fontFamily: 'monospace',
             zIndex: 10}}>
-        </div>
+        </div> */}
     </>
 );
 }

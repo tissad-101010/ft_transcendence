@@ -144,7 +144,7 @@ export default class GameLogic
             this.handleKeys(keys);
             if (this.#state === 1)
             {
-                // this.#ball.move();
+                this.#ball.move();
                 let tmp = this.#ball.goal;
                 if (tmp !== 0)
                 {

@@ -167,6 +167,36 @@ export default class Pong3DScene
         }
     };
 
+    preparePlayer(player: IPlayer) : void
+    {
+        const size = getWorldSize(player.mesh);
+        const scale = player.logic.width / size.width;
+        player.mesh.scaling = new Vector3(scale, scale, scale);
+        
+        const bounding = player.mesh.getBoundingInfo().boundingBox;
+        const center = bounding.centerWorld;
+        player.mesh.position = player.mesh.position.subtract(center);
+
+        player.mesh.position.x = player.logic.posX;
+        player.mesh.position.z = player.logic.posY;
+        player.mesh.position.y = 5;
+    };
+
+    prepareBall() : void
+    {
+        const size = getWorldSize(this.#ball.mesh);
+        const scale = this.#ball.logic.width / size.width;
+        this.#ball.mesh.scaling = new Vector3(scale, scale, scale);
+        
+        const bounding = this.#ball.mesh.getBoundingInfo().boundingBox;
+        const center = bounding.centerWorld;
+        this.#ball.mesh.position = this.#ball.mesh.position.subtract(center);
+
+        this.#ball.mesh.position.x = this.#ball.logic.posX;
+        this.#ball.mesh.position.z = this.#ball.logic.posY;
+        this.#ball.mesh.position.y = 2;
+    };
+
     async init() : Promise<void>
     {
         const context = this.#canvas?.getContext("webgl") || this.#canvas?.getContext("experimental-webgl");
@@ -185,8 +215,8 @@ export default class Pong3DScene
         //     this.#scene
         // );
         // Centrer explicitement (normalement, par défaut c’est déjà à 0,0,0)
-        this.#camera = new FreeCamera("freeCamera", new Vector3(0.75, 115, -190.75), this.#scene);
-        this.#camera.setTarget(Vector3.Zero());
+        // this.#camera = new FreeCamera("freeCamera", new Vector3(0.75, 115, -190.75), this.#scene);
+        // this.#camera.setTarget(Vector3.Zero());
         // this.#camera.attachControl(this.#canvas, true);
         // this.#camera.speed = 1;
         // const axes = new AxesViewer(this.#scene, 10);
@@ -199,38 +229,62 @@ export default class Pong3DScene
         await this.loadPlayerMesh(0);
         await this.loadPlayerMesh(1);
 
-        console.log(this.#game.mesh.getBoundingInfo());
-        let bounding = this.#game.mesh.getBoundingInfo().boundingBox;
-        let size = getWorldSize(this.#game.mesh);
-        let desiredWidth = this.#game.logic.width;
-        let desiredHeight = this.#game.logic.height;
-        let scaleX = desiredWidth / size.width;
-        let scaleY = desiredHeight / size.depth;
-        this.#game.mesh.scaling = new Vector3(scaleX, scaleX, scaleY);
-        let center = bounding.centerWorld;
-        this.#game.mesh.bakeTransformIntoVertices(Matrix.Translation(-center.x, -center.y, -center.z));
-        this.#game.mesh.position = new Vector3(0,0,0);
+        
+
+        const size = getWorldSize(this.#game.mesh);
+        let scaleX = this.#game.logic.width / size.width;
+        let scaleZ = this.#game.logic.height / size.depth;
+        let uniformScale = Math.min(scaleX, scaleZ);
+        this.#game.mesh.scaling = new Vector3(uniformScale, uniformScale, uniformScale);
+
+        const bounding = this.#game.mesh.getBoundingInfo().boundingBox;
+        const center = bounding.centerWorld;
+        this.#game.mesh.position = this.#game.mesh.position.subtract(center);
+
+        this.preparePlayer(this.#players[0]);
+        this.preparePlayer(this.#players[1]);
+        this.prepareBall();
+        this.#camera = new ArcRotateCamera("arcCamera", 
+            Math.PI / 2,   // alpha
+            Math.PI / 4,   // beta
+            300,           // radius
+            this.#game.mesh,    // <--- ICI tu mets le mesh directement
+            this.#scene
+        );
+        // this.#camera.attachControl(this.#canvas, true);
+
+        // console.log(this.#game.mesh.getBoundingInfo());
+        // let bounding = this.#game.mesh.getBoundingInfo().boundingBox;
+        // let size = getWorldSize(this.#game.mesh);
+        // let desiredWidth = this.#game.logic.width;
+        // let desiredHeight = this.#game.logic.height;
+        // let scaleX = desiredWidth / size.width;
+        // let scaleY = desiredHeight / size.depth;
+        // this.#game.mesh.scaling = new Vector3(scaleX, scaleX, scaleY);
+        // let center = bounding.centerWorld;
+        // this.#game.mesh.bakeTransformIntoVertices(Matrix.Translation(-center.x, -center.y, -center.z));
+        // this.#game.mesh.position = new Vector3(0,0,0);
 
 
-        size = getWorldSize(this.#players[0].mesh);
-        desiredWidth = this.#players[0].logic.width;
-        scaleX = desiredWidth / size.width;
-        bounding = this.#players[0].mesh.getBoundingInfo().boundingBox;
-        this.#players[0].mesh.scaling = new Vector3(scaleX, scaleX, scaleX);
-        center = bounding.centerWorld
-        this.#players[0].mesh.bakeTransformIntoVertices(Matrix.Translation(-center.x, -center.y, -center.z));
-        bounding = this.#players[1].mesh.getBoundingInfo().boundingBox;
-        this.#players[1].mesh.scaling = new Vector3(scaleX, scaleX, scaleX);
-        center = bounding.centerWorld;
-        this.#players[1].mesh.bakeTransformIntoVertices(Matrix.Translation(-center.x, -center.y, -center.z));
+        // size = getWorldSize(this.#players[0].mesh);
+        // desiredWidth = this.#players[0].logic.width;
+        // scaleX = desiredWidth / size.width;
+        // bounding = this.#players[0].mesh.getBoundingInfo().boundingBox;
+        // this.#players[0].mesh.scaling = new Vector3(scaleX, scaleX, scaleX);
+        // center = bounding.centerWorld
+        // this.#players[0].mesh.bakeTransformIntoVertices(Matrix.Translation(-center.x, -center.y, -center.z));
+        // bounding = this.#players[1].mesh.getBoundingInfo().boundingBox;
+        // this.#players[1].mesh.scaling = new Vector3(scaleX, scaleX, scaleX);
+        // center = bounding.centerWorld;
+        // this.#players[1].mesh.bakeTransformIntoVertices(Matrix.Translation(-center.x, -center.y, -center.z));
 
-        bounding = this.#ball.mesh.getBoundingInfo().boundingBox;
-        size = getWorldSize(this.#ball.mesh);
-        desiredWidth = this.#ball.logic.width;
-        scaleX = desiredWidth / size.width;
-        this.#ball.mesh.scaling = new Vector3(scaleX, scaleX, scaleX);
-        center = bounding.centerWorld;
-        this.#ball.mesh.bakeTransformIntoVertices(Matrix.Translation(-center.x, -center.y, -center.z));
+        // bounding = this.#ball.mesh.getBoundingInfo().boundingBox;
+        // size = getWorldSize(this.#ball.mesh);
+        // desiredWidth = this.#ball.logic.width;
+        // scaleX = desiredWidth / size.width;
+        // this.#ball.mesh.scaling = new Vector3(scaleX, scaleX, scaleX);
+        // center = bounding.centerWorld;
+        // this.#ball.mesh.bakeTransformIntoVertices(Matrix.Translation(-center.x, -center.y, -center.z));
     };
 
     start() : void
@@ -259,7 +313,7 @@ export default class Pong3DScene
         // })
 
         this.#game.logic.state = 1;
-    this.#game.logic.setStartPosition();
+    // this.#game.logic.setStartPosition();
 
     // Déplace la logique dans un seul callback, avant le render
     this.#scene.onBeforeRenderObservable.add(() => {
@@ -268,11 +322,26 @@ export default class Pong3DScene
 
         // Update visuel
         if (this.#players[0].mesh)
-            this.#players[0].mesh.position = new Vector3(this.#game.logic.player1.posX, 2, this.#game.logic.player1.posY);
+            this.#players[0].mesh.position = new Vector3(
+                -this.#game.logic.width / 2 + this.#players[0].logic.posX,
+                7,
+                -this.#game.logic.height / 2 + this.#players[0].logic.posY
+            );
+
         if (this.#players[1].mesh)
-            this.#players[1].mesh.position = new Vector3(this.#game.logic.player2.posX, 2, this.#game.logic.player2.posY);
+            this.#players[1].mesh.position = new Vector3(
+                -this.#game.logic.width / 2 + this.#players[1].logic.posX,
+                7,
+                -this.#game.logic.height / 2 + this.#players[1].logic.posY
+            );
+
         if (this.#ball.mesh)
-            this.#ball.mesh.position = new Vector3(this.#game.logic.ball.posX, 2, this.#game.logic.ball.posY);
+            this.#ball.mesh.position = new Vector3(
+                -this.#game.logic.width / 2 + this.#ball.logic.posX,
+                3,
+                -this.#game.logic.height / 2 + this.#ball.logic.posY
+            );
+        
     });
 
     this.#engine.runRenderLoop(() => {

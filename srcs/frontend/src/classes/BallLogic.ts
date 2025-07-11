@@ -19,13 +19,14 @@ export default class BallLogic
     constructor(color: string, speed: number, field: IField)
     {
         this.#width = 8;
-        this.#posX = 0;
         this.#posY = 0;
         this.#speed = speed;
         this.#color = color;
         this.#directionX = 1;
         this.#directionY = 1;
         this.#field = field;
+        this.#posX = this.#field.width / 2;
+        this.#posY = this.#field.height / 2;
     };
 
     // Methode qui deplace la balle

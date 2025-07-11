@@ -27,8 +27,8 @@ export default class PlayerLogic
         if (id < 1 || id > 2)
             throw new Error("id incorrect : " + id);
         this.#id = id;
-        this.#height = 2;
-        this.#width = 2;
+        this.#height = 1;
+        this.#width = 1;
         this.#color = color;
         this.#field = field;
         this.#posX = 0;
@@ -36,10 +36,16 @@ export default class PlayerLogic
         this.#score = 0;
         this.#speed = speed;
         if (id === 1)
+        {
+            this.#posX = 0;
             this.#control = {up: "q", down: "a"};
+        }
         else
+        {
+            this.#posX = this.#field.width;
             this.#control = {up: "ArrowUp", down: "ArrowDown"};
-        // this.#posY = 0;
+        }
+        this.#posY = this.#field.height / 2;
     };
 
 
