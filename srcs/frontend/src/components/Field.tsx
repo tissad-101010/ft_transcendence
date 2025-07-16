@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react';
 
 import Pong3DScene from '../classes/Pong3DScene.ts';
 
-import GameLogic from '../classes/GameLogic.ts'
+import GameLogic from '../classes/Game/GameLogic.js'
 
 function Field() {
     const pong3D = useRef<HTMLCanvasElement | null>(null);

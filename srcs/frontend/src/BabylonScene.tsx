@@ -34,9 +34,9 @@ const BabylonScene = () => {
         // );
 
 
-        const camera = new FreeCamera("freeCamera", new Vector3(0, 5, -10), scene);
-        camera.attachControl(canvasRef.current, true);
-        camera.speed = 0.5;
+      const camera = new FreeCamera("freeCamera", new Vector3(0, 5, -10), scene);
+      camera.attachControl(canvasRef.current, true);
+      camera.speed = 0.5;
 
       const light = new HemisphericLight("light", new Vector3(0, 1, 0), scene);
       light.intensity = 0.8;

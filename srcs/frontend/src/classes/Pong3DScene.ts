@@ -18,9 +18,9 @@ import {
 
 import '@babylonjs/loaders/glTF'; // important : chargeur pour .glb et .gltf
 
-import GameLogic from './GameLogic.ts';
-import PlayerLogic from './PlayerLogic.ts';
-import BallLogic from './BallLogic.ts';
+import GameLogic from './Game/GameLogic.js';
+import PlayerLogic from './Game/PlayerLogic.js';
+import BallLogic from './Game/BallLogic.js';
 
 interface IPlayer
 {
