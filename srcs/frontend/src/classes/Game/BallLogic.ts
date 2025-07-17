@@ -1,4 +1,4 @@
-import PlayerLogic from './PlayerLogic.js'; 
+import PlayerLogic from './PlayerLogic.ts'; 
 
 interface IField
 {

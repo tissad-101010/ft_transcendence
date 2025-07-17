@@ -1,4 +1,4 @@
-import GameLogic from "./GameLogic.js";
+import GameLogic from "./GameLogic.ts";
 
 interface IRules
 {
@@ -18,7 +18,7 @@ export default class GameManager
         this.#game = null;
     };
 
-    createGame(rules: IRules, keys: Set<string>) : void
+    createGame(rules: IRules) : void
     {
         if (this.#game)
             throw new Error("Partie deja en cours");

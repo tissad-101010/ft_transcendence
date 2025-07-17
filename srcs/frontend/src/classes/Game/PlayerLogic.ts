@@ -37,12 +37,12 @@ export default class PlayerLogic
         this.#speed = speed;
         if (id === 1)
         {
-            this.#posX = 0;
+            this.#posX = this.#field.width / 10;
             this.#control = {up: "q", down: "a"};
         }
         else
         {
-            this.#posX = this.#field.width;
+            this.#posX = this.#field.width - this.#field.width / 10;
             this.#control = {up: "ArrowUp", down: "ArrowDown"};
         }
         this.#posY = this.#field.height / 2;
@@ -63,6 +63,7 @@ export default class PlayerLogic
             this.#posY += dep * this.#speed;
         else if (dep === 1 && (this.#posY + dep * this.#speed) + this.#height <= this.#field.height)
             this.#posY += dep * this.#speed;
+        console.log("posY vaut maintenant ", this.#posY);
     };
 
     // Methode qui ajoute 1 au score du player

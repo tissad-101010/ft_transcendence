@@ -45,35 +45,35 @@ export default class World3D
         this.#keys = new Set<string>();
     };
 
-    private keyDownHandler(e: KeyboardEvent): void
+    keyDownHandler(e: KeyboardEvent): void
     {
         this.#keys.add(e.key);
     }
 
-    private keyUpHandler(e: KeyboardEvent): void
+    keyUpHandler(e: KeyboardEvent): void
     {
         this.#keys.delete(e.key);
     }
 
-    async loadWorldMesh() : Promise<void>
-    {
-        try
-        {
-            console.log(this.#world.meshPath.folder, this.#world.meshPath.file);
-            const result = await SceneLoader.ImportMeshAsync
-            (
-                "",
-                "/babylon/",
-                "scene.glb",
-                this.#scene
-            );
-            const ms = result.meshes;
+    // async loadWorldMesh() : Promise<void>
+    // {
+    //     try
+    //     {
+    //         console.log(this.#world.meshPath.folder, this.#world.meshPath.file);
+    //         const result = await SceneLoader.ImportMeshAsync
+    //         (
+    //             "",
+    //             "/babylon/",
+    //             "scene.glb",
+    //             this.#scene
+    //         );
+    //         const ms = result.meshes;
             
-        } catch (error: unknown)
-        {
-            console.error("Error loadWorldMesh");
-        }
-    }
+    //     } catch (error: unknown)
+    //     {
+    //         console.error("Error loadWorldMesh");
+    //     }
+    // }
 
     async init() : Promise<void>
     {
@@ -93,25 +93,25 @@ export default class World3D
 
 
         // TMP : RECUPERE LE MESH REPRESENTANT LE TERRAIN, UTILE POUR LA CAMERA POUR LE MOMENT
-        const test = this.#scene.getMeshByName("Terrain");
-        if (!test)
-        {
-            console.error("Mesh Terrain pas trouve");
-            return ;
-        }
+        // const test = this.#scene.getMeshByName("Terrain");
+        // if (!test)
+        // {
+        //     console.error("Mesh Terrain pas trouve");
+        //     return ;
+        // }
 
-        console.log("Donnees sur mon mesh : ");
-        const boundingInfo = test.getBoundingInfo();
-        const minimum = boundingInfo.minimum;
-        const maximum = boundingInfo.maximum;
+        // console.log("Donnees sur mon mesh : ");
+        // const boundingInfo = test.getBoundingInfo();
+        // const minimum = boundingInfo.minimum;
+        // const maximum = boundingInfo.maximum;
 
-        const size = maximum.subtract(minimum);
-        console.log("Largeur (x):", size.x);
-        console.log("Hauteur (y):", size.y);
-        console.log("Profondeur (z):", size.z);
+        // const size = maximum.subtract(minimum);
+        // console.log("Largeur (x):", size.x);
+        // console.log("Hauteur (y):", size.y);
+        // console.log("Profondeur (z):", size.z);
 
 
-        // AFFICHE TOUS LES MESHS
+        //AFFICHE TOUS LES MESHS
         // if (this.#scene.meshes.length === 0)
         //     console.log("Aucun mesh !");
         // this.#scene.meshes.forEach((mesh) => {
@@ -122,11 +122,6 @@ export default class World3D
 
     start() : void
     {
-        // A changer de place plus tard (Utile pour le gameplay)
-        window.addEventListener("keydown", this.keyDownHandler);
-        window.addEventListener("keyup", this.keyUpHandler);
-        /////////////////////////////////////////////////////////
-
         // TEST POUR UN MATCH
         const testRules = {
             scoreMax: 5,
@@ -142,7 +137,10 @@ export default class World3D
             {
                 this.#game3D = new Game3D(game, this.#scene);
                 if (!this.#game3D.loadMeshes())
+                {
+                    console.error("ERROR LORS DE LA RECUPERATION DES MESHS");
                     return ;
+                }
                 
             } catch (error: unknown)
             {
@@ -154,7 +152,10 @@ export default class World3D
         }
 
         if (!this.#game3D)
+        {
+            console.error("game3D est null")   
             return ;
+        }
         this.#camera = new ArcRotateCamera("arcCamera", 
             Math.PI / 2,   // alpha
             Math.PI / 4,   // beta
@@ -162,12 +163,20 @@ export default class World3D
             this.#game3D.fieldMesh,    // <--- ICI tu mets le mesh directement
             this.#scene
         );
-        /////////////////////
+        // /////////////////////
 
         this.#world.logic.gameManager.start();
 
+        // A changer de place plus tard (Utile pour le gameplay)
+        this.keyDownHandler = this.keyDownHandler.bind(this);
+        this.keyUpHandler = this.keyUpHandler.bind(this);
+        window.addEventListener("keydown", this.keyDownHandler);
+        window.addEventListener("keyup", this.keyUpHandler);
+        /////////////////////////////////////////////////////////
+
+
         this.#scene.onBeforeRenderObservable.add(() => {
-            if (this.#world.logic.game && this.#world.logic.game.state != 0)
+            if (this.#world.logic.game && this.#world.logic.game.state !== 0)
                 this.#game3D?.update(this.#keys);
         });
 

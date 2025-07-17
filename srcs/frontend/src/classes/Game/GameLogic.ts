@@ -1,5 +1,5 @@
-import PlayerLogic from './PlayerLogic.js';
-import BallLogic from './BallLogic.js';
+import PlayerLogic from './PlayerLogic.ts';
+import BallLogic from './BallLogic.ts';
 
 interface IControl
 {
@@ -33,8 +33,6 @@ export default class GameLogic
     #player1: PlayerLogic;
     #player2: PlayerLogic;
     #ball: BallLogic;
-    #ctx: CanvasRenderingContext2D;
-    #canvas: HTMLCanvasElement;
     #state: number; // 0 : Pause | 1 : En cours | 2 : Engagement | 3 : termine
     #control: IControl;
     #countDownGoal: ICountDownGoal; // Utile pour le compteur de l'engagement
@@ -44,11 +42,6 @@ export default class GameLogic
     constructor(rules : IRules)
     {
         this.#rules = rules;
-        this.#canvas = document.getElementById("bkgdPong") as HTMLCanvasElement;
-        if (this.#canvas.getContext)
-            this.#ctx = this.#canvas.getContext("2d") as CanvasRenderingContext2D;
-        else
-            throw new Error("canvas not compatible");
         this.#field = {width: 100, height: 50};
         this.#player1 = new PlayerLogic(1, "rgb(255, 255, 255)", this.#rules.playerSpeed, this.#field);
         this.#player2 = new PlayerLogic(2, "rgb(255, 255, 255)", this.#rules.playerSpeed, this.#field);

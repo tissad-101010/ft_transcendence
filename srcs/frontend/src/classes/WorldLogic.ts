@@ -1,5 +1,5 @@
-import {GameManager, GameLogic } from "./Game/GameManager.ts";
-// import GameLogic from "./Game/GameLogic.ts";
+import GameManager from "./Game/GameManager.ts";
+import GameLogic from "./Game/GameLogic.ts";
 
 interface IRules
 {

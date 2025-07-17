@@ -13,19 +13,22 @@ import BallLogic from './BallLogic.ts';
 interface IPlayer
 {
     logic: PlayerLogic,
-    mesh: Mesh | null
+    mesh: Mesh | null,
+    size: Vector3 | null
 };
 
 interface IBall
 {
     logic: BallLogic,
-    mesh: Mesh | null
+    mesh: Mesh | null,
+    size: Vector3 | null
 };
 
 interface IGame
 {
     logic: GameLogic,
-    mesh: Mesh | null
+    mesh: Mesh | null,
+    size: Vector3 | null
 };
 
 export default class Game3D
@@ -38,58 +41,102 @@ export default class Game3D
     {
         if (!game)
             throw new Error("Error constructor Game3D : game = null");
-        this.#game = {logic: game, mesh: null};
+        this.#game = {logic: game, mesh: null, size: null};
         this.#players = [
-            {mesh: null, logic: game.player1},
-            {mesh: null, logic: game.player2}];
-        this.#ball = {logic: game.ball, mesh: null};
+            {mesh: null, logic: game.player1, size: null},
+            {mesh: null, logic: game.player2, size: null}];
+        this.#ball = {logic: game.ball, mesh: null, size: null};
         this.#scene = scene;
     };
+
+    convertLogicToWorld3D(
+        logicX: number,
+        logicY: number,
+    ): Vector3 | null
+    {
+        const scaleX = this.#game.size.x / this.#game.logic.width;
+        const scaleY = this.#game.size.z / this.#game.logic.height;
+
+        // Calcul position logique (origine en haut à gauche)
+        const offsetX = logicX * scaleX - this.#game.size.x / 2;
+        const offsetZ = logicY * scaleY - this.#game.size.z / 2;
+
+        const center = this.#game.mesh.getBoundingInfo().boundingBox.centerWorld;
+
+        // Inverser l'axe Z car Y logique va vers le bas
+        const invertedOffsetZ = -offsetZ;
+
+        return new Vector3(
+            center.x + offsetX,
+            center.y,                 // Y constant (hauteur)
+            center.z + invertedOffsetZ
+        );
+    }
+
+    getSizeMesh(mesh: Mesh) : Vector3
+    {
+        const box = mesh.getBoundingInfo().boundingBox;
+        const min = box.minimumWorld;
+        const max = box.maximumWorld;
+
+        return (max.subtract(min));
+    }
 
     loadMeshes() : boolean
     {
         this.#game.mesh = this.#scene.getMeshByName("Terrain");
         this.#players[0].mesh = this.#scene.getMeshByName("MancheRaquette");
-        this.#players[1].mesh = this.#scene.getMeshByName("McheRaquette001");
-        this.#ball = this.#scene.getMeshByName("Ball");
-        if (!this.#game.mesh
-                || !this.#players[0].mesh
-                || !this.#players[1].mesh
-                || !this.#ball.mesh
-        )
+        this.#players[1].mesh = this.#scene.getMeshByName("McheRaquette.001");
+        this.#ball.mesh = this.#scene.getMeshByName("BallPong");
+        if (!this.#game.mesh)
         {
-            console.error("MESH NON CHARGE");
+            console.error("terrain non trouve");
             return (false);
         }
+        else if (!this.#players[0].mesh)
+        {
+            console.error("player1 non trouve");
+            return (false);
+        }
+        else if (!this.#players[1].mesh)
+        {
+            console.error("player2 non trouve");
+            return (false);
+        }
+        else if (!this.#ball.mesh)
+        {
+            console.error("ball non trouve");
+            return (false);
+        }
+        this.#game.size = this.getSizeMesh(this.#game.mesh);
+        this.#players[0].size = this.getSizeMesh(this.#players[0].mesh);
+        this.#players[1].size = this.getSizeMesh(this.#players[1].mesh);
+        this.#ball.size = this.getSizeMesh(this.#ball.mesh);
+        console.log("Position du terrain : ", this.#game.mesh.position);
+        console.log("Position du player1 : ", this.#players[0].mesh.position);
+        console.log("Position du player2 : ", this.#players[1].mesh.position);
+        console.log("Position de la balle : ", this.#ball.mesh.position);
         return (true);
     };
 
     updatePlayer(player: IPlayer)
     {
-        const boundingInfo = this.#game.mesh.getBoundingInfo();
-        const minimum = boundingInfo.minimum;
-        const maximum = boundingInfo.maximum;
-
-        const size = maximum.subtract(minimum);
-
-        const scaleX = size.width / player.logic.width;
-        const scaleZ = size.depth / player.logic.height;
-
-        player.mesh.position = new Vector3(scaleX, player.mesh.position.y, scaleZ);
+        const newPos = this.convertLogicToWorld3D(
+            player.logic.posX,
+            player.logic.posY
+        );
+        if (newPos)
+            player.mesh.position = Vector3.Lerp(player.mesh.position, newPos, 0.2);
     };
 
     updateBall(ball: IBall)
     {
-        const boundingInfo = this.#game.mesh.getBoundingInfo();
-        const minimum = boundingInfo.minimum;
-        const maximum = boundingInfo.maximum;
-
-        const size = maximum.subtract(minimum);
-
-        const scaleX = size.width / ball.logic.width;
-        const scaleZ = size.depth / ball.logic.width;
-
-        ball.mesh.position = new Vector3(scaleX, ball.mesh.position.y, scaleZ);
+        const newPos = this.convertLogicToWorld3D(
+            ball.logic.posX,
+            ball.logic.posY
+        );
+        if (newPos)
+            ball.mesh.position = newPos;
     };
 
     update(keys: Set<string>) : void
