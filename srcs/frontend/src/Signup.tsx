@@ -6,9 +6,9 @@ function SignupForm() {
 
   const handleSignup = async (e) => {
     e.preventDefault(); // empêche le rechargement de la page
-
+    console.log('Signup URL:', 'https://localhost:8443/api');
     try {
-      const response = await fetch('https://localhost:8443/api/signup', {
+      const response = await fetch('https://localhost:8443/api', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json', // indique qu'on envoie du JSON

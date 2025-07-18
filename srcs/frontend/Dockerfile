@@ -11,7 +11,7 @@ COPY ./public/ ./public
 
 #CMD ["tail", "-f", "/dev/null"]
 
-# RUN npm run build
+RUN npm run build
 # CMD ["tail", "-f", "/dev/null"]
 
 CMD ["npm", "start"]

@@ -8,7 +8,7 @@ interface SignupBody {
 }
 
 // Déclaration de la route POST /api/signup
-fastify.post<{ Body: SignupBody }>('/api/signup', async (request, reply) => {
+fastify.post<{ Body: SignupBody }>('/api', async (request, reply) => {
   const { username, password } = request.body;
 
   // Log des données reçues
@@ -24,8 +24,9 @@ fastify.post<{ Body: SignupBody }>('/api/signup', async (request, reply) => {
 // Démarrage du serveur
 const start = async () => {
   try {
-    await fastify.listen({ port: 5000 });
-    console.log('🚀 Serveur Fastify démarré sur http://localhost:5000');
+    // await fastify.listen({ port: 4000 });
+    await fastify.listen({ port: 4000, host: '0.0.0.0' });
+    console.log('🚀 Serveur Fastify démarré sur http://localhost:4000');
   } catch (err) {
     fastify.log.error(err);
     process.exit(1);
