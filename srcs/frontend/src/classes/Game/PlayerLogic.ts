@@ -48,14 +48,6 @@ export default class PlayerLogic
         this.#posY = this.#field.height / 2;
     };
 
-
-    // Methode de rendu graphique pour le canvas
-    // render() : void
-    // {
-    //     this.#ctx.fillStyle = this.#color;
-    //     this.#ctx.fillRect(this.#posX, this.#posY, this.#width, this.#height);
-    // };
-
     // Methode qui met a jour la position de la barre du player
     update(dep: number) : void
     {
@@ -63,7 +55,6 @@ export default class PlayerLogic
             this.#posY += dep * this.#speed;
         else if (dep === 1 && (this.#posY + dep * this.#speed) + this.#height <= this.#field.height)
             this.#posY += dep * this.#speed;
-        console.log("posY vaut maintenant ", this.#posY);
     };
 
     // Methode qui ajoute 1 au score du player

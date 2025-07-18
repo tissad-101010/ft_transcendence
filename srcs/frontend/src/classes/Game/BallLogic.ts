@@ -62,11 +62,6 @@ export default class BallLogic
         return this.#width;
     }
 
-    // get canvas() : HTMLCanvasElement
-    // {
-    //     return this.#canvas;
-    // }
-
     get posX() : number
     {
         return this.#posX;
@@ -96,11 +91,6 @@ export default class BallLogic
     {
         return this.#directionY;
     }
-
-    // get ctx() : CanvasRenderingContext2D
-    // {
-    //     return this.#ctx;
-    // }
 
     /*
     *   Si Player1 marque -> 1, Si Player2 marque -> 2, Sinon 0
@@ -135,14 +125,5 @@ export default class BallLogic
             if (this.#posY < 20)
                 this.#posY = 20;
             this.#posX = this.#field.width / 2; // La balle repart du centre du terrain
-    };
-
-    // Methode de rendu graphique dans le canvas
-    render(ctx : CanvasRenderingContext2D) : void
-    {
-        ctx.beginPath();
-        ctx.fillStyle = this.#color;
-        ctx.arc(this.#posX, this.#posY, this.#width / 2, 0, 2 * Math.PI);
-        ctx.fill();
     };
 };

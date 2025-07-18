@@ -1,7 +1,11 @@
 import {
   Scene,
   Vector3,
-  Mesh
+  Mesh,
+  TransformNode,
+  MeshBuilder,
+  StandardMaterial,
+  Color3
 } from '@babylonjs/core';
 import '@babylonjs/loaders/glTF'; // important : chargeur pour .glb et .gltf
 
@@ -13,7 +17,7 @@ import BallLogic from './BallLogic.ts';
 interface IPlayer
 {
     logic: PlayerLogic,
-    mesh: Mesh | null,
+    mesh: Mesh | null | TransformNode,
     size: Vector3 | null
 };
 
@@ -52,6 +56,7 @@ export default class Game3D
     convertLogicToWorld3D(
         logicX: number,
         logicY: number,
+        size: Vector3
     ): Vector3 | null
     {
         const scaleX = this.#game.size.x / this.#game.logic.width;
@@ -65,29 +70,67 @@ export default class Game3D
 
         // Inverser l'axe Z car Y logique va vers le bas
         const invertedOffsetZ = -offsetZ;
-
         return new Vector3(
             center.x + offsetX,
-            center.y,                 // Y constant (hauteur)
+            center.y + size.y / 2,                 // Y constant (hauteur)
             center.z + invertedOffsetZ
         );
     }
 
-    getSizeMesh(mesh: Mesh) : Vector3
+    getSizeMesh(mesh: Mesh | TransformNode) : Vector3
     {
-        const box = mesh.getBoundingInfo().boundingBox;
-        const min = box.minimumWorld;
-        const max = box.maximumWorld;
+        if (mesh instanceof Mesh)
+        {
+            const box = mesh.getBoundingInfo().boundingBox;
+            const min = box.minimumWorld;
+            const max = box.maximumWorld;
+            return (max.subtract(min));
+        } else if (mesh instanceof TransformNode)
+        {
+            const {min, max} = mesh.getHierarchyBoundingVectors();
+            return (max.subtract(min));
+        }
+        return (null);
+    }
 
-        return (max.subtract(min));
+    showHitBox(item: Mesh | TransformNode) : void
+    {
+        if (item instanceof Mesh)
+        {
+            item.showBoundingBox = true;
+        }
+        else if (item instanceof TransformNode)
+        {
+            const { min, max } = item.getHierarchyBoundingVectors();
+            const size = max.subtract(min);
+            const center = min.add(size.scale(0.5));
+
+            const box = MeshBuilder.CreateBox("bbox", {
+                width: size.x,
+                height: size.y,
+                depth: size.z
+            }, this.#scene);
+
+            box.position = center.subtract(item.getAbsolutePosition());
+
+            box.isPickable = false;
+            box.visibility = 0.3;
+
+            const material = new StandardMaterial("bboxMat", this.#scene);
+            material.wireframe = true;
+            material.emissiveColor = Color3.Red();
+            box.material = material;
+
+            box.parent = item;
+        }
     }
 
     loadMeshes() : boolean
     {
-        this.#game.mesh = this.#scene.getMeshByName("Terrain");
-        this.#players[0].mesh = this.#scene.getMeshByName("MancheRaquette");
-        this.#players[1].mesh = this.#scene.getMeshByName("McheRaquette.001");
-        this.#ball.mesh = this.#scene.getMeshByName("BallPong");
+        this.#game.mesh = this.#scene.getMeshByName("field");
+        this.#players[0].mesh = this.#scene.getTransformNodeByName("raquetteLeft");
+        this.#players[1].mesh = this.#scene.getTransformNodeByName("raquetteRight");
+        this.#ball.mesh = this.#scene.getMeshByName("ballPong");
         if (!this.#game.mesh)
         {
             console.error("terrain non trouve");
@@ -112,10 +155,17 @@ export default class Game3D
         this.#players[0].size = this.getSizeMesh(this.#players[0].mesh);
         this.#players[1].size = this.getSizeMesh(this.#players[1].mesh);
         this.#ball.size = this.getSizeMesh(this.#ball.mesh);
-        console.log("Position du terrain : ", this.#game.mesh.position);
-        console.log("Position du player1 : ", this.#players[0].mesh.position);
-        console.log("Position du player2 : ", this.#players[1].mesh.position);
-        console.log("Position de la balle : ", this.#ball.mesh.position);
+        if (
+            !this.#game.size ||
+            !this.#players[0].size ||
+            !this.#players[1].size ||
+            !this.#ball.size
+        )
+            return (false);
+        this.showHitBox(this.#game.mesh);
+        this.showHitBox(this.#players[0].mesh);
+        this.showHitBox(this.#players[1].mesh);
+        this.showHitBox(this.#ball.mesh);
         return (true);
     };
 
@@ -123,7 +173,8 @@ export default class Game3D
     {
         const newPos = this.convertLogicToWorld3D(
             player.logic.posX,
-            player.logic.posY
+            player.logic.posY,
+            player.size
         );
         if (newPos)
             player.mesh.position = Vector3.Lerp(player.mesh.position, newPos, 0.2);
@@ -133,7 +184,8 @@ export default class Game3D
     {
         const newPos = this.convertLogicToWorld3D(
             ball.logic.posX,
-            ball.logic.posY
+            ball.logic.posY,
+            ball.size
         );
         if (newPos)
             ball.mesh.position = newPos;

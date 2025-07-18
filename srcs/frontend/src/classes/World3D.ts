@@ -91,33 +91,9 @@ export default class World3D
         // CHARGE TOUTE LA SCENE ET STOCKE LES MESH DANS this.#scene.meshes
         await SceneLoader.AppendAsync("/babylon/", "scene.glb", this.#scene);
 
-
-        // TMP : RECUPERE LE MESH REPRESENTANT LE TERRAIN, UTILE POUR LA CAMERA POUR LE MOMENT
-        // const test = this.#scene.getMeshByName("Terrain");
-        // if (!test)
-        // {
-        //     console.error("Mesh Terrain pas trouve");
-        //     return ;
-        // }
-
-        // console.log("Donnees sur mon mesh : ");
-        // const boundingInfo = test.getBoundingInfo();
-        // const minimum = boundingInfo.minimum;
-        // const maximum = boundingInfo.maximum;
-
-        // const size = maximum.subtract(minimum);
-        // console.log("Largeur (x):", size.x);
-        // console.log("Hauteur (y):", size.y);
-        // console.log("Profondeur (z):", size.z);
-
-
-        //AFFICHE TOUS LES MESHS
-        // if (this.#scene.meshes.length === 0)
-        //     console.log("Aucun mesh !");
-        // this.#scene.meshes.forEach((mesh) => {
-        //     console.log(mesh.name);
-        // });
-
+        this.#scene.meshes.forEach(m => {
+            console.log(m.name);
+        });
     };
 
     start() : void
@@ -125,8 +101,8 @@ export default class World3D
         // TEST POUR UN MATCH
         const testRules = {
             scoreMax: 5,
-            ballSpeed: 2,
-            playerSpeed: 3,
+            ballSpeed: 0.5,
+            playerSpeed: 1,
             countDownGoalTime: 3,
             allowPause: true
         }
@@ -158,9 +134,9 @@ export default class World3D
         }
         this.#camera = new ArcRotateCamera("arcCamera", 
             Math.PI / 2,   // alpha
-            Math.PI / 4,   // beta
-            50,           // radius
-            this.#game3D.fieldMesh,    // <--- ICI tu mets le mesh directement
+            Math.PI / 2.4,   // beta
+            25,           // radius
+            new Vector3(0, 40, 0),    // <--- ICI tu mets le mesh directement
             this.#scene
         );
         // /////////////////////
@@ -176,7 +152,7 @@ export default class World3D
 
 
         this.#scene.onBeforeRenderObservable.add(() => {
-            if (this.#world.logic.game && this.#world.logic.game.state !== 0)
+            if (this.#world.logic.game && this.#world.logic.game.state !== 3)
                 this.#game3D?.update(this.#keys);
         });
 

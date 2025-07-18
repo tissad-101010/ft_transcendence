@@ -52,53 +52,6 @@ export default class GameLogic
         this.#winner = null;
     };
 
-    // // Methode de rendu pour le compteur lors de l'engagement
-    // renderCountDown() : void
-    // {
-    //     this.#ctx.font = "50px Arial";
-    //     this.#ctx.fillStyle = "rgb(75, 75, 75)";
-    //     if (this.#countDownGoal.value !== 0)
-    //         this.#ctx.fillText(`${this.#countDownGoal.value}`, this.#canvas.width / 2, this.#canvas.height / 2);
-    // }
-
-    // Methode de rendu graphique pour le canvas
-    // render() : void
-    // {
-    //     this.#ctx.clearRect(0, 0, this.#canvas.width, this.#canvas.height);
-    //     this.#ctx.fillStyle = "rgb(0, 0, 0)";
-    //     this.#ctx.fillRect(0, 0, this.#canvas.width, this.#canvas.height);
-
-    //     if (this.#countDownGoal.active === true)
-    //         this.renderCountDown();
-
-    //     if (this.#state === 0)
-    //     {
-    //         this.#ctx.fillStyle = "rgb(255, 255, 255)";
-    //         this.#ctx.font = "30px Arial";
-    //         let text = "Jeu en pause !"
-    //         this.#ctx.fillText("Jeu en pause !", this.#canvas.width / 2 - this.#ctx.measureText(text).width / 2, 50);
-    //     }
-
-    //     if (this.#state !== 3)
-    //         this.#ball.render(this.#ctx);
-    //     else
-    //     {
-    //         this.#ctx.fillStyle = "rgb(255, 255, 255)";
-    //         this.#ctx.font = "30px Arial";
-    //         let text = "undefinied";
-    //         if (this.#winner)
-    //             text = `Player ${this.#winner.id} wins!`;
-    //         this.#ctx.fillText(text, this.#canvas.width / 2 - this.#ctx.measureText(text).width / 2, this.#canvas.height / 2);
-    //     }
-        
-    //     this.#player1.render();
-    //     this.#player2.render();
-        
-    //     this.#ctx.font = "30px Arial";
-    //     this.#ctx.fillText(`${this.#player1.score}`, this.#canvas.width / 2 - this.#canvas.width / 4, this.#canvas.height / 2);
-    //     this.#ctx.fillText(`${this.#player2.score}`, this.#canvas.width / 2 + this.#canvas.width / 4, this.#canvas.height / 2);
-    // };
-
     startCountDown() : void
     {
         this.#state = 2;
@@ -177,17 +130,19 @@ export default class GameLogic
     // Methode qui gere les actions selon les touches appuyees
     handleKeys(keys: Set<string>) : void
     {
+        if (keys.size === 0)
+            return ;
         if (this.#state >= 1 && this.#state <= 2)
         {
             if (keys.has(this.#player2.down))
-                this.#player2.update(1);
-            else if (keys.has(this.#player2.up))
                 this.#player2.update(-1);
+            else if (keys.has(this.#player2.up))
+                this.#player2.update(1);
     
             if (keys.has(this.#player1.down))
-                this.#player1.update(1);
-            else if (keys.has(this.#player1.up))
                 this.#player1.update(-1);
+            else if (keys.has(this.#player1.up))
+                this.#player1.update(1);
 
             if (keys.has(this.#control.pause) && this.#rules.allowPause === true)
             {
@@ -255,27 +210,3 @@ export default class GameLogic
     };
 
 };
-
-// export function pong(): void
-// {
-//     try {
-//         let rules = {
-//                 scoreMax: 3,
-//                 timeLimit: 5,
-//                 ballSpeed: 8,
-//                 playerSpeed: 10,
-//                 allowPause: true,
-//                 countDownGoalTime: 3
-//             };
-//     } catch (err : unknown)
-//     {
-//         if (err instanceof Error)
-//             console.error("Error : ", err.message);
-//         else
-//             console.error("Error : unknown");
-//     }
-// }
-
-
-
-
