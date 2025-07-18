@@ -8,7 +8,7 @@ function SignupForm() {
     e.preventDefault(); // empêche le rechargement de la page
 
     try {
-      const response = await fetch('https://localhost:8443/api', {
+      const response = await fetch('https://localhost:8443/api/signup', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json', // indique qu'on envoie du JSON

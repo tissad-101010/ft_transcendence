@@ -2,7 +2,7 @@ import React from 'react';
 import { useState } from 'react';
 import BabylonScene from './BabylonScene.tsx';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import Hello from './Singup.tsx';
+import SignupForm from './Signup.tsx';
 import './App.css';
 
 function App() {
@@ -10,7 +10,7 @@ function App() {
     <Router>
       <Routes>
         <Route path="/" element={<BabylonScene />} />
-        <Route path="/Singup" element={<Hello />} />
+        <Route path="/signup" element={<SignupForm />} />
       </Routes>
     </Router>
   );
