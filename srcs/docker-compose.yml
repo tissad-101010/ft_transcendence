@@ -83,7 +83,7 @@ services:
       - ./proxy/modsecurity/crs:/etc/nginx/modsecurity.d/crs
     ports:
       - "8443:443"
-      # - "8080:80"
+      - "8080:80"
     networks:
       - transcendence
     restart: unless-stopped

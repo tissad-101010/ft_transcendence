@@ -20,7 +20,9 @@ function SignupForm() {
       });
 
       const data = await response.json();
-      console.log(data.message); // message de retour du backend
+      console.log(data.message); // affiche le message de succès
+      console.log('Données reçues:', data.data); // affiche les données reçues
+
     } catch (error) {
       console.error('Erreur lors du signup:', error);
     }
