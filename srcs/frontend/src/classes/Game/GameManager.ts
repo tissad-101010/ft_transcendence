@@ -30,9 +30,7 @@ export default class GameManager
         if (!this.#game)
             console.log("Game pas prete");
         else
-        {
             this.#game.start();
-        }
     }
 
     get game() : GameLogic | null

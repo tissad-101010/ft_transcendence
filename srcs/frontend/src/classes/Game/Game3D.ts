@@ -162,10 +162,23 @@ export default class Game3D
             !this.#ball.size
         )
             return (false);
-        this.showHitBox(this.#game.mesh);
-        this.showHitBox(this.#players[0].mesh);
-        this.showHitBox(this.#players[1].mesh);
-        this.showHitBox(this.#ball.mesh);
+
+        // MISE A JOUR DES TAILLES POUR LA LOGIQUE
+        const ratioX = this.#game.logic.width / this.#game.size.x;
+        const ratioY = this.#game.logic.height / this.#game.size.z;
+
+        this.#ball.logic.width = this.#ball.size.x * ratioX;
+
+        this.#players[0].logic.width = this.#players[0].size.x * ratioX;
+        this.#players[0].logic.height = this.#players[0].size.z * ratioY;
+
+        this.#players[1].logic.width = this.#players[1].size.x * ratioX;
+        this.#players[1].logic.height = this.#players[1].size.z * ratioY;
+
+        // this.showHitBox(this.#game.mesh);
+        // this.showHitBox(this.#players[0].mesh);
+        // this.showHitBox(this.#players[1].mesh);
+        // this.showHitBox(this.#ball.mesh);
         return (true);
     };
 

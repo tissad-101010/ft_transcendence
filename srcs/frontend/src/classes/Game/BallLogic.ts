@@ -115,6 +115,10 @@ export default class BallLogic
         this.#posY = value; 
     }
 
+    set width(value:number)
+    {
+        this.#width = value;
+    }
     /*
     * Methode qui permet de reinitialiser la balle apres un but, lance un compteur de 3 secondes pour le coup d'envoi
     */

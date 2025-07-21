@@ -91,9 +91,9 @@ export default class World3D
         // CHARGE TOUTE LA SCENE ET STOCKE LES MESH DANS this.#scene.meshes
         await SceneLoader.AppendAsync("/babylon/", "scene.glb", this.#scene);
 
-        this.#scene.meshes.forEach(m => {
-            console.log(m.name);
-        });
+        // this.#scene.meshes.forEach(m => {
+        //     console.log(m.name);
+        // });
     };
 
     start() : void
@@ -158,12 +158,12 @@ export default class World3D
 
         this.#engine.runRenderLoop(() => {
             const camDiv = document.getElementById("camPosition");
-            this.#scene.registerBeforeRender(() => {
-                if (camDiv) {
-                    const pos = this.#camera.position;
-                    camDiv.innerText = `x: ${pos.x.toFixed(2)}\ny: ${pos.y.toFixed(2)}\nz: ${pos.z.toFixed(2)}`;
-                }
-            });
+            // this.#scene.registerBeforeRender(() => {
+            //     if (camDiv) {
+            //         const pos = this.#camera.position;
+            //         camDiv.innerText = `x: ${pos.x.toFixed(2)}\ny: ${pos.y.toFixed(2)}\nz: ${pos.z.toFixed(2)}`;
+            //     }
+            // });
             this.#scene.render();
         });
     };
@@ -171,5 +171,8 @@ export default class World3D
     dispose() : void
     {
         this.#engine.dispose();
+        window.removeEventListener("resize", () => {
+            this.#engine.dispose();
+        });
     };
 };

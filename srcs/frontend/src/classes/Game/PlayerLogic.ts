@@ -113,4 +113,14 @@ export default class PlayerLogic
     {
         this.#posY = value;
     }
+
+    set width(value: number)
+    {
+        this.#width = value;
+    }
+
+    set height(value: number)
+    {
+        this.#height = value;
+    }
 };
