@@ -30,7 +30,7 @@ interface IBall
 
 interface IGame
 {
-    logic: GameLogic,
+    logic: GameLogic,   
     mesh: Mesh | null,
     size: Vector3 | null
 };
@@ -53,6 +53,7 @@ export default class Game3D
         this.#scene = scene;
     };
 
+    // PERMET DE SAVOIR LA POSITION DE L'ELEMENT DANS L'ENVIRONNEMENT 3D PAR RAPPORT A SA LOGIC
     convertLogicToWorld3D(
         logicX: number,
         logicY: number,
@@ -77,6 +78,7 @@ export default class Game3D
         );
     }
 
+    // RETOURNE UN VECTOR3 QUI CONTIENT LA TAILLE DE L'ELEMENT DONNE EN PARAMETRE
     getSizeMesh(mesh: Mesh | TransformNode) : Vector3
     {
         if (mesh instanceof Mesh)
@@ -93,38 +95,40 @@ export default class Game3D
         return (null);
     }
 
-    showHitBox(item: Mesh | TransformNode) : void
-    {
-        if (item instanceof Mesh)
-        {
-            item.showBoundingBox = true;
-        }
-        else if (item instanceof TransformNode)
-        {
-            const { min, max } = item.getHierarchyBoundingVectors();
-            const size = max.subtract(min);
-            const center = min.add(size.scale(0.5));
+    // FONCTION QUI AFFICHE UN RECTANGLE D'UN MESH OU D'UN TRANFORM NODE
+    // showHitBox(item: Mesh | TransformNode) : void
+    // {
+    //     if (item instanceof Mesh)
+    //     {
+    //         item.showBoundingBox = true;
+    //     }
+    //     else if (item instanceof TransformNode)
+    //     {
+    //         const { min, max } = item.getHierarchyBoundingVectors();
+    //         const size = max.subtract(min);
+    //         const center = min.add(size.scale(0.5));
 
-            const box = MeshBuilder.CreateBox("bbox", {
-                width: size.x,
-                height: size.y,
-                depth: size.z
-            }, this.#scene);
+    //         const box = MeshBuilder.CreateBox("bbox", {
+    //             width: size.x,
+    //             height: size.y,
+    //             depth: size.z
+    //         }, this.#scene);
 
-            box.position = center.subtract(item.getAbsolutePosition());
+    //         box.position = center.subtract(item.getAbsolutePosition());
 
-            box.isPickable = false;
-            box.visibility = 0.3;
+    //         box.isPickable = false;
+    //         box.visibility = 0.3;
 
-            const material = new StandardMaterial("bboxMat", this.#scene);
-            material.wireframe = true;
-            material.emissiveColor = Color3.Red();
-            box.material = material;
+    //         const material = new StandardMaterial("bboxMat", this.#scene);
+    //         material.wireframe = true;
+    //         material.emissiveColor = Color3.Red();
+    //         box.material = material;
 
-            box.parent = item;
-        }
-    }
+    //         box.parent = item;
+    //     }
+    // }
 
+    // CHARGE LES MESHS OU TRANSFORM NODE 3D
     loadMeshes() : boolean
     {
         this.#game.mesh = this.#scene.getMeshByName("field");
@@ -163,11 +167,11 @@ export default class Game3D
         )
             return (false);
 
-        // MISE A JOUR DES TAILLES POUR LA LOGIQUE
+        // MISE A JOUR DES TAILLES POUR LA PARTIE LOGIC
         const ratioX = this.#game.logic.width / this.#game.size.x;
         const ratioY = this.#game.logic.height / this.#game.size.z;
 
-        this.#ball.logic.width = this.#ball.size.x * ratioX;
+        this.#ball.logic.radius = this.#ball.size.x * ratioX;
 
         this.#players[0].logic.width = this.#players[0].size.x * ratioX;
         this.#players[0].logic.height = this.#players[0].size.z * ratioY;
@@ -175,13 +179,10 @@ export default class Game3D
         this.#players[1].logic.width = this.#players[1].size.x * ratioX;
         this.#players[1].logic.height = this.#players[1].size.z * ratioY;
 
-        // this.showHitBox(this.#game.mesh);
-        // this.showHitBox(this.#players[0].mesh);
-        // this.showHitBox(this.#players[1].mesh);
-        // this.showHitBox(this.#ball.mesh);
         return (true);
     };
 
+    // MET A JOUR LA POSITION DU PLAYER
     updatePlayer(player: IPlayer)
     {
         const newPos = this.convertLogicToWorld3D(
@@ -193,6 +194,7 @@ export default class Game3D
             player.mesh.position = Vector3.Lerp(player.mesh.position, newPos, 0.2);
     };
 
+    // MET A JOUR LA POSITION DE LA BALLE
     updateBall(ball: IBall)
     {
         const newPos = this.convertLogicToWorld3D(
@@ -204,6 +206,7 @@ export default class Game3D
             ball.mesh.position = newPos;
     };
 
+    // MET A JOUR TOUS LES ELEMENTS 3D
     update(keys: Set<string>) : void
     {
         this.#game.logic.update(keys);

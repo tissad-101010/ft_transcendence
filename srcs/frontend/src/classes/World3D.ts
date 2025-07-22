@@ -101,7 +101,7 @@ export default class World3D
         // TEST POUR UN MATCH
         const testRules = {
             scoreMax: 5,
-            ballSpeed: 0.5,
+            ballSpeed: 0.2,
             playerSpeed: 1,
             countDownGoalTime: 3,
             allowPause: true

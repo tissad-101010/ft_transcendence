@@ -8,7 +8,7 @@ interface IField
 
 export default class BallLogic
 {
-    #width: number;
+    #radius: number;
     #posY: number;
     #posX: number;
     #speed: number;
@@ -18,7 +18,7 @@ export default class BallLogic
     #field: IField;
     constructor(color: string, speed: number, field: IField)
     {
-        this.#width = 8;
+        this.#radius = 8;
         this.#posY = 0;
         this.#speed = speed;
         this.#color = color;
@@ -39,27 +39,54 @@ export default class BallLogic
     // Methode qui verifie si la balle touche un mur
     bounce() : void
     {
-        if (this.#posY >= this.#field.height || this.#posY <= 0)
+        if (this.#posY + this.#radius >= this.#field.height || this.#posY - this.#radius <= 0)
             this.#directionY = -this.#directionY;
     };
 
     // Methode pour verifier si la balle entre en contact avec la barre du player donne en parametre
-    hit(player: PlayerLogic) : void
-    {
-        if (this.#posX + this.#width / 2 >= player.posX &&
-            this.#posX - this.#width / 2 <= player.posX + player.width &&
-            this.#posY + this.#width / 2 >= player.posY &&
-            this.#posY - this.#width / 2 <= player.posY + player.height)
-        {
-            this.#directionX = -this.#directionX;
-        }
-    };
+    hit(player: PlayerLogic): void {
 
+    // Trouver le point le plus proche du centre de la balle sur le rectangle
+    const closestX = Math.max(player.posX, Math.min(this.#posX, player.posX + player.width));
+    const closestY = Math.max(player.posY, Math.min(this.#posY, player.posY + player.height));
+
+    // Calcul de la distance entre ce point et le centre de la balle
+    const dx = (this.#posX) - closestX;
+    const dy = (this.#posY) - closestY;
+
+    const distanceSquared = dx * dx + dy * dy;
+
+    // si colision
+    if (distanceSquared <= this.#radius * this.#radius) {
+        
+        // Calcul du contact sur la raquette
+        const centerY = this.#posY + this.#radius;
+        const centerPlayerY = player.posY + player.height / 2;
+        const impactY = (centerY - centerPlayerY) / (player.height / 2); // entre -1 et +1
+        const maxAngle = Math.PI / 3.5;
+        const bounceAngle = impactY * maxAngle;
+
+        const speed = Math.sqrt(this.#directionX ** 2 + this.#directionY ** 2);
+
+        // directionX : simplement inversée
+        const blend = 0.7;
+        const dirY = Math.sin(bounceAngle) * speed;
+
+        this.#directionX = -this.#directionX;
+        this.#directionY = dirY * (1 - blend) + dirY * blend;
+
+        // Corriger la position (évite de rester dans la raquette)
+        if (this.#directionX > 0)
+            this.#posX = player.posX + player.width + this.#radius;
+        else
+            this.#posX = player.posX - this.#radius;
+        }
+    }
 
     // GETTERS
-    get width() : number
+    get radius() : number
     {
-        return this.#width;
+        return this.#radius;
     }
 
     get posX() : number
@@ -115,9 +142,9 @@ export default class BallLogic
         this.#posY = value; 
     }
 
-    set width(value:number)
+    set radius(value:number)
     {
-        this.#width = value;
+        this.#radius = value;
     }
     /*
     * Methode qui permet de reinitialiser la balle apres un but, lance un compteur de 3 secondes pour le coup d'envoi
