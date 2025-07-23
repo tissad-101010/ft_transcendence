@@ -1,32 +1,46 @@
-import Fastify from 'fastify';
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   api.ts                                             :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/07/23 15:58:35 by tissad            #+#    #+#             */
+/*   Updated: 2025/07/23 16:03:45 by tissad           ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
 
+import Fastify from 'fastify';
+import cors from '@fastify/cors';
+
+// Import the Fastify framework
 const fastify = Fastify({ logger: true });
 
+// Define the API endpoint for user signup
 interface SignupBody {
   username: string;
   password: string;
 }
 
-// Déclaration de la route POST /api/signup
+// Register the POST route for user signup
 fastify.post<{ Body: SignupBody }>('/api', async (request, reply) => {
   const { username, password } = request.body;
 
-  // Log des données reçues
-  request.log.info(`Signup reçu: ${username}, ${password}`);
 
-  // Réponse JSON
+  request.log.info(`Signup for: ${username}, ${password}`);
+
   return reply.code(201).send({
-    message: 'Utilisateur reçu avec succès',
+    message: 'User signed up successfully',
     data: { username, password },
   });
 });
 
-// Démarrage du serveur
+
+// Start the Fastify server
 const start = async () => {
   try {
-    // await fastify.listen({ port: 4000 });
     await fastify.listen({ port: 4000, host: '0.0.0.0' });
-    console.log('🚀 Serveur Fastify démarré sur http://localhost:4000');
+    console.log('🚀 Server is running at http://localhost:4000');
   } catch (err) {
     fastify.log.error(err);
     process.exit(1);
