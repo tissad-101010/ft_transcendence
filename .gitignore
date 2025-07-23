@@ -2,3 +2,4 @@
 *.log
 *.tmp
 *test
+*node_modules

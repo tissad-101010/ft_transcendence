@@ -51,8 +51,8 @@ services:
         - "4000:4000"
       networks:
         - transcendence
-      depends_on:
-        - frontend
+      # depends_on:
+      #   - frontend
 
   proxy:
     image: proxy

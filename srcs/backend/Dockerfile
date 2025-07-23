@@ -1,6 +1,6 @@
-FROM node:latest AS build
+FROM node:22.17.1 AS build
 
-RUN echo "1ere etape"
+RUN echo "step I"
 
 WORKDIR /app
 
@@ -13,9 +13,9 @@ COPY ./app/tsconfig.json .
 
 RUN npm run build
 
-FROM node:latest
+FROM node:22.17.1
 
-RUN echo "2eme etape"
+RUN echo "step II"
 
 WORKDIR /app
 
