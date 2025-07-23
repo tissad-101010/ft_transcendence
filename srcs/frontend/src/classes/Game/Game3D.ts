@@ -53,31 +53,6 @@ export default class Game3D
         this.#scene = scene;
     };
 
-    // PERMET DE SAVOIR LA POSITION DE L'ELEMENT DANS L'ENVIRONNEMENT 3D PAR RAPPORT A SA LOGIC
-    convertLogicToWorld3D(
-        logicX: number,
-        logicY: number,
-        size: Vector3
-    ): Vector3 | null
-    {
-        const scaleX = this.#game.size.x / this.#game.logic.width;
-        const scaleY = this.#game.size.z / this.#game.logic.height;
-
-        // Calcul position logique (origine en haut à gauche)
-        const offsetX = logicX * scaleX - this.#game.size.x / 2;
-        const offsetZ = logicY * scaleY - this.#game.size.z / 2;
-
-        const center = this.#game.mesh.getBoundingInfo().boundingBox.centerWorld;
-
-        // Inverser l'axe Z car Y logique va vers le bas
-        const invertedOffsetZ = -offsetZ;
-        return new Vector3(
-            center.x + offsetX,
-            center.y + size.y / 2,                 // Y constant (hauteur)
-            center.z + invertedOffsetZ
-        );
-    }
-
     // RETOURNE UN VECTOR3 QUI CONTIENT LA TAILLE DE L'ELEMENT DONNE EN PARAMETRE
     getSizeMesh(mesh: Mesh | TransformNode) : Vector3
     {
@@ -182,12 +157,37 @@ export default class Game3D
         return (true);
     };
 
+    // PERMET DE SAVOIR LA POSITION DE L'ELEMENT DANS L'ENVIRONNEMENT 3D PAR RAPPORT A SA LOGIC
+    convertLogicToWorld3D(
+        logicX: number,
+        logicY: number,
+        size: Vector3
+    ): Vector3 | null
+    {
+        const scaleX = this.#game.size.x / this.#game.logic.width;
+        const scaleY = this.#game.size.z / this.#game.logic.height;
+
+        // Calcul position logique (origine en haut à gauche)
+        const offsetX = logicX * scaleX - this.#game.size.x / 2;
+        const offsetZ = logicY * scaleY - this.#game.size.z / 2;
+
+        const center = this.#game.mesh.getBoundingInfo().boundingBox.centerWorld;
+
+        // Inverser l'axe Z car Y logique va vers le bas
+        const invertedOffsetZ = -offsetZ;
+        return new Vector3(
+            center.x + offsetX,
+            center.y + size.y / 2, // Y constant (hauteur)
+            center.z + invertedOffsetZ
+        );
+    }
+
     // MET A JOUR LA POSITION DU PLAYER
     updatePlayer(player: IPlayer)
     {
         const newPos = this.convertLogicToWorld3D(
-            player.logic.posX,
-            player.logic.posY,
+            player.logic.posX + player.logic.width / 2,
+            player.logic.posY + player.logic.height / 2,
             player.size
         );
         if (newPos)

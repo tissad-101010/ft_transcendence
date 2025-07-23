@@ -37,7 +37,7 @@ export default class World3D
     #keys: Set<string>;
     #game3D: Game3D | null;
 
-    constructor(logic: worldLogic, canvas: HTMLCanvasElement, worldPath: IPathMesh)
+    constructor(logic: WorldLogic, canvas: HTMLCanvasElement, worldPath: IPathMesh)
     {
         this.#world = {logic: logic, mesh: null, meshPath: worldPath};
         this.#game3D = null;
