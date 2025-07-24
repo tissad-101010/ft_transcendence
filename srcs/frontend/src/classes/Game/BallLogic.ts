@@ -15,18 +15,17 @@ export default class BallLogic
     #color: string;
     #directionX : number;
     #directionY: number;
-    #field: IField;
-    constructor(color: string, speed: number, field: IField)
+    #field: IField | null;
+    constructor(speed: number)
     {
-        this.#radius = 8;
+        this.#radius = 0;
         this.#posY = 0;
+        this.#posX = 0;
         this.#speed = speed;
-        this.#color = color;
+        this.#color = "rgb(255,255,255)";
         this.#directionX = 1;
-        this.#directionY = 1;
-        this.#field = field;
-        this.#posX = this.#field.width / 2;
-        this.#posY = this.#field.height / 2;
+        this.#directionY = 0;
+        this.#field = null;
     };
 
     // Methode qui deplace la balle
@@ -39,7 +38,7 @@ export default class BallLogic
     // Methode qui verifie si la balle touche un mur
     bounce() : void
     {
-        if (this.#posY + this.#radius >= this.#field.height || this.#posY - this.#radius <= 0)
+        if (this.#field && (this.#posY + this.#radius >= this.#field.height || this.#posY - this.#radius <= 0))
             this.#directionY = -this.#directionY;
     };
 

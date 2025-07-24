@@ -17,8 +17,8 @@ import BallLogic from './BallLogic.ts';
 interface IPlayer
 {
     logic: PlayerLogic,
-    mesh: Mesh | null | TransformNode,
-    size: Vector3 | null
+    mesh: Mesh,
+    size: Vector3 | null,
 };
 
 interface IBall
@@ -30,27 +30,106 @@ interface IBall
 
 interface IGame
 {
-    logic: GameLogic,   
+    logic: GameLogic,
     mesh: Mesh | null,
     size: Vector3 | null
 };
 
 export default class Game3D
 {
-    #game: IGame;
+    #game: IGame | null;
     #players: IPlayer[];
-    #ball: IBall;
+    #ball: IBall | null;
     #scene: Scene;
-    constructor(game: GameLogic | null, scene: Scene)
+    constructor(scene: Scene)
     {
-        if (!game)
-            throw new Error("Error constructor Game3D : game = null");
-        this.#game = {logic: game, mesh: null, size: null};
-        this.#players = [
-            {mesh: null, logic: game.player1, size: null},
-            {mesh: null, logic: game.player2, size: null}];
-        this.#ball = {logic: game.ball, mesh: null, size: null};
+        this.#game = null;
+        this.#players = [];
+        this.#ball = null;
         this.#scene = scene;
+    };
+
+    initPlayer(logic: PlayerLogic, index: number) : boolean
+    {
+        let box;
+        try
+        {
+            box = MeshBuilder.CreateBox(
+                "player" + index,
+                {
+                    width: 1,
+                    height: 2,
+                    depth: 2
+                },
+                this.#scene
+            );
+            const pos = this.#game?.mesh.position;
+            console.log("J'arrive ici");
+            if (logic.team)
+                box.position = new Vector3(
+                    (pos.x - this.#game?.size.x / 2) + (this.#game?.size.x / 10),
+                    pos.y,
+                    pos.z
+                );
+            else
+                box.position = new Vector3(
+                    (pos.x + this.#game?.size.x / 2) - (this.#game?.size.x / 10),
+                    pos.y,
+                    pos.z
+                );
+        } catch (error: unknown)
+        {
+            console.error("Error lors de la creation du mesh du player " + index);
+            return (false);
+        }
+        this.#players.push({
+            logic: logic,
+            mesh: box,
+            size: {x: 1, y: 1, z: 2}
+        });
+        return (true);
+    };
+
+    initField(logic: GameLogic) : boolean
+    {
+        this.#game = {
+            logic: logic,
+            mesh: this.#scene.getMeshByName("field"),
+            size: null
+        };
+        if (!this.#game.mesh)
+        {
+            console.error("Error : field pas trouve");
+            return (false);
+        }
+        this.#game.size = this.getSizeMesh(this.#game.mesh);
+        if (!this.#game.size)
+        {
+            console.error("Error : size pas recupee dans initField");
+            return (false);
+        }
+        return (true);
+    };
+
+    initBall(logic: BallLogic) : boolean
+    {
+        this.#ball = {
+            logic: logic,
+            mesh: this.#scene.getMeshByName("ballPong"),
+            size: null
+        };
+        if (!this.#ball.mesh)
+        {
+            console.error("Error : ballPong pas trouve");
+            return (false);
+        }
+        this.#ball.size = this.getSizeMesh(this.#ball.mesh);
+        if (!this.#ball.size)
+        {
+            console.error("Error : size pas recupee dans initBall");
+            return (false);
+        }
+        return (true);
     };
 
     // RETOURNE UN VECTOR3 QUI CONTIENT LA TAILLE DE L'ELEMENT DONNE EN PARAMETRE
@@ -104,139 +183,139 @@ export default class Game3D
     // }
 
     // CHARGE LES MESHS OU TRANSFORM NODE 3D
-    loadMeshes() : boolean
-    {
-        this.#game.mesh = this.#scene.getMeshByName("field");
-        this.#players[0].mesh = this.#scene.getTransformNodeByName("raquetteLeft");
-        this.#players[1].mesh = this.#scene.getTransformNodeByName("raquetteRight");
-        this.#ball.mesh = this.#scene.getMeshByName("ballPong");
-        if (!this.#game.mesh)
-        {
-            console.error("terrain non trouve");
-            return (false);
-        }
-        else if (!this.#players[0].mesh)
-        {
-            console.error("player1 non trouve");
-            return (false);
-        }
-        else if (!this.#players[1].mesh)
-        {
-            console.error("player2 non trouve");
-            return (false);
-        }
-        else if (!this.#ball.mesh)
-        {
-            console.error("ball non trouve");
-            return (false);
-        }
-        this.#game.size = this.getSizeMesh(this.#game.mesh);
-        this.#players[0].size = this.getSizeMesh(this.#players[0].mesh);
-        this.#players[1].size = this.getSizeMesh(this.#players[1].mesh);
-        this.#ball.size = this.getSizeMesh(this.#ball.mesh);
-        if (
-            !this.#game.size ||
-            !this.#players[0].size ||
-            !this.#players[1].size ||
-            !this.#ball.size
-        )
-            return (false);
+    // loadMeshes() : boolean
+    // {
+    //     this.#game.mesh = this.#scene.getMeshByName("field");
+    //     this.#players[0].mesh = this.#scene.getTransformNodeByName("raquetteLeft");
+    //     this.#players[1].mesh = this.#scene.getTransformNodeByName("raquetteRight");
+    //     this.#ball.mesh = this.#scene.getMeshByName("ballPong");
+    //     if (!this.#game.mesh)
+    //     {
+    //         console.error("terrain non trouve");
+    //         return (false);
+    //     }
+    //     else if (!this.#players[0].mesh)
+    //     {
+    //         console.error("player1 non trouve");
+    //         return (false);
+    //     }
+    //     else if (!this.#players[1].mesh)
+    //     {
+    //         console.error("player2 non trouve");
+    //         return (false);
+    //     }
+    //     else if (!this.#ball.mesh)
+    //     {
+    //         console.error("ball non trouve");
+    //         return (false);
+    //     }
+    //     this.#game.size = this.getSizeMesh(this.#game.mesh);
+    //     this.#players[0].size = this.getSizeMesh(this.#players[0].mesh);
+    //     this.#players[1].size = this.getSizeMesh(this.#players[1].mesh);
+    //     this.#ball.size = this.getSizeMesh(this.#ball.mesh);
+    //     if (
+    //         !this.#game.size ||
+    //         !this.#players[0].size ||
+    //         !this.#players[1].size ||
+    //         !this.#ball.size
+    //     )
+    //         return (false);
 
-        // MISE A JOUR DES TAILLES POUR LA PARTIE LOGIC
-        const ratioX = this.#game.logic.width / this.#game.size.x;
-        const ratioY = this.#game.logic.height / this.#game.size.z;
+    //     // MISE A JOUR DES TAILLES POUR LA PARTIE LOGIC
+    //     const ratioX = this.#game.logic.width / this.#game.size.x;
+    //     const ratioY = this.#game.logic.height / this.#game.size.z;
 
-        this.#ball.logic.radius = this.#ball.size.x * ratioX;
+    //     this.#ball.logic.radius = this.#ball.size.x * ratioX;
 
-        this.#players[0].logic.width = this.#players[0].size.x * ratioX;
-        this.#players[0].logic.height = this.#players[0].size.z * ratioY;
+    //     this.#players[0].logic.width = this.#players[0].size.x * ratioX;
+    //     this.#players[0].logic.height = this.#players[0].size.z * ratioY;
 
-        this.#players[1].logic.width = this.#players[1].size.x * ratioX;
-        this.#players[1].logic.height = this.#players[1].size.z * ratioY;
+    //     this.#players[1].logic.width = this.#players[1].size.x * ratioX;
+    //     this.#players[1].logic.height = this.#players[1].size.z * ratioY;
 
-        return (true);
-    };
+    //     return (true);
+    // };
 
-    // PERMET DE SAVOIR LA POSITION DE L'ELEMENT DANS L'ENVIRONNEMENT 3D PAR RAPPORT A SA LOGIC
-    convertLogicToWorld3D(
-        logicX: number,
-        logicY: number,
-        size: Vector3
-    ): Vector3 | null
-    {
-        const scaleX = this.#game.size.x / this.#game.logic.width;
-        const scaleY = this.#game.size.z / this.#game.logic.height;
+    // // PERMET DE SAVOIR LA POSITION DE L'ELEMENT DANS L'ENVIRONNEMENT 3D PAR RAPPORT A SA LOGIC
+    // convertLogicToWorld3D(
+    //     logicX: number,
+    //     logicY: number,
+    //     size: Vector3
+    // ): Vector3 | null
+    // {
+    //     const scaleX = this.#game.size.x / this.#game.logic.width;
+    //     const scaleY = this.#game.size.z / this.#game.logic.height;
 
-        // Calcul position logique (origine en haut à gauche)
-        const offsetX = logicX * scaleX - this.#game.size.x / 2;
-        const offsetZ = logicY * scaleY - this.#game.size.z / 2;
+    //     // Calcul position logique (origine en haut à gauche)
+    //     const offsetX = logicX * scaleX - this.#game.size.x / 2;
+    //     const offsetZ = logicY * scaleY - this.#game.size.z / 2;
 
-        const center = this.#game.mesh.getBoundingInfo().boundingBox.centerWorld;
+    //     const center = this.#game.mesh.getBoundingInfo().boundingBox.centerWorld;
 
-        // Inverser l'axe Z car Y logique va vers le bas
-        const invertedOffsetZ = -offsetZ;
-        return new Vector3(
-            center.x + offsetX,
-            center.y + size.y / 2, // Y constant (hauteur)
-            center.z + invertedOffsetZ
-        );
-    }
+    //     // Inverser l'axe Z car Y logique va vers le bas
+    //     const invertedOffsetZ = -offsetZ;
+    //     return new Vector3(
+    //         center.x + offsetX,
+    //         center.y + size.y / 2, // Y constant (hauteur)
+    //         center.z + invertedOffsetZ
+    //     );
+    // }
 
-    // MET A JOUR LA POSITION DU PLAYER
-    updatePlayer(player: IPlayer)
-    {
-        const newPos = this.convertLogicToWorld3D(
-            player.logic.posX + player.logic.width / 2,
-            player.logic.posY + player.logic.height / 2,
-            player.size
-        );
-        if (newPos)
-            player.mesh.position = Vector3.Lerp(player.mesh.position, newPos, 0.2);
-    };
+    // // MET A JOUR LA POSITION DU PLAYER
+    // updatePlayer(player: IPlayer)
+    // {
+    //     const newPos = this.convertLogicToWorld3D(
+    //         player.logic.posX + player.logic.width / 2,
+    //         player.logic.posY + player.logic.height / 2,
+    //         player.size
+    //     );
+    //     if (newPos)
+    //         player.mesh.position = Vector3.Lerp(player.mesh.position, newPos, 0.2);
+    // };
 
-    // MET A JOUR LA POSITION DE LA BALLE
-    updateBall(ball: IBall)
-    {
-        const newPos = this.convertLogicToWorld3D(
-            ball.logic.posX,
-            ball.logic.posY,
-            ball.size
-        );
-        if (newPos)
-            ball.mesh.position = newPos;
-    };
+    // // MET A JOUR LA POSITION DE LA BALLE
+    // updateBall(ball: IBall)
+    // {
+    //     const newPos = this.convertLogicToWorld3D(
+    //         ball.logic.posX,
+    //         ball.logic.posY,
+    //         ball.size
+    //     );
+    //     if (newPos)
+    //         ball.mesh.position = newPos;
+    // };
 
-    // MET A JOUR TOUS LES ELEMENTS 3D
-    update(keys: Set<string>) : void
-    {
-        this.#game.logic.update(keys);
-        // Update visuel
-        if (this.#players[0].mesh)
-            this.updatePlayer(this.#players[0]);
-        if (this.#players[1].mesh)
-            this.updatePlayer(this.#players[1]);
-        if (this.#ball.mesh)
-            this.updateBall(this.#ball);
-    };
+    // // MET A JOUR TOUS LES ELEMENTS 3D
+    // update(keys: Set<string>) : void
+    // {
+    //     this.#game.logic.update(keys);
+    //     // Update visuel
+    //     if (this.#players[0].mesh)
+    //         this.updatePlayer(this.#players[0]);
+    //     if (this.#players[1].mesh)
+    //         this.updatePlayer(this.#players[1]);
+    //     if (this.#ball.mesh)
+    //         this.updateBall(this.#ball);
+    // };
 
-    get fieldMesh() : Mesh
-    {
-        return (this.#game.mesh);
-    }
+    // get fieldMesh() : Mesh
+    // {
+    //     return (this.#game.mesh);
+    // }
 
-    get ballMesh() : Mesh
-    {
-        return (this.#ball.mesh);
-    }
+    // get ballMesh() : Mesh
+    // {
+    //     return (this.#ball.mesh);
+    // }
 
-    get player1Mesh() : Mesh
-    {
-        return (this.#players[0].mesh);
-    }
+    // get player1Mesh() : Mesh
+    // {
+    //     return (this.#players[0].mesh);
+    // }
 
-    get player2Mesh() : Mesh
-    {
-        return (this.#players[1].mesh);
-    }
+    // get player2Mesh() : Mesh
+    // {
+    //     return (this.#players[1].mesh);
+    // }
 
 };

@@ -11,7 +11,7 @@ import {
 import '@babylonjs/loaders/glTF'; // important : chargeur pour .glb et .gltf
 
 import WorldLogic from "./WorldLogic.ts";
-import Game3D from './Game/Game3D.ts';
+import GameManager from './Game/GameManager.ts';
 
 interface IWorld
 {
@@ -26,6 +26,7 @@ interface IPathMesh
     file: string
 };
 
+// CLASS DE TEST POUR MON ENVIRONNEMENT 3D
 export default class World3D
 {
 
@@ -35,14 +36,14 @@ export default class World3D
     #scene: Scene;
     #camera: FreeCamera;
     #keys: Set<string>;
-    #game3D: Game3D | null;
+    #gameManager: GameManager;
 
     constructor(logic: WorldLogic, canvas: HTMLCanvasElement, worldPath: IPathMesh)
     {
         this.#world = {logic: logic, mesh: null, meshPath: worldPath};
-        this.#game3D = null;
         this.#canvas = canvas;
         this.#keys = new Set<string>();
+        this.#gameManager = new GameManager();
     };
 
     keyDownHandler(e: KeyboardEvent): void
@@ -99,39 +100,47 @@ export default class World3D
     start() : void
     {
         // TEST POUR UN MATCH
+        /*
+            type correspond au mode de la partie :
+            1 : local
+            2 : online
+            3 : local vs IA
+        */
         const testRules = {
+            nbPlayers: 2,
             scoreMax: 5,
             ballSpeed: 0.2,
             playerSpeed: 1,
             countDownGoalTime: 3,
-            allowPause: true
+            allowPause: true,
+            type: 1
         }
-        if (this.#world.logic.createGame(testRules))
+        
+        // SIMULATION DE CREATION D'UN MATCH
+        try
         {
-            const game = this.#world.logic.game;
-            try
-            {
-                this.#game3D = new Game3D(game, this.#scene);
-                if (!this.#game3D.loadMeshes())
-                {
-                    console.error("ERROR LORS DE LA RECUPERATION DES MESHS");
-                    return ;
-                }
-                
-            } catch (error: unknown)
-            {
-                if (error instanceof Error)
-                    console.error(error.message);
-                else
-                    console.error("erreur inconnue");
-            }
+
+            this.#gameManager.createGame(testRules, this.#scene);
+
+            this.#gameManager.gameLogic?.addPlayers(1);
+            this.#gameManager.gameLogic?.addPlayers(2);
+
+            this.#gameManager.initGame();
+
+            console.log(this.#gameManager);
+
+
+        } catch (error: unknown)
+        {
+            if (error instanceof Error)
+                console.error(error.message);
+            else
+                console.error("Error innexistante");
         }
 
-        if (!this.#game3D)
-        {
-            console.error("game3D est null")   
-            return ;
-        }
+
+        ////////////////////////////////////
+        
         this.#camera = new ArcRotateCamera("arcCamera", 
             Math.PI / 2,   // alpha
             Math.PI / 2.4,   // beta
@@ -141,23 +150,23 @@ export default class World3D
         );
         // /////////////////////
 
-        this.#world.logic.gameManager.start();
+        // this.#world.logic.gameManager.start();
 
-        // A changer de place plus tard (Utile pour le gameplay)
-        this.keyDownHandler = this.keyDownHandler.bind(this);
-        this.keyUpHandler = this.keyUpHandler.bind(this);
-        window.addEventListener("keydown", this.keyDownHandler);
-        window.addEventListener("keyup", this.keyUpHandler);
-        /////////////////////////////////////////////////////////
+        // // A changer de place plus tard (Utile pour le gameplay)
+        // this.keyDownHandler = this.keyDownHandler.bind(this);
+        // this.keyUpHandler = this.keyUpHandler.bind(this);
+        // window.addEventListener("keydown", this.keyDownHandler);
+        // window.addEventListener("keyup", this.keyUpHandler);
+        // /////////////////////////////////////////////////////////
 
 
-        this.#scene.onBeforeRenderObservable.add(() => {
-            if (this.#world.logic.game && this.#world.logic.game.state !== 3)
-                this.#game3D?.update(this.#keys);
-        });
+        // this.#scene.onBeforeRenderObservable.add(() => {
+        //     if (this.#world.logic.game && this.#world.logic.game.state !== 3)
+        //         this.#game3D?.update(this.#keys);
+        // });
 
         this.#engine.runRenderLoop(() => {
-            const camDiv = document.getElementById("camPosition");
+            // const camDiv = document.getElementById("camPosition");
             // this.#scene.registerBeforeRender(() => {
             //     if (camDiv) {
             //         const pos = this.#camera.position;
