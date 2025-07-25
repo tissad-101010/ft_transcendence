@@ -2,6 +2,8 @@ FROM node:22.17.1 AS build
 
 RUN echo "step I : build"
 
+RUN mkdir -p /data && chmod +rwx /data
+
 WORKDIR /app
 
 COPY ./app/package*.json ./

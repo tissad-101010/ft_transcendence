@@ -4,3 +4,13 @@
 *test
 *node_modules
 *build
+*.dist
+*.cache
+*.env
+*.DS_Store
+*.vscode
+*.idea
+*.sqlite
+*.db
+*.pid
+*.pid.lock

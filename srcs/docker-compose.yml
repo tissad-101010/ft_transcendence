@@ -46,6 +46,7 @@ services:
       volumes:
         - ./backend/app:/app
         - /app/node_modules
+        - DataBase:/data
       # command: npm run dev
       ports: 
         - "4000:4000"
@@ -92,19 +93,24 @@ networks:
     transcendence:
       driver: bridge
 volumes:
-    # Volume pour les données de Vault
-    # Utilisation d'un volume local pour éviter les problèmes de permission  
+  # this volume is used to store the Vault data
   LocalVaultData:
     driver: local
     driver_opts:
       type: none
       device: ./vault/data
       o: bind
-    # pour éviter les problèmes de permission avec le volume local
+    # this volume is used to store the frontend build files
   frontend-build:
     driver: local
     driver_opts:
       type: none
       device: ./frontend/build
       o: bind
-  #
+  # this volume is used to store the backend data
+  DataBase:
+    driver: local
+    driver_opts:
+      type: none
+      device: ./backend/data
+      o: bind

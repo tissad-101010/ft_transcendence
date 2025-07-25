@@ -6,44 +6,25 @@
 /*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/23 15:58:35 by tissad            #+#    #+#             */
-/*   Updated: 2025/07/24 16:53:16 by tissad           ###   ########.fr       */
+/*   Updated: 2025/07/25 16:39:49 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 import Fastify from 'fastify';
 import cors from '@fastify/cors';
+import { userRoutes } from './routes/users.routes';
+import dbPlugin from './plugins/db';
 
 
-
+/* ************************************************************************** */
 
 // Import the Fastify framework
 const app = Fastify({ logger: true });
 
+// Register the database plugin
+app.register(dbPlugin);
 
-
-
-
-// Define the API endpoint for user signup
-interface SignupBody {
-  username: string;
-  password: string;
-}
-
-// Register the POST route for user signup
-app.post<{ Body: SignupBody }>('/api', async (request, reply) => {
-  const { username, password } = request.body;
-
-
-  request.log.info(`Signup for: ${username}, ${password}`);
-
-  return reply.code(201).send({
-    message: 'User signed up successfully',
-    data: { username, password },
-  });
-});
-
-
-
+app.register(userRoutes, { prefix: '/users' });
 
 // Start the Fastify server
 const start = async () => {
