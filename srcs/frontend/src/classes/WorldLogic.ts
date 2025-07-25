@@ -35,13 +35,13 @@ export default class WorldLogic
         return (true);
     }
 
-    get game() : GameLogic | null
-    {
-        return (this.#gameManager.game);
-    }
+    // get game() : GameLogic | null
+    // {
+    //     return (this.#gameManager.game);
+    // }
 
-    get gameManager() : GameManager
-    {
-        return (this.#gameManager);
-    }
+    // get gameManager() : GameManager
+    // {
+    //     return (this.#gameManager);
+    // }
 };

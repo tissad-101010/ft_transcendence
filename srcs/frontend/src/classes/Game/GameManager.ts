@@ -31,7 +31,7 @@ export default class GameManager
     };
 
     createGame(rules: IRules, scene: Scene) : void
-    {
+    { 
         if (this.#game)
             throw new Error("Une partie est deja en cours de creation ou lancee");
         this.#game = {
@@ -49,27 +49,41 @@ export default class GameManager
             console.log("Aucune interface graphique associee a la partie");
         else if (!this.#game.ready)
             console.log("La game n'est pas prete pour etre lancee");
-        // else
-        //     this.#game.logic.start();
+        else
+            this.#game.logic.start();
     };
+
+    finishGame() : void
+    {
+        this.#game?.interface?.players.forEach((player) => {
+            player.mesh.dispose();
+        });
+        this.#game = null;
+    }
+
+    updateGame(keys : Set<string>) : void
+    {
+        this.#game?.interface?.update(keys);
+    }
 
     initGame() : void
     {
         if (!this.#game || !this.#game.interface || !this.#game.logic
             || this.#game.logic.players.length !== this.#game.logic.players.length)
-            console.error("Il manque des infos pour initialiser la game");
+            throw new Error("Il manque des infos pour initialiser la game");
         else
         {
             if (
                 !this.#game.interface.initField(this.#game.logic) ||
-                !this.#game.interface.initBall(this.#game.logic.Ball)
+                !this.#game.interface.initBall(this.#game.logic.ball)
             )
-                console.log("Error dans initGame (1)");
+                throw new Error("Error dans initGame (1)");
             this.#game.logic.players.forEach((player, index) => {
                 if (!this.#game?.interface?.initPlayer(player, index))
-                    console.error("Error dans initGame (2)");
+                    throw new Error("Error dans initGame (2)");
             });
         }
+        this.#game.ready = true;
     };
 
     get gameLogic() : GameLogic | null
@@ -87,6 +101,11 @@ export default class GameManager
         else
             return (null);
     };
+
+    get ready()
+    {
+        return (this.#game?.ready);
+    }
 
     // get game() : GameLogic | null
     // {

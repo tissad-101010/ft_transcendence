@@ -42,45 +42,56 @@ export default class BallLogic
             this.#directionY = -this.#directionY;
     };
 
+    hit(player: PlayerLogic) : void
+    {
+        if (
+            this.#posX + this.#radius >= player.posX - player.width / 2 &&
+            this.#posX - this.#radius <= player.posX + player.width / 2 &&
+            this.#posY + this.#radius >= player.posY - player.height / 2 &&
+            this.#posY - this.#radius <= player.posY + player.height / 2
+        )
+            this.#directionX = -this.#directionX;
+    };
+
     // Methode pour verifier si la balle entre en contact avec la barre du player donne en parametre
-    hit(player: PlayerLogic): void {
+    // hit(player: PlayerLogic): void {
 
-    // Trouver le point le plus proche du centre de la balle sur le rectangle
-    const closestX = Math.max(player.posX, Math.min(this.#posX, player.posX + player.width));
-    const closestY = Math.max(player.posY, Math.min(this.#posY, player.posY + player.height));
+    // // Trouver le point le plus proche du centre de la balle sur le rectangle
+    // const closestX = Math.max(player.posX, Math.min(this.#posX, player.posX + player.width));
+    // const closestY = Math.max(player.posY, Math.min(this.#posY, player.posY + player.height));
 
-    // Calcul de la distance entre ce point et le centre de la balle
-    const dx = (this.#posX) - closestX;
-    const dy = (this.#posY) - closestY;
+    // // Calcul de la distance entre ce point et le centre de la balle
+    // const dx = (this.#posX) - closestX;
+    // const dy = (this.#posY) - closestY;
 
-    const distanceSquared = dx * dx + dy * dy;
+    // const distanceSquared = dx * dx + dy * dy;
 
-    // si colision
-    if (distanceSquared <= this.#radius * this.#radius) {
+    // // si colision
+    // if (distanceSquared <= this.#radius * this.#radius) {
         
-        // Calcul du contact sur la raquette
-        const centerY = this.#posY + this.#radius;
-        const centerPlayerY = player.posY + player.height / 2;
-        const impactY = (centerY - centerPlayerY) / (player.height / 2); // entre -1 et +1
-        const maxAngle = Math.PI / 3.5;
-        const bounceAngle = impactY * maxAngle;
+    //     // Calcul du contact sur la raquette
+    //     const centerY = this.#posY + this.#radius;
+    //     const centerPlayerY = player.posY + player.height / 2;
+    //     const impactY = (centerY - centerPlayerY) / (player.height / 2); // entre -1 et +1
+    //     const maxAngle = Math.PI / 3.5;
+    //     const bounceAngle = impactY * maxAngle;
 
-        const speed = Math.sqrt(this.#directionX ** 2 + this.#directionY ** 2);
+    //     const speed = Math.sqrt(this.#directionX ** 2 + this.#directionY ** 2);
 
-        // directionX : simplement inversée
-        const blend = 0.7;
-        const dirY = Math.sin(bounceAngle) * speed;
+    //     // directionX : simplement inversée
+    //     const blend = 0.7;
+    //     const dirY = Math.sin(bounceAngle) * speed;
 
-        this.#directionX = -this.#directionX;
-        this.#directionY = dirY * (1 - blend) + dirY * blend;
+    //     this.#directionX = -this.#directionX;
+    //     this.#directionY = dirY * (1 - blend) + dirY * blend;
 
-        // Corriger la position (évite de rester dans la raquette)
-        if (this.#directionX > 0)
-            this.#posX = player.posX + player.width + this.#radius;
-        else
-            this.#posX = player.posX - this.#radius;
-        }
-    }
+    //     // Corriger la position (évite de rester dans la raquette)
+    //     if (this.#directionX > 0)
+    //         this.#posX = player.posX + player.width + this.#radius;
+    //     else
+    //         this.#posX = player.posX - this.#radius;
+    //     }
+    // }
 
     // GETTERS
     get radius() : number
@@ -123,10 +134,12 @@ export default class BallLogic
     */
     get goal() : number
     {
-        if (this.#posX >= this.#field.width)
-            return (1);
-        else if (this.#posX <= 0)
-            return (2);
+        if (!this.#field)
+            return (0);
+        if (this.#posX >= this.#field.width / 2)
+            return (1); // But Player1
+        else if (this.#posX <= -this.#field.width / 2)
+            return (2); // But Player2
         else
             return (0);
     };
@@ -150,10 +163,7 @@ export default class BallLogic
     */
     reset() : void
     {
-            if (this.#posY > this.#field.height - 20)
-                this.#posY = this.#field.height - 20;
-            if (this.#posY < 20)
-                this.#posY = 20;
-            this.#posX = this.#field.width / 2; // La balle repart du centre du terrain
+        this.#posX = 0;
+        this.#posY = 0;
     };
 };

@@ -91,7 +91,12 @@ export default class World3D
 
         // CHARGE TOUTE LA SCENE ET STOCKE LES MESH DANS this.#scene.meshes
         await SceneLoader.AppendAsync("/babylon/", "scene.glb", this.#scene);
+        let mesh = this.#scene.getTransformNodeByName("raquetteLeft");
+        mesh.dispose();
+        mesh = this.#scene.getTransformNodeByName("raquetteRight");
+        mesh.dispose();
 
+        // AFFICHE TOUS LES MESHS PRESENT DANS LA SCENE
         // this.#scene.meshes.forEach(m => {
         //     console.log(m.name);
         // });
@@ -109,8 +114,8 @@ export default class World3D
         const testRules = {
             nbPlayers: 2,
             scoreMax: 5,
-            ballSpeed: 0.2,
-            playerSpeed: 1,
+            ballSpeed: 2,
+            playerSpeed: 5,
             countDownGoalTime: 3,
             allowPause: true,
             type: 1
@@ -127,13 +132,15 @@ export default class World3D
 
             this.#gameManager.initGame();
 
-            console.log(this.#gameManager);
-
+            this.#gameManager.start();
 
         } catch (error: unknown)
         {
             if (error instanceof Error)
+            {
                 console.error(error.message);
+                return ;
+            }
             else
                 console.error("Error innexistante");
         }
@@ -152,27 +159,28 @@ export default class World3D
 
         // this.#world.logic.gameManager.start();
 
-        // // A changer de place plus tard (Utile pour le gameplay)
-        // this.keyDownHandler = this.keyDownHandler.bind(this);
-        // this.keyUpHandler = this.keyUpHandler.bind(this);
-        // window.addEventListener("keydown", this.keyDownHandler);
-        // window.addEventListener("keyup", this.keyUpHandler);
-        // /////////////////////////////////////////////////////////
+        // A changer de place plus tard (Utile pour le gameplay)
+        this.keyDownHandler = this.keyDownHandler.bind(this);
+        this.keyUpHandler = this.keyUpHandler.bind(this);
+        window.addEventListener("keydown", this.keyDownHandler);
+        window.addEventListener("keyup", this.keyUpHandler);
+        /////////////////////////////////////////////////////////
 
 
-        // this.#scene.onBeforeRenderObservable.add(() => {
-        //     if (this.#world.logic.game && this.#world.logic.game.state !== 3)
-        //         this.#game3D?.update(this.#keys);
-        // });
+        this.#scene.onBeforeRenderObservable.add(() => {
+            if (this.#gameManager.ready && this.#gameManager.gameLogic
+                && this.#gameManager.gameLogic.state !== 3)
+            {
+                this.#gameManager.updateGame(this.#keys);
+            }
+            else if (this.#gameManager.ready && this.#gameManager.gameLogic
+                && this.#gameManager.gameLogic.state === 3)
+            {
+                this.#gameManager.finishGame();
+            }
+        });
 
         this.#engine.runRenderLoop(() => {
-            // const camDiv = document.getElementById("camPosition");
-            // this.#scene.registerBeforeRender(() => {
-            //     if (camDiv) {
-            //         const pos = this.#camera.position;
-            //         camDiv.innerText = `x: ${pos.x.toFixed(2)}\ny: ${pos.y.toFixed(2)}\nz: ${pos.z.toFixed(2)}`;
-            //     }
-            // });
             this.#scene.render();
         });
     };

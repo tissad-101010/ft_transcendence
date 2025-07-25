@@ -35,22 +35,71 @@ export default class PlayerLogic
         this.#score = 0;
         this.#speed = speed;
         this.#team = team;
-        this.#control = null;
+        if (this.#id === 0)
+            this.#control = {up: "q", down: "a"};
+        else if (this.#id === 1)
+            this.#control = {up: "ArrowUp", down: "ArrowDown"};
+        else 
+            this.#control = null;
     };
 
-    get team() : number
+    get team()
     {
         return (this.#team);
     };
 
+    get posX()
+    {
+        return (this.#posX);
+    }
+
+    get posY()
+    {
+        return (this.#posY);
+    }
+
+    get down()
+    {
+        if (this.#control)
+            return (this.#control.down);
+        return (null);
+    }
+
+    get up()
+    {
+        if (this.#control)
+            return (this.#control.up);
+        return (null);
+    }
+
+    set width(value: number)
+    {
+        this.#width = value;
+    }
+
+    set height(value: number)
+    {
+        this.#height = value;
+    }
+
+    set field(field: IField)
+    {
+        this.#field = field;
+    }
+
+
     // Methode qui met a jour la position de la barre du player
-    // update(dep: number) : void
-    // {
-    //     if (dep === -1 && this.#posY + dep * this.#speed >= 0)
-    //         this.#posY += dep * this.#speed;
-    //     else if (dep === 1 && (this.#posY + dep * this.#speed) + this.#height <= this.#field.height)
-    //         this.#posY += dep * this.#speed;
-    // };
+    update(dep: number) : void
+    {
+        if (!this.#field)
+            return ;
+
+        const nextY = this.#posY + dep * this.#speed;
+        const halfHeight = this.#height / 2;
+
+        if (nextY - halfHeight >= 0 - this.#field.height / 2 && nextY + halfHeight <= this.#field.height / 2)
+            this.#posY = nextY;
+    };
 
     // // Methode qui ajoute 1 au score du player
     // addScore() : void
@@ -99,15 +148,15 @@ export default class PlayerLogic
     //     return this.#control.up;
     // }
 
-    // set posX(value: number)
-    // {
-    //     this.#posX = value;
-    // }
+    set posX(value: number)
+    {
+        this.#posX = value;
+    }
 
-    // set posY(value : number)
-    // {
-    //     this.#posY = value;
-    // }
+    set posY(value : number)
+    {
+        this.#posY = value;
+    }
 
     // set width(value: number)
     // {

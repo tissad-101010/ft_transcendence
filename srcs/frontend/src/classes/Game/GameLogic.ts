@@ -29,6 +29,12 @@ interface IField
     height: number
 };
 
+interface IScore
+{
+    team1: number,
+    team2: number
+}
+
 export default class GameLogic
 {
     #players: PlayerLogic[];
@@ -37,8 +43,9 @@ export default class GameLogic
     #control: IControl;
     #countDownGoal: ICountDownGoal; // Utile pour le compteur de l'engagement
     #rules: IRules;
-    #winner: PlayerLogic | null;
+    #winner: number;
     #field: IField | null;
+    #score: IScore;
     constructor(rules : IRules)
     {
         this.#rules = rules;
@@ -48,7 +55,8 @@ export default class GameLogic
         this.#ball = new BallLogic(this.#rules.ballSpeed);
         this.#countDownGoal = {active: false, value: this.#rules.countDownGoalTime, id: 0};
         this.#players = [];
-        this.#winner = null;
+        this.#winner = 0;
+        this.#score = {team1: 0, team2: 0};
     };
 
     addPlayers(team: number) : void
@@ -62,77 +70,99 @@ export default class GameLogic
             console.log("Ajout du player impossible, deja le nombre necessaire");
     }
 
+    start() : void
+    {
+        this.#state = 1;
+    }
+
+    get state()
+    {
+        return (this.#state);
+    }
+
     get players() : PlayerLogic[]
     {
         return (this.#players);
     };
 
-    get Ball() : BallLogic
+    get ball() : BallLogic
     {
         return (this.#ball);
     }
 
-    // startCountDown() : void
-    // {
-    //     this.#state = 2;
-    //     this.#countDownGoal.id = setInterval(() => {
-    //         this.#countDownGoal.value--;
-    //         if (this.#countDownGoal.value === 0)
-    //         {
-    //             this.#state = 1;
-    //             this.#countDownGoal.active = false;
-    //             clearInterval(this.#countDownGoal.id);
-    //         }
-    //     }, 1000);
-    // }
+    get field() : IField | null
+    {
+        return (this.#field);
+    }
 
-    // // Methode appele lorsqu'un player marque un point
-    // goal(player : PlayerLogic) : void
-    // {
-    //     player.addScore();
-    // }
+    set field(field: IField)
+    {
+        this.#field = field;
+    }
 
-    // hasWinner() : void
-    // {
-    //     if (this.#player1.score >= this.#rules.scoreMax)
-    //         this.#winner = this.#player1;
-    //     else if (this.#player2.score >= this.#rules.scoreMax)
-    //         this.#winner = this.#player2;
-    // };
+    startCountDown() : void
+    {
+        this.#state = 2;
+        this.#countDownGoal.id = setInterval(() => {
+            this.#countDownGoal.value--;
+            if (this.#countDownGoal.value === 0)
+            {
+                this.#state = 1;
+                this.#countDownGoal.active = false;
+                clearInterval(this.#countDownGoal.id);
+            }
+        }, 1000);
+    }
 
-    // // Methode qui met a jour l'etat de la partie a chaque appel de window.requestAnimationFrame
-    // update(keys: Set<string>) : void
-    // {
-    //     if (this.#state !== 3)
-    //     {
-    //         this.handleKeys(keys);
-    //         if (this.#state === 1)
-    //         {
-    //             this.#ball.move();
-    //             let tmp = this.#ball.goal;
-    //             if (tmp !== 0)
-    //             {
-    //                 if (tmp === 1)
-    //                     this.goal(this.#player1);
-    //                 else if (tmp === 2)
-    //                     this.goal(this.#player2);
-    //                 this.hasWinner();
-    //                 if (this.#winner !== null)
-    //                     this.#state = 3;
-    //                 else
-    //                 {
-    //                     this.#ball.reset();
-    //                     this.#countDownGoal.value = this.#rules.countDownGoalTime;
-    //                     this.#countDownGoal.active = true;
-    //                     this.startCountDown();
-    //                 }
-    //             }
-    //             this.#ball.bounce();
-    //             this.#ball.hit(this.#player1);
-    //             this.#ball.hit(this.#player2);
-    //         }
-    //     }
-    // };
+    // Methode appele lorsqu'un player marque un point
+    goal(value : number) : void
+    {
+        if (value === 1)
+            this.#score.team1 += 1;
+        else if (value === 2)
+            this.#score.team2 += 1;
+    }
+
+    hasWinner() : void
+    {
+        if (this.#score.team1 >= this.#rules.scoreMax)
+            this.#winner = 1;
+        else if (this.#score.team2 >= this.#rules.scoreMax)
+            this.#winner = 2;
+    };
+
+    // Methode qui met a jour l'etat de la partie a chaque appel de window.requestAnimationFrame
+    update(keys: Set<string>) : void
+    {
+        if (this.#state !== 3)
+        {
+            this.handleKeys(keys);
+            if (this.#state === 1)
+            {
+                this.#ball.move();
+                let tmp = this.#ball.goal;
+                if (tmp !== 0)
+                {
+                    if (tmp !== 0)
+                        this.goal(tmp);
+                    this.hasWinner();
+                    if (this.#winner !== null)
+                        this.#state = 3;
+                    else
+                    {
+                        this.#ball.reset();
+                        this.#countDownGoal.value = this.#rules.countDownGoalTime;
+                        this.#countDownGoal.active = true;
+                        this.startCountDown();
+                    }
+                }
+                // this.#ball.bounce();
+                // this.#players.forEach((player) => {
+                    // this.#ball.hit(player);
+                // });
+            }
+        }
+    };
 
     // setStartPosition() : void
     // {
@@ -147,47 +177,42 @@ export default class GameLogic
     // };
 
 
-    // // Methode qui gere les actions selon les touches appuyees
-    // handleKeys(keys: Set<string>) : void
-    // {
-    //     if (keys.size === 0)
-    //         return ;
-    //     if (this.#state >= 1 && this.#state <= 2)
-    //     {
-    //         if (keys.has(this.#player2.down))
-    //             this.#player2.update(-1);
-    //         else if (keys.has(this.#player2.up))
-    //             this.#player2.update(1);
+    // Methode qui gere les actions selon les touches appuyees
+    handleKeys(keys: Set<string>) : void
+    {
+        if (keys.size === 0)
+            return ;
+        if (this.#state >= 1 && this.#state <= 2)
+        {
+            this.#players.forEach((player) => {
+                const up = player.up;
+                const down = player.down
+                if (up && keys.has(up))
+                    player.update(-1);
+                else if (down && keys.has(down))
+                    player.update(1);
+            });
+            // if (keys.has(this.#control.pause) && this.#rules.allowPause === true)
+            // {
+            //     keys.delete(this.#control.pause);
+            //     if (this.#countDownGoal.active === true)
+            //         clearInterval(this.#countDownGoal.id);
+            //     this.#state = 0;
+            // }
+        // } else
+        // {
+        //     if (keys.has(this.#control.pause) && this.#rules.allowPause === true)
+        //     {
+        //         keys.delete(this.#control.pause);
+        //         if (this.#countDownGoal.active === true)
+        //             this.startCountDown();
+        //         else
+        //             this.#state = 1;
+        //     }
+        }
+    };
+
     
-    //         if (keys.has(this.#player1.down))
-    //             this.#player1.update(-1);
-    //         else if (keys.has(this.#player1.up))
-    //             this.#player1.update(1);
-
-    //         if (keys.has(this.#control.pause) && this.#rules.allowPause === true)
-    //         {
-    //             keys.delete(this.#control.pause);
-    //             if (this.#countDownGoal.active === true)
-    //                 clearInterval(this.#countDownGoal.id);
-    //             this.#state = 0;
-    //         }
-    //     } else
-    //     {
-    //         if (keys.has(this.#control.pause) && this.#rules.allowPause === true)
-    //         {
-    //             keys.delete(this.#control.pause);
-    //             if (this.#countDownGoal.active === true)
-    //                 this.startCountDown();
-    //             else
-    //                 this.#state = 1;
-    //         }
-    //     }
-    // };
-
-    // start() : void
-    // {
-    //     this.#state = 1;
-    // }
 
     // get player1() : PlayerLogic
     // {

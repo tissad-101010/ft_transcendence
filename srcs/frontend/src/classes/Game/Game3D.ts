@@ -59,24 +59,33 @@ export default class Game3D
                 {
                     width: 1,
                     height: 2,
-                    depth: 2
+                    depth: 5
                 },
                 this.#scene
             );
-            const pos = this.#game?.mesh.position;
-            console.log("J'arrive ici");
-            if (logic.team)
+            box.parent = this.#game?.mesh;
+            const material = new StandardMaterial("materialPlayer" + index, this.#scene);
+            if (logic.team === 1)
+            {
                 box.position = new Vector3(
-                    (pos.x - this.#game?.size.x / 2) + (this.#game?.size.x / 10),
-                    pos.y,
-                    pos.z
+                    (0 - this.#game?.size.x / 2) + (this.#game?.size.x / 10),
+                    0,
+                    0
                 );
+                material.diffuseColor = Color3.Blue();
+            }
             else
+            {
                 box.position = new Vector3(
-                    (pos.x + this.#game?.size.x / 2) - (this.#game?.size.x / 10),
-                    pos.y,
-                    pos.z
+                    (this.#game?.size.x / 2) - (this.#game?.size.x / 10),
+                    0,
+                    0
                 );
+                material.diffuseColor = Color3.Red();
+            }
+            box.isPickable = false;
+            box.visibility = 1;
+            box.material = material;
         } catch (error: unknown)
         {
             console.error("Error lors de la creation du mesh du player " + index);
@@ -85,8 +94,14 @@ export default class Game3D
         this.#players.push({
             logic: logic,
             mesh: box,
-            size: {x: 1, y: 1, z: 2}
+            size: this.getSizeMesh(box)
         });
+        logic.width = this.#players[index].size.x;
+        logic.height = this.#players[index].size.z;
+        logic.posX = box.position.x;
+        logic.posY = box.position.y;
+        if (this.#game && this.#game.logic.field)
+            logic.field = this.#game.logic.field;
         return (true);
     };
 
@@ -108,6 +123,7 @@ export default class Game3D
             console.error("Error : size pas recupee dans initField");
             return (false);
         }
+        logic.field = {width: this.#game.size.x, height: this.#game.size.z};
         return (true);
     };
 
@@ -123,12 +139,17 @@ export default class Game3D
             console.error("Error : ballPong pas trouve");
             return (false);
         }
+        this.#ball.mesh.parent = this.#game?.mesh;
         this.#ball.size = this.getSizeMesh(this.#ball.mesh);
         if (!this.#ball.size)
         {
             console.error("Error : size pas recupee dans initBall");
             return (false);
         }
+        this.#ball.mesh.position = new Vector3(0, this.#ball.size.z, 0);
+        logic.radius = this.#ball.size.x;
+        logic.posX = this.#ball.mesh.position.x;
+        logic.posY = this.#ball.mesh.position.z;
         return (true);
     };
 
@@ -149,173 +170,35 @@ export default class Game3D
         return (null);
     }
 
-    // FONCTION QUI AFFICHE UN RECTANGLE D'UN MESH OU D'UN TRANFORM NODE
-    // showHitBox(item: Mesh | TransformNode) : void
-    // {
-    //     if (item instanceof Mesh)
-    //     {
-    //         item.showBoundingBox = true;
-    //     }
-    //     else if (item instanceof TransformNode)
-    //     {
-    //         const { min, max } = item.getHierarchyBoundingVectors();
-    //         const size = max.subtract(min);
-    //         const center = min.add(size.scale(0.5));
+    
 
-    //         const box = MeshBuilder.CreateBox("bbox", {
-    //             width: size.x,
-    //             height: size.y,
-    //             depth: size.z
-    //         }, this.#scene);
+    // MET A JOUR LA POSITION DU PLAYER
+    updatePlayer(player: IPlayer)
+    {
+        player.mesh.position = new Vector3(player.logic.posX, player.mesh.position.y, player.logic.posY);
+            // player.mesh.position = Vector3.Lerp(player.mesh.position, newPos, 0.2);
+    };
 
-    //         box.position = center.subtract(item.getAbsolutePosition());
+    // MET A JOUR LA POSITION DE LA BALLE
+    updateBall(ball: IBall)
+    {
+        ball.mesh.position = new Vector3(ball.logic.posX, ball.mesh.position.y, ball.logic.posY);
+    };
 
-    //         box.isPickable = false;
-    //         box.visibility = 0.3;
+    // MET A JOUR TOUS LES ELEMENTS 3D
+    update(keys: Set<string>) : void
+    {
+        this.#game?.logic.update(keys);
+        // Update visuel
+        this.#players.forEach((player) => {
+            this.updatePlayer(player);
+        });
+        if (this.#ball && this.#ball.mesh)
+            this.updateBall(this.#ball);
+    };
 
-    //         const material = new StandardMaterial("bboxMat", this.#scene);
-    //         material.wireframe = true;
-    //         material.emissiveColor = Color3.Red();
-    //         box.material = material;
-
-    //         box.parent = item;
-    //     }
-    // }
-
-    // CHARGE LES MESHS OU TRANSFORM NODE 3D
-    // loadMeshes() : boolean
-    // {
-    //     this.#game.mesh = this.#scene.getMeshByName("field");
-    //     this.#players[0].mesh = this.#scene.getTransformNodeByName("raquetteLeft");
-    //     this.#players[1].mesh = this.#scene.getTransformNodeByName("raquetteRight");
-    //     this.#ball.mesh = this.#scene.getMeshByName("ballPong");
-    //     if (!this.#game.mesh)
-    //     {
-    //         console.error("terrain non trouve");
-    //         return (false);
-    //     }
-    //     else if (!this.#players[0].mesh)
-    //     {
-    //         console.error("player1 non trouve");
-    //         return (false);
-    //     }
-    //     else if (!this.#players[1].mesh)
-    //     {
-    //         console.error("player2 non trouve");
-    //         return (false);
-    //     }
-    //     else if (!this.#ball.mesh)
-    //     {
-    //         console.error("ball non trouve");
-    //         return (false);
-    //     }
-    //     this.#game.size = this.getSizeMesh(this.#game.mesh);
-    //     this.#players[0].size = this.getSizeMesh(this.#players[0].mesh);
-    //     this.#players[1].size = this.getSizeMesh(this.#players[1].mesh);
-    //     this.#ball.size = this.getSizeMesh(this.#ball.mesh);
-    //     if (
-    //         !this.#game.size ||
-    //         !this.#players[0].size ||
-    //         !this.#players[1].size ||
-    //         !this.#ball.size
-    //     )
-    //         return (false);
-
-    //     // MISE A JOUR DES TAILLES POUR LA PARTIE LOGIC
-    //     const ratioX = this.#game.logic.width / this.#game.size.x;
-    //     const ratioY = this.#game.logic.height / this.#game.size.z;
-
-    //     this.#ball.logic.radius = this.#ball.size.x * ratioX;
-
-    //     this.#players[0].logic.width = this.#players[0].size.x * ratioX;
-    //     this.#players[0].logic.height = this.#players[0].size.z * ratioY;
-
-    //     this.#players[1].logic.width = this.#players[1].size.x * ratioX;
-    //     this.#players[1].logic.height = this.#players[1].size.z * ratioY;
-
-    //     return (true);
-    // };
-
-    // // PERMET DE SAVOIR LA POSITION DE L'ELEMENT DANS L'ENVIRONNEMENT 3D PAR RAPPORT A SA LOGIC
-    // convertLogicToWorld3D(
-    //     logicX: number,
-    //     logicY: number,
-    //     size: Vector3
-    // ): Vector3 | null
-    // {
-    //     const scaleX = this.#game.size.x / this.#game.logic.width;
-    //     const scaleY = this.#game.size.z / this.#game.logic.height;
-
-    //     // Calcul position logique (origine en haut à gauche)
-    //     const offsetX = logicX * scaleX - this.#game.size.x / 2;
-    //     const offsetZ = logicY * scaleY - this.#game.size.z / 2;
-
-    //     const center = this.#game.mesh.getBoundingInfo().boundingBox.centerWorld;
-
-    //     // Inverser l'axe Z car Y logique va vers le bas
-    //     const invertedOffsetZ = -offsetZ;
-    //     return new Vector3(
-    //         center.x + offsetX,
-    //         center.y + size.y / 2, // Y constant (hauteur)
-    //         center.z + invertedOffsetZ
-    //     );
-    // }
-
-    // // MET A JOUR LA POSITION DU PLAYER
-    // updatePlayer(player: IPlayer)
-    // {
-    //     const newPos = this.convertLogicToWorld3D(
-    //         player.logic.posX + player.logic.width / 2,
-    //         player.logic.posY + player.logic.height / 2,
-    //         player.size
-    //     );
-    //     if (newPos)
-    //         player.mesh.position = Vector3.Lerp(player.mesh.position, newPos, 0.2);
-    // };
-
-    // // MET A JOUR LA POSITION DE LA BALLE
-    // updateBall(ball: IBall)
-    // {
-    //     const newPos = this.convertLogicToWorld3D(
-    //         ball.logic.posX,
-    //         ball.logic.posY,
-    //         ball.size
-    //     );
-    //     if (newPos)
-    //         ball.mesh.position = newPos;
-    // };
-
-    // // MET A JOUR TOUS LES ELEMENTS 3D
-    // update(keys: Set<string>) : void
-    // {
-    //     this.#game.logic.update(keys);
-    //     // Update visuel
-    //     if (this.#players[0].mesh)
-    //         this.updatePlayer(this.#players[0]);
-    //     if (this.#players[1].mesh)
-    //         this.updatePlayer(this.#players[1]);
-    //     if (this.#ball.mesh)
-    //         this.updateBall(this.#ball);
-    // };
-
-    // get fieldMesh() : Mesh
-    // {
-    //     return (this.#game.mesh);
-    // }
-
-    // get ballMesh() : Mesh
-    // {
-    //     return (this.#ball.mesh);
-    // }
-
-    // get player1Mesh() : Mesh
-    // {
-    //     return (this.#players[0].mesh);
-    // }
-
-    // get player2Mesh() : Mesh
-    // {
-    //     return (this.#players[1].mesh);
-    // }
-
+    get players()
+    {
+        return (this.#players);
+    }
 };
