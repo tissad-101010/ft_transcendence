@@ -46,7 +46,8 @@ The project involves:
 - ✅ Attack test script implemented (SQLi, XSS, etc.)
 - ✅ Nginx configured as reverse proxy serving static pages
 ### 🔐 2.2 – Security: HashiCorp Vault 
-
+- ✅ HashiCorp Vault running in a dedicated container
+- 
 
 ## 🐳 Docker Architecture
 
