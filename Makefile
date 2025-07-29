@@ -33,5 +33,7 @@ tls_gen:
 local:
 	mkdir -p ./srcs/vault/data
 	mkdir -p ./srcs/frontend/build
-	mkdir -p ./srcs/backeend/data
+	mkdir -p ./srcs/backend/data
+	touch ./srcs/backend/data/db.sqlite
+	
 .PHONY: start down restart up clean prune
