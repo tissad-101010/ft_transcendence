@@ -1,5 +1,9 @@
-services:
 
+services:
+#********************************************************************************#
+#                               HASHICORP VAULT                                  #
+#********************************************************************************#
+# HashiCorp Vault service for managing secrets and sensitive data
   hashicorp_vault:
     image: hashicorp/vault
     container_name: hashicorp_vault
@@ -16,26 +20,13 @@ services:
       - "8200:8200"
       - "8201:8201"
     networks:
-      - transcendence
+      - global-net
+      - secyrity-net
     restart: unless-stopped
     entrypoint: ["vault", "server", "-config=/vault/config/vault.hcl"]
-
-  frontend:
-    image : frontend
-    container_name: frontend
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-    # depends_on:
-    #   - hashicorp_vault
-    volumes:
-      - frontend-build:/app/build:rw
-    networks:
-      - transcendence
-    ports:
-      - "3000:3000"
-    restart: unless-stopped
-  
+  #********************************************************************************#
+  #                              BACKEND SERVICE                                   #
+  #********************************************************************************#
   backend:
       image: backend
       build:
@@ -50,10 +41,32 @@ services:
       ports: 
         - "4000:4000"
       networks:
-        - transcendence
-      # depends_on:
-      #   - frontend
-
+        - global-net
+        - secyrity-net
+      depends_on:
+        - hashicorp_vault
+  #********************************************************************************#
+  #                              FRONTEND SERVICE                                  #
+  #********************************************************************************#
+  frontend:
+    image : frontend
+    container_name: frontend
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    depends_on:
+      - backend
+    volumes:
+      - frontend-build:/app/build:rw
+    networks:
+      - global-net
+    ports:
+      - "3000:3000"
+    restart: unless-stopped
+  #********************************************************************************#
+  #                              PROXY SERVICE                                     #
+  #********************************************************************************#
+  # Nginx reverse proxy with ModSecurity for security and SSL termination
   proxy:
     image: proxy
     build:
@@ -62,7 +75,6 @@ services:
     container_name: proxy
     depends_on:
       - frontend
-      - backend
     environment:
       - SSL_CERT=/etc/nginx/ssl/server.crt
       - SSL_CERT_KEY=/etc/nginx/ssl/server.key
@@ -85,26 +97,37 @@ services:
       - "8443:443"
       - "8080:80"
     networks:
-      - transcendence
+      - global-net
     restart: unless-stopped
-
+#********************************************************************************#
+#                              NETWORKS                                          #
+#********************************************************************************#
 networks:
-    transcendence:
+  # Global network for all services
+    global-net:
       driver: bridge
+  #******************************************************************************#
+  # Security network for sensitive services
+    secyrity-net:
+      driver: bridge
+#********************************************************************************#
+#                              VOLUMES                                           #
+#********************************************************************************# 
 volumes:
-    # Volume pour les données de Vault
-    # Utilisation d'un volume local pour éviter les problèmes de permission  
+  # Local volume for HashiCorp Vault data
+  # This volume is used to persist Vault data across container restarts
   LocalVaultData:
     driver: local
     driver_opts:
       type: none
       device: ./vault/data
       o: bind
-    # pour éviter les problèmes de permission avec le volume local
+  #*******************************************************************************#
+  # Local volume for frontend build artifacts
+  # This volume is used to persist the build output of the frontend application
   frontend-build:
     driver: local
     driver_opts:
       type: none
       device: ./frontend/build
       o: bind
-  #
