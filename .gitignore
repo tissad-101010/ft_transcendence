@@ -14,3 +14,4 @@
 *.db
 *.pid
 *.pid.lock
+*data

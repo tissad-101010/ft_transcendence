@@ -1,68 +1,6 @@
-
 services:
-#********************************************************************************#
-#                               HASHICORP VAULT                                  #
-#********************************************************************************#
-# HashiCorp Vault service for managing secrets and sensitive data
-  hashicorp_vault:
-    image: hashicorp_vault
-    build:
-      context: ./vault
-      dockerfile: Dockerfile
-    container_name: hashicorp_vault
-    volumes:
-      - LocalVaultData:/vault/data
-      - ./vault/config/vault.hcl:/vault/config/vault.hcl:ro
-      - ./vault/certs/vault.crt:/vault/certs/vault.crt:ro
-      - ./vault/certs/vault.key:/vault/certs/vault.key:ro
-    cap_add:
-      - IPC_LOCK
-    # environment:
-    #   - VAULT_ADDR=http://localhost:8200
-    ports:
-      - "8200:8200"
-      - "8201:8201"
-    networks:
-      - global-net
-      - security-net
-    restart: unless-stopped
-  #********************************************************************************#
-  #                              BACKEND SERVICE                                   #
-  #********************************************************************************#
-  backend:
-      image: backend
-      build:
-        context: ./backend
-        dockerfile: Dockerfile
-      container_name: backend
-      volumes:
-        - ./backend/app:/app
-        - /app/node_modules
-        - DataBase:/data
-      networks:
-        - global-net
-        - security-net
-      depends_on:
-        - hashicorp_vault
-      restart: unless-stopped
-  #********************************************************************************#
-  #                              FRONTEND SERVICE                                  #
-  #********************************************************************************#
-  frontend:
-    image : frontend
-    container_name: frontend
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-    depends_on:
-      - backend
-    volumes:
-      - frontend-build:/app/build:rw
-    networks:
-      - global-net
-    ports:
-      - "3000:3000"
-    restart: unless-stopped
+
+
   #********************************************************************************#
   #                              PROXY SERVICE                                     #
   #********************************************************************************#
@@ -99,6 +37,136 @@ services:
     networks:
       - global-net
     restart: unless-stopped
+  #********************************************************************************#
+
+
+
+
+  #********************************************************************************#
+  #                              FRONTEND SERVICE                                  #
+  #********************************************************************************#
+  frontend:
+    image : frontend
+    container_name: frontend
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    depends_on:
+      - user-service
+    volumes:
+      - frontend-build:/app/build:rw
+    networks:
+      - global-net
+    ports:
+      - "3000:3000"
+    restart: unless-stopped
+  #********************************************************************************#
+
+
+
+#**********************************************************************************#
+#                              BACKEND SMICROSERVICES                              #
+#**********************************************************************************#
+  #********************************************************************************#
+  #                            USER SERVICE                                        #
+  #********************************************************************************#
+  # User service for managing user accounts, login, and registration
+  user-service:
+    image: user-service
+    build:
+      context: ./backend/user-service
+      dockerfile: Dockerfile
+    container_name: user-service
+    volumes:
+      - ./backend/user-service/app:/app
+      - /app/node_modules
+      - DataUserService:/data
+    networks:
+      - global-net
+      - security-net
+    depends_on:
+      - hashicorp_vault
+      - postgres
+    restart: unless-stopped
+    ports:
+      - "3001:3001"
+    environment:
+      - NODE_ENV=production
+      - VAULT_ADDR=http://hashicorp_vault:8200
+  #********************************************************************************#
+  #                            AUTH SERVICE                                        #
+  #********************************************************************************#
+  # Authentication service for managing user sessions and JWT tokens
+  
+  
+  
+  #********************************************************************************#
+  #                            GAME SERVICE                                        #
+  #********************************************************************************#
+  # Game service for managing game sessions, matchmaking, and real-time interactions
+
+  
+  
+  
+  #********************************************************************************#
+  #                            POSTGRES SERVICE                                    #
+  #********************************************************************************#
+  # PostgreSQL service for storing user data and application state
+  postgres:
+    image: postgres
+    build:
+      context: ./backend/postgres
+      dockerfile: Dockerfile
+    container_name: postgres
+    volumes:
+      - PostgresData:/var/lib/postgresql/data:rw
+    networks:
+      - security-net
+    restart: unless-stopped
+    environment:
+      - POSTGRES_USER=transcendence
+      - POSTGRES_PASSWORD=transcendence
+      - POSTGRES_DB=transcendence_db
+    ports:
+      - "5432:5432"
+  #********************************************************************************#      
+  #********************************************************************************#
+
+
+
+
+  #********************************************************************************#
+  #                               HASHICORP VAULT                                  #
+  #********************************************************************************#
+  # HashiCorp Vault service for managing secrets and sensitive data
+  hashicorp_vault:
+    image: hashicorp_vault
+    build:
+      context: ./vault
+      dockerfile: Dockerfile
+    container_name: hashicorp_vault
+    volumes:
+      - LocalVaultData:/vault/data
+      - ./vault/config/vault.hcl:/vault/config/vault.hcl:ro
+      - ./vault/certs/vault.crt:/vault/certs/vault.crt:ro
+      - ./vault/certs/vault.key:/vault/certs/vault.key:ro
+    cap_add:
+      - IPC_LOCK
+    # environment:
+    #   - VAULT_ADDR=http://localhost:8200
+    ports:
+      - "8200:8200"
+      - "8201:8201"
+    networks:
+      - global-net
+      - security-net
+    restart: unless-stopped
+  #********************************************************************************#
+#********************************************************************************#
+
+
+
+
 #********************************************************************************#
 #                              NETWORKS                                          #
 #********************************************************************************#
@@ -133,9 +201,19 @@ volumes:
       o: bind
   #*******************************************************************************#
   # this volume is used to store the backend data
-  DataBase:
+  DataUserService:
     driver: local
     driver_opts:
       type: none
-      device: ./backend/data
+      device: ./backend/user-service/data
       o: bind
+  #*******************************************************************************#
+  # Local volume for PostgreSQL data
+  # This volume is used to persist PostgreSQL data across container restarts
+  PostgresData:
+    driver: local
+    driver_opts: 
+      type: none
+      device: ./backend/postgres/data
+      o: bind
+  #*******************************************************************************#
