@@ -34,6 +34,7 @@ local:
 	mkdir -p ./srcs/vault/data
 	mkdir -p ./srcs/frontend/build
 	mkdir -p ./srcs/./backend/user-service/data
+	mkdir -p ./srcs/backend/postgresql/data
 
 	
 .PHONY: start down restart up clean prune

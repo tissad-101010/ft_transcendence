@@ -113,20 +113,24 @@ services:
   #********************************************************************************#
   # PostgreSQL service for storing user data and application state
   postgres:
-    image: postgres
+    image: postgresql
     build:
-      context: ./backend/postgres
+      context: ./backend/postgresql
       dockerfile: Dockerfile
-    container_name: postgres
+    container_name: PostgreSQL
     volumes:
-      - PostgresData:/var/lib/postgresql/data:rw
+      - PostgresData:/var/lib/postgresql/data
+      - ./backend/postgresql/config/postgresql.conf:/etc/postgresql/postgresql.conf:ro
+      - ./backend/postgresql/config/pg_hba.conf:/etc/postgresql/pg_hba.conf:ro
+      - ./backend/postgresql/config/pg_ident.conf:/etc/postgresql/pg_ident.conf:ro
     networks:
       - security-net
     restart: unless-stopped
     environment:
-      - POSTGRES_USER=transcendence
-      - POSTGRES_PASSWORD=transcendence
-      - POSTGRES_DB=transcendence_db
+      - POSTGRES_DB=${DB_NAME}
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_HOST_AUTH_METHOD=trust
     ports:
       - "5432:5432"
   #********************************************************************************#      
@@ -214,6 +218,6 @@ volumes:
     driver: local
     driver_opts: 
       type: none
-      device: ./backend/postgres/data
+      device: ./backend/postgresql/data
       o: bind
   #*******************************************************************************#
