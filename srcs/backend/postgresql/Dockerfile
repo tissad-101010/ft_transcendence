@@ -6,12 +6,12 @@
 #    By: tissad <tissad@student.42.fr>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/07/31 14:24:00 by tissad            #+#    #+#              #
-#    Updated: 2025/07/31 15:25:37 by tissad           ###   ########.fr        #
+#    Updated: 2025/08/04 14:40:42 by tissad           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 # PostgreSQL Dockerfile
-FROM alpine:3.19
+FROM alpine:3.22
 
 # install PostgreSQL and dependencies
 RUN apk update && apk add --no-cache \

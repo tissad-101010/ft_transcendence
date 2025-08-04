@@ -86,7 +86,7 @@ services:
       - security-net
     depends_on:
       - hashicorp_vault
-      - postgres
+      - postgreSQL
     restart: unless-stopped
     ports:
       - "3001:3001"
@@ -112,7 +112,7 @@ services:
   #                            POSTGRES SERVICE                                    #
   #********************************************************************************#
   # PostgreSQL service for storing user data and application state
-  postgres:
+  postgreSQL:
     image: postgresql
     build:
       context: ./backend/postgresql
@@ -130,7 +130,7 @@ services:
       - POSTGRES_DB=${DB_NAME}
       - POSTGRES_USER=${DB_USER}
       - POSTGRES_PASSWORD=${DB_PASSWORD}
-      - POSTGRES_HOST_AUTH_METHOD=trust
+      - POSTGRES_ROOT_PASSWORD=${DB_ROOT_PASSWORD}
     ports:
       - "5432:5432"
   #********************************************************************************#      
