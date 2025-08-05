@@ -89,25 +89,45 @@ fi
 #******************************************************************************#
     cat <<EOF > /tmp/init.sql
 -- PostgreSQL initialization script
--- This script will create the database and user if they do not exist
+
+-- 1. Create the database if it doesn't exist
 SELECT 'CREATE DATABASE "UserService"'
 WHERE NOT EXISTS (
   SELECT FROM pg_database WHERE datname = 'UserService'
 )\gexec
--- Create the user if it does not exist
-DO \$\$
+
+-- 2. Create the user if it does not exist
+DO $$
 BEGIN
    IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = '$POSTGRES_USER') THEN
       CREATE USER "$POSTGRES_USER" WITH PASSWORD '$POSTGRES_PASSWORD';
    END IF;
 END
-\$\$;
+$$;
 
--- Grant privileges to the user on the database
-GRANT ALL PRIVILEGES ON DATABASE "$POSTGRES_DB" TO "$POSTGRES_USER";
+-- 3. Grant privileges to the user on the database
+GRANT ALL PRIVILEGES ON DATABASE "UserService" TO "$POSTGRES_USER";
 
--- Set the password for the postgres user
+--3.1 create role if it does not exist
+CREATE ROLE "$POSTGRES_USER" WITH LOGIN PASSWORD "$POSTGRES_PASSWORD";
+
+-- 4. Set the password for the postgres superuser
 ALTER USER postgres WITH PASSWORD '$POSTGRES_ROOT_PASSWORD';
+
+-- 5. Switch to the new database
+\connect "UserService"
+
+-- 6. Create the users table
+CREATE TABLE IF NOT EXISTS users (
+    id SERIAL PRIMARY KEY,
+    username VARCHAR(50) NOT NULL UNIQUE,
+    email VARCHAR(100) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+
 EOF
 #******************************************************************************#
     echo "✅  init.sql created successfully."

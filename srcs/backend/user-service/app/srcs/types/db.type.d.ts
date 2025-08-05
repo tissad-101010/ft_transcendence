@@ -1,21 +1,19 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   db.type.ts                                         :+:      :+:    :+:   */
+/*   db.type.d.ts                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/25 15:18:06 by tissad            #+#    #+#             */
-/*   Updated: 2025/07/25 15:19:44 by tissad           ###   ########.fr       */
+/*   Updated: 2025/08/05 15:41:31 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-import 'fastify'
-import Database from 'better-sqlite3'
+import { Pool } from 'pg'
 
-// Extend the FastifyInstance interface to include the db property
 declare module 'fastify' {
   interface FastifyInstance {
-    db: Database.Database
+    db: Pool
   }
 }

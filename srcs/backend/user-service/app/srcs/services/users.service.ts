@@ -6,54 +6,51 @@
 /*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/25 11:38:09 by tissad            #+#    #+#             */
-/*   Updated: 2025/07/25 16:09:43 by tissad           ###   ########.fr       */
+/*   Updated: 2025/08/05 15:43:10 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-import { SignupUserInput } from '../types/user.type';
-import Database from 'better-sqlite3'
-
-
+import { SignupUserInput } from '../types/user.type'
+import { Pool } from 'pg'
 
 export class UserService {
-    // This service can be used to handle user-related operations
-    // such as signup, login, etc.
-    constructor(private db: Database.Database) {
-        // Initialize any necessary properties or dependencies here
-    }
-    signup(signupInfo: SignupUserInput): { message: string; id:number ; data: SignupUserInput } {
-        // This method can be used to create a new user in the database
-        // For now, we will just return a success message
-        console.log(`Signup for: ${signupInfo.username}, ${signupInfo.email}`);
-        const stmt = this.db.prepare(
-            'INSERT INTO users (username, email, password) VALUES (?, ?, ?)'
-        )
-        const result = stmt.run(signupInfo.username, signupInfo.email, signupInfo.password);
-        console.log(`Creating user: ${signupInfo.username}`);
-        
-        return {
-            message: 'User created successfully',
-            id: Number(result.lastInsertRowid),
-            data: signupInfo,
-        };
-    }
-    
-    getAllUsers() {
-        return this.db.prepare('SELECT * FROM users').all()
-    }
+  constructor(private db: Pool) {}
 
-    getUserById(id: number) {
-        return this.db.prepare('SELECT * FROM users WHERE id = ?').get(id)
-    }
+  async signup(signupInfo: SignupUserInput): Promise<{ message: string; id: number; data: SignupUserInput }> {
+    console.log(`Signup for: ${signupInfo.username}, ${signupInfo.email}`)
+    const result = await this.db.query(
+      `INSERT INTO users (username, email, password) VALUES ($1, $2, $3) RETURNING id`,
+      [signupInfo.username, signupInfo.email, signupInfo.password]
+    )
+    const id = result.rows[0].id
+    console.log(`Creating user: ${signupInfo.username}`)
 
-    getByEmail(email: string) {
-        return this.db.prepare('SELECT * FROM users WHERE email = ?').get(email)
+    return {
+      message: 'User created successfully',
+      id,
+      data: signupInfo
     }
-    
-    getByUsername(username: string) {
-        return this.db.prepare('SELECT * FROM users WHERE username = ?').get(username)
-    }
-    
+  }
+
+  async getAllUsers() {
+    const result = await this.db.query('SELECT * FROM users')
+    return result.rows
+  }
+
+  async getUserById(id: number) {
+    const result = await this.db.query('SELECT * FROM users WHERE id = $1', [id])
+    return result.rows[0]
+  }
+
+  async getByEmail(email: string) {
+    const result = await this.db.query('SELECT * FROM users WHERE email = $1', [email])
+    return result.rows[0]
+  }
+
+  async getByUsername(username: string) {
+    const result = await this.db.query('SELECT * FROM users WHERE username = $1', [username])
+    return result.rows[0]
+  }
 }
 
 

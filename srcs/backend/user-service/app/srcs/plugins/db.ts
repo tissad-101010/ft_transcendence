@@ -6,7 +6,7 @@
 /*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/25 14:43:43 by tissad            #+#    #+#             */
-/*   Updated: 2025/07/25 16:38:37 by tissad           ###   ########.fr       */
+/*   Updated: 2025/08/05 17:15:26 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,31 +15,34 @@
 // fastify-plugin is used to create a plugin for fastify
 // fp is a function that wraps the plugin
 import fp from 'fastify-plugin'
-// Database is imported from better-sqlite3
-import Database from 'better-sqlite3'
+import { Pool } from 'pg'
+import { FastifyInstance } from 'fastify'
 
-import { FastifyInstance } from 'fastify';
 // This is the main function that initializes the database
 const dbPlugin = async (app: FastifyInstance) => {
-    // Create a new database instance
-  const db = new Database('/data/db.sqlite')
+  const pool = new Pool({
+    connectionString: 'postgres://postgres@postgreSQL:5432/UserService'
+  })
+  // test the connection to the database
+  const client = await pool.connect()
+  try {
+    await client.query('SELECT NOW()')
+    console.log('✅ Database connection successful')
+  } catch (err) {
+    console.error('❌ Database connection failed:', err)
+    throw err
+  } finally {
+    client.release()  // release the client back to the pool
+  } 
+  
 
-    // Create a users table if it does not exist
-  db.prepare(`
-    CREATE TABLE IF NOT EXISTS users (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        username TEXT NOT NULL UNIQUE,
-        email TEXT NOT NULL UNIQUE,
-        password TEXT NOT NULL    
-    );
-  `).run()
-
-    // Decorate the fastify instance with the db instance
-  app.decorate('db', db)
+  // Decorate the fastify instance with the db instance
+  app.decorate('db', pool)
 
   // Add a hook to close the database connection when fastify closes
   app.addHook('onClose', async () => {
-    db.close()
+    await pool.end()
   })
+  console.log('🔄 Database plugin initialized')
 }
 export default fp(dbPlugin)

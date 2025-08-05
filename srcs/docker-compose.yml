@@ -85,14 +85,25 @@ services:
       - global-net
       - security-net
     depends_on:
-      - hashicorp_vault
+      # - hashicorp_vault
       - postgreSQL
-    restart: unless-stopped
     ports:
       - "3001:3001"
     environment:
       - NODE_ENV=production
       - VAULT_ADDR=http://hashicorp_vault:8200
+      - DATABASE_URL=${DATABASE_URL}
+      - POSTGRES_DB=${DB_NAME}
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_ROOT_PASSWORD=${DB_ROOT_PASSWORD}
+      - POSTGRES_PORT=${DB_PORT}
+      - POSTGRES_HOST=postgreSQL
+    restart: unless-stopped
+  #********************************************************************************#
+
+
+
   #********************************************************************************#
   #                            AUTH SERVICE                                        #
   #********************************************************************************#
@@ -131,10 +142,12 @@ services:
       - POSTGRES_USER=${DB_USER}
       - POSTGRES_PASSWORD=${DB_PASSWORD}
       - POSTGRES_ROOT_PASSWORD=${DB_ROOT_PASSWORD}
+      - POSTGRES_PORT=${DB_PORT}
     ports:
       - "5432:5432"
   #********************************************************************************#      
   #********************************************************************************#
+
 
 
 
