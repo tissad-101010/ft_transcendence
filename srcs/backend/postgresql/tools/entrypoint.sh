@@ -88,36 +88,30 @@ fi
     echo "📝 Creating init.sql script..."
 #******************************************************************************#
     cat <<EOF > /tmp/init.sql
--- PostgreSQL initialization script
-
--- 1. Create the database if it doesn't exist
-SELECT 'CREATE DATABASE "UserService"'
-WHERE NOT EXISTS (
-  SELECT FROM pg_database WHERE datname = 'UserService'
-)\gexec
-
--- 2. Create the user if it does not exist
-DO $$
+-- 1. Create admin role if it does not exist
+DO \$\$
 BEGIN
-   IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = '$POSTGRES_USER') THEN
-      CREATE USER "$POSTGRES_USER" WITH PASSWORD '$POSTGRES_PASSWORD';
+   IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = 'admin') THEN
+      CREATE ROLE admin WITH LOGIN PASSWORD 'securepassword';
    END IF;
 END
-$$;
+\$\$;
 
--- 3. Grant privileges to the user on the database
-GRANT ALL PRIVILEGES ON DATABASE "UserService" TO "$POSTGRES_USER";
+-- 2. Create the database if it doesn't exist
+SELECT 'CREATE DATABASE users OWNER admin'
+WHERE NOT EXISTS (
+    SELECT FROM pg_database WHERE datname = 'users'
+)\gexec
 
---3.1 create role if it does not exist
-CREATE ROLE "$POSTGRES_USER" WITH LOGIN PASSWORD "$POSTGRES_PASSWORD";
+-- 3. Grant privileges
+GRANT ALL PRIVILEGES ON DATABASE users TO admin;
 
--- 4. Set the password for the postgres superuser
-ALTER USER postgres WITH PASSWORD '$POSTGRES_ROOT_PASSWORD';
+-- 4. Set postgres superuser password
+ALTER USER postgres WITH PASSWORD 'rootpassword';
 
--- 5. Switch to the new database
-\connect "UserService"
+-- 5. Switch to new DB and create table
+\connect users
 
--- 6. Create the users table
 CREATE TABLE IF NOT EXISTS users (
     id SERIAL PRIMARY KEY,
     username VARCHAR(50) NOT NULL UNIQUE,
@@ -126,6 +120,7 @@ CREATE TABLE IF NOT EXISTS users (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
 
 
 EOF
@@ -150,7 +145,7 @@ done
 if [ -f /tmp/init.sql ]; then
     echo "📄  Running /tmp/init.sql"
     su-exec postgres psql -U postgres -f /tmp/init.sql
-    rm /tmp/init.sql
+    # rm /tmp/init.sql
 fi
 
 # 

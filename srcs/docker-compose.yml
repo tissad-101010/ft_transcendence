@@ -128,7 +128,7 @@ services:
     build:
       context: ./backend/postgresql
       dockerfile: Dockerfile
-    container_name: PostgreSQL
+    container_name: postgreSQL
     volumes:
       - PostgresData:/var/lib/postgresql/data
       - ./backend/postgresql/config/postgresql.conf:/etc/postgresql/postgresql.conf:ro
