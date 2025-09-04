@@ -112,6 +112,7 @@ ALTER USER postgres WITH PASSWORD 'rootpassword';
 -- 5. Switch to new DB and create table
 \connect users
 
+-- 6. Create a sample table
 CREATE TABLE IF NOT EXISTS users (
     id SERIAL PRIMARY KEY,
     username VARCHAR(50) NOT NULL UNIQUE,
@@ -121,6 +122,18 @@ CREATE TABLE IF NOT EXISTS users (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+-- 7. Create a app user role
+DO \$\$
+BEGIN
+   IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = 'app_user') THEN
+      CREATE ROLE app_user WITH LOGIN PASSWORD 'apppassword';
+   END IF;
+END
+\$\$;
+
+-- 8. Grant privileges to app_user
+GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE users TO app_user;
+GRANT USAGE, SELECT, UPDATE ON SEQUENCE users_id_seq TO app_user;
 
 
 EOF

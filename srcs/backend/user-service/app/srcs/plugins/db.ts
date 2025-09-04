@@ -6,7 +6,7 @@
 /*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/25 14:43:43 by tissad            #+#    #+#             */
-/*   Updated: 2025/08/08 18:59:59 by tissad           ###   ########.fr       */
+/*   Updated: 2025/09/04 15:42:29 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,14 @@ import { FastifyInstance } from 'fastify'
 // This is the main function that initializes the database
 const dbPlugin = async (app: FastifyInstance) => {
   const pool = new Pool({
-    connectionString: 'postgres://admin:securepassword@postgreSQL:5432/users'
+    user: 'app_user',
+    host: 'postgreSQL',
+    database: 'users',
+    password: 'apppassword',
+    port: 5432,
+    max: 20, // maximum number of clients in the pool 
+    idleTimeoutMillis: 30000, // close idle clients after 30 seconds
+    connectionTimeoutMillis: 2000, // return an error after 2 seconds if connection could not be established
   })
   // test the connection to the database
   const client = await pool.connect()
