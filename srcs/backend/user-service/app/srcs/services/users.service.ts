@@ -6,11 +6,12 @@
 /*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/25 11:38:09 by tissad            #+#    #+#             */
-/*   Updated: 2025/08/05 15:43:10 by tissad           ###   ########.fr       */
+/*   Updated: 2025/09/05 14:42:03 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 import { SignupUserInput } from '../types/user.type'
+import { SigninUserInput } from '../types/user.type'
 import { Pool } from 'pg'
 
 export class UserService {
@@ -31,7 +32,29 @@ export class UserService {
       data: signupInfo
     }
   }
-
+  
+  // signin method to verify user credentials (query to db) and return user data if valid
+  async signin(SigninInfo: SigninUserInput): Promise<{ message: string; data: SigninUserInput | null }> {
+    console.log(`Signin for: ${SigninInfo.username}`)
+    const result = await this.db.query(
+      `SELECT * FROM users WHERE username = $1 AND password = $2`,
+      [SigninInfo.username, SigninInfo.password]
+    )
+    if (result.rows.length > 0) {
+      console.log(`User found: ${result.rows[0].username}`)
+      return {
+        message: 'User signed in successfully',
+        data: SigninInfo
+      }
+    } else {
+      console.log('Invalid credentials')
+      return {  
+        message: 'Invalid username or password',
+        data: null
+      }
+    }
+  }
+  
   async getAllUsers() {
     const result = await this.db.query('SELECT * FROM users')
     return result.rows

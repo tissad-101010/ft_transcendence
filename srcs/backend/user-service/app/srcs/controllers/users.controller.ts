@@ -6,7 +6,7 @@
 /*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/25 11:19:58 by tissad            #+#    #+#             */
-/*   Updated: 2025/08/05 15:43:44 by tissad           ###   ########.fr       */
+/*   Updated: 2025/09/05 14:44:43 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,16 +14,15 @@
 // to handle the request response
 import { FastifyReply, FastifyRequest } from 'fastify'
 import { UserService } from '../services/users.service'
+// import the SignupUserInput and SigninUserInput types
+import { SignupUserInput } from '../types/user.type'
+import { SigninUserInput } from '../types/user.type'
 
 export async function signupController(
   request: FastifyRequest,
   reply: FastifyReply
 ) {
-  const signupInfo = request.body as {
-    username: string
-    password: string
-    email: string
-  }
+  const signupInfo = request.body as SignupUserInput
   try {
     const userService = new UserService(request.server.db)
 
@@ -41,6 +40,29 @@ export async function signupController(
     return reply.code(201).send(result)
   } catch (error) {
     request.log.error('Error during signup:', error)
+    return reply.code(500).send({ message: 'Internal Server Error' })
+  }
+}
+
+
+// signin controller to handle signin requests  
+export async function signinController(
+  request: FastifyRequest,  
+  reply: FastifyReply 
+) { 
+  const signinInfo = request.body as SigninUserInput
+  try {
+    const userService = new UserService(request.server.db)
+    const result = await userService.signin(signinInfo)
+
+    if (result.data) {
+      console.log(`User signed in: ${result.data.username}`)
+      return reply.code(200).send(result)
+    } else {
+      return reply.code(401).send({ message: 'Invalid username or password' })
+    }
+  } catch (error) {
+    request.log.error('Error during signin:', error)
     return reply.code(500).send({ message: 'Internal Server Error' })
   }
 }
