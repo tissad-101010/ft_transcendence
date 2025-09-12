@@ -6,7 +6,7 @@
 /*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/25 11:38:09 by tissad            #+#    #+#             */
-/*   Updated: 2025/09/09 15:11:40 by tissad           ###   ########.fr       */
+/*   Updated: 2025/09/12 15:10:58 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -94,6 +94,7 @@ export class UserService {
       }
     }
   }
+  
   
   async getAllUsers() {
     const result = await this.db.query('SELECT * FROM users')

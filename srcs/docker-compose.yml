@@ -102,12 +102,6 @@ services:
     restart: unless-stopped
   #********************************************************************************#
 
-
-
-  #********************************************************************************#
-  #                            AUTH SERVICE                                        #
-  #********************************************************************************#
-  # Authentication service for managing user sessions and JWT tokens
   
   
   
@@ -118,7 +112,27 @@ services:
 
   
   
-  
+  #****************************************************************************#
+  #                                  REDIS                                     #
+  #****************************************************************************#
+  redis: # Name of the Redis service
+    build: # Build the image
+      context: ./backend/redis # Build the image using the Dockerfile
+    
+    image: redis # Image name
+
+    container_name: redis # Container name
+
+    labels: # Labels for the description of the container
+      - com.redis.description="Redis Server" # Container description
+
+    expose: # Expose the port of the container
+      - "6379" # Expose the port 6379
+    networks: # Use the network for communication between containers
+      - global-net # Network name
+
+    restart: unless-stopped # Restart the container unless it is stopped
+  #*******************************REDIS-SERVER*********************************#
   #********************************************************************************#
   #                            POSTGRES SERVICE                                    #
   #********************************************************************************#

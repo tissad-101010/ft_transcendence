@@ -6,7 +6,7 @@
 /*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/25 11:19:58 by tissad            #+#    #+#             */
-/*   Updated: 2025/09/05 14:44:43 by tissad           ###   ########.fr       */
+/*   Updated: 2025/09/12 13:16:19 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,7 +36,7 @@ export async function signupController(
 
     const result = await userService.signup(signupInfo)
 
-    console.log(`User created: ${result.data.username} with ID: ${result.id}`)
+    console.log(`User created: ${result.data.username}`)
     return reply.code(201).send(result)
   } catch (error) {
     request.log.error('Error during signup:', error)
