@@ -6,7 +6,7 @@
 /*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/23 15:58:35 by tissad            #+#    #+#             */
-/*   Updated: 2025/09/02 16:15:17 by tissad           ###   ########.fr       */
+/*   Updated: 2025/09/16 12:11:06 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@ import Fastify from 'fastify';
 import cors from '@fastify/cors';
 import { userRoutes } from './routes/users.routes';
 import dbPlugin from './plugins/db';
+import redisPlugin from './plugins/redis';
 
 
 /* ************************************************************************** */
@@ -23,6 +24,7 @@ const app = Fastify({ logger: true });
 
 // Register the database plugin
 app.register(dbPlugin);
+app.register(redisPlugin);
 
 app.register(userRoutes, { prefix: '/users' });
 
