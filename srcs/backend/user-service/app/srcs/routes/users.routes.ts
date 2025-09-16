@@ -6,7 +6,7 @@
 /*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/25 09:59:20 by tissad            #+#    #+#             */
-/*   Updated: 2025/09/05 14:42:41 by tissad           ###   ########.fr       */
+/*   Updated: 2025/09/16 18:55:08 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,9 +15,12 @@ import { signupController } from '../controllers/users.controller';
 import { signinController } from '../controllers/users.controller';
 import { SignupUserInput } from '../types/user.type';
 import { SigninUserInput } from '../types/user.type';
+
 export async function userRoutes(server: FastifyInstance)
 {
     // Register the POST route for user signup
     server.post<{ Body: SignupUserInput }>('/signup', signupController);
     server.post<{ Body: SigninUserInput }>('/signin', signinController);
 }
+
+// Note: Les routes OTP sont définies dans otp.routes.ts

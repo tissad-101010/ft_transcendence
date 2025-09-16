@@ -6,15 +6,21 @@
 /*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/23 15:58:35 by tissad            #+#    #+#             */
-/*   Updated: 2025/09/16 12:11:06 by tissad           ###   ########.fr       */
+/*   Updated: 2025/09/16 19:20:19 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 import Fastify from 'fastify';
 import cors from '@fastify/cors';
+
+// import routes
 import { userRoutes } from './routes/users.routes';
+import { otpRoutes } from './routes/otp.routes';
+
+// import plugins
 import dbPlugin from './plugins/db';
 import redisPlugin from './plugins/redis';
+
 
 
 /* ************************************************************************** */
@@ -22,11 +28,14 @@ import redisPlugin from './plugins/redis';
 // Import the Fastify framework
 const app = Fastify({ logger: true });
 
-// Register the database plugin
+// Register plugins (database, redis, etc.)
 app.register(dbPlugin);
 app.register(redisPlugin);
 
+
+// Register routes
 app.register(userRoutes, { prefix: '/users' });
+app.register(otpRoutes, { prefix: '/auth' });
 
 // Start the Fastify server
 const start = async () => {
