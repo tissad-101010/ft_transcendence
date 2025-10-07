@@ -1,6 +1,6 @@
 #!/bin/bash
 
-CERTS_DIR="srcs/vault/certs"
+CERTS_DIR="srcs/backend/vault/certs"
 mkdir -p "$CERTS_DIR"
 
 openssl req -x509 -nodes -newkey rsa:2048 \

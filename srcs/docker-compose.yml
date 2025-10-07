@@ -52,7 +52,7 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
     depends_on:
-      - user-service
+      - service-users
     volumes:
       - frontend-build:/app/build:rw
     networks:
@@ -71,14 +71,14 @@ services:
   #                            USER SERVICE                                        #
   #********************************************************************************#
   # User service for managing user accounts, login, and registration
-  user-service:
-    image: user-service
+  service-users:
+    image: service-users
     build:
-      context: ./backend/user-service
+      context: ./backend/services/service-users
       dockerfile: Dockerfile
-    container_name: user-service
+    container_name: service-users
     volumes:
-      - ./backend/user-service/app:/app
+      - ./backend/services/service-users/app:/app
       - /app/node_modules
       - DataUserService:/data
     networks:
@@ -88,7 +88,7 @@ services:
       # - hashicorp_vault
       - postgreSQL
     ports:
-      - "3001:3001"
+      - "4000:4000"
     environment:
       - NODE_ENV=production
       - VAULT_ADDR=http://hashicorp_vault:8200
@@ -110,8 +110,112 @@ services:
   #********************************************************************************#
   # Game service for managing game sessions, matchmaking, and real-time interactions
 
+  service-game:
+    image: service-game
+    build:
+      context: ./backend/services/service-game
+      dockerfile: Dockerfile
+    container_name: service-game
+    volumes:
+      - ./backend/services/service-game/app:/app
+      - /app/node_modules
+      - DataUserService:/data
+    networks:
+      - global-net
+      - security-net
+    depends_on:
+      # - hashicorp_vault
+      - postgreSQL
+    ports:
+      - "4001:4001"
+    environment:
+      - NODE_ENV=production
+      - VAULT_ADDR=http://hashicorp_vault:8200
+      - DATABASE_URL=${DATABASE_URL}
+      - POSTGRES_DB=${DB_NAME}
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_ROOT_PASSWORD=${DB_ROOT_PASSWORD}
+      - POSTGRES_PORT=${DB_PORT}
+      - POSTGRES_HOST=postgreSQL
+    restart: unless-stopped
   
-  
+
+  #********************************************************************************#
+  #                            CHAT SERVICE                                        #
+  #********************************************************************************#
+  # Chat service for managing chat sessions, messaging and real-time interactions
+
+  service-chat:
+    image: service-chat
+    build:
+      context: ./backend/services/service-chat
+      dockerfile: Dockerfile
+    container_name: service-chat
+    volumes:
+      - ./backend/services/service-chat/app:/app
+      - /app/node_modules
+      - DataUserService:/data
+    networks:
+      - global-net
+      - security-net
+    depends_on:
+      # - hashicorp_vault
+      - postgreSQL
+    ports:
+      - "4002:4002"
+    environment:
+      - NODE_ENV=production
+      - VAULT_ADDR=http://hashicorp_vault:8200
+      - DATABASE_URL=${DATABASE_URL}
+      - POSTGRES_DB=${DB_NAME}
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_ROOT_PASSWORD=${DB_ROOT_PASSWORD}
+      - POSTGRES_PORT=${DB_PORT}
+      - POSTGRES_HOST=postgreSQL
+    restart: unless-stopped
+
+
+
+  #********************************************************************************#
+  #                            FRIENDS SERVICE                                     #
+  #********************************************************************************#
+  # Friends service for managing Friends sessions, matchmaking, and real-time interactions
+
+  service-friends:
+    image: service-friends
+    build:
+      context: ./backend/services/service-friends
+      dockerfile: Dockerfile
+    container_name: service-friends
+    volumes:
+      - ./backend/services/service-friends/app:/app
+      - /app/node_modules
+      - DataUserService:/data
+    networks:
+      - global-net
+      - security-net
+    depends_on:
+      # - hashicorp_vault
+      - postgreSQL
+    ports:
+      - "4003:4003"
+    environment:
+      - NODE_ENV=production
+      - VAULT_ADDR=http://hashicorp_vault:8200
+      - DATABASE_URL=${DATABASE_URL}
+      - POSTGRES_DB=${DB_NAME}
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_ROOT_PASSWORD=${DB_ROOT_PASSWORD}
+      - POSTGRES_PORT=${DB_PORT}
+      - POSTGRES_HOST=postgreSQL
+    restart: unless-stopped
+
+
+
+
 
   #********************************************************************************#
   #                            POSTGRES SERVICE                                    #
@@ -153,14 +257,14 @@ services:
   hashicorp_vault:
     image: hashicorp_vault
     build:
-      context: ./vault
+      context: ./backend/vault
       dockerfile: Dockerfile
     container_name: hashicorp_vault
     volumes:
       - LocalVaultData:/vault/data
-      - ./vault/config/vault.hcl:/vault/config/vault.hcl:ro
-      - ./vault/certs/vault.crt:/vault/certs/vault.crt:ro
-      - ./vault/certs/vault.key:/vault/certs/vault.key:ro
+      - ./backend/vault/config/vault.hcl:/vault/config/vault.hcl:ro
+      - ./backend/vault/certs/vault.crt:/vault/certs/vault.crt:ro
+      - ./backend/vault/certs/vault.key:/vault/certs/vault.key:ro
     cap_add:
       - IPC_LOCK
     # environment:
@@ -179,7 +283,7 @@ services:
   #****************************************************************************#
   redis: # Name of the Redis service
     build: # Build the image
-      context: ./redis # Build the image using the Dockerfile
+      context: ./backend/redis # Build the image using the Dockerfile
     
     image: redis # Image name
 
@@ -222,7 +326,7 @@ volumes:
     driver: local
     driver_opts:
       type: none
-      device: ./vault/data
+      device: ./backend/vault/data
       o: bind
   #*******************************************************************************#
   # Local volume for frontend build artifacts
@@ -239,7 +343,7 @@ volumes:
     driver: local
     driver_opts:
       type: none
-      device: ./backend/user-service/data
+      device: ./backend/services/service-users/data
       o: bind
   #*******************************************************************************#
   # Local volume for PostgreSQL data

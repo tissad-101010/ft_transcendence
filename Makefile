@@ -28,13 +28,13 @@ test_crs:
 	bash test_tools/test_modsec.sh
 
 tls_gen:
-	bash srcs/vault/tools/vault-tls-gen.sh
+	bash srcs/backend/vault/tools/vault-tls-gen.sh
 
 local:
-	mkdir -p ./srcs/vault/data
 	mkdir -p ./srcs/frontend/build
-	mkdir -p ./srcs/./backend/user-service/data
+	mkdir -p ./srcs/backend/vault/data
 	mkdir -p ./srcs/backend/postgresql/data
-
+	mkdir -p ./srcs/backend/services/service-users/data
+	mkdir -p ./srcs/backend/services/service-game/data
 	
 .PHONY: start down restart up clean prune
