@@ -6,7 +6,7 @@
 /*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/23 15:58:35 by tissad            #+#    #+#             */
-/*   Updated: 2025/09/16 19:20:19 by tissad           ###   ########.fr       */
+/*   Updated: 2025/10/09 14:47:16 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,6 +22,7 @@ import dbPlugin from './plugins/db';
 import redisPlugin from './plugins/redis';
 
 
+import { testEmail } from './services/mailer.service';
 
 /* ************************************************************************** */
 
@@ -57,6 +58,8 @@ const start = async () => {
     
     await app.listen({ port: 4000, host: '0.0.0.0' });
     console.log('🚀 Server is running at http://localhost:4000');
+    // Test email sending functionality
+    await testEmail("ft.transcendence101010@gmail.com", "123456");
   } catch (err) {
     app.log.error(err);
     process.exit(1);

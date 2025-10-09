@@ -86,6 +86,7 @@ services:
       - security-net
     depends_on:
       # - hashicorp_vault
+      - redis
       - postgreSQL
     ports:
       - "4000:4000"
@@ -99,6 +100,8 @@ services:
       - POSTGRES_ROOT_PASSWORD=${DB_ROOT_PASSWORD}
       - POSTGRES_PORT=${DB_PORT}
       - POSTGRES_HOST=postgreSQL
+      - EMAIL_USER=${EMAIL_USER}
+      - GMAIL_APP_PASSWORD=${GMAIL_APP_PASSWORD}
     restart: unless-stopped
   #********************************************************************************#
 
