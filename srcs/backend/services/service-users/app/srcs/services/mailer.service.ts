@@ -6,39 +6,34 @@
 /*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/09 14:10:25 by tissad            #+#    #+#             */
-/*   Updated: 2025/10/09 14:46:08 by tissad           ###   ########.fr       */
+/*   Updated: 2025/10/10 16:24:20 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-// src/utils/testMailer.ts
-import nodemailer from "nodemailer";
-import dotenv from "dotenv";
+// srcs/services/mailer/mailer.service.ts
 
-dotenv.config();
+import { MailArgs } from "../types/mail.type";
+import { sendMail } from "../utils/sendMail.utils";
 
-export async function testEmail(email_dest: string, otp_code: string) {
-  console.log("EMAIL_USER:", process.env.EMAIL_USER);
-  console.log("GMAIL_APP_PASSWORD:", process.env.GMAIL_APP_PASSWORD ? "✅ défini" : "❌ manquant");
+export async function sendUserRegistrationEmail(userEmail: string) {
+  const mailOptions: MailArgs = {
+    from: `"Pong Game" <${process.env.EMAIL_USER}>`,
+    to: userEmail,
+    subject: "Welcome to Our Pong Game!",
+    text: "Thank you for registering!",
+  };
 
-  try {
-    const transporter = nodemailer.createTransport({
-      service: "gmail",
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.GMAIL_APP_PASSWORD,
-      },
-    });
+  await sendMail(mailOptions);
+}
 
-    const info = await transporter.sendMail({
-      from: '" pong game " <' + process.env.EMAIL_USER + '>', // expeiditor
-      to: email_dest, // receiver
-      subject: " Your code is here!", // Subject line
-      text: "Hello\n\nYour code is: " + otp_code + "\n\nThis code is valid for 5 minutes.\n\nIf you did not request this, please ignore this email.", // plain text body
-    });
+// Send OTP email
+export async function sendUserOtpEmail(userEmail: string, otp: string): Promise<boolean> {
+  const mailOptions: MailArgs = {
+    from: `"Pong Game" <${process.env.EMAIL_USER}>`,
+    to: userEmail,
+    subject: "Your OTP Code",
+    text: `Your OTP code is: ${otp}`,
+  };
 
-    console.log("✅ Email sent successfully!");
-    console.log("Message ID:", info.messageId);
-  } catch (err) {
-    console.error("❌ Error sending email:", err);
-  }
+  return await sendMail(mailOptions);
 }

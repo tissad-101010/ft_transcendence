@@ -6,7 +6,7 @@
 /*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/23 15:58:35 by tissad            #+#    #+#             */
-/*   Updated: 2025/10/07 18:06:26 by tissad           ###   ########.fr       */
+/*   Updated: 2025/10/10 17:52:18 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,7 +43,7 @@ const start = async () => {
     });
     
     await app.listen({ port: 4002, host: '0.0.0.0' });
-    console.log('🚀 Game  server is running at http://localhost:4002');
+    console.log('🚀 Chat  server is running at http://localhost:4002');
   } catch (err) {
     app.log.error(err);
     process.exit(1);

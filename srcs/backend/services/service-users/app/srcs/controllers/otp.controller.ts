@@ -6,7 +6,7 @@
 /*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/16 19:00:31 by tissad            #+#    #+#             */
-/*   Updated: 2025/09/16 19:06:35 by tissad           ###   ########.fr       */
+/*   Updated: 2025/10/10 16:30:46 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,19 +27,23 @@ export class OtpController {
     this.otpService = otpService;
   }
 
-  // Génération OTP
-  generateOtp = async (
+  // Generate OTP
+  Otpcontroller = async (
     req: FastifyRequest<{ Body: OtpRequest }>,
     reply: FastifyReply
   ) => {
     const { email } = req.body;
-    const otp = await this.otpService.generateOtp(email);
-
-    // ⚠️ Pour l’instant, retour OTP dans la réponse (à remplacer par un envoi email)
-    return reply.send({ message: "OTP generated", otp });
+    const mailSent = await this.otpService.generateAndSendOtp(email);
+    
+    // If mail sending failed, return error response
+    if (!mailSent) {
+      return reply.status(500).send({ message: "Failed to send OTP email", mailSent });
+    }
+    // Return success response
+    return reply.send({ message: "OTP generated", mailSent });
   };
 
-  // Vérification OTP
+  // Verify OTP
   verifyOtp = async (
     req: FastifyRequest<{ Body: VerifyOtpRequest }>,
     reply: FastifyReply

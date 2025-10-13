@@ -6,11 +6,13 @@
 /*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/16 18:54:11 by tissad            #+#    #+#             */
-/*   Updated: 2025/09/16 18:54:21 by tissad           ###   ########.fr       */
+/*   Updated: 2025/10/10 16:27:28 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 import { FastifyInstance } from "fastify";
+import { sendUserOtpEmail } from "./mailer.service";
+
 
 export class OtpService {
   private fastify: FastifyInstance;
@@ -19,12 +21,17 @@ export class OtpService {
     this.fastify = fastify;
   }
 
-  // Génère un OTP à 6 chiffres et le stocke en Redis (5 min)
-  async generateOtp(email: string): Promise<string> {
+  // generate otp 
+  async generateAndSendOtp(email: string): Promise<boolean> {
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
 
-    await this.fastify.redis.set(`otp:${email}`, otp, "EX", 300); // expire après 300s = 5min
-    return otp;
+    
+    // send mail with otp
+    const mailSent = await sendUserOtpEmail(email, otp);
+    if (!mailSent) return mailSent;
+    // store otp in redis with expiration time of 5 minutes
+    await this.fastify.redis.set(`otp:${email}`, otp, "EX", 300); // expire in 300 seconds (5 minutes)
+    return mailSent;
   }
 
   // Vérifie si l’OTP est correct

@@ -51,8 +51,6 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
-    depends_on:
-      - service-users
     volumes:
       - frontend-build:/app/build:rw
     networks:

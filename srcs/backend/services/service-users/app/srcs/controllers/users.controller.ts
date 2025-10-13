@@ -6,7 +6,7 @@
 /*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/25 11:19:58 by tissad            #+#    #+#             */
-/*   Updated: 2025/09/12 13:16:19 by tissad           ###   ########.fr       */
+/*   Updated: 2025/10/10 16:42:49 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,7 +39,7 @@ export async function signupController(
     console.log(`User created: ${result.data.username}`)
     return reply.code(201).send(result)
   } catch (error) {
-    request.log.error('Error during signup:', error)
+    request.log.error('Error during signup:', undefined, error)
     return reply.code(500).send({ message: 'Internal Server Error' })
   }
 }
@@ -62,7 +62,7 @@ export async function signinController(
       return reply.code(401).send({ message: 'Invalid username or password' })
     }
   } catch (error) {
-    request.log.error('Error during signin:', error)
+    request.log.error('Error during signin:', undefined, error)
     return reply.code(500).send({ message: 'Internal Server Error' })
   }
 }

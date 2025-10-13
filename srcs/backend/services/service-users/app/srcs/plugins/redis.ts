@@ -6,7 +6,7 @@
 /*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/16 11:29:10 by tissad            #+#    #+#             */
-/*   Updated: 2025/09/16 18:09:10 by tissad           ###   ########.fr       */
+/*   Updated: 2025/10/10 16:43:27 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,7 +39,7 @@ const redisPlugin = fp(async (fastify: FastifyInstance) => {
         fastify.log.error("❌ Redis connection failed: Unexpected response");
       }
     } catch (err) {
-      fastify.log.error("❌ Redis connection failed:", err);
+      fastify.log.error(`❌ Redis connection failed: ${err}`);
       throw err;
     }
   });
