@@ -6,7 +6,7 @@
 /*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/23 15:58:35 by tissad            #+#    #+#             */
-/*   Updated: 2025/10/10 16:40:58 by tissad           ###   ########.fr       */
+/*   Updated: 2025/10/13 15:13:18 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,7 +36,7 @@ app.register(redisPlugin);
 
 // Register routes
 app.register(userRoutes, { prefix: '/users' });
-app.register(otpRoutes, { prefix: '/auth' });
+app.register(otpRoutes, { prefix: '/otp' });
 
 // Start the Fastify server
 const start = async () => {

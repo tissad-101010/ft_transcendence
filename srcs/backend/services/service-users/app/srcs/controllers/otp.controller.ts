@@ -6,7 +6,7 @@
 /*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/16 19:00:31 by tissad            #+#    #+#             */
-/*   Updated: 2025/10/10 16:30:46 by tissad           ###   ########.fr       */
+/*   Updated: 2025/10/13 19:00:03 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,13 +28,14 @@ export class OtpController {
   }
 
   // Generate OTP
-  Otpcontroller = async (
+  SendOtpByEmail = async (
     req: FastifyRequest<{ Body: OtpRequest }>,
     reply: FastifyReply
   ) => {
     const { email } = req.body;
-    const mailSent = await this.otpService.generateAndSendOtp(email);
-    
+    const mailSent = await this.otpService.SendOtpByEmail(email);
+    console.log("Mail sent status:", mailSent);
+    console.log("Email:", email);
     // If mail sending failed, return error response
     if (!mailSent) {
       return reply.status(500).send({ message: "Failed to send OTP email", mailSent });
@@ -43,12 +44,32 @@ export class OtpController {
     return reply.send({ message: "OTP generated", mailSent });
   };
 
+  // send otp by sms
+  SendOtpBySms = async (
+    req: FastifyRequest<{ Body: OtpRequest }>,
+    reply: FastifyReply
+  ) => {
+    const { phone } = req.body;
+    const smsSent = await this.otpService.SendOtpBySms(phone);
+    console.log("SMS sent status:", smsSent);
+    console.log("Phone:", phone);
+    // If SMS sending failed, return error response
+    if (!smsSent) {
+      return reply.status(500).send({ message: "Failed to send OTP SMS", smsSent });
+    }
+    // Return success response
+    return reply.send({ message: "OTP sent via SMS", smsSent });
+  };
+
+  
   // Verify OTP
   verifyOtp = async (
     req: FastifyRequest<{ Body: VerifyOtpRequest }>,
     reply: FastifyReply
   ) => {
     const { email, otp } = req.body;
+    console.log("Verifying OTP for email:", email);
+    console.log("OTP to verify:", otp);
     const isValid = await this.otpService.verifyOtp(email, otp);
 
     if (!isValid) {

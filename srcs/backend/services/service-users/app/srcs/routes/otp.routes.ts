@@ -6,7 +6,7 @@
 /*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/16 18:55:45 by tissad            #+#    #+#             */
-/*   Updated: 2025/10/10 16:45:07 by tissad           ###   ########.fr       */
+/*   Updated: 2025/10/13 19:01:17 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,7 @@ export  async function otpRoutes(fastify: FastifyInstance) {
   const otpService = new OtpService(fastify);
   const otpController = new OtpController(otpService);
 
-  fastify.post("/otp", otpController.Otpcontroller);
-  fastify.post("/otp/verify", otpController.verifyOtp);
+  fastify.post("/email", otpController.SendOtpByEmail);
+  fastify.post("/phone", otpController.SendOtpBySms);
+  fastify.post("/verify", otpController.verifyOtp);
 }
