@@ -6,13 +6,14 @@
 /*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/16 18:54:11 by tissad            #+#    #+#             */
-/*   Updated: 2025/10/13 18:37:20 by tissad           ###   ########.fr       */
+/*   Updated: 2025/10/14 16:04:51 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 import { FastifyInstance } from "fastify";
 import { sendUserOtpEmail } from "./mailer.service";
-import { sendSMS } from "./sms.service";
+import { PhoneService } from "./phone.service";
+
 
 export class OtpService {
   private fastify: FastifyInstance;
@@ -49,21 +50,22 @@ export class OtpService {
 
   // send otp by sms
   async SendOtpBySms(phone: string): Promise<boolean> {
-    // Ici, vous implémenteriez la logique pour envoyer l’OTP par SMS
-    // Cela pourrait impliquer l’utilisation d’un service tiers comme Twilio
-    // Pour cet exemple, nous allons simplement simuler l’envoi
-    const otp = this.generateOtp();
-    
-    await sendSMS(phone, `Your OTP code is: ${otp}`);
-    console.log(`Sending OTP to phone number: ${phone}`);
+    const phoneService = new PhoneService(this.fastify);
+    const smsSent = await phoneService.SendOtpBySms(phone);
+    if (!smsSent) 
+    {
+      console.log("SMS sending failed in OTP service.");
+      return smsSent;
+    }
+    console.log("SMS sent successfully in OTP service.");
     return true;
   }
-  
+
   // Vérifie si l’OTP est correct
   async verifyOtp(email: string, otp: string): Promise<boolean> {
     const storedOtp = await this.fastify.redis.get(`otp:${email}`);
-      console.log(`Retrieved OTP for ${email}: ${storedOtp}`);
-      console.log(`OTP provided for verification: ${otp}`);
+    console.log(`Retrieved OTP for ${email}: ${storedOtp}`);
+    console.log(`OTP provided for verification: ${otp}`);
     if (!storedOtp) return false;
     console.log("======================>Stored OTP:", storedOtp);    
     if (storedOtp.trim() !== String(otp).trim()) return false;

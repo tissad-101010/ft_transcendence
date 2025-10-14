@@ -57,6 +57,8 @@ services:
       - global-net
     ports:
       - "3000:3000"
+    environment:
+     - RECAPTCHA_SITE_KEY=${RECAPTCHA_SITE_KEY}
     restart: unless-stopped
   #********************************************************************************#
 
@@ -102,9 +104,8 @@ services:
       - GMAIL_APP_PASSWORD=${GMAIL_APP_PASSWORD}
       - EMAIL_HOST=${EMAIL_HOST}
       - EMAIL_PORT=${EMAIL_PORT}
-      - TWILIO_ACCOUNT_SID=${TWILIO_ACCOUNT_SID}
-      - TWILIO_AUTH_TOKEN=${TWILIO_AUTH_TOKEN}
-      - TWILIO_PHONE_NUMBER=${TWILIO_PHONE_NUMBER}
+      - FIREBASE_API_KEY=${FIREBASE_API_KEY}
+      - REKAPTCHA_SECRET_KEY=${REKAPTCHA_SECRET_KEY}
     restart: unless-stopped
   #********************************************************************************#
 

@@ -6,7 +6,7 @@
 /*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/16 19:00:31 by tissad            #+#    #+#             */
-/*   Updated: 2025/10/13 19:00:03 by tissad           ###   ########.fr       */
+/*   Updated: 2025/10/14 12:21:32 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,11 @@
 
 import { FastifyReply, FastifyRequest } from "fastify";
 import { OtpService } from "../services/otp.service";
-import { OtpRequest, VerifyOtpRequest } from "../types/otp.type";
+import {  OtpEmailRequest,
+          OtpPhoneRequest,
+          VerifyOtpEmailRequest,
+          VerifyOtpPhoneRequest
+       } from "../types/otp.type";
 
 export class OtpController {
   private otpService: OtpService;
@@ -29,7 +33,7 @@ export class OtpController {
 
   // Generate OTP
   SendOtpByEmail = async (
-    req: FastifyRequest<{ Body: OtpRequest }>,
+    req: FastifyRequest<{ Body: OtpEmailRequest }>,
     reply: FastifyReply
   ) => {
     const { email } = req.body;
@@ -46,7 +50,7 @@ export class OtpController {
 
   // send otp by sms
   SendOtpBySms = async (
-    req: FastifyRequest<{ Body: OtpRequest }>,
+    req: FastifyRequest<{ Body: OtpPhoneRequest }>,
     reply: FastifyReply
   ) => {
     const { phone } = req.body;
@@ -64,7 +68,7 @@ export class OtpController {
   
   // Verify OTP
   verifyOtp = async (
-    req: FastifyRequest<{ Body: VerifyOtpRequest }>,
+    req: FastifyRequest<{ Body: VerifyOtpEmailRequest }>,
     reply: FastifyReply
   ) => {
     const { email, otp } = req.body;
