@@ -104,8 +104,8 @@ services:
       - GMAIL_APP_PASSWORD=${GMAIL_APP_PASSWORD}
       - EMAIL_HOST=${EMAIL_HOST}
       - EMAIL_PORT=${EMAIL_PORT}
-      - FIREBASE_API_KEY=${FIREBASE_API_KEY}
-      - REKAPTCHA_SECRET_KEY=${REKAPTCHA_SECRET_KEY}
+      - REKAPTCHA_API_KEY=${REKAPTCHA_API_KEY}
+      - RECAPTCHA_SECRET_KEY=${RECAPTCHA_SECRET_KEY}
     restart: unless-stopped
   #********************************************************************************#
 

@@ -6,7 +6,7 @@
 /*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/10 15:30:33 by tissad            #+#    #+#             */
-/*   Updated: 2025/10/13 15:11:06 by tissad           ###   ########.fr       */
+/*   Updated: 2025/10/16 15:58:33 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,8 +28,10 @@ const transporter = nodemailer.createTransport({
   },
 });
 console.log("======>>HHHHHOST",process.env.EMAIL_HOST);
+
 console.log("===========================>Email user:", process.env.EMAIL_USER);
 console.log("Email pass:", process.env.GMAIL_APP_PASSWORD? "********" : "Not Set");
+console.log(" REKAPTCHA_API_KEY host:", process.env.REKAPTCHA_API_KEY);
 export async function sendMail(mailOptions: MailArgs): Promise<boolean> {
   try {
     const info = await transporter.sendMail(mailOptions);

@@ -6,7 +6,7 @@
 /*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/13 18:34:28 by tissad            #+#    #+#             */
-/*   Updated: 2025/10/14 17:12:41 by tissad           ###   ########.fr       */
+/*   Updated: 2025/10/16 21:18:19 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,38 +16,61 @@ import axios from "axios";
 
 import {    firebaseAdmin, 
             verifyFirebaseToken,
-            createUserWithPhone, 
-            deleteUserByUid } from "./firebase.service";
+            createUser, 
+            deleteUserByUid,
+            verifyRecaptcha
+          } from "./firebase.service";
+
 
 export class PhoneService {
-  private fastify: FastifyInstance; 
-    constructor(fastify: FastifyInstance) {
-    this.fastify = fastify;
-  }
-  // send otp by sms (placeholder)
-    async SendOtpBySms(phone: string): Promise<boolean> {
-        const userRecord = await createUserWithPhone(phone);
-        console.log("User created with phone:", userRecord.uid);
-        // envoyer l'otp via firebase
-        try {
-        // Appel REST Firebase Identity Toolkit
-        const response = await axios.post(
-            `https://identitytoolkit.googleapis.com/v1/accounts:sendVerificationCode?key=${process.env.FIREBASE_API_KEY}`,
-            { phoneNumber: phone, recaptchaToken: "RECAPTCHA_BYPASS" } // en dev, tu peux bypass
-        );
-        } catch (error: any) {
-            console.error("❌ Erreur envoi OTP :", error.response?.data || error);
-            //await deleteUserByUid(userRecord.uid);
-            return false;
+  /**
+   * Envoie un OTP par SMS via Firebase Authentication
+   * @param phone - Numéro de téléphone au format E.164 (+33..., +1..., etc.)
+   * @param firebaseRecaptchaToken - Jeton reCAPTCHA généré côté client
+   * @returns true si l’envoi a réussi, sinon false
+   */
+  public async SendOtpBySms(phone: string, firebaseRecaptchaToken: string): Promise<boolean> {
+    if (!process.env.REKAPTCHA_API_KEY) {
+      console.error("❌ REKAPTCHA_API_KEY manquant dans les variables d'environnement");
+      return false;
+    }
+
+
+
+    if (!phone || !firebaseRecaptchaToken) {
+      console.error("❌ Paramètres manquants : phone ou recaptchaToken");
+      return false;
+    }
+    // Vérifier le token reCAPTCHA
+    // const recaptchaValid = await verifyRecaptcha(firebaseRecaptchaToken);
+    // if (!recaptchaValid) {
+    //   console.error("❌ Échec de la vérification reCAPTCHA");
+    //   return false;
+    // }
+    try {
+      console.log("📤 Envoi OTP via Firebase pour :", phone);
+
+      const response = await axios.post(
+        `https://identitytoolkit.googleapis.com/v1/accounts:sendVerificationCode?key=${process.env.REKAPTCHA_API_KEY}`,
+        {
+          phoneNumber: phone,
+          recaptchaToken: firebaseRecaptchaToken,
+        },
+        {
+          headers: { "Content-Type": "application/json" },
+          timeout: 10000, // 10s de sécurité
         }
-        return true;
+      );
+
+      console.log("✅ OTP envoyé avec succès :", response.data);
+      return true;
+    } catch (error: any) {
+      console.error("❌ Erreur envoi OTP Firebase :", error.response?.data || error.message);
+      console.error("Phone:", phone);
+      console.error("Token reCAPTCHA:", firebaseRecaptchaToken);
+      return false;
     }
-    // verify otp by sms (placeholder)
-    async VerifyOtpBySms(phone: string, otp: string): Promise<boolean> {
-    
-    // Ici, vous implémenteriez la logique pour vérifier l’OTP par SMS
-    // Cela pourrait impliquer l’utilisation d’un service tiers comme Twilio
-    // Pour cet exemple, nous allons simplement simuler la vérification 
-    return true;
-    }
+  }
 }
+
+

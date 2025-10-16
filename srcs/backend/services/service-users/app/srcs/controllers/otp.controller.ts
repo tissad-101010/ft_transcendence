@@ -6,7 +6,7 @@
 /*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/16 19:00:31 by tissad            #+#    #+#             */
-/*   Updated: 2025/10/14 12:21:32 by tissad           ###   ########.fr       */
+/*   Updated: 2025/10/16 15:31:55 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,7 +54,8 @@ export class OtpController {
     reply: FastifyReply
   ) => {
     const { phone } = req.body;
-    const smsSent = await this.otpService.SendOtpBySms(phone);
+    const recaptchaToken = req.headers['x-recaptcha-token'] as string;
+    const smsSent = await this.otpService.SendOtpBySms(phone, recaptchaToken || "" );
     console.log("SMS sent status:", smsSent);
     console.log("Phone:", phone);
     // If SMS sending failed, return error response

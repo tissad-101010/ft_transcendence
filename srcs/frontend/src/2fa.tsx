@@ -77,9 +77,10 @@ function TwoFactorAuthV2() {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
           'Authorization': 'Bearer test',
+          'x-recaptcha-token': recaptchaToken,
         },
         credentials: 'include',
-        body: JSON.stringify({ phone, recaptchaToken }),
+        body: JSON.stringify({ phone }),
       });
 
       const data = await response.json();
@@ -150,7 +151,7 @@ function TwoFactorAuthV2() {
         <div style={{ margin: '10px 0' }}>
           <div
             className="g-recaptcha"
-            data-sitekey={process.env.RECAPTCHA_SITE_KEY}
+            data-sitekey="your-site-key-here"
           ></div>
         </div>
 

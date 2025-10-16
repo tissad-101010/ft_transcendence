@@ -6,14 +6,14 @@
 /*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/16 18:54:11 by tissad            #+#    #+#             */
-/*   Updated: 2025/10/14 16:04:51 by tissad           ###   ########.fr       */
+/*   Updated: 2025/10/16 21:30:21 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 import { FastifyInstance } from "fastify";
 import { sendUserOtpEmail } from "./mailer.service";
 import { PhoneService } from "./phone.service";
-
+import { createUser } from "./firebase.service";
 
 export class OtpService {
   private fastify: FastifyInstance;
@@ -49,9 +49,12 @@ export class OtpService {
   }
 
   // send otp by sms
-  async SendOtpBySms(phone: string): Promise<boolean> {
-    const phoneService = new PhoneService(this.fastify);
-    const smsSent = await phoneService.SendOtpBySms(phone);
+  async SendOtpBySms(phone: string, recaptchaToken: string): Promise<boolean> {
+    
+    // createUser(phone, "taharissad48@gmail.com");
+    const phoneService = new PhoneService();
+    
+    const smsSent = await phoneService.SendOtpBySms(phone, recaptchaToken);
     if (!smsSent) 
     {
       console.log("SMS sending failed in OTP service.");
