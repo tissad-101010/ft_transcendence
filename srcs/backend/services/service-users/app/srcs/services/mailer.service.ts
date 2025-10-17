@@ -6,7 +6,7 @@
 /*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/09 14:10:25 by tissad            #+#    #+#             */
-/*   Updated: 2025/10/10 16:24:20 by tissad           ###   ########.fr       */
+/*   Updated: 2025/10/17 11:52:30 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,7 @@
 import { MailArgs } from "../types/mail.type";
 import { sendMail } from "../utils/sendMail.utils";
 
-export async function sendUserRegistrationEmail(userEmail: string) {
+export async function sendUserRegistrationEmail(userEmail: string) : Promise<boolean> {
   const mailOptions: MailArgs = {
     from: `"Pong Game" <${process.env.EMAIL_USER}>`,
     to: userEmail,
@@ -23,7 +23,7 @@ export async function sendUserRegistrationEmail(userEmail: string) {
     text: "Thank you for registering!",
   };
 
-  await sendMail(mailOptions);
+  return await sendMail(mailOptions);
 }
 
 // Send OTP email

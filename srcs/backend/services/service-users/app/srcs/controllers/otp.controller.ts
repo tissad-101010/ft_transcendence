@@ -6,29 +6,25 @@
 /*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/16 19:00:31 by tissad            #+#    #+#             */
-/*   Updated: 2025/10/16 15:31:55 by tissad           ###   ########.fr       */
+/*   Updated: 2025/10/17 12:02:17 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-// Contrôleur pour la gestion des OTP (One-Time Password)
-// le controleur est responsable de la logique métier et de la gestion des requêtes/réponses
-// il utilise le service OTP pour la génération et la vérification des OTP
-// tandis que le service son role est de gérer la logique spécifique liée aux OTP
+// srcs/controllers/otp.controller.ts
+// print logs whit the file name
 
 
 import { FastifyReply, FastifyRequest } from "fastify";
-import { OtpService } from "../services/otp.service";
+import { TwoFactorAuthService } from "../services/2fa.service";
 import {  OtpEmailRequest,
-          OtpPhoneRequest,
           VerifyOtpEmailRequest,
-          VerifyOtpPhoneRequest
        } from "../types/otp.type";
 
-export class OtpController {
-  private otpService: OtpService;
+export class TwoFactorAuthController {
+  private twoFactorAuthService: TwoFactorAuthService;
 
-  constructor(otpService: OtpService) {
-    this.otpService = otpService;
+  constructor(twoFactorAuthService: TwoFactorAuthService) {
+    this.twoFactorAuthService = twoFactorAuthService;
   }
 
   // Generate OTP
@@ -37,35 +33,18 @@ export class OtpController {
     reply: FastifyReply
   ) => {
     const { email } = req.body;
-    const mailSent = await this.otpService.SendOtpByEmail(email);
-    console.log("Mail sent status:", mailSent);
-    console.log("Email:", email);
+    const mailSent = await this.twoFactorAuthService.SendOtpByEmail(email);
+    
     // If mail sending failed, return error response
     if (!mailSent) {
+      console.error("❌ [otp.controller.ts] Failed to send OTP email to:", email);
       return reply.status(500).send({ message: "Failed to send OTP email", mailSent });
     }
-    // Return success response
-    return reply.send({ message: "OTP generated", mailSent });
-  };
-
-  // send otp by sms
-  SendOtpBySms = async (
-    req: FastifyRequest<{ Body: OtpPhoneRequest }>,
-    reply: FastifyReply
-  ) => {
-    const { phone } = req.body;
-    const recaptchaToken = req.headers['x-recaptcha-token'] as string;
-    const smsSent = await this.otpService.SendOtpBySms(phone, recaptchaToken || "" );
-    console.log("SMS sent status:", smsSent);
-    console.log("Phone:", phone);
-    // If SMS sending failed, return error response
-    if (!smsSent) {
-      return reply.status(500).send({ message: "Failed to send OTP SMS", smsSent });
+    else{
+      console.log("✅ [otp.controller.ts] OTP email sent to:", email);
+      return reply.send({ message: "OTP email sent successfully ✅", mailSent });
     }
-    // Return success response
-    return reply.send({ message: "OTP sent via SMS", smsSent });
   };
-
   
   // Verify OTP
   verifyOtp = async (
@@ -73,14 +52,15 @@ export class OtpController {
     reply: FastifyReply
   ) => {
     const { email, otp } = req.body;
-    console.log("Verifying OTP for email:", email);
-    console.log("OTP to verify:", otp);
-    const isValid = await this.otpService.verifyOtp(email, otp);
+    console.log("[otp.controller.ts] Verifying OTP for email:", email);
+    const isValid = await this.twoFactorAuthService.verifyOtp(email, otp);
 
     if (!isValid) {
-      return reply.status(400).send({ message: "Invalid or expired OTP" });
+      console.error("❌ [otp.controller.ts] OTP verification failed for email:", email);
+      return reply.status(400).send({ message: "Invalid or expired OTP ❌" });
+    } else {
+      console.log("✅ [otp.controller.ts] OTP verified successfully for email:", email);
+      return reply.send({ message: "OTP verified successfully ✅" });
     }
-
-    return reply.send({ message: "OTP verified successfully ✅" });
   };
 }
