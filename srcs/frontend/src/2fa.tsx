@@ -40,7 +40,7 @@ function TwoFactorAuthV2() {
   const verifyOtp = async () => {
     if (!otp) return alert('Veuillez saisir le code OTP');
     try {
-      const response = await fetch('https://localhost:8443/api/otp/verify', {
+      const response = await fetch('https://localhost:8443/api/2fa/verify', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
