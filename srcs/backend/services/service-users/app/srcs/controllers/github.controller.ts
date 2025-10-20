@@ -6,12 +6,12 @@
 /*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/17 16:56:20 by tissad            #+#    #+#             */
-/*   Updated: 2025/10/17 18:34:43 by tissad           ###   ########.fr       */
+/*   Updated: 2025/10/20 16:28:52 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 import { FastifyRequest, FastifyReply } from 'fastify';
-import { getGithubAccessToken, getGithubUser } from '../services/github.service';
+import { GithubService } from '../services/github.service';
 
 const clientId = process.env.GITHUB_CLIENT_ID!;
 const redirectUri = process.env.GITHUB_REDIRECT_URI!;
@@ -23,33 +23,22 @@ export async function githubLogin(req: FastifyRequest, reply: FastifyReply) {
 }
 
 export async function githubCallback(req: FastifyRequest, reply: FastifyReply) {
-  const { code } = req.query as { code?: string };
-
-  if (!code) {
-    return reply.status(400).send({ error: 'Missing "code" in callback URL' });
-  }
+  const code = (req.query as any).code;
+  const githubService = new GithubService(req.server.db);
 
   try {
-    // Échange du code contre un access_token
-    const tokenData = await getGithubAccessToken(code);
+    const token = await githubService.getAccessToken(code);
+    const profile = await githubService.getGithubProfile(token);
+    const user = await githubService.findOrCreateUser(profile);
 
-    if (!tokenData.access_token) {
-      return reply.status(400).send({ error: 'Failed to get access token', details: tokenData });
-    }
+// On convertit le user en chaîne JSON encodée
+const userString = encodeURIComponent(JSON.stringify(user));
 
-    // Récupération du profil utilisateur GitHub
-    const githubUser = await getGithubUser(tokenData.access_token);
-
-    console.log('✅ GitHub user:', githubUser);
-
-    // 👉 Ici tu peux soit créer, soit connecter l’utilisateur dans ta DB
-    // Exemple :
-    // const user = await userService.findOrCreateByGithubId(githubUser);
-
-    // Pour tester, on renvoie le profil brut
-    return reply.send({ githubUser });
-  } catch (err) {
-    console.error('❌ Error in GitHub callback:', err);
-    return reply.status(500).send({ error: 'Internal error during GitHub auth' });
+// Redirige vers le front
+  return reply.redirect(`https://localhost:8443/2fa`);
+  } catch (err: any) {
+    req.log.error(err);
+    return reply.status(500).send({ error: err.message });
   }
 }
+

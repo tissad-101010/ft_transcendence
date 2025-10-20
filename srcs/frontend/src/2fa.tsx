@@ -93,7 +93,7 @@ function TwoFactorAuthV2() {
           Vérifier le code OTP
         </button>
       </div>
-    </div>
+  </div>
   );
 }
 

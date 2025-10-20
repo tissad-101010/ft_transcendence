@@ -68,6 +68,20 @@ function SigninForm() {
         <br />
         <button type="submit">Se connecter</button>
       </form>
+      <div id ="Oauth-github">
+        <a href="https://localhost:8443/api/auth/github">
+          <button type="button" style={{ marginTop: 10 }}>
+            continuer avec GitHub
+          </button>
+        </a>
+      </div>
+      <div id ="Oauth-google">
+        <a href="https://localhost:8443/api/auth/google">
+          <button type="button" style={{ marginTop: 10 }}>
+            continuer avec Google
+          </button>
+        </a>
+      </div>
     </div>
   );
 }
