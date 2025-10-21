@@ -1,23 +1,20 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   github.routes.ts                                   :+:      :+:    :+:   */
+/*   Oauth42.routes.ts                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/10/17 16:56:01 by tissad            #+#    #+#             */
-/*   Updated: 2025/10/17 18:35:49 by tissad           ###   ########.fr       */
+/*   Created: 2025/10/21 13:57:27 by tissad            #+#    #+#             */
+/*   Updated: 2025/10/21 14:18:58 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+
 import { FastifyInstance } from 'fastify';
-import { githubLogin, githubCallback } from '../controllers/github.controller';
+import { fortyTwoProviderRedirect, fortyTwoCallback } from '../controllers/Oauth42.controller';
 
-export async function githubRoutes(fastify: FastifyInstance) {
-  // Étape 1 : redirection vers GitHub
-  fastify.get('/github', githubLogin);
-
-  // Étape 2 : callback reçu depuis GitHub
-  fastify.get('/github/callback', githubCallback);
+export async function oauth42Routes(fastify: FastifyInstance) {
+    fastify.get('/42', fortyTwoProviderRedirect);
+    fastify.get('/42/callback', fortyTwoCallback);
 }
-

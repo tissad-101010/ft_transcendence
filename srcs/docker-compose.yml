@@ -12,7 +12,7 @@ services:
       dockerfile: Dockerfile
     container_name: proxy
     depends_on:
-      - frontend
+      - service-users
     environment:
       - SSL_CERT=/etc/nginx/ssl/server.crt
       - SSL_CERT_KEY=/etc/nginx/ssl/server.key
@@ -45,21 +45,21 @@ services:
   #********************************************************************************#
   #                              FRONTEND SERVICE                                  #
   #********************************************************************************#
-  frontend:
-    image : frontend
-    container_name: frontend
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-    volumes:
-      - frontend-build:/app/build:rw
-    networks:
-      - global-net
-    ports:
-      - "3000:3000"
-    environment:
-     - RECAPTCHA_SITE_KEY=${RECAPTCHA_SITE_KEY}
-    restart: unless-stopped
+  # frontend:
+  #   image : frontend
+  #   container_name: frontend
+  #   build:
+  #     context: ./frontend
+  #     dockerfile: Dockerfile
+  #   volumes:
+  #     - frontend-build:/app:rw
+  #   networks:
+  #     - global-net
+  #   ports:
+  #     - "3000:3000"
+  #   environment:
+  #    - RECAPTCHA_SITE_KEY=${RECAPTCHA_SITE_KEY}
+  #   restart: unless-stopped
   #********************************************************************************#
 
 
@@ -108,6 +108,12 @@ services:
       - GITHUB_CLIENT_ID=${GITHUB_CLIENT_ID}
       - GITHUB_CLIENT_SECRET=${GITHUB_CLIENT_SECRET}
       - GITHUB_REDIRECT_URI=${GITHUB_REDIRECT_URI}
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
+      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
+      - GOOGLE_REDIRECT_URI=${GOOGLE_REDIRECT_URI}
+      - FORTYTWO_CLIENT_ID=${FORTYTWO_CLIENT_ID}
+      - FORTYTWO_CLIENT_SECRET=${FORTYTWO_CLIENT_SECRET}
+      - FORTYTWO_REDIRECT_URI=${FORTYTWO_REDIRECT_URI}
     restart: unless-stopped
   #********************************************************************************#
 
@@ -339,12 +345,12 @@ volumes:
       o: bind
   #*******************************************************************************#
   # Local volume for frontend build artifacts
-  # This volume is used to persist the build output of the frontend application
+  # This volume is used to persist the build outreact-scriptsput of the frontend application
   frontend-build:
     driver: local
     driver_opts:
       type: none
-      device: ./frontend/build
+      device: ./frontend
       o: bind
   #*******************************************************************************#
   # this volume is used to store the backend data

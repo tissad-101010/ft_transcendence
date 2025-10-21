@@ -92,6 +92,13 @@ function SignupForm() {
           </button>
         </a>
       </div>
+      <div id ="Oauth-42">
+        <a href="https://localhost:8443/api/auth/42">
+          <button type="button" style={{ marginTop: 10 }}>
+            continuer avec 42
+          </button>
+        </a>
+      </div>
     </div>
   );
 }

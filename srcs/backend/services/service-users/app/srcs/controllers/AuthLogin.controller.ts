@@ -6,14 +6,14 @@
 /*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/25 11:19:58 by tissad            #+#    #+#             */
-/*   Updated: 2025/10/10 16:42:49 by tissad           ###   ########.fr       */
+/*   Updated: 2025/10/21 13:48:55 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 // this file receives the request from the frontend and call userservice 
 // to handle the request response
 import { FastifyReply, FastifyRequest } from 'fastify'
-import { UserService } from '../services/users.service'
+import { UserService } from '../services/AuthLogin.service'
 // import the SignupUserInput and SigninUserInput types
 import { SignupUserInput } from '../types/user.type'
 import { SigninUserInput } from '../types/user.type'

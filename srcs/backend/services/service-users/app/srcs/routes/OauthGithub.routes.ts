@@ -1,22 +1,23 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   google.routes.ts                                   :+:      :+:    :+:   */
+/*   OauthGithub.routes.ts                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/10/20 17:58:25 by tissad            #+#    #+#             */
-/*   Updated: 2025/10/20 19:26:39 by tissad           ###   ########.fr       */
+/*   Created: 2025/10/17 16:56:01 by tissad            #+#    #+#             */
+/*   Updated: 2025/10/21 13:50:34 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-
 import { FastifyInstance } from 'fastify';
-import { googleLogin, googleCallback } from '../controllers/google.controller';
+import { githubLogin, githubCallback } from '../controllers/OauthGithub.controller';
 
-export async function googleRoutes(fastify: FastifyInstance) {
-    // Étape 1 : redirection vers Google
-    fastify.get('/google', googleLogin);
-    // Étape 2 : callback reçu depuis Google
-    fastify.get('/google/callback', googleCallback);
+export async function githubRoutes(fastify: FastifyInstance) {
+  // Étape 1 : redirection vers GitHub
+  fastify.get('/github', githubLogin);
+
+  // Étape 2 : callback reçu depuis GitHub
+  fastify.get('/github/callback', githubCallback);
 }
+

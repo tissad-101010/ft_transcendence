@@ -6,12 +6,12 @@
 /*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/17 16:56:20 by tissad            #+#    #+#             */
-/*   Updated: 2025/10/20 16:28:52 by tissad           ###   ########.fr       */
+/*   Updated: 2025/10/21 13:46:21 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 import { FastifyRequest, FastifyReply } from 'fastify';
-import { GithubService } from '../services/github.service';
+import { GithubService } from '../services/OauthGithub.service';
 
 const clientId = process.env.GITHUB_CLIENT_ID!;
 const redirectUri = process.env.GITHUB_REDIRECT_URI!;

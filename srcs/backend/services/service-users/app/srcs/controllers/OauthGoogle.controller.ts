@@ -6,13 +6,13 @@
 /*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/20 17:57:18 by tissad            #+#    #+#             */
-/*   Updated: 2025/10/20 19:35:56 by tissad           ###   ########.fr       */
+/*   Updated: 2025/10/21 13:46:01 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 
 import { FastifyRequest, FastifyReply } from 'fastify';
-import { GoogleService } from '../services/google.service';
+import { GoogleService } from '../services/OauthGoogle.service';
 
 const clientId = process.env.GOOGLE_CLIENT_ID!; 
 const redirectUri = process.env.GOOGLE_REDIRECT_URI!;

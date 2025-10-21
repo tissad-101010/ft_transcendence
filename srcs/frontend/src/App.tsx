@@ -1,11 +1,11 @@
 import React from 'react';
 import { useState } from 'react';
-import BabylonScene from './BabylonScene.tsx';
-import Chat from './Chat.tsx';
+import BabylonScene from './BabylonScene';
+import Chat from './Chat';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import SignupForm from './Signup.tsx';
-import SigninForm from './Signin.tsx';
-import OtpVerification from './2fa.tsx';
+import SignupForm from './Signup';
+import SigninForm from './Signin';
+import OtpVerification from './2fa';
 import './App.css';
 import { Link } from 'react-router-dom';
 

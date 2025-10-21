@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   2fa.service.ts                                     :+:      :+:    :+:   */
+/*   TwoFactorAuth.service.ts                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/16 18:54:11 by tissad            #+#    #+#             */
-/*   Updated: 2025/10/17 11:54:02 by tissad           ###   ########.fr       */
+/*   Updated: 2025/10/21 17:03:03 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,13 +15,19 @@
 // print logs whit the file name
 
 import { FastifyInstance } from "fastify";
-import { sendUserOtpEmail } from "./mailer.service";
+import { sendUserOtpEmail } from "./Mailer.service";
+import speakeasy from "speakeasy";
+import QRCode from "qrcode";
+import bcrypt from "bcryptjs";
+import { Pool } from "pg";
 
 export class TwoFactorAuthService {
   private fastify: FastifyInstance;
+  private db: Pool;
   
   constructor(fastify: FastifyInstance) {
     this.fastify = fastify;
+    this.db = fastify.db;
   }
   
   // Generate a 6-digit OTP
@@ -80,4 +86,74 @@ export class TwoFactorAuthService {
     console.log("✅ [2fa.service.ts] OTP verified and deleted from Redis for email:", email);
     return true;
   }
+
+  // gerate TFA secret and QR code and store  in db
+  async generateTfaSecretAndQrCode(userId: number): Promise<{qrCodeDataUrl: string }> {
+    const secret = speakeasy.generateSecret({ length: 20, name: `ft_transcendence_user_${userId}` });
+    // warnning:
+    // In production, you should never store the TFA secret in plain text in your database.
+    // store the secret in hashicorp vault
+    // you should configure vault and implement the logic to store and retrieve secrets securely.
+    const client = await this.db.connect(); 
+    try {
+      await client.query(
+        "UPDATE users SET tfa_secret = $1, tfa_enabled = $2 WHERE id = $3",
+        [secret, true, userId]
+      );
+      console.log("✅ [2fa.service.ts] TFA secret stored in DB for user ID:", userId);
+    } finally {
+      client.release();
+    }
+    // generate QR code from secret 
+    const otpauthUrl = speakeasy.otpauthURL({
+      secret: secret.base32,
+      label: `ft_transcendence_user_${userId}`, 
+      issuer: "ft_transcendence",
+      encoding: "base32",
+    });
+    const qrCodeDataUrl = await QRCode.toDataURL(otpauthUrl);
+    console.log("✅ [2fa.service.ts] QR code generated for user ID:", userId);
+    
+    // store qr code data url in redis
+    await this.fastify.redis.set(`tfa_qr_code:${userId}`, qrCodeDataUrl, "EX", 600); // expire in 10 minutes
+    
+    return { qrCodeDataUrl };
+  }
+
+  // Verify TFA token
+  async verifyTfaToken(userId: number, token: string): Promise<boolean> {
+    const client = await this.db.connect();
+    try {
+      const res = await client.query(
+        "SELECT tfa_secret FROM users WHERE id = $1",
+        [userId]
+      );
+      if (res.rows.length === 0) {
+        console.log("❌ [2fa.service.ts] User not found for ID:", userId);
+        return false;
+      }
+      const tfaSecret = res.rows[0].tfa_secret;
+      if (!tfaSecret) {
+        console.log("❌ [2fa.service.ts] TFA not enabled for user ID:", userId);
+        return false;
+      }
+      const verified = speakeasy.totp.verify({
+        secret: tfaSecret.base32,
+        encoding: 'base32',
+        token,
+        window: 1, // allow 30 seconds before or after
+      });
+      if (verified) {
+        console.log("✅ [2fa.service.ts] TFA token verified for user ID:", userId);
+      } else {
+        console.log("❌ [2fa.service.ts] TFA token verification failed for user ID:", userId);
+      }
+      return verified;
+    } finally {
+      client.release();
+    }
+  }
+
 }
+
+

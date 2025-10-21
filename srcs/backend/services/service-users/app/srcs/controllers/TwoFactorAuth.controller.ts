@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   otp.controller.ts                                  :+:      :+:    :+:   */
+/*   TwoFactorAuth.controller.ts                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/16 19:00:31 by tissad            #+#    #+#             */
-/*   Updated: 2025/10/17 12:02:17 by tissad           ###   ########.fr       */
+/*   Updated: 2025/10/21 17:19:37 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,10 +15,11 @@
 
 
 import { FastifyReply, FastifyRequest } from "fastify";
-import { TwoFactorAuthService } from "../services/2fa.service";
+import { TwoFactorAuthService } from "../services/TwoFactorAuth.service";
 import {  OtpEmailRequest,
           VerifyOtpEmailRequest,
        } from "../types/otp.type";
+
 
 export class TwoFactorAuthController {
   private twoFactorAuthService: TwoFactorAuthService;
@@ -61,6 +62,40 @@ export class TwoFactorAuthController {
     } else {
       console.log("✅ [otp.controller.ts] OTP verified successfully for email:", email);
       return reply.send({ message: "OTP verified successfully ✅" });
+    }
+  };
+
+  // setup TFA for user with google authenticator app
+  
+  setupTwoFactorAuth = async (
+    req: FastifyRequest,
+    reply: FastifyReply
+  ) => {
+    const userId = (req.params as any).userId;
+    try {
+      const qrCodeDataURL = await this.twoFactorAuthService.generateTfaSecretAndQrCode(userId);
+      return reply.send({ qrCodeDataURL });
+    } catch (error: any) {
+      console.error("❌ [2fa.controller.ts] Error setting up TFA for user ID:", userId, error);
+      return reply.status(500).send({ message: "Error setting up two-factor authentication ❌" });
+    }
+  }
+  // verify TFA token for user
+  verifyTwoFactorAuth = async (
+    req: FastifyRequest,
+    reply: FastifyReply
+  ) => {
+  const { userId, token } = req.body as { userId: string; token: string };
+    try {
+      const isValid = await this.twoFactorAuthService.verifyTfaToken(Number(userId), token); 
+      if (!isValid) {
+        return reply.status(400).send({ message: "Invalid TFA token ❌" });
+      } else {
+        return reply.send({ message: "TFA token verified successfully ✅" });
+      }
+    } catch (error: any) {
+      console.error("❌ [2fa.controller.ts] Error verifying TFA token for user ID:", userId, error);
+      return reply.status(500).send({ message: "Error verifying two-factor authentication token ❌" });
     }
   };
 }

@@ -121,6 +121,7 @@ CREATE TABLE IF NOT EXISTS users (
     provider VARCHAR(50) DEFAULT 'local',
     github_id VARCHAR(50),
     google_id VARCHAR(50),
+    oauth42_id VARCHAR(50),
     name VARCHAR(100),
     first_name VARCHAR(50),
     last_name VARCHAR(50),
