@@ -18,6 +18,8 @@
     "@fastify/secure-session": "^8.2.0",
     "@prisma/client": "^6.13.0",
     "@types/pg": "^8.15.5",
+    "@types/qrcode": "^1.5.5",
+    "@types/speakeasy": "^2.0.10",
     "bcryptjs": "^3.0.2",
     "fastify": "^5.6.1",
     "firebase-admin": "^13.5.0",
