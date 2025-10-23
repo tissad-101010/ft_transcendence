@@ -93,13 +93,16 @@ services:
     environment:
       - NODE_ENV=production
       - VAULT_ADDR=http://hashicorp_vault:8200
-      - DB_URL=${DB_URL}
-      - POSTGRES_DB=${DB_NAME}
-      - POSTGRES_USER=${DB_USER}
-      - POSTGRES_PASSWORD=${DB_PASSWORD}
-      - POSTGRES_ROOT_PASSWORD=${DB_ROOT_PASSWORD}
-      - POSTGRES_PORT=${DB_PORT}
-      - POSTGRES_HOST=postgreSQL
+      - DB_HOST=${DB_HOST}
+      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_ROOT_PASSWORD=${DB_ROOT_PASSWORD}
+      - DB_PORT=${DB_PORT}
+      - DB_SAMPLE_NAME=${DB_SAMPLE_NAME}
+      - DB_MAX_CLIENTS=${DB_MAX_CLIENTS}
+      - DB_IDLE_TIMEOUT=${DB_IDLE_TIMEOUT}
+      - DB_CONNECTION_TIMEOUT=${DB_CONNECTION_TIMEOUT}
       - EMAIL_USER=${EMAIL_USER}
       - GMAIL_APP_PASSWORD=${GMAIL_APP_PASSWORD}
       - EMAIL_HOST=${EMAIL_HOST}
@@ -146,13 +149,13 @@ services:
     environment:
       - NODE_ENV=production
       - VAULT_ADDR=http://hashicorp_vault:8200
-      - DB_URL=${DB_URL}
-      - POSTGRES_DB=${DB_NAME}
-      - POSTGRES_USER=${DB_USER}
-      - POSTGRES_PASSWORD=${DB_PASSWORD}
-      - POSTGRES_ROOT_PASSWORD=${DB_ROOT_PASSWORD}
-      - POSTGRES_PORT=${DB_PORT}
-      - POSTGRES_HOST=postgreSQL
+      - DB_HOST=${DB_HOST}
+      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_ROOT_PASSWORD=${DB_ROOT_PASSWORD}
+      - DB_PORT=${DB_PORT}
+      - DB_SAMPLE_NAME=${DB_SAMPLE_NAME}  
     restart: unless-stopped
   
 
@@ -182,13 +185,13 @@ services:
     environment:
       - NODE_ENV=production
       - VAULT_ADDR=http://hashicorp_vault:8200
-      - DB_URL=${DB_URL}
-      - POSTGRES_DB=${DB_NAME}
-      - POSTGRES_USER=${DB_USER}
-      - POSTGRES_PASSWORD=${DB_PASSWORD}
-      - POSTGRES_ROOT_PASSWORD=${DB_ROOT_PASSWORD}
-      - POSTGRES_PORT=${DB_PORT}
-      - POSTGRES_HOST=postgreSQL
+      - DB_HOST=${DB_HOST}
+      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_ROOT_PASSWORD=${DB_ROOT_PASSWORD}
+      - DB_PORT=${DB_PORT}
+      - DB_SAMPLE_NAME=${DB_SAMPLE_NAME}  
     restart: unless-stopped
 
 
@@ -219,13 +222,13 @@ services:
     environment:
       - NODE_ENV=production
       - VAULT_ADDR=http://hashicorp_vault:8200
-      - DB_URL=${DB_URL}
-      - POSTGRES_DB=${DB_NAME}
-      - POSTGRES_USER=${DB_USER}
-      - POSTGRES_PASSWORD=${DB_PASSWORD}
-      - POSTGRES_ROOT_PASSWORD=${DB_ROOT_PASSWORD}
-      - POSTGRES_PORT=${DB_PORT}
-      - POSTGRES_HOST=postgreSQL
+      - DB_HOST=${DB_HOST}
+      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_ROOT_PASSWORD=${DB_ROOT_PASSWORD}
+      - DB_PORT=${DB_PORT}
+      - DB_SAMPLE_NAME=${DB_SAMPLE_NAME}  
     restart: unless-stopped
 
 
@@ -251,11 +254,13 @@ services:
       - security-net
     restart: unless-stopped
     environment:
-      - POSTGRES_DB=${DB_NAME}
-      - POSTGRES_USER=${DB_USER}
-      - POSTGRES_PASSWORD=${DB_PASSWORD}
-      - POSTGRES_ROOT_PASSWORD=${DB_ROOT_PASSWORD}
-      - POSTGRES_PORT=${DB_PORT}
+      - DB_HOST=${DB_HOST}
+      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_ROOT_PASSWORD=${DB_ROOT_PASSWORD}
+      - DB_PORT=${DB_PORT}
+      - DB_SAMPLE_NAME=${DB_SAMPLE_NAME}  
     ports:
       - "5432:5432"
   #********************************************************************************#      
