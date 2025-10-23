@@ -6,7 +6,7 @@
 /*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/16 18:54:11 by tissad            #+#    #+#             */
-/*   Updated: 2025/10/21 17:03:03 by tissad           ###   ########.fr       */
+/*   Updated: 2025/10/23 15:19:50 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,6 +21,7 @@ import QRCode from "qrcode";
 import bcrypt from "bcryptjs";
 import { Pool } from "pg";
 
+
 export class TwoFactorAuthService {
   private fastify: FastifyInstance;
   private db: Pool;
@@ -34,9 +35,34 @@ export class TwoFactorAuthService {
   private generateOtp(): string {
     return (Math.floor(100000 + Math.random() * 900000).toString());
   }
+  // update user to enable tfa
+  private sendQueryToDb(userId: number, type: string, isEnabled: boolean): Promise<void> {
+    return this.db.query(
+      "UPDATE users SET ${type} = $1 WHERE id = $2",
+      [isEnabled, userId]
+    ).then(() => {
+      console.log("✅ [2fa.service.ts] User TFA status updated in DB for user ID:", userId);
+    });
+  } 
   
+  // update user to disable tfa
+  private setTfaInDb(userId: number, type: string, isEnabled: boolean): Promise<void> {
+    if (type === 'email_2fa') {
+      this.sendQueryToDb(userId, 'email_2fa', isEnabled);
+    } else if (type === 'autenticator_2fa') {
+      this.sendQueryToDb(userId, 'autenticator_2fa', isEnabled);
+    }else if (type === 'phone_2fa') {
+      this.sendQueryToDb(userId, 'phone_2fa', isEnabled);
+    }
+    return Promise.resolve();
+  }
+  
+  // enable email tfa 
+  // async enableEmailOtpForTfa(userId: number): Promise<boolean> {
+  
+  // }  
   // Send OTP by email
-  async SendOtpByEmail(email: string): Promise<boolean> {
+  async sendOtpByEmail(email: string): Promise<boolean> {
     // generate otp
     const otp = this.generateOtp();
     console.log("✅ [2fa.service.ts] OTP generated:", otp);
@@ -64,6 +90,17 @@ export class TwoFactorAuthService {
     }
   }
 
+  async enableEmailOtpForTfa(email: string): Promise<boolean> {
+    if (await this.sendOtpByEmail(email)) {
+      console.log("✅ [2fa.service.ts] Email OTP sent for enabling TFA for email:", email);
+      return (true);
+    } else {
+      console.error("❌ [2fa.service.ts] Failed to send Email OTP for enabling TFA for email:", email);
+      return (false);
+    }
+    
+  }
+
   // Verify OTP for email  
   async verifyOtp(email: string, otp: string): Promise<boolean> {
     const storedOtp = await this.fastify.redis.get(`otp:${email}`);
@@ -88,7 +125,7 @@ export class TwoFactorAuthService {
   }
 
   // gerate TFA secret and QR code and store  in db
-  async generateTfaSecretAndQrCode(userId: number): Promise<{qrCodeDataUrl: string }> {
+  async generateTfaSecretAndQrCode(userId: number): Promise<{qrCodeUrl: string }> {
     const secret = speakeasy.generateSecret({ length: 20, name: `ft_transcendence_user_${userId}` });
     // warnning:
     // In production, you should never store the TFA secret in plain text in your database.
@@ -97,8 +134,8 @@ export class TwoFactorAuthService {
     const client = await this.db.connect(); 
     try {
       await client.query(
-        "UPDATE users SET tfa_secret = $1, tfa_enabled = $2 WHERE id = $3",
-        [secret, true, userId]
+        "UPDATE users SET is_2fa_enabled = $1 WHERE id = $2",
+        [true, userId]
       );
       console.log("✅ [2fa.service.ts] TFA secret stored in DB for user ID:", userId);
     } finally {
@@ -111,13 +148,13 @@ export class TwoFactorAuthService {
       issuer: "ft_transcendence",
       encoding: "base32",
     });
-    const qrCodeDataUrl = await QRCode.toDataURL(otpauthUrl);
+    const qrCodeUrl = await QRCode.toDataURL(otpauthUrl);
     console.log("✅ [2fa.service.ts] QR code generated for user ID:", userId);
     
     // store qr code data url in redis
-    await this.fastify.redis.set(`tfa_qr_code:${userId}`, qrCodeDataUrl, "EX", 600); // expire in 10 minutes
+    await this.fastify.redis.set(`tfa_qr_code:${userId}`, qrCodeUrl, "EX", 600); // expire in 10 minutes
     
-    return { qrCodeDataUrl };
+    return { qrCodeUrl };
   }
 
   // Verify TFA token

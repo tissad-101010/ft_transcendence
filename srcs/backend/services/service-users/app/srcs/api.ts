@@ -6,7 +6,7 @@
 /*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/23 15:58:35 by tissad            #+#    #+#             */
-/*   Updated: 2025/10/21 14:01:56 by tissad           ###   ########.fr       */
+/*   Updated: 2025/10/23 12:20:03 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,7 @@ import cors from '@fastify/cors';
 
 // import routes
 import { userRoutes } from './routes/AuthLogin.routes';
-import { otpRoutes } from './routes/TwoFactorAuth.routes';
+import { TwoFactorAuth } from './routes/TwoFactorAuth.routes';
 import { githubRoutes } from './routes/OauthGithub.routes';
 import { googleRoutes } from './routes/OauthGoogle.routes';
 import { oauth42Routes } from './routes/Oauth42.routes';
@@ -39,7 +39,7 @@ app.register(redisPlugin);
 
 // Register routes
 app.register(userRoutes, { prefix: '/users' });
-app.register(otpRoutes, { prefix: '/2fa' });
+app.register(TwoFactorAuth, { prefix: '/two-factor' });
 app.register(githubRoutes, { prefix: '/auth' });
 app.register(googleRoutes, { prefix: '/auth' });
 app.register(oauth42Routes, { prefix: '/auth' });

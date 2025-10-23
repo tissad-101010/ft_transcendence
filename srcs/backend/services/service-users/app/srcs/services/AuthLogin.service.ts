@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   users.service.ts                                   :+:      :+:    :+:   */
+/*   AuthLogin.service.ts                               :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/25 11:38:09 by tissad            #+#    #+#             */
-/*   Updated: 2025/09/12 15:10:58 by tissad           ###   ########.fr       */
+/*   Updated: 2025/10/23 14:56:02 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,6 +22,7 @@ import jwt from 'jsonwebtoken'
 export class UserService {
   constructor(private db: Pool) {}
 
+  
   // signup method to create a new user (insert into db) and return user data if successful
   async signup(signupInfo: SignupUserInput): Promise<{ data: SignupResponse }> {
     console.log(`Signup for: ${signupInfo.username}, ${signupInfo.email}`)
@@ -116,20 +117,3 @@ export class UserService {
     return result.rows[0]
   }
 }
-
-
-
-
-
-// export async function signupUser(signupInfo: SignupUserInput): Promise<{ message: string; data: SignupUserInput }> {
-//     const { username, password, email} = signupInfo;
-//     // Log the received data
-//     console.log(`Signup for: ${username}, ${password}`);
-//     // Here you would typically handle the signup logic, such as saving the user to a database
-//     // For now, we will just return a success message
-
-//     return {
-//         message: 'User signed up successfully',
-//         data: signupInfo,
-//     };
-// }

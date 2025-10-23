@@ -6,13 +6,14 @@
 /*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/16 19:00:31 by tissad            #+#    #+#             */
-/*   Updated: 2025/10/21 17:19:37 by tissad           ###   ########.fr       */
+/*   Updated: 2025/10/23 15:20:11 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 // srcs/controllers/otp.controller.ts
 // print logs whit the file name
-
+//
+const userId = 1; // temporary user id for testing
 
 import { FastifyReply, FastifyRequest } from "fastify";
 import { TwoFactorAuthService } from "../services/TwoFactorAuth.service";
@@ -34,7 +35,7 @@ export class TwoFactorAuthController {
     reply: FastifyReply
   ) => {
     const { email } = req.body;
-    const mailSent = await this.twoFactorAuthService.SendOtpByEmail(email);
+    const mailSent = await this.twoFactorAuthService.sendOtpByEmail(email);
     
     // If mail sending failed, return error response
     if (!mailSent) {
@@ -71,10 +72,11 @@ export class TwoFactorAuthController {
     req: FastifyRequest,
     reply: FastifyReply
   ) => {
-    const userId = (req.params as any).userId;
+    // const userId = (req.params as any).userId;
     try {
-      const qrCodeDataURL = await this.twoFactorAuthService.generateTfaSecretAndQrCode(userId);
-      return reply.send({ qrCodeDataURL });
+      const qrCodeUrl = await this.twoFactorAuthService.generateTfaSecretAndQrCode(userId);
+      console.log("✅ [2fa.controller.ts] TFA setup successful for user ID:", userId);
+      reply.send({ qrCodeUrl, message: 'TFA setup successful ✅' });
     } catch (error: any) {
       console.error("❌ [2fa.controller.ts] Error setting up TFA for user ID:", userId, error);
       return reply.status(500).send({ message: "Error setting up two-factor authentication ❌" });
