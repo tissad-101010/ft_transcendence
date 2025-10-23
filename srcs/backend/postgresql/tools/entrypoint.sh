@@ -92,58 +92,40 @@ fi
 DO \$\$
 BEGIN
    IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = 'admin') THEN
-      CREATE ROLE admin WITH LOGIN PASSWORD 'securepassword';
+      CREATE ROLE admin WITH LOGIN PASSWORD '$DB_ROOT_PASSWORD';
    END IF;
 END
 \$\$;
 
 -- 2. Create the database if it doesn't exist
-SELECT 'CREATE DATABASE users OWNER admin'
+SELECT 'CREATE DATABASE $DB_NAME OWNER admin'
 WHERE NOT EXISTS (
-    SELECT FROM pg_database WHERE datname = 'users'
+    SELECT FROM pg_database WHERE datname = '$DB_NAME'
 )\gexec
 
 -- 3. Grant privileges
-GRANT ALL PRIVILEGES ON DATABASE users TO admin;
+GRANT ALL PRIVILEGES ON DATABASE $DB_NAME TO admin;
 
 -- 4. Set postgres superuser password
-ALTER USER postgres WITH PASSWORD 'rootpassword';
+ALTER USER postgres WITH PASSWORD '$DB_ROOT_PASSWORD';
 
 -- 5. Switch to new DB and create table
-\connect users
-
--- 6. Create a sample table
-CREATE TABLE IF NOT EXISTS users ( 
-    id SERIAL PRIMARY KEY,
-    username VARCHAR(50) UNIQUE,
-    email VARCHAR(100) UNIQUE,
-    password VARCHAR(255),
-    provider VARCHAR(50) DEFAULT 'local',
-    github_id VARCHAR(50),
-    google_id VARCHAR(50),
-    oauth42_id VARCHAR(50),
-    name VARCHAR(100),
-    first_name VARCHAR(50),
-    last_name VARCHAR(50),
-    avatar_url TEXT,
-    is_2fa_enabled BOOLEAN DEFAULT FALSE,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
+\connect $DB_NAME;
 
 -- 7. Create a app user role
 DO \$\$
 BEGIN
-   IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = 'app_user') THEN
-      CREATE ROLE app_user WITH LOGIN PASSWORD 'apppassword';
+   IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = '$DB_USER') THEN
+      CREATE ROLE $DB_USER WITH LOGIN PASSWORD '$DB_PASSWORD';
    END IF;
 END
 \$\$;
 
--- 8. Grant privileges to app_user
-GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE users TO app_user;
-GRANT USAGE, SELECT, UPDATE ON SEQUENCE users_id_seq TO app_user;
+ALTER USER $DB_USER CREATEDB;
+GRANT ALL PRIVILEGES ON SCHEMA public TO $DB_USER;
+GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE $DB_NAME TO $DB_USER;
+GRANT USAGE, SELECT, UPDATE ON SEQUENCE ${DB_NAME}_id_seq TO $DB_USER;
+
 
 
 EOF
@@ -155,26 +137,26 @@ EOF
   #wrapper for the init.sql script
 # 
 echo "▶️   Starting PostgreSQL temporarily."
-su-exec postgres postgres -D "$DATA_DIR" &
+su-exec postgres postgres -D "$DATA_DIR" >> /var/log/postgresql/postgresql.log 2>&1 &
 PG_PID=$!
 
 # 
-until su-exec postgres pg_isready -q; do
+until su-exec postgres pg_isready -q >> /var/log/postgresql/postgresql.log 2>&1 ; do 
   echo "⏳  Waiting for PostgreSQL to be ready..."
-  sleep 1
+  sleep 1 >> /var/log/postgresql/postgresql.log 2>&1
 done
 
 # 
 if [ -f /tmp/init.sql ]; then
     echo "📄  Running /tmp/init.sql"
-    su-exec postgres psql -U postgres -f /tmp/init.sql
+    su-exec postgres psql -U postgres -f /tmp/init.sql >> /var/log/postgresql/postgresql.log 2>&1
     # rm /tmp/init.sql
 fi
 
 # 
 echo "🛑  Stopping temporary PostgreSQL"
-kill "$PG_PID"
-wait "$PG_PID"
+kill "$PG_PID" >> /var/log/postgresql/postgresql.log 2>&1
+wait "$PG_PID" >> /var/log/postgresql/postgresql.log 2>&1
 #******************************************************************************#
 #******************************************************************************#
 
@@ -184,7 +166,36 @@ wait "$PG_PID"
 
 # Create the init.sql script that will be executed on the first run
 echo "🚀 Starting PostgreSQL server..."
-exec su-exec postgres postgres -D "$DATA_DIR" 
+exec su-exec postgres postgres -D "$DATA_DIR" >> /var/log/postgresql/postgresql.log 2>&1
 # exec tail -f /dev/null
 
 #*****************************************************************************#
+
+
+# -- 6. Create a sample table
+# CREATE TABLE IF NOT EXISTS $DB_SAMPLE_NAME ( 
+#     id SERIAL PRIMARY KEY,
+#     username VARCHAR(50) UNIQUE,
+#     email VARCHAR(100) UNIQUE,
+#     password VARCHAR(255),
+#     provider VARCHAR(50) DEFAULT 'local',
+#     github_id VARCHAR(50),
+#     google_id VARCHAR(50),
+#     oauth42_id VARCHAR(50),
+#     name VARCHAR(100),
+#     first_name VARCHAR(50),
+#     last_name VARCHAR(50),
+#     avatar_url TEXT,
+#     email_2fa BOOLEAN DEFAULT FALSE,
+#     autenticator_2fa BOOLEAN DEFAULT FALSE,
+#     phone_2fa BOOLEAN DEFAULT FALSE,
+#     email_verified BOOLEAN DEFAULT FALSE,
+#     phone_verified BOOLEAN DEFAULT FALSE,
+#     vault_token VARCHAR(255),
+#     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+#     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+# );
+
+# -- 8. Grant privileges to $DB_USER
+# GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE $DB_SAMPLE_NAME TO $DB_USER;
+# GRANT USAGE, SELECT, UPDATE ON SEQUENCE ${DB_SAMPLE_NAME}_id_seq TO $DB_USER;
