@@ -6,7 +6,7 @@
 /*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/23 15:58:35 by tissad            #+#    #+#             */
-/*   Updated: 2025/10/24 11:58:36 by tissad           ###   ########.fr       */
+/*   Updated: 2025/10/24 14:01:49 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,7 +34,7 @@ import { prismaPlugin } from './plugins/prisma.plugin';
 const app = Fastify({ logger: true });
 
 // Register plugins (database, redis, etc.)
-app.register(dbPlugin);
+// app.register(dbPlugin);
 app.register(redisPlugin);
 app.register(prismaPlugin);
 

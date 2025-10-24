@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   redis.ts                                           :+:      :+:    :+:   */
+/*   redis.plugin.ts                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/16 11:29:10 by tissad            #+#    #+#             */
-/*   Updated: 2025/10/10 16:43:27 by tissad           ###   ########.fr       */
+/*   Updated: 2025/10/24 14:18:12 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,7 +34,7 @@ const redisPlugin = fp(async (fastify: FastifyInstance) => {
     try {
       const result = await fastify.redis.ping();
       if (result === "PONG") {
-        fastify.log.info("✅ Redis connection successful");
+        console.log("✅ Redis connection successful");
       } else {
         fastify.log.error("❌ Redis connection failed: Unexpected response");
       }

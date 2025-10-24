@@ -7,7 +7,7 @@
     "build": "tsc",
     "start": "node dist/srcs/api.js",
 
-    "prisma:generate": "prisma generate",
+    "prisma:generate": "prisma generate --schema=./lib/prisma/schema.prisma",
     "prisma:migrate": "prisma migrate dev --schema=./lib/prisma/schema.prisma",
     "prisma:reset": "prisma migrate reset --force --schema=./lib/prisma/schema.prisma",
     "prisma:studio": "prisma studio --schema=./lib/prisma/schema.prisma"

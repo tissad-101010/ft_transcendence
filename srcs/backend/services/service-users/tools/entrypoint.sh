@@ -22,15 +22,9 @@ until pg_isready -h postgreSQL -p $DB_PORT -U admin >> /dev/null 2>&1; do
   echo "🔄 Waiting for PostgreSQL to be ready..."
   sleep 2
 done
-echo "✅ PostgreSQL is ready!"
-
-echo $BATABASE_URL >> lib/.env
-
-cd lib/prisma
-npm run prisma:generate
-npm run prisma:migrate
-cd ../../
 # echo "pg_isready -h postgreSQL -p $DB_PORT -U admin: PostgreSQL is ready!"
 echo "🚀 Starting service-users app..."
+npm run prisma:generate
+npm run prisma:migrate
 npm run dev 
 # exec tail -f /dev/null 

@@ -16,12 +16,13 @@ RUN npm install
 
 COPY ./app/srcs .
 COPY ./app/tsconfig.json .
-
-RUN npm run build
+COPY ./app/lib/prisma ./lib/prisma
+RUN npm run prisma:generate && npm run build
 
 FROM node:22.17.1
 
 RUN echo "step II : run"
+
 RUN apt-get install -y bash 
 
 RUN apt-get update && apt-get install -y postgresql-client
