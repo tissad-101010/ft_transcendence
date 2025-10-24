@@ -93,6 +93,7 @@ services:
     environment:
       - NODE_ENV=production
       - VAULT_ADDR=http://hashicorp_vault:8200
+      - DATABASE_URL=${DATABASE_URL}
       - DB_HOST=${DB_HOST}
       - DB_NAME=${DB_NAME}
       - DB_USER=${DB_USER}

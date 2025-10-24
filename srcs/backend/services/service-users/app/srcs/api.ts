@@ -6,7 +6,7 @@
 /*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/23 15:58:35 by tissad            #+#    #+#             */
-/*   Updated: 2025/10/23 12:20:03 by tissad           ###   ########.fr       */
+/*   Updated: 2025/10/24 11:58:36 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,8 +21,9 @@ import { googleRoutes } from './routes/OauthGoogle.routes';
 import { oauth42Routes } from './routes/Oauth42.routes';
 
 // import plugins
-import dbPlugin from './plugins/db';
-import redisPlugin from './plugins/redis';
+import dbPlugin from './plugins/db.plugin';
+import redisPlugin from './plugins/redis.plugin';
+import { prismaPlugin } from './plugins/prisma.plugin';
 
 
 
@@ -35,6 +36,8 @@ const app = Fastify({ logger: true });
 // Register plugins (database, redis, etc.)
 app.register(dbPlugin);
 app.register(redisPlugin);
+app.register(prismaPlugin);
+
 
 
 // Register routes
