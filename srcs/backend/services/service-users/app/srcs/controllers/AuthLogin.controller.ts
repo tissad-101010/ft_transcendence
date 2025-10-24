@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   users.controller.ts                                :+:      :+:    :+:   */
+/*   AuthLogin.controller.ts                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/25 11:19:58 by tissad            #+#    #+#             */
-/*   Updated: 2025/10/21 13:48:55 by tissad           ###   ########.fr       */
+/*   Updated: 2025/10/24 16:47:10 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,22 +21,25 @@ import { SigninUserInput } from '../types/user.type'
 export async function signupController(
   request: FastifyRequest,
   reply: FastifyReply
+  
 ) {
   const signupInfo = request.body as SignupUserInput
   try {
-    const userService = new UserService(request.server.db)
-
+    const userService = new UserService(request.server)
+    console.log('====>Signup info received:', signupInfo)
     // Vérifie si l'utilisateur existe déjà
     const existingUser = await userService.getByUsername(signupInfo.username)
+    console.log('====>Existing user check1111111111111111111111111:', existingUser)
+    
     const existingEmail = await userService.getByEmail(signupInfo.email)
-
+    console.log('====>Existing user check:', { existingUser, existingEmail })
     if (existingUser || existingEmail) {
       return reply.code(409).send({ message: 'Username or email already exists' })
     }
+    console.log('====>No existing user found, proceeding to signup.')
+    const result = await userService.signupUser(signupInfo) 
 
-    const result = await userService.signup(signupInfo)
-
-    console.log(`User created: ${result.data.username}`)
+    console.log(`User created: ${result.username}`)
     return reply.code(201).send(result)
   } catch (error) {
     request.log.error('Error during signup:', undefined, error)
@@ -52,11 +55,11 @@ export async function signinController(
 ) { 
   const signinInfo = request.body as SigninUserInput
   try {
-    const userService = new UserService(request.server.db)
-    const result = await userService.signin(signinInfo)
+    const userService = new UserService(request.server)
+    const result = await userService.signinUser(signinInfo)
 
-    if (result.data) {
-      console.log(`User signed in: ${result.data.username}`)
+    if (result) {
+      console.log(`User signed in: ${result.username}`)
       return reply.code(200).send(result)
     } else {
       return reply.code(401).send({ message: 'Invalid username or password' })

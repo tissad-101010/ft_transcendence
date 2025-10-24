@@ -17,14 +17,14 @@ set -e
 # echo "🔄 Generating Prisma client..."
 # npx prisma generate
 
-until pg_isready -h postgreSQL -p $DB_PORT -U admin >> /dev/null 2>&1; do
+until pg_isready -h postgreSQL -p $DB_PORT -U admin; do
   # echo "connecting to PostgreSQL at $DB_HOST:$DB_PORT as $DB_USER..."
   echo "🔄 Waiting for PostgreSQL to be ready..."
   sleep 2
 done
 # echo "pg_isready -h postgreSQL -p $DB_PORT -U admin: PostgreSQL is ready!"
 echo "🚀 Starting service-users app..."
-npm run prisma:generate
+npm run prisma:reset
 npm run prisma:migrate
 npm run dev 
 # exec tail -f /dev/null 

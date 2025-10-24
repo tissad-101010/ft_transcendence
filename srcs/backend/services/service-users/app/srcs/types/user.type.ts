@@ -6,7 +6,7 @@
 /*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/25 15:14:54 by tissad            #+#    #+#             */
-/*   Updated: 2025/09/09 14:33:46 by tissad           ###   ########.fr       */
+/*   Updated: 2025/10/24 18:45:59 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,8 +38,20 @@ export interface SigninUserInput {
 // response data type for signin
 export interface SigninResponse {
   message: string;
-  id: number;
+  data: any;
+}
+
+// session data type
+export interface DataResponse {
+  userId: number;
   username: string;
+  email: string;
+  emailVerified: boolean;
+  phoneVerified: boolean;
+  email2FA: boolean;
+  phone2FA: boolean;
+  authenticator2FA: boolean;
+  enabled2FA: boolean;
   accessToken: string; // JWT access token
   refreshToken: string; // JWT refresh token
 }

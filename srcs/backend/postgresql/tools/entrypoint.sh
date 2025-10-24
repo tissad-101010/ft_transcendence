@@ -137,26 +137,26 @@ EOF
   #wrapper for the init.sql script
 # 
 echo "▶️   Starting PostgreSQL temporarily."
-su-exec postgres postgres -D "$DATA_DIR" >> /var/log/postgresql/postgresql.log 2>&1 &
+su-exec postgres postgres -D "$DATA_DIR"   &
 PG_PID=$!
 
 # 
-until su-exec postgres pg_isready -q >> /var/log/postgresql/postgresql.log 2>&1 ; do 
+until su-exec postgres pg_isready -q   ; do 
   echo "⏳  Waiting for PostgreSQL to be ready..."
-  sleep 1 >> /var/log/postgresql/postgresql.log 2>&1
+  sleep 1  
 done
 
 # 
 if [ -f /tmp/init.sql ]; then
     echo "📄  Running /tmp/init.sql"
-    su-exec postgres psql -U postgres -f /tmp/init.sql >> /var/log/postgresql/postgresql.log 2>&1
+    su-exec postgres psql -U postgres -f /tmp/init.sql  
     # rm /tmp/init.sql
 fi
 
 # 
 echo "🛑  Stopping temporary PostgreSQL"
-kill "$PG_PID" >> /var/log/postgresql/postgresql.log 2>&1
-wait "$PG_PID" >> /var/log/postgresql/postgresql.log 2>&1
+kill "$PG_PID"  
+wait "$PG_PID"  
 #******************************************************************************#
 #******************************************************************************#
 
@@ -166,7 +166,7 @@ wait "$PG_PID" >> /var/log/postgresql/postgresql.log 2>&1
 
 # Create the init.sql script that will be executed on the first run
 echo "🚀 Starting PostgreSQL server..."
-exec su-exec postgres postgres -D "$DATA_DIR" >> /var/log/postgresql/postgresql.log 2>&1
+exec su-exec postgres postgres -D "$DATA_DIR"  
 # exec tail -f /dev/null
 
 #*****************************************************************************#
