@@ -6,7 +6,7 @@
 /*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/25 11:19:58 by tissad            #+#    #+#             */
-/*   Updated: 2025/10/24 16:47:10 by tissad           ###   ########.fr       */
+/*   Updated: 2025/10/26 19:27:43 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,7 +59,7 @@ export async function signinController(
     const result = await userService.signinUser(signinInfo)
 
     if (result) {
-      console.log(`User signed in: ${result.username}`)
+      console.log(`User signed in: ${result.data.username}`)
       return reply.code(200).send(result)
     } else {
       return reply.code(401).send({ message: 'Invalid username or password' })
