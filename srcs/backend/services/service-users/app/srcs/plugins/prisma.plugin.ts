@@ -6,14 +6,15 @@
 /*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/24 10:31:21 by tissad            #+#    #+#             */
-/*   Updated: 2025/10/24 14:16:56 by tissad           ###   ########.fr       */
+/*   Updated: 2025/10/27 11:13:08 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 import fp from "fastify-plugin";
-import { PrismaClient } from "../../lib/generated/prisma/client";
+import { PrismaClient } from "../prisma/generated/prisma/client";
 
 let prisma: PrismaClient | null = null;
+
 
 const prismaPlugin = fp(async (fastify) => {
   if (!prisma) {

@@ -16,7 +16,9 @@ RUN npm install
 
 COPY ./app/srcs /app/srcs
 COPY ./app/tsconfig.json .
-COPY ./app/lib/prisma /app/lib/prisma
+
+# COPY prisma schema and generate client
+COPY ./app/srcs/prisma/prisma /app/srcs/prisma/prisma
 RUN npm run prisma:generate && npm run build
 
 FROM node:22.17.1

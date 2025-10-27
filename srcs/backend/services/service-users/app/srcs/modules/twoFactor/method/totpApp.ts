@@ -1,26 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   user.model.ts                                      :+:      :+:    :+:   */
+/*   totpApp.ts                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/07/25 11:32:05 by tissad            #+#    #+#             */
-/*   Updated: 2025/10/20 14:50:04 by tissad           ###   ########.fr       */
+/*   Created: 2025/10/27 11:50:06 by tissad            #+#    #+#             */
+/*   Updated: 2025/10/27 11:50:07 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-
-export interface User {
-  id: string;
-  email: string;
-  phone?: string;
-  password?: string; // hashed password optional for OAuth users
-  provider?: 'local' | 'github';
-  githubId?: string;
-  name?: string;
-  avatarUrl?: string;
-  isTwoFactorEnabled: boolean;
-  createdAt: Date;
-  updatedAt: Date;
-}

@@ -1,0 +1,81 @@
+
+// =====================
+// User Profile
+// =====================
+model UserProfile {
+  // =====================
+  // Basic Info
+  // =====================
+  id               String           @id @default(uuid())
+  email            String           @unique
+  username         String          @unique
+  passwordHash     String?          // null si utilisateur OAuth uniquement
+  phoneNumber      String?          @unique
+  isVerified       Boolean          @default(false)
+  emailVerified    Boolean          @default(false)
+  phoneVerified    Boolean          @default(false)
+  // =====================
+  // 2FA
+  // =====================
+  twoFactorMethods TwoFactorMethod[]
+  // =====================
+  // OAuth Providers
+  // =====================
+  oauthProviders   OAuthProvider[]
+  // =====================
+  // Profil & Statut
+  // =====================
+  displayName      String?
+  avatarUrl        String?
+  role             UserRole         @default(USER)
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+}
+
+
+// =====================
+// 2FA Methods
+// =====================
+model TwoFactorMethod {
+  id         String       @id @default(uuid())
+  type       TwoFactorType
+  enabled    Boolean       @default(false)
+  createdAt  DateTime      @default(now())
+  user       UserProfile   @relation(fields: [userId], references: [id])
+  userId     String
+}
+
+
+// =====================
+// OAuth Providers
+// =====================
+model OAuthProvider {
+  id            String       @id @default(uuid())
+  provider      OAuthProviderType
+  providerId    String       // ex: id Google ou GitHub
+  accessToken   String?
+  refreshToken  String?
+  user          UserProfile  @relation(fields: [userId], references: [id])
+  userId        String
+}
+
+
+// =====================
+// Enums
+// =====================
+enum UserRole {
+  USER
+  ADMIN
+}
+
+enum TwoFactorType {
+  TOTP
+  SMS
+  EMAIL
+}
+
+enum OAuthProviderType {
+  GOOGLE
+  GITHUB
+  FORTYTWO
+}

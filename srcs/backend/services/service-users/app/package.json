@@ -7,10 +7,10 @@
     "build": "tsc",
     "start": "node dist/srcs/api.js",
 
-    "prisma:generate": "prisma generate --schema=./lib/prisma/schema.prisma",
-    "prisma:migrate": "prisma migrate dev --schema=./lib/prisma/schema.prisma --name initUserTable",
-    "prisma:reset": "prisma migrate reset --force --schema=./lib/prisma/schema.prisma",
-    "prisma:studio": "prisma studio --schema=./lib/prisma/schema.prisma"
+    "prisma:generate": "prisma generate --schema=./srcs/prisma/prisma/schema.prisma",
+    "prisma:migrate": "prisma migrate dev --schema=./srcs/prisma/prisma/schema.prisma --name initUserTable",
+    "prisma:reset": "prisma migrate reset --force --schema=./srcs/prisma/prisma/schema.prisma",
+    "prisma:studio": "prisma studio --schema=./srcs/prisma/prisma/schema.prisma"
   },  
 
   "keywords": [],
