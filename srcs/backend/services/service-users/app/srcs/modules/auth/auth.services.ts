@@ -6,7 +6,7 @@
 /*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/27 11:44:27 by tissad            #+#    #+#             */
-/*   Updated: 2025/10/27 16:50:07 by tissad           ###   ########.fr       */
+/*   Updated: 2025/10/28 15:19:58 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,12 +26,32 @@ import { JwtUtils } from '../../utils/jwt.utils';
 /***********************************/
 
 export class AuthService {
-    private usersService: UsersService;
+    private userService: UsersService;
     constructor(prismaClient: any) {
-        this.usersService = new UsersService(prismaClient);
+        this.userService = new UsersService(prismaClient);
     }
     // register a new user
     async registerUser(inputData: SignupUserDTO): Promise<SignupResponseDTO> {
+    try {   
+            console.log('[Signup authservice] Checking for existing username or email');
+            const existingUser = await this.userService.getUserByEmail(inputData.email)
+                || await this.userService.getUserByUsername(inputData.username);
+            if (existingUser) {
+                console.log('[Signup Controller] Username or email already exists');
+                // send back error response
+                return({ 
+                    message: 'Username or email already exists',
+                    signupComplete: false,
+                } as SignupResponseDTO);
+            }
+        }
+        catch (error) {
+            console.error('[Signup authservice] Error checking existing user:', error);
+            return({    
+                message: 'Signup failed due to server error',
+                signupComplete: false,
+            } as SignupResponseDTO);
+        }
         // hash the password before storing
         const hashedPassword = await CryptUtils.hashLongPassword(inputData.password);
         // data that will be stored in the database
@@ -41,7 +61,7 @@ export class AuthService {
             passwordHash: hashedPassword,
         };
         // create the user
-        const user = await this.usersService.createUser(data);
+        const user = await this.userService.createUser(data);
 
         // if user creation fails
         if (!user) {
@@ -63,11 +83,13 @@ export class AuthService {
             process.env.REFRESH_TOKEN_SECRET === undefined ||
             process.env.ACCESS_TOKEN_EXPIRATION === undefined ||
             process.env.REFRESH_TOKEN_EXPIRATION === undefined) {
-            throw new Error('JWT configuration is missing');
+            throw new Error('JWT secret configuration is missing');
         }        
         // find user by username
-        const user = await this.usersService.getUserByUsername(inputData.username)|| 
-        await this.usersService.getUserByEmail(inputData.username);
+        console.log('[Signin authservice] Authenticating user:', inputData.username);
+        const user = await this.userService.getUserByUsername(inputData.username)|| 
+        await this.userService.getUserByEmail(inputData.username);
+        console.log('[Signin authservice] User found:', user ? user.username : 'null');
         if (!user) {
             return {
                 message: 'Authentication failed: User not found',
@@ -116,7 +138,7 @@ export class AuthService {
     }
 
     async getUserProfile(userId: string): Promise<any> {
-        const user = await this.usersService.getUserById(userId);
+        const user = await this.userService.getUserById(userId);
         if (!user) {
             return null;
         }

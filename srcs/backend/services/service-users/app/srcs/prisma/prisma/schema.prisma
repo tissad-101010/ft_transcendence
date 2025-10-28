@@ -1,14 +1,35 @@
+// Prisma schema file
+
+// =====================
+// Generator
+// =====================
+generator client {
+  provider = "prisma-client"
+  output = "./generated/client"
+}
+
+
+
+// =====================
+// Datasource
+// =====================
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+
 
 // =====================
 // User Profile
 // =====================
-model UserProfile {
+model User {
   // =====================
   // Basic Info
   // =====================
   id               String           @id @default(uuid())
   email            String           @unique
-  username         String          @unique
+  username         String           @unique
   passwordHash     String?          // null si utilisateur OAuth uniquement
   phoneNumber      String?          @unique
   isVerified       Boolean          @default(false)
@@ -41,7 +62,7 @@ model TwoFactorMethod {
   type       TwoFactorType
   enabled    Boolean       @default(false)
   createdAt  DateTime      @default(now())
-  user       UserProfile   @relation(fields: [userId], references: [id])
+  user       User   @relation(fields: [userId], references: [id])
   userId     String
 }
 
@@ -55,7 +76,7 @@ model OAuthProvider {
   providerId    String       // ex: id Google ou GitHub
   accessToken   String?
   refreshToken  String?
-  user          UserProfile  @relation(fields: [userId], references: [id])
+  user          User  @relation(fields: [userId], references: [id])
   userId        String
 }
 

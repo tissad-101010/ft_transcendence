@@ -6,7 +6,7 @@
 /*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/23 15:58:35 by tissad            #+#    #+#             */
-/*   Updated: 2025/10/24 14:01:49 by tissad           ###   ########.fr       */
+/*   Updated: 2025/10/28 16:23:05 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,11 +14,11 @@ import Fastify from 'fastify';
 import cors from '@fastify/cors';
 
 // import routes
-import { userRoutes } from './routes/AuthLogin.routes';
-import { TwoFactorAuth } from './routes/TwoFactorAuth.routes';
-import { githubRoutes } from './routes/OauthGithub.routes';
-import { googleRoutes } from './routes/OauthGoogle.routes';
-import { oauth42Routes } from './routes/Oauth42.routes';
+import { authRoutes } from './modules/auth/auth.routes';
+// import { TwoFactorAuth } from './routes/TwoFactorAuth.routes';
+// import { githubRoutes } from './routes/OauthGithub.routes';
+// // import { googleRoutes } from './routes/OauthGoogle.routes';
+// import { oauth42Routes } from './routes/Oauth42.routes';
 
 // import plugins
 import dbPlugin from './plugins/db.plugin';
@@ -41,11 +41,11 @@ app.register(prismaPlugin);
 
 
 // Register routes
-app.register(userRoutes, { prefix: '/users' });
-app.register(TwoFactorAuth, { prefix: '/two-factor' });
-app.register(githubRoutes, { prefix: '/auth' });
-app.register(googleRoutes, { prefix: '/auth' });
-app.register(oauth42Routes, { prefix: '/auth' });
+app.register(authRoutes, { prefix: '/user' });
+// app.register(TwoFactorAuth, { prefix: '/two-factor' });
+// app.register(githubRoutes, { prefix: '/auth' });
+// app.register(googleRoutes, { prefix: '/auth' });
+// app.register(oauth42Routes, { prefix: '/auth' });
 
 
 // Start the Fastify server
@@ -67,7 +67,7 @@ const start = async () => {
     });
     
     await app.listen({ port: 4000, host: '0.0.0.0' });
-    console.log('🚀 Server is running at http://localhost:4000');
+    console.log('🚀 Server is running');
 
   } catch (err) {
     app.log.error(err);

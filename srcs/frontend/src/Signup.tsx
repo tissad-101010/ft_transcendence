@@ -9,7 +9,7 @@ function SignupForm() {
     e.preventDefault(); // prevent the default form submission behavior
     console.log('Signup URL:', 'https://localhost:8443/api');
     try {
-      const response = await fetch('https://localhost:8443/api/users/signup', {
+      const response = await fetch('https://localhost:8443/api/user/signup', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json', // indicates that the request body is JSON
@@ -29,7 +29,7 @@ function SignupForm() {
       });
       const data = await response.json();
       console.log(data.message); // affiche le message de succès
-      console.log('recived data:', data.data); // affiche les données reçues
+      console.log('recived data:', data); // affiche les données reçues
       if (response.ok) {
         console.log('registration successful:', data.data);
       } else {

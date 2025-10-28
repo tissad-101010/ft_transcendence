@@ -8,7 +8,7 @@ function SigninForm() {
     e.preventDefault(); // empêche le rechargement de la page
     console.log('Signin URL:', 'https://localhost:8443/api');
     try {
-      const response = await fetch('https://localhost:8443/api/users/signin', {
+      const response = await fetch('https://localhost:8443/api/user/signin', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

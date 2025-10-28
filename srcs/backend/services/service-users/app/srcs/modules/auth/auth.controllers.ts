@@ -6,7 +6,7 @@
 /*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/27 11:44:30 by tissad            #+#    #+#             */
-/*   Updated: 2025/10/27 17:00:57 by tissad           ###   ########.fr       */
+/*   Updated: 2025/10/28 15:18:17 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,8 +51,8 @@ export async function signupController(
     // check if username or email already exists
     try {   
         console.log('[Signup Controller] Checking for existing username or email');
-        const existingUser = await userService.getUserByEmail(inputData.email) ||
-            await userService.getUserByUsername(inputData.username);
+        const existingUser = await userService.getUserByEmail(inputData.email)
+            || await userService.getUserByUsername(inputData.username);
         if (existingUser) {
             console.log('[Signup Controller] Username or email already exists');
             // send back error response
@@ -93,6 +93,7 @@ export async function signinController(
   request: FastifyRequest,  
   reply: FastifyReply 
 ) { 
+    console.log('[Signin Controller] Received signin request');
     const inputData = request.body as LoginUserDTO;
     const authService = new AuthService(request.server.prisma);
     try {
