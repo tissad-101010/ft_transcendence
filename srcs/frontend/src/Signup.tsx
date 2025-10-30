@@ -79,21 +79,21 @@ function SignupForm() {
       <button type="submit">S'inscrire</button>
     </form>
           <div id ="Oauth-github">
-        <a href="https://localhost:8443/api/auth/github">
+        <a href="https://localhost:8443/api/user/oauth/github">
           <button type="button" style={{ marginTop: 10 }}>
             continuer avec GitHub
           </button>
         </a>
       </div>
       <div id ="Oauth-google">
-        <a href="https://localhost:8443/api/auth/google">
+        <a href="https://localhost:8443/api/user/oauth/google">
           <button type="button" style={{ marginTop: 10 }}>
             continuer avec Google
           </button>
         </a>
       </div>
       <div id ="Oauth-42">
-        <a href="https://localhost:8443/api/auth/42">
+        <a href="https://localhost:8443/api/user/oauth/42">
           <button type="button" style={{ marginTop: 10 }}>
             continuer avec 42
           </button>
