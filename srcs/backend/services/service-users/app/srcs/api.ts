@@ -6,12 +6,15 @@
 /*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/23 15:58:35 by tissad            #+#    #+#             */
-/*   Updated: 2025/10/30 12:27:15 by tissad           ###   ########.fr       */
+/*   Updated: 2025/10/30 14:36:40 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 import Fastify from 'fastify';
 import cors from '@fastify/cors';
+import fastifyCookie from '@fastify/cookie';
+
+
 
 // import routes
 import { authRoutes,
@@ -32,8 +35,14 @@ import { prismaPlugin } from './plugins/prisma.plugin';
 
 /* ************************************************************************** */
 
-// Import the Fastify framework
+// register the Fastify framework
 const app = Fastify({ logger: true });
+
+// Register cookie plugin
+app.register(fastifyCookie, {
+  secret: process.env.COOKIE_SECRET || 'supersecret', // optionnel (pour signer les cookies)
+});
+
 
 // Register plugins (database, redis, etc.)
 // app.register(dbPlugin);

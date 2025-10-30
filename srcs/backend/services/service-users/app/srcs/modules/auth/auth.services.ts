@@ -6,7 +6,7 @@
 /*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/27 11:44:27 by tissad            #+#    #+#             */
-/*   Updated: 2025/10/28 15:19:58 by tissad           ###   ########.fr       */
+/*   Updated: 2025/10/30 15:19:36 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -144,7 +144,6 @@ export class AuthService {
         }
         // return user profile data excluding sensitive information
         return {
-            id: user.id,
             email: user.email,
             username: user.username,
             avatarUrl: user.avatarUrl,

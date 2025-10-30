@@ -6,7 +6,7 @@
 /*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/27 12:12:38 by tissad            #+#    #+#             */
-/*   Updated: 2025/10/30 12:28:16 by tissad           ###   ########.fr       */
+/*   Updated: 2025/10/30 16:10:42 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,8 +14,12 @@ import {    signupController,
             signinController,
             getProfileController,
         } from './auth.controllers';
-import {    googleOAuthControllerCallback,
-            googleProviderRedirect
+import {    fortyTwoProviderRedirect,
+            githubProviderRedirect, 
+            googleProviderRedirect,
+            fortyTwoOAuthControllerCallback,
+            githubOAuthControllerCallback,
+            googleOAuthControllerCallback,
         } from '../oauth/oauth.controllers';
 
 /***********************************/
@@ -38,12 +42,17 @@ export async function authRoutes(server: FastifyInstance)
 // OAuth routes
 export async function oauthRoutes(server: FastifyInstance)
 {
+    // Google OAuth routes
     server.get('/google/provider', googleProviderRedirect);
     server.get('/google/callback', googleOAuthControllerCallback);
-    server.get('/github/provider', googleProviderRedirect);
-    server.get('/github/callback', googleOAuthControllerCallback);
-    server.get('/42/provider', googleProviderRedirect);
-    server.get('/42/callback', googleOAuthControllerCallback);
+    
+    // GitHub OAuth routes
+    server.get('/github/provider', githubProviderRedirect);
+    server.get('/github/callback', githubOAuthControllerCallback);
+    
+    // 42 OAuth routes
+    server.get('/42/provider', fortyTwoProviderRedirect);
+    server.get('/42/callback', fortyTwoOAuthControllerCallback);
 }
 
 // user routes

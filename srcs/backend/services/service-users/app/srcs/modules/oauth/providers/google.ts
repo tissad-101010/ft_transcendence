@@ -6,7 +6,7 @@
 /*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/27 12:12:09 by tissad            #+#    #+#             */
-/*   Updated: 2025/10/30 12:06:38 by tissad           ###   ########.fr       */
+/*   Updated: 2025/10/30 14:12:02 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -100,9 +100,7 @@ export class GoogleOAuthProvider {
                 console.log("[google.service] Error preparing user creation:", error);
                 return null;
             }
-            user = await this.userService.createUser(DB_profile);
         }
-        
         // link OAuth provider to the new user
         if (user)
         {

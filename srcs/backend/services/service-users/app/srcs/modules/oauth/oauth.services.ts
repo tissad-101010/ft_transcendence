@@ -6,7 +6,7 @@
 /*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/27 11:45:25 by tissad            #+#    #+#             */
-/*   Updated: 2025/10/30 12:02:16 by tissad           ###   ########.fr       */
+/*   Updated: 2025/10/30 17:20:51 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,25 +25,41 @@ export class OauthService {
     }
     
     async handleGoogleOAuth(code: string): Promise<any> {
-        const googleProvider = new GoogleOAuthProvider( this.prismaClient);
-        const accessToken = await googleProvider.getAccessToken(code);
-        const profile = await googleProvider.getGoogleProfile(accessToken);
-        const user = await googleProvider.findOrCreateUser(profile);
-        // 
-        return user;
+        try {
+            const googleProvider = new GoogleOAuthProvider( this.prismaClient);
+            const accessToken = await googleProvider.getAccessToken(code);
+            const profile = await googleProvider.getGoogleProfile(accessToken);
+            const user = await googleProvider.findOrCreateUser(profile);
+            return user;
+        } catch (error) {
+            console.log("[OAuth Service] Google OAuth error:", error);
+            return (null);
+        }
     }
     
     async handleGitHubOAuth(code: string): Promise<any> {
-        const githubProvider = new GitHubOAuthProvider();
-        const accessToken = await githubProvider.getAccessToken(code);
-        const profile = await githubProvider.getGithubProfile(accessToken);
-        return profile;
+        try {
+            const githubProvider = new GitHubOAuthProvider( this.prismaClient);
+            const accessToken = await githubProvider.getAccessToken(code);
+            const profile = await githubProvider.getGithubProfile(accessToken);
+            const user = await githubProvider.findOrCreateUser(profile);
+            return user;
+        } catch (error) {
+            console.log("[OAuth Service] Google OAuth error:", error);
+            return (null);
+        }
     }
 
     async handle42OAuth(code: string): Promise<any> {
-        const api42Provider = new Api42OAuthProvider();
-        const accessToken = await api42Provider.getAccessToken(code);
-        const profile = await api42Provider.get42Profile(accessToken);
-        return profile;
+        try {
+            const api42Provider = new Api42OAuthProvider(this.prismaClient);
+            const accessToken = await api42Provider.getAccessToken(code);
+            const profile = await api42Provider.get42Profile(accessToken);
+            const user = await api42Provider.findOrCreateUser(profile);
+            return user;
+        } catch (error) {
+            console.log("[OAuth Service] 42 OAuth error:", error);
+            return (null);
+        }
     }
 }   
