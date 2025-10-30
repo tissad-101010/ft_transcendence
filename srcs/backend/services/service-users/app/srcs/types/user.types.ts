@@ -6,7 +6,7 @@
 /*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/25 15:14:54 by tissad            #+#    #+#             */
-/*   Updated: 2025/10/27 15:33:44 by tissad           ###   ########.fr       */
+/*   Updated: 2025/10/30 12:08:38 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,7 +37,6 @@ export interface TwoFactorMethod {
 /*        User OAuth Provider      */
 /***********************************/
 export interface OAuthProvider {
-  id: string;
   provider: OAuthProviderType;
   providerId: string;
   accessToken?: string;
@@ -48,7 +47,7 @@ export interface OAuthProvider {
 /*          User Profile           */
 /***********************************/
 export interface UserProfile {
-  id: string;
+  id?: string;
   email: string;
   username?: string;
   firstName?: string;
@@ -60,18 +59,18 @@ export interface UserProfile {
   phoneVerified: boolean;
 
   // 2FA
-  twoFactorMethods: TwoFactorMethod[];
+  twoFactorMethods?: TwoFactorMethod[];
 
   // OAuth
-  oauthProviders: OAuthProvider[];
+  oauthProviders?: OAuthProvider[];
 
   // Profil
   displayName?: string;
   avatarUrl?: string;
-  role: UserRole;
+  role?: UserRole;
 
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
 /***********************************/

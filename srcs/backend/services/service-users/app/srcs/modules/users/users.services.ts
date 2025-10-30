@@ -6,7 +6,7 @@
 /*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/27 11:51:29 by tissad            #+#    #+#             */
-/*   Updated: 2025/10/28 17:21:13 by tissad           ###   ########.fr       */
+/*   Updated: 2025/10/30 12:11:18 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,13 +65,16 @@ export class UsersService {
         });
     }
     // link OAuth provider to user
-  async linkOAuthProviderToUser(userId: string, oauthData: OAuthProviderInput) {
+  async linkOAuthProviderToUser(userId: string, oauthData: OAuthProvider) {
     try {
-      // 1️⃣ Vérifie si le user existe
-      const user = await this.prismaClient.user.findUnique({ where: { id: userId } });
-      if (!user) throw new Error('User not found');
+      // step 1️⃣ — check if user exists
+      try {
+        await this.prismaClient.user.findUnique({ where: { id: userId } });
+      } catch {
+        throw new Error('User not found');
+      }
 
-      // 2️⃣ Vérifie si un provider de ce type est déjà lié à ce user
+      // 2️⃣ — check if the OAuth provider is already linked
       const existing = await this.prismaClient.oAuthProvider.findFirst({
         where: {
           userId,
@@ -82,7 +85,8 @@ export class UsersService {
       let result;
 
       if (existing) {
-        // 3️⃣ Mise à jour du provider existant
+        // 3️⃣ — update existing OAuth provider link
+        console.log('🔄 Updating existing OAuth provider link for user ID:', userId);
         result = await this.prismaClient.oAuthProvider.update({
           where: { id: existing.id },
           data: {
@@ -92,8 +96,9 @@ export class UsersService {
           },
         });
       } else {
-        // 4️⃣ Création d’un nouveau lien OAuth → User
-        result = await this.prismaClient.oAuthProvider.create({
+        // 4️⃣ — create new OAuth provider link
+        console.log('🔗 Linking new OAuth provider to user:', oauthData.provider, oauthData.providerId, 'for user ID:', userId);
+        result = await this.prismaClient.oAuthProvider.create({ 
           data: {
             provider: oauthData.provider,
             providerId: oauthData.providerId,

@@ -6,7 +6,7 @@
 /*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/23 15:58:35 by tissad            #+#    #+#             */
-/*   Updated: 2025/10/28 16:23:05 by tissad           ###   ########.fr       */
+/*   Updated: 2025/10/30 12:27:15 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,14 +14,16 @@ import Fastify from 'fastify';
 import cors from '@fastify/cors';
 
 // import routes
-import { authRoutes } from './modules/auth/auth.routes';
+import { authRoutes,
+          oauthRoutes,
+          userRoutes
+ } from './modules/auth/auth.routes';
 // import { TwoFactorAuth } from './routes/TwoFactorAuth.routes';
 // import { githubRoutes } from './routes/OauthGithub.routes';
 // // import { googleRoutes } from './routes/OauthGoogle.routes';
 // import { oauth42Routes } from './routes/Oauth42.routes';
 
 // import plugins
-import dbPlugin from './plugins/db.plugin';
 import redisPlugin from './plugins/redis.plugin';
 import { prismaPlugin } from './plugins/prisma.plugin';
 
@@ -41,7 +43,10 @@ app.register(prismaPlugin);
 
 
 // Register routes
-app.register(authRoutes, { prefix: '/user' });
+app.register(authRoutes, { prefix: '/user/auth' });
+app.register(oauthRoutes, { prefix: '/user/oauth' });
+app.register(userRoutes, { prefix: '/user' });
+
 // app.register(TwoFactorAuth, { prefix: '/two-factor' });
 // app.register(githubRoutes, { prefix: '/auth' });
 // app.register(googleRoutes, { prefix: '/auth' });

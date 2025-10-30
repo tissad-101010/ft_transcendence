@@ -6,7 +6,7 @@
 /*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/27 11:45:25 by tissad            #+#    #+#             */
-/*   Updated: 2025/10/28 16:23:24 by tissad           ###   ########.fr       */
+/*   Updated: 2025/10/30 12:02:16 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,10 +25,12 @@ export class OauthService {
     }
     
     async handleGoogleOAuth(code: string): Promise<any> {
-        const googleProvider = new GoogleOAuthProvider();
+        const googleProvider = new GoogleOAuthProvider( this.prismaClient);
         const accessToken = await googleProvider.getAccessToken(code);
         const profile = await googleProvider.getGoogleProfile(accessToken);
-        return profile;
+        const user = await googleProvider.findOrCreateUser(profile);
+        // 
+        return user;
     }
     
     async handleGitHubOAuth(code: string): Promise<any> {

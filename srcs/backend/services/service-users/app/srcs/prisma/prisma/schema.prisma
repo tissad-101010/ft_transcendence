@@ -36,6 +36,13 @@ model User {
   emailVerified    Boolean          @default(false)
   phoneVerified    Boolean          @default(false)
   // =====================
+  // more info
+  // =====================
+  firstName       String?
+  lastName        String?
+  dateOfBirth     DateTime?
+  lastLogin       DateTime?
+  // =====================
   // 2FA
   // =====================
   twoFactorMethods TwoFactorMethod[]

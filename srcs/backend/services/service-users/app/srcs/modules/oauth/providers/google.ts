@@ -6,14 +6,16 @@
 /*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/27 12:12:09 by tissad            #+#    #+#             */
-/*   Updated: 2025/10/28 17:38:08 by tissad           ###   ########.fr       */
+/*   Updated: 2025/10/30 12:06:38 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 
 import axios from "axios";
 import { UsersService } from "../../users/users.services";
-import { OAuthProvider } from "../../../types/user.types";
+import { OAuthProvider,
+        UserProfile
+ } from "../../../types/user.types";
 import { OAuthProviderType } from "../../../prisma/prisma/generated/client/enums";
 
 /***********************************/
@@ -26,7 +28,7 @@ export class GoogleOAuthProvider {
     private userService: UsersService;
 
 
-    constructor(prismaClient?: any) {
+    constructor(prismaClient: any) {
         this.clientId = process.env.GOOGLE_CLIENT_ID!;
         this.clientSecret = process.env.GOOGLE_CLIENT_SECRET!;
         this.userService = new UsersService(prismaClient);
@@ -63,36 +65,62 @@ export class GoogleOAuthProvider {
             console.log("[google.service] Failed to fetch Google profile:", response.data);
             throw new Error("Failed to fetch Google profile");
         }
-        console.log("[google.service] Successfully fetched Google profile");
-        return response.data;
+        // console.log("[google.service] ====>Successfully fetched Google profile", response);
+        return (response.data);
     }
     /*
     step 3 — find user in DB or create new user
     */
-    async findOrCreateUser(profile: any): Promise<any> {
-        let user = await this.userService.getUserByEmail(profile.email);
+    // connection ok + jwt token, not user data
+    async findOrCreateUser(google_profile: any): Promise<any> {
+        console.log("[google.service]================> Google profile data:", google_profile);
+        let  user = await this.userService.getUserByEmail(google_profile.email);
+        console.log("[google.service] Searching for user by email:", google_profile.email);  
         if (!user) {
             console.log("[google.service] No existing user found, creating new user");
-            const data = {
-                email: profile.email,
-                username: profile.name,
-                
+            const DB_profile: UserProfile = {
+                email: google_profile.email,
+                username: google_profile.name,
+                // firstName: google_profile.given_name,
+                // lastName: google_profile.family_name,
+                passwordHash: undefined,
+                isVerified: true,
+                emailVerified: google_profile.verified_email,
+                phoneVerified: false,
+                phoneNumber: undefined,
+                displayName: google_profile.name,
+                avatarUrl: google_profile.picture,
+                createdAt: new Date(),
+                updatedAt: new Date(),
             };
-            user = await this.userService.createUser(data);
-            // link OAuth provider to the new user
-            if (user)
-            {
-                await this.userService.linkOAuthProviderToUser(user.id, {
-                    provider: OAuthProviderType.GOOGLE,
-                    providerId: profile.providerId,
-                    accessToken: profile.accessToken,
-                    refreshToken: profile.refreshToken,
-                });
+            try {
+                console.log("[google.service] Creating user with profile:", DB_profile);
+                 user = await this.userService.createUser(DB_profile);
+            } catch (error) {
+                console.log("[google.service] Error preparing user creation:", error);
+                return null;
             }
-            
-        } else {
-            console.log("[google.service] Existing user found:", user.username);
+            user = await this.userService.createUser(DB_profile);
         }
-        return user;
+        
+        // link OAuth provider to the new user
+        if (user)
+        {
+            console.log("[google.service] Linking Google OAuth provider to user:", user.id);
+            const DB_provider : OAuthProvider = {
+                provider: OAuthProviderType.GOOGLE,
+                providerId: google_profile.id,// Google unique ID /!\
+                accessToken: undefined,
+                refreshToken: undefined,
+            }
+            try {
+                await this.userService.linkOAuthProviderToUser(user.id, DB_provider);
+                console.log("[google.service] Successfully linked Google OAuth provider to user:", user.id);
+                return user;
+            } catch (error) {
+                console.log("[google.service] Error linking OAuth provider to user:", error);
+                return null;
+            }    
+        }
     }
 }
