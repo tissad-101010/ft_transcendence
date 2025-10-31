@@ -6,7 +6,7 @@
 /*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/27 14:39:36 by tissad            #+#    #+#             */
-/*   Updated: 2025/10/27 15:07:06 by tissad           ###   ########.fr       */
+/*   Updated: 2025/10/31 10:12:08 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,20 @@
 /*    Credential Utility Class     */
 /***********************************/
 
+import { promises } from 'dns';
 import { SignupUserDTO } from '../types/user.types';
+
+interface Errors {
+    emailFormat?: string;
+    usernameFormat?: string;
+    passwordFormat?: string;
+}
+
+interface Response {
+    isValid: boolean;
+    errors: Errors;
+}
+
 
 export class CredentialUtils {
     // Placeholder for credential utility methods
@@ -38,21 +51,22 @@ export class CredentialUtils {
             /[!@#$%^&*(),.?":{}|<>]/.test(password) // at least one special character
         );
     }
-    static validateCredentials(data: SignupUserDTO): { isValid: boolean; response: string } {
-        const errors: string[] = [];
-
+    static validateCredentials(data: SignupUserDTO):Response { 
+        const errors: Errors = {};
+        const response: Response = { isValid: true, errors: {} };
         if (!this.isValidEmail(data.email)) {
-            errors.push('Invalid email format.');
+            errors.emailFormat = 'Invalid email format.';
+            response.isValid = false;
         }
         if (!this.isValidUsername(data.username)) {
-            errors.push('Invalid username. It should be 3-30 characters long and can contain letters, numbers, and underscores.');
+            errors.usernameFormat = 'Username must be 3-30 characters long and can only contain letters, numbers, and underscores.';
+            response.isValid = false;
         }
         if (!this.isValidPassword(data.password)) {
-            errors.push('8 characters minimum, 1 uppercase, 1 lowercase,1 digit, and 1 special character.');
+            errors.passwordFormat = 'Password must be at least 8 characters long and include uppercase letters, lowercase letters, numbers, and special characters.';
+            response.isValid = false;
         }
-        return {
-            isValid: errors.length === 0,
-            response: errors.join(' '),
-        };
+        response.errors = errors;
+        return response;
     }        
 }

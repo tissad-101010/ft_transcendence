@@ -6,7 +6,7 @@
 /*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/27 11:51:29 by tissad            #+#    #+#             */
-/*   Updated: 2025/10/30 12:11:18 by tissad           ###   ########.fr       */
+/*   Updated: 2025/10/31 10:58:04 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -132,5 +132,15 @@ export class UsersService {
 
     async listUsers() {
         return this.prismaClient.user.findMany();
+    }
+
+    async getTwoFactorMethods(userId: string) {
+      const userWith2FA = await this.prismaClient.user.findUnique({
+        where: { id: userId },
+        include: {
+          twoFactorMethods: true, // charge la relation
+        },
+      });
+      return userWith2FA?.twoFactorMethods || [];
     }
 }

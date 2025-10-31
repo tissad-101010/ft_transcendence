@@ -6,7 +6,7 @@
 /*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/27 11:44:27 by tissad            #+#    #+#             */
-/*   Updated: 2025/10/30 15:19:36 by tissad           ###   ########.fr       */
+/*   Updated: 2025/10/31 11:49:23 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,8 @@ import { SignupUserDTO,
          SignupResponseDTO,
          LoginUserDTO,
          LoginResponseDTO,
+         AuthenticatedUserDTO,
+         UserProfile 
         } from '../../types/user.types';
 import { CryptUtils } from '../../utils/crypt.utils';
 import { JwtUtils } from '../../utils/jwt.utils';
@@ -32,26 +34,7 @@ export class AuthService {
     }
     // register a new user
     async registerUser(inputData: SignupUserDTO): Promise<SignupResponseDTO> {
-    try {   
-            console.log('[Signup authservice] Checking for existing username or email');
-            const existingUser = await this.userService.getUserByEmail(inputData.email)
-                || await this.userService.getUserByUsername(inputData.username);
-            if (existingUser) {
-                console.log('[Signup Controller] Username or email already exists');
-                // send back error response
-                return({ 
-                    message: 'Username or email already exists',
-                    signupComplete: false,
-                } as SignupResponseDTO);
-            }
-        }
-        catch (error) {
-            console.error('[Signup authservice] Error checking existing user:', error);
-            return({    
-                message: 'Signup failed due to server error',
-                signupComplete: false,
-            } as SignupResponseDTO);
-        }
+        console.log('[Signup authservice] Registering user:', inputData.username);
         // hash the password before storing
         const hashedPassword = await CryptUtils.hashLongPassword(inputData.password);
         // data that will be stored in the database
@@ -78,25 +61,12 @@ export class AuthService {
     }
 
     
-    async authenticateUser(inputData: LoginUserDTO): Promise<LoginResponseDTO>{
-        if (process.env.ACCESS_TOKEN_SECRET === undefined ||
-            process.env.REFRESH_TOKEN_SECRET === undefined ||
-            process.env.ACCESS_TOKEN_EXPIRATION === undefined ||
-            process.env.REFRESH_TOKEN_EXPIRATION === undefined) {
-            throw new Error('JWT secret configuration is missing');
-        }        
+    async authenticateUser(inputData: LoginUserDTO) : Promise<LoginResponseDTO> {  
         // find user by username
         console.log('[Signin authservice] Authenticating user:', inputData.username);
         const user = await this.userService.getUserByUsername(inputData.username)|| 
         await this.userService.getUserByEmail(inputData.username);
         console.log('[Signin authservice] User found:', user ? user.username : 'null');
-        if (!user) {
-            return {
-                message: 'Authentication failed: User not found',
-                signinComplete: false,
-                twoFactorRequired: false,
-            };
-        }
         // verify password  
         const isPasswordValid = await CryptUtils.verifyLongPassword(
             inputData.password,
@@ -109,46 +79,46 @@ export class AuthService {
                 twoFactorRequired: false,
             };
         }
-        // generate JWT tokens
-        const accessToken = JwtUtils.generateToken(
-            { id: user.id }, 
-            process.env.ACCESS_TOKEN_SECRET!,
-            process.env.ACCESS_TOKEN_EXPIRATION!
-        );
-        const refreshToken = JwtUtils.generateToken(
-            { id: user.id },
-            process.env.REFRESH_TOKEN_SECRET!,
-            process.env.REFRESH_TOKEN_EXPIRATION!
-        );
+        const loginResponse: AuthenticatedUserDTO = {
+            id: user.id,
+            email: user.email,
+        };
+        const accessToken = JwtUtils.generateAccessToken(loginResponse);
+        const refreshToken = JwtUtils.generateRefreshToken(loginResponse);
+        const twoFactorMethods = await this.userService.getTwoFactorMethods(user.id);
+        const isTwoFactorEnabled = twoFactorMethods.length > 0;
         return {
+            message: 'Authentication successful',
             signinComplete: true,
-            twoFactorRequired: user.twoFactorEnabled || false,
-            methodsEnabled: user.twoFactorMethods || [],
+            methodsEnabled: twoFactorMethods,
+            twoFactorRequired: isTwoFactorEnabled,
             accessToken,
             refreshToken,
         };
     }
-    // Additional authentication methods can be added here
-    async verifyAuthToken(token: string): Promise<any> {
-        if (process.env.ACCESS_TOKEN_SECRET === undefined) {
-            throw new Error('JWT configuration is missing');
-        }
-        const payload = JwtUtils.verifyToken(token, process.env.ACCESS_TOKEN_SECRET);
-        return payload;
-    }
 
-    async getUserProfile(userId: string): Promise<any> {
+    async getUserProfile(userId: string): Promise<UserProfile | null> {
         const user = await this.userService.getUserById(userId);
         if (!user) {
             return null;
         }
         // return user profile data excluding sensitive information
+        const twoFactorMethods = await this.userService.getTwoFactorMethods(user.id);
+        const isTwoFactorEnabled = twoFactorMethods.length > 0;
         return {
             email: user.email,
             username: user.username,
+            firstName: user.firstName,
+            lastName: user.lastName,
             avatarUrl: user.avatarUrl,
             createdAt: user.createdAt,
             updatedAt: user.updatedAt,
-        };
+            twoFactorEnabled: isTwoFactorEnabled,
+            twoFactorMethods: twoFactorMethods,
+        }as  UserProfile;
+    }
+    
+    async getUserById(userId: string) { 
+        return this.userService.getUserById(userId);
     }
 }

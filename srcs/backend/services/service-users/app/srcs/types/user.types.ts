@@ -6,7 +6,7 @@
 /*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/25 15:14:54 by tissad            #+#    #+#             */
-/*   Updated: 2025/10/30 12:08:38 by tissad           ###   ########.fr       */
+/*   Updated: 2025/10/31 11:44:36 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,7 +47,6 @@ export interface OAuthProvider {
 /*          User Profile           */
 /***********************************/
 export interface UserProfile {
-  id?: string;
   email: string;
   username?: string;
   firstName?: string;
@@ -57,8 +56,8 @@ export interface UserProfile {
   isVerified: boolean;
   emailVerified: boolean;
   phoneVerified: boolean;
-
   // 2FA
+  twoFactorEnabled: boolean;
   twoFactorMethods?: TwoFactorMethod[];
 
   // OAuth
@@ -99,6 +98,7 @@ export interface UpdateUserDTO {
   phoneNumber?: string;
   displayName?: string;
   avatarUrl?: string;
+  role?: UserRole;
 }
 
 /************************************/
@@ -135,6 +135,7 @@ export interface SignupUserDTO {
 export interface SignupResponseDTO {
   message: string;
   signupComplete: boolean;
+  errors?:any;
 }
 
 /************************************/
@@ -148,12 +149,19 @@ export interface LoginUserDTO {
 /*      User Login Response DTO     */
 /************************************/
 export interface LoginResponseDTO {
-  message?: string;
   signinComplete: boolean;
+  message?: string;
   twoFactorRequired?: boolean;
   methodsEnabled?: TwoFactorType[];
   accessToken?: string;
   refreshToken?: string;
+}
+/************************************/
+/*      Authenticated User DTO      */
+/************************************/
+export interface AuthenticatedUserDTO {
+  id: string;
+  email: string;
 }
 
 

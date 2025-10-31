@@ -6,7 +6,7 @@
 /*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/27 11:44:30 by tissad            #+#    #+#             */
-/*   Updated: 2025/10/28 15:18:17 by tissad           ###   ########.fr       */
+/*   Updated: 2025/10/31 11:52:56 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,6 +23,10 @@ import { SignupUserDTO,
 import { UsersService } from '../users/users.services';
 import { CredentialUtils } from '../../utils/credential.utils';
 import { AuthService } from './auth.services';
+import { CryptUtils } from '../../utils/crypt.utils';
+import { JwtUtils } from '../../utils/jwt.utils';
+import { log } from 'console';
+import { auth } from 'firebase-admin';
 /***********************************/
 /*     Auth Controllers            */
 /***********************************/
@@ -38,11 +42,12 @@ export async function signupController(
         inputData
     );
     if (!credentialValidation.isValid) {
-        console.log('[Signup Controller] Invalid credentials:', credentialValidation.response);
+        console.log('[Signup Controller] Invalid credentials:', credentialValidation.errors);
         // send back error response
         return reply.code(400).send({
-            message: 'Signup failed: ' + credentialValidation.response,
+            message: 'Signup failed: Invalid credentials',
             signupComplete: false,
+            errors: credentialValidation
         } as SignupResponseDTO);
     }
     
@@ -77,7 +82,13 @@ export async function signupController(
         if (!signupResponse.signupComplete) {
             return reply.code(400).send(signupResponse);
         }
-        return reply.code(201).send(signupResponse);
+    
+        
+        // Successful registration redirect to signin page
+        console.log('[Signup Controller] User registered successfully');
+        return reply.code(201).redirect(process.env.FRONTEND_URL || 'https://localhost:8443/signin');
+    
+    
     } catch (error) {
         console.error('[Signup Controller] Error during user registration:', error);
         return reply.code(500).send({
@@ -102,8 +113,15 @@ export async function signinController(
         if (!loginResponse.signinComplete) {
             return reply.code(401).send(loginResponse);
         }
-        console.log('[Signin Controller] User authenticated successfully');
-        return reply.code(200).send(loginResponse);
+        // set JWT cookies
+        JwtUtils.setAccessTockenCookie(reply, loginResponse.accessToken!);
+        JwtUtils.setRefreshTockenCookie(reply, loginResponse.refreshToken!);
+        return reply.code(200).send({
+            message: loginResponse.message,
+            signinComplete: loginResponse.signinComplete,
+            twoFactorRequired: loginResponse.twoFactorRequired,
+            methodsEnabled: loginResponse.methodsEnabled,
+        } as LoginResponseDTO);
     } catch (error) {
         console.error('[Signin Controller] Error during authentication:', error);
         return reply.code(500).send({
@@ -118,33 +136,28 @@ export async function getProfileController(
     request: FastifyRequest,
     reply: FastifyReply
 ) {
-    const token = request.headers['authorization']?.split(' ')[1];
-    if (!token) {
-        return reply.code(401).send({ message: 'Unauthorized: No token provided' });
+    const access_token = request.cookies['access_token'];
+    if (!access_token) {
+        return reply.code(401).send({ message: 'Unauthorized: No access token provided' });
     }
     const authService = new AuthService(request.server.prisma);
-    // midelware functionality to verify token
-    try {
-        const isAuthenticated = await authService.verifyAuthToken(token);
-        if (!isAuthenticated) {
-            return reply.code(401).send({ message: 'Unauthorized' });
-        }
-        // proceed to next handler
-        try {
-            const userId = isAuthenticated.id;
-            const userProfile = await authService.getUserProfile(userId);
-            if (!userProfile) {
-                return reply.code(404).send({ message: 'User profile not found' });
-            }
-            return reply.code(200).send(userProfile);
-        } catch (error) {
-            console.error('[Get Profile Controller] Error fetching user profile:', error);
-            return reply.code(500).send({ message: 'Internal server error fetching profile' });
-        }
+    const payload = JwtUtils.verifyAccessToken(access_token);
+    if (!payload) {
+        return reply.code(401).send({ message: 'Unauthorized: Invalid access token' });
     }
-    catch (error) {
-        console.error('[Get Profile Controller] Error during token verification:', error);
-        return reply.code(500).send({ message: 'Internal server error during authentication' });
+    try {
+        const user = await authService.getUserById(payload.id);
+        if (!user) {
+            return reply.code(404).send({ message: 'User not found' });
+        }
+        const profie_data = await authService.getUserProfile(user.id);
+        if (profie_data === null) {
+            return reply.code(404).send({ message: 'User profile not found' });
+        }
+        return reply.code(200).send({ profile: profie_data});
+    } catch (error) {
+        console.error('[Get Profile Controller] Error fetching user profile:', error);
+        return reply.code(500).send({ message: 'Internal server error' });
     }
 }
 
