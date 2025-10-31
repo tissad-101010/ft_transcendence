@@ -6,7 +6,7 @@
 /*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/25 15:14:54 by tissad            #+#    #+#             */
-/*   Updated: 2025/10/31 11:44:36 by tissad           ###   ########.fr       */
+/*   Updated: 2025/10/31 16:53:05 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -142,6 +142,8 @@ export interface SignupResponseDTO {
 /*      User Login DTO              */  
 /************************************/
 export interface LoginUserDTO {
+  userAgent: string;
+  ipAddress: string;
   username: string;
   password: string;
 }
@@ -155,6 +157,7 @@ export interface LoginResponseDTO {
   methodsEnabled?: TwoFactorType[];
   accessToken?: string;
   refreshToken?: string;
+  tempToken?: string;
 }
 /************************************/
 /*      Authenticated User DTO      */

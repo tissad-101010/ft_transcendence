@@ -6,7 +6,7 @@
 /*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/23 15:58:35 by tissad            #+#    #+#             */
-/*   Updated: 2025/10/30 14:36:40 by tissad           ###   ########.fr       */
+/*   Updated: 2025/10/31 15:22:02 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,6 +60,9 @@ app.register(userRoutes, { prefix: '/user' });
 // app.register(githubRoutes, { prefix: '/auth' });
 // app.register(googleRoutes, { prefix: '/auth' });
 // app.register(oauth42Routes, { prefix: '/auth' });
+
+
+
 
 
 // Start the Fastify server

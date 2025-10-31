@@ -1,42 +1,69 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom'; // pour rediriger après succès
 
 function SignupForm() {
+  const navigate = useNavigate();
+
+  // champs du formulaire
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [email, setEmail] = useState('');
 
+  // gestion des erreurs
+  const [errors, setErrors] = useState({
+    emailFormat: '',
+    usernameFormat: '',
+    passwordFormat: '',
+  });
+
+  const [generalError, setGeneralError] = useState('');
+
   const handleSignup = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault(); // prevent the default form submission behavior
-    console.log('Signup URL:', 'https://localhost:8443/api');
+    e.preventDefault();
+    setGeneralError('');
+    setErrors({ emailFormat: '', usernameFormat: '', passwordFormat: '' });
+
     try {
-      const response = await fetch('https://localhost:8443/api/user/signup', {
+      const response = await fetch('https://localhost:8443/api/user/auth/signup', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json', // indicates that the request body is JSON
-          'Accept': 'application/json', // indicates that the client expects a JSON response
-          'Origin': 'https://localhost:8443', // uncomment this line if you want to specify the origin
-          'Access-Control-Allow-Origin': 'https://localhost:8443', // this header is optional, used for CORS
-          'Access-Control-Allow-Credentials': 'true', // this header is optional, used for CORS
-          'Authorization': 'Bearer test' // this header is optional, used for authentication if needed
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
         },
-        credentials: 'include', // include cookies in the request
-        mode: 'cors', // set the mode to 'cors' to allow cross-origin requests
-        body: JSON.stringify({
-          username: username,
-          password: password,
-          email: email,
-        }),
+        credentials: 'include',
+        mode: 'cors',
+        body: JSON.stringify({ username, password, email }),
       });
+
       const data = await response.json();
-      console.log(data.message); // affiche le message de succès
-      console.log('recived data:', data); // affiche les données reçues
-      if (response.ok) {
-        console.log('registration successful:', data.data);
-      } else {
-        console.error('registration failed:', data.message);
+      console.log('Received data:', data);
+
+      // cas succès
+      if (data.signupComplete === true) {
+        console.log('Signup successful');
+        navigate('/signin'); // redirection vers la page de connexion
+        return;
+      }
+
+      // cas erreurs connues
+      if (data.signupComplete === false) {
+        if (data.errors && data.errors.errors) {
+          // erreurs de format côté backend
+          setErrors({
+            emailFormat: data.errors.errors.emailFormat || '',
+            usernameFormat: data.errors.errors.usernameFormat || '',
+            passwordFormat: data.errors.errors.passwordFormat || '',
+          });
+        } else if (data.message) {
+          // message d'erreur global
+          setGeneralError(data.message);
+        } else {
+          setGeneralError('Une erreur inconnue est survenue.');
+        }
       }
     } catch (error) {
       console.error('Error during signup:', error);
+      setGeneralError("Erreur réseau ou serveur injoignable.");
     }
   };
 
@@ -44,58 +71,71 @@ function SignupForm() {
     <div>
       <h2>Signup</h2>
       <p>Enter your details to create an account.</p>
-    <form onSubmit={handleSignup}>
-      <input
-        id ="username"
-        name="username"
-        type="text"
-        placeholder="username"
-        value={username}
-        onChange={(e) => setUsername(e.target.value)}
-      />
-      <br />
-      <br />
-      <input
-        id="email"
-        name="email"
-        type="email"
-        placeholder="email"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-      />
-      <br />
-      <br />
-      <input
-        id="password"
-        name="password"
-        type="password"
-        placeholder="password"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-      />
 
-      <br />
-      <br />
-      <button type="submit">S'inscrire</button>
-    </form>
-          <div id ="Oauth-github">
-        <a href="https://localhost:8443/api/user/oauth/github">
+      <form onSubmit={handleSignup} noValidate>
+        <div style={{ marginBottom: 16 }}>
+          <input
+            id="username"
+            name="username"
+            type="text"
+            placeholder="Nom d'utilisateur"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+          />
+          {errors.usernameFormat && (
+            <p style={{ color: 'red', fontSize: 12 }}>{errors.usernameFormat}</p>
+          )}
+        </div>
+
+        <div style={{ marginBottom: 16 }}>
+          <input
+            id="email"
+            name="email"
+            type="email"
+            placeholder="Adresse email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
+          {errors.emailFormat && (
+            <p style={{ color: 'red', fontSize: 12 }}>{errors.emailFormat}</p>
+          )}
+        </div>
+
+        <div style={{ marginBottom: 16 }}>
+          <input
+            id="password"
+            name="password"
+            type="password"
+            placeholder="Mot de passe"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+          {errors.passwordFormat && (
+            <p style={{ color: 'red', fontSize: 12 }}>{errors.passwordFormat}</p>
+          )}
+        </div>
+
+        {generalError && (
+          <p style={{ color: 'red', fontWeight: 'bold' }}>{generalError}</p>
+        )}
+
+        <button type="submit">S'inscrire</button>
+      </form>
+
+      <div style={{ marginTop: 20 }}>
+        <a href="https://localhost:8443/api/user/oauth/github/provider">
           <button type="button" style={{ marginTop: 10 }}>
-            continuer avec GitHub
+            Continuer avec GitHub
           </button>
         </a>
-      </div>
-      <div id ="Oauth-google">
-        <a href="https://localhost:8443/api/user/oauth/google">
+        <a href="https://localhost:8443/api/user/oauth/google/provider">
           <button type="button" style={{ marginTop: 10 }}>
-            continuer avec Google
+            Continuer avec Google
           </button>
         </a>
-      </div>
-      <div id ="Oauth-42">
-        <a href="https://localhost:8443/api/user/oauth/42">
+        <a href="https://localhost:8443/api/user/oauth/42/provider">
           <button type="button" style={{ marginTop: 10 }}>
-            continuer avec 42
+            Continuer avec 42
           </button>
         </a>
       </div>

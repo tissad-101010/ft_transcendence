@@ -6,7 +6,7 @@
 /*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/27 12:12:38 by tissad            #+#    #+#             */
-/*   Updated: 2025/10/30 16:10:42 by tissad           ###   ########.fr       */
+/*   Updated: 2025/10/31 14:50:21 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,5 +59,5 @@ export async function oauthRoutes(server: FastifyInstance)
 export async function userRoutes(server: FastifyInstance)
 {
     // Define user-related routes here
-    server.get('/me', getProfileController);//pre-handler to verify token is valid aythentication middleware is called before the controller
+    server.get('/profile', getProfileController);//pre-handler to verify token is valid aythentication middleware is called before the controller
 }

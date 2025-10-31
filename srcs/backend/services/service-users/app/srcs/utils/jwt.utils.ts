@@ -6,7 +6,7 @@
 /*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/27 14:02:23 by tissad            #+#    #+#             */
-/*   Updated: 2025/10/30 15:14:51 by tissad           ###   ########.fr       */
+/*   Updated: 2025/10/31 16:52:20 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,18 +50,38 @@ export class JwtUtils {
         );
     }   
 
-    static setAccessTockenCookie(reply: any, token: string) {
+    static generateTwoFactorTempToken(payload: Record<string, any>): string {
+        return this.generateToken(
+            payload,
+            process.env.TEMP_TOKEN_SECRET!, 
+            process.env.TEMP_TOKEN_EXPIRATION!
+        );
+    }
+
+    static setAccessTokenCookie(reply: any, token: string) {
         reply.setCookie('access_token', token, {
+            httpOnly: true,
+            secure: true,
+            sameSite:'strict',
+            // secure: process.env.NODE_ENV === 'production',
+            // sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'none',
+            path: '/',
+            maxAge: 60 * 1, // 15 minutes
+        });
+    }
+    static setRefreshTokenCookie(reply: any, token: string) {
+        reply.setCookie('refresh_token', token, {
             httpOnly: true,
             secure: true,
             sameSite: 'strict', 
         });
     }
-    static setRefreshTockenCookie(reply: any, token: string) {
-        reply.setCookie('refresh_token', token, {
+    
+    static setTempTokenCookie(reply: any, token: string) {
+        reply.setCookie('temp_token', token, {
             httpOnly: true,
             secure: true,
-            sameSite: 'strict', 
+            sameSite: 'none',
         });
     }
     

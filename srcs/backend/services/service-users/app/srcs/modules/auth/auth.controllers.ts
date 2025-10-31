@@ -6,7 +6,7 @@
 /*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/27 11:44:30 by tissad            #+#    #+#             */
-/*   Updated: 2025/10/31 11:52:56 by tissad           ###   ########.fr       */
+/*   Updated: 2025/10/31 17:11:43 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -77,7 +77,7 @@ export async function signupController(
     // Step 3: proceed to register the user
     try {
         console.log('[Signup Controller] Credentials validated, proceeding to register user');
-        const authService = new AuthService(request.server.prisma);
+        const authService = new AuthService(request.server);
         const signupResponse = await authService.registerUser(inputData);
         if (!signupResponse.signupComplete) {
             return reply.code(400).send(signupResponse);
@@ -86,7 +86,7 @@ export async function signupController(
         
         // Successful registration redirect to signin page
         console.log('[Signup Controller] User registered successfully');
-        return reply.code(201).redirect(process.env.FRONTEND_URL || 'https://localhost:8443/signin');
+        return reply.code(201).send(signupResponse).redirect('https://localhost:8443/signin');
     
     
     } catch (error) {
@@ -106,22 +106,42 @@ export async function signinController(
 ) { 
     console.log('[Signin Controller] Received signin request');
     const inputData = request.body as LoginUserDTO;
-    const authService = new AuthService(request.server.prisma);
+    const authService = new AuthService(request.server);
     try {
         // authenticate the user
         const loginResponse = await authService.authenticateUser(inputData);
         if (!loginResponse.signinComplete) {
             return reply.code(401).send(loginResponse);
         }
-        // set JWT cookies
-        JwtUtils.setAccessTockenCookie(reply, loginResponse.accessToken!);
-        JwtUtils.setRefreshTockenCookie(reply, loginResponse.refreshToken!);
-        return reply.code(200).send({
+        console.log('[Signin Controller] User authenticated successfully');
+        loginResponse.twoFactorRequired = true; // TO BE REMOVED AFTER TESTING
+        // prepare BASIC response data
+        const responseData: LoginResponseDTO = {
             message: loginResponse.message,
             signinComplete: loginResponse.signinComplete,
             twoFactorRequired: loginResponse.twoFactorRequired,
             methodsEnabled: loginResponse.methodsEnabled,
-        } as LoginResponseDTO);
+        };    
+        
+
+        // handle 2FA requirement
+        
+        if ( loginResponse.twoFactorRequired ) {    
+            console.log('[Signin Controller] 2FA required, sending response without tokens');
+            JwtUtils.setTempTokenCookie(reply, loginResponse.tempToken!); 
+            return reply.code(200).send(responseData);// or redirect to 2FA page
+        }
+
+
+        // no 2FA required, set JWT cookies
+        console.log('[Signin Controller] No 2FA required, setting JWT cookies');
+        // set JWT cookies
+        JwtUtils.setAccessTokenCookie(reply, loginResponse.accessToken!);
+        JwtUtils.setRefreshTokenCookie(reply, loginResponse.refreshToken!);
+        return reply.code(200).send(responseData);
+
+        
+    
     } catch (error) {
         console.error('[Signin Controller] Error during authentication:', error);
         return reply.code(500).send({
@@ -140,7 +160,7 @@ export async function getProfileController(
     if (!access_token) {
         return reply.code(401).send({ message: 'Unauthorized: No access token provided' });
     }
-    const authService = new AuthService(request.server.prisma);
+    const authService = new AuthService(request.server);
     const payload = JwtUtils.verifyAccessToken(access_token);
     if (!payload) {
         return reply.code(401).send({ message: 'Unauthorized: Invalid access token' });

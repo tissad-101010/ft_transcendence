@@ -6,7 +6,7 @@
 /*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/27 12:12:03 by tissad            #+#    #+#             */
-/*   Updated: 2025/10/31 09:51:12 by tissad           ###   ########.fr       */
+/*   Updated: 2025/10/31 17:10:07 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,8 +49,8 @@ export async function githubProviderRedirect(req: FastifyRequest,
         throw new Error("Missing GitHub OAuth configuration");
     }
     // Redirect user to GitHub's OAuth 2.0 consent screen
-    const githubAuthUrl = `https://github.com/login/oauth/authorize?`+`
-        client_id=${githubClientId}&redirect_uri=${githubredirectUri}&`+
+    const githubAuthUrl = `https://github.com/login/oauth/authorize?`+
+        `client_id=${githubClientId}&redirect_uri=${githubredirectUri}&`+
         `scope=user:email`;
     console.log("[OauthGitHub.controller] Redirecting to:", githubAuthUrl);
     return reply.redirect(githubAuthUrl);
@@ -86,20 +86,27 @@ export async function googleOAuthControllerCallback(
         const user = await oauthService.handleGoogleOAuth(code);
         if (!user) {
             // Authentication failed
+            return reply.code(401).send({ message: "Google OAuth authentication failed" });
         }
         else {
-            // Successful authentication
-            // generate JWT tokens
-            const accessToken = JwtUtils.generateAccessToken({ id: user.id, email: user.email });
-            const refreshToken = JwtUtils.generateRefreshToken({ id: user.id, email: user.email });
-            // set cookies
-            JwtUtils.setAccessTockenCookie(reply, accessToken);
-            JwtUtils.setRefreshTockenCookie(reply, refreshToken);
+
+            // handle 2FA if enabled
             if ( user.isTwoFactorEnabled ) {
+                console.log("User has 2FA enabled, redirecting to 2FA page");
+                const temp_token = JwtUtils.generateTwoFactorTempToken({ id: user.id, email: user.email });
+                JwtUtils.setTempTokenCookie(reply, temp_token);
                 // redirect to 2FA page
                 return reply.redirect(`${process.env.FRONTEND_URL || '/'}2fa`);
             }
-            return reply.redirect(`${process.env.FRONTEND_URL || '/'}2fa`);
+            // Successful authentication
+            // generate JWT tokens
+            console.log("Google OAuth successful for user ID:", user.id);
+            const accessToken = JwtUtils.generateAccessToken({ id: user.id, email: user.email });
+            const refreshToken = JwtUtils.generateRefreshToken({ id: user.id, email: user.email });
+            // set cookies
+            JwtUtils.setAccessTokenCookie(reply, accessToken);
+            JwtUtils.setRefreshTokenCookie(reply, refreshToken);
+            return reply.redirect(`${process.env.FRONTEND_URL || '/'}`);
             // return reply.redirect(process.env.FRONTEND_URL || '/');
         }
     }
@@ -120,19 +127,24 @@ export async function githubOAuthControllerCallback(
         const user = await oauthService.handleGitHubOAuth(code);
         if (!user) {
             // Authentication failed    
+            return reply.code(401).send({ message: "GitHub OAuth authentication failed" }); 
         }   
         else {
+            if ( user.isTwoFactorEnabled ) {
+                // redirect to 2FA page
+                console.log("User has 2FA enabled, redirecting to 2FA page");
+                const temp_token = JwtUtils.generateTwoFactorTempToken({ id: user.id, email: user.email });
+                JwtUtils.setTempTokenCookie(reply, temp_token);
+                return reply.redirect(`${process.env.FRONTEND_URL || '/'}2fa`);
+            }
             // Successful authentication
+            console.log("GitHub OAuth successful for user ID:", user.id);
             // generate JWT tokens
             const accessToken = JwtUtils.generateAccessToken({ id: user.id, email: user.email });
             const refreshToken = JwtUtils.generateRefreshToken({ id: user.id, email: user.email });
             // set cookies
-            JwtUtils.setAccessTockenCookie(reply, accessToken);
-            JwtUtils.setRefreshTockenCookie(reply, refreshToken);
-            if ( user.isTwoFactorEnabled ) {
-                // redirect to 2FA page
-                return reply.redirect(`${process.env.FRONTEND_URL || '/'}2fa`);
-            }
+            JwtUtils.setAccessTokenCookie(reply, accessToken);
+            JwtUtils.setRefreshTokenCookie(reply, refreshToken);
             return reply.redirect(process.env.FRONTEND_URL || '/');
         }
     }
@@ -152,20 +164,27 @@ export async function fortyTwoOAuthControllerCallback(
     try {
         const user = await oauthService.handle42OAuth(code);    
         if (!user) {
-            // Authentication failed    
+            // Authentication failed
+            console.log("42 OAuth authentication failed");
+            return reply.code(401).send({ message: "42 OAuth authentication failed" });  
         }   
         else {
+            
+            if ( user.isTwoFactorEnabled ) {
+                // redirect to 2FA page
+                console.log("User has 2FA enabled, redirecting to 2FA page");   
+                const temp_token = JwtUtils.generateTwoFactorTempToken({ id: user.id, email: user.email });
+                JwtUtils.setTempTokenCookie(reply, temp_token);
+                return reply.redirect(`${process.env.FRONTEND_URL || '/'}2fa`);
+            }
             // Successful authentication
+            console.log("42 OAuth successful for user ID:", user.id);
             // generate JWT tokens
             const accessToken = JwtUtils.generateAccessToken({ id: user.id, email: user.email });
             const refreshToken = JwtUtils.generateRefreshToken({ id: user.id, email: user.email });
             // set cookies
-            JwtUtils.setAccessTockenCookie(reply, accessToken);
-            JwtUtils.setRefreshTockenCookie(reply, refreshToken);
-            if ( user.isTwoFactorEnabled ) {
-                // redirect to 2FA page
-                return reply.redirect(`${process.env.FRONTEND_URL || '/'}2fa`);
-            }
+            JwtUtils.setAccessTokenCookie(reply, accessToken);
+            JwtUtils.setRefreshTokenCookie(reply, refreshToken);
             return reply.redirect(process.env.FRONTEND_URL || '/');
         }   
     }
