@@ -6,7 +6,7 @@
 /*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/27 12:12:18 by tissad            #+#    #+#             */
-/*   Updated: 2025/10/30 17:38:05 by tissad           ###   ########.fr       */
+/*   Updated: 2025/10/31 17:18:20 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -81,6 +81,7 @@ export class Api42OAuthProvider {
             const DB_profile: UserProfile = {
                 email: fortytwo_profile.email,
                 username: fortytwo_profile.login,
+                // twoFactorEnabled: false,
                 // firstName: google_profile.given_name,
                 // lastName: google_profile.family_name,
                 passwordHash: undefined,

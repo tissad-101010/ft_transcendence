@@ -6,7 +6,7 @@
 /*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/25 15:14:54 by tissad            #+#    #+#             */
-/*   Updated: 2025/10/31 16:53:05 by tissad           ###   ########.fr       */
+/*   Updated: 2025/10/31 17:18:03 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,7 +57,7 @@ export interface UserProfile {
   emailVerified: boolean;
   phoneVerified: boolean;
   // 2FA
-  twoFactorEnabled: boolean;
+  twoFactorEnabled?: boolean;
   twoFactorMethods?: TwoFactorMethod[];
 
   // OAuth
