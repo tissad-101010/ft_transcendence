@@ -41,7 +41,6 @@ local:
 	cp ./srcs/.env ~/.env.local
 npm_cache_clean:
 	npm cache clean --force
-	rm -rf node_modules
-	rm -f package-lock.json
+
 
 .PHONY: start down restart up clean prune

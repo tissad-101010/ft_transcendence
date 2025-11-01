@@ -1,11 +1,11 @@
 import React from 'react';
 import { useState } from 'react';
-import BabylonScene from './BabylonScene';
-import Chat from './Chat';
+import BabylonScene from './BabylonScene.tsx';
+import Chat from './Chat.tsx';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import SignupForm from './Signup';
-import SigninForm from './Signin';
-import OtpVerification from './2fa';
+import SignupForm from './Signup.tsx';
+import SigninForm from './Signin.tsx';
+import OtpVerification from './2fa.tsx';
 import './App.css';
 import { Link } from 'react-router-dom';
 
@@ -14,7 +14,7 @@ import { Link } from 'react-router-dom';
 const Scene: React.FC = () => {
   return (
     <div style={{ position: "relative", width: "100%", height: "100vh", overflow: "hidden" }}>
-      <BabylonScene />
+      <BabylonScene />git 
       <Chat />
     </div>
   );
