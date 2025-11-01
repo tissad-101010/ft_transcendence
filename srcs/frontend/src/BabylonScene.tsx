@@ -96,7 +96,17 @@ const BabylonScene = () => {
         };
     }, []);
 
-    return <canvas ref={canvasRef} style={{ width: '100%', height: '100vh' }} />;
+    return (
+    <canvas
+      ref={canvasRef}
+      style={{
+        width: "100%",
+        height: "100vh",
+        display: "block",
+        background: "black",
+      }}
+    />
+  );
 
 };
 export default BabylonScene;
