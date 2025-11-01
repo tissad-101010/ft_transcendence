@@ -23,6 +23,7 @@ clean :
 # 	rm -rf ./srcs/frontend/build
 prune : clean
 	docker system prune -fa
+	npm_cache_clean
 
 test_crs:
 	bash test_tools/test_modsec.sh
@@ -38,7 +39,9 @@ local:
 	mkdir -p ./srcs/backend/services/service-users/data
 	mkdir -p ./srcs/backend/services/service-game/data
 	cp ./srcs/.env ~/.env.local
-
-
+npm_cache_clean:
+	npm cache clean --force
+	rm -rf node_modules
+	rm -f package-lock.json
 
 .PHONY: start down restart up clean prune
