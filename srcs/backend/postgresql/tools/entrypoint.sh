@@ -88,83 +88,93 @@ fi
     echo "📝 Creating init.sql script..."
 #******************************************************************************#
     cat <<EOF > /tmp/init.sql
--- 1. Create admin role if it does not exist
-DO \$\$
-BEGIN
-   IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = 'admin') THEN
-      CREATE ROLE admin WITH LOGIN PASSWORD '$USER_SERVICE_DB_ROOT_PASSWORD';
-   END IF;
-END
-\$\$;
+-- ========================================
+-- 🧩 INIT MULTI-DB + USERS PAR SERVICE (Optimisé)
+-- ========================================
 
--- 2. Create the database if it doesn't exist
-SELECT 'CREATE DATABASE $USER_SERVICE_DB_NAME OWNER admin'
-WHERE NOT EXISTS (
-    SELECT FROM pg_database WHERE datname = '$USER_SERVICE_DB_NAME'
-)\gexec
+  -- 1. Créer le rôle admin s’il n’existe pas
+  DO \$\$
+  BEGIN
+    IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = 'admin') THEN
+        CREATE ROLE admin WITH LOGIN PASSWORD '$GLOBAL_DB_ADMIN_PASSWORD';
+    END IF;
+  END
+  \$\$;
 
--- 3. Grant privileges
-GRANT ALL PRIVILEGES ON DATABASE $USER_SERVICE_DB_NAME TO admin;
+  -- Définir mot de passe pour postgres
+  ALTER USER postgres WITH PASSWORD '$GLOBAL_DB_ADMIN_PASSWORD';
 
--- 4. Set postgres superuser password
-ALTER USER postgres WITH PASSWORD '$USER_SERVICE_DB_ROOT_PASSWORD';
+  -- ========================================
+  -- 🔹 USER SERVICE
+  -- ========================================
 
--- 5. Switch to new DB and create table
-\connect $USER_SERVICE_DB_NAME;
+  -- Créer la base si elle n’existe pas
+  SELECT 'CREATE DATABASE ' || quote_ident('$USER_SERVICE_DB_NAME') || ' OWNER admin'
+  WHERE NOT EXISTS (
+      SELECT FROM pg_database WHERE datname = '$USER_SERVICE_DB_NAME'
+  )\gexec
 
--- 7. Create a app user role
-DO \$\$
-BEGIN
-   IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = '$USER_SERVICE_DB_USER') THEN
-      CREATE ROLE $USER_SERVICE_DB_USER WITH LOGIN PASSWORD '$USER_SERVICE_DB_PASSWORD';
-   END IF;
-END
-\$\$;
+  -- Se connecter à la base
+  \connect $USER_SERVICE_DB_NAME;
 
-ALTER USER $USER_SERVICE_DB_USER CREATEDB;
-GRANT ALL PRIVILEGES ON SCHEMA public TO $USER_SERVICE_DB_USER;
-GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE $USER_SERVICE_DB_NAME TO $USER_SERVICE_DB_USER;
-GRANT USAGE, SELECT, UPDATE ON SEQUENCE ${USER_SERVICE_DB_NAME}_id_seq TO $USER_SERVICE_DB_USER;
+  -- Créer l’utilisateur applicatif
+  DO \$\$
+  BEGIN
+    IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = '$USER_SERVICE_DB_USER') THEN
+        CREATE ROLE "$USER_SERVICE_DB_USER" WITH LOGIN PASSWORD '$USER_SERVICE_DB_PASSWORD';
+    END IF;
+  END
+  \$\$;
 
--- Repeat for another service database if needed
--- 1. Create admin role if it does not exist
+  -- Donner les droits à l’utilisateur
+  GRANT CONNECT ON DATABASE "$USER_SERVICE_DB_NAME" TO "$USER_SERVICE_DB_USER";
+  GRANT ALL PRIVILEGES ON SCHEMA public TO "$USER_SERVICE_DB_USER";
 
-DO \$\$
-BEGIN
-   IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = 'admin') THEN
-      CREATE ROLE admin WITH LOGIN PASSWORD '$GAME_SERVICE_DB_ROOT_PASSWORD';
-   END IF;
-END
-\$\$;
+  -- ========================================
+  -- 🔹 GAME SERVICE
+  -- ========================================
 
--- 2. Create the database if it doesn't exist
-SELECT 'CREATE DATABASE $GAME_SERVICE_DB_NAME OWNER admin'
-WHERE NOT EXISTS (
-    SELECT FROM pg_database WHERE datname = '$GAME_SERVICE_DB_NAME'
-)\gexec
+  SELECT 'CREATE DATABASE ' || quote_ident('$GAME_SERVICE_DB_NAME') || ' OWNER admin'
+  WHERE NOT EXISTS (
+      SELECT FROM pg_database WHERE datname = '$GAME_SERVICE_DB_NAME'
+  )\gexec
 
--- 3. Grant privileges
-GRANT ALL PRIVILEGES ON DATABASE $GAME_SERVICE_DB_NAME TO admin;
+  \connect $GAME_SERVICE_DB_NAME;
 
--- 4. Set postgres superuser password
-ALTER USER postgres WITH PASSWORD '$GAME_SERVICE_DB_ROOT_PASSWORD';
+  DO \$\$
+  BEGIN
+    IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = '$GAME_SERVICE_DB_USER') THEN
+        CREATE ROLE "$GAME_SERVICE_DB_USER" WITH LOGIN PASSWORD '$GAME_SERVICE_DB_PASSWORD';
+    END IF;
+  END
+  \$\$;
 
--- 5. Switch to new DB and create table
-\connect $GAME_SERVICE_DB_NAME;
+  GRANT CONNECT ON DATABASE "$GAME_SERVICE_DB_NAME" TO "$GAME_SERVICE_DB_USER";
+  GRANT ALL PRIVILEGES ON SCHEMA public TO "$GAME_SERVICE_DB_USER";
 
--- 7. Create a app user role
-DO \$\$
-BEGIN
-   IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = '$GAME_SERVICE_DB_USER') THEN
-      CREATE ROLE $GAME_SERVICE_DB_USER WITH LOGIN PASSWORD '$GAME_SERVICE_DB_PASSWORD';
-   END IF;
-END
-\$\$;
+  -- ========================================
+  -- 🔹 CHAT SERVICE
+  -- ========================================
 
-ALTER USER $GAME_SERVICE_DB_USER CREATEDB;
-GRANT ALL PRIVILEGES ON SCHEMA public TO $GAME_SERVICE_DB_USER;
-GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE $GAME_SERVICE_DB_NAME TO $GAME_SERVICE_DB_USER;
-GRANT USAGE, SELECT, UPDATE ON SEQUENCE ${GAME_SERVICE_DB_NAME}_id_seq TO $GAME_SERVICE_DB_USER;
+  SELECT 'CREATE DATABASE ' || quote_ident('$CHAT_SERVICE_DB_NAME') || ' OWNER admin'
+  WHERE NOT EXISTS (
+      SELECT FROM pg_database WHERE datname = '$CHAT_SERVICE_DB_NAME'
+  )\gexec
+
+  \connect $CHAT_SERVICE_DB_NAME;
+
+  DO \$\$
+  BEGIN
+    IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = '$CHAT_SERVICE_DB_USER') THEN
+        CREATE ROLE "$CHAT_SERVICE_DB_USER" WITH LOGIN PASSWORD '$CHAT_SERVICE_DB_PASSWORD';
+    END IF;
+  END
+  \$\$;
+
+  GRANT CONNECT ON DATABASE "$CHAT_SERVICE_DB_NAME" TO "$CHAT_SERVICE_DB_USER";
+  GRANT ALL PRIVILEGES ON SCHEMA public TO "$CHAT_SERVICE_DB_USER";
+  -- ========================================
+
 
 EOF
 #******************************************************************************#

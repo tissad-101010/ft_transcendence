@@ -44,4 +44,10 @@ npm_cache_clean:
 	rm -rf node_modules
 	rm -f package-lock.json
 
+postgresql:
+	docker-compose -f srcs/docker-compose.yml up postgreSQL --build
+chat:
+	docker-compose -f srcs/docker-compose.yml up service-chat --build
+	
+
 .PHONY: start down restart up clean prune

@@ -6,7 +6,7 @@
 /*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/23 15:58:35 by tissad            #+#    #+#             */
-/*   Updated: 2025/10/10 17:52:18 by tissad           ###   ########.fr       */
+/*   Updated: 2025/11/03 16:21:45 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,7 @@ import cors from '@fastify/cors';
 // Import the Fastify framework
 const app = Fastify({ logger: true });
 
-
+//
 
 // Start the Fastify server
 const start = async () => {
