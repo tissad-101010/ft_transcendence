@@ -91,17 +91,17 @@ services:
     environment:
       - NODE_ENV=production
       - VAULT_ADDR=http://hashicorp_vault:8200
-      - DATABASE_URL=${DATABASE_URL}
-      - DB_HOST=${DB_HOST}
-      - DB_NAME=${DB_NAME}
-      - DB_USER=${DB_USER}
-      - DB_PASSWORD=${DB_PASSWORD}
-      - DB_ROOT_PASSWORD=${DB_ROOT_PASSWORD}
-      - DB_PORT=${DB_PORT}
-      - DB_SAMPLE_NAME=${DB_SAMPLE_NAME}
-      - DB_MAX_CLIENTS=${DB_MAX_CLIENTS}
-      - DB_IDLE_TIMEOUT=${DB_IDLE_TIMEOUT}
-      - DB_CONNECTION_TIMEOUT=${DB_CONNECTION_TIMEOUT}
+      - DATABASE_URL=${USER_SERVICE_DATABASE_URL}
+      - DB_HOST=${USER_SERVICE_DB_HOST}
+      - DB_NAME=${USER_SERVICE_DB_NAME}
+      - DB_USER=${USER_SERVICE_DB_USER}
+      - DB_PASSWORD=${USER_SERVICE_DB_PASSWORD}
+      - DB_ROOT_PASSWORD=${USER_SERVICE_DB_ROOT_PASSWORD}
+      - DB_PORT=${USER_SERVICE_DB_PORT}
+      - DB_SAMPLE_NAME=${USER_SERVICE_DB_SAMPLE_NAME}
+      - DB_MAX_CLIENTS=${USER_SERVICE_DB_MAX_CLIENTS}
+      - DB_IDLE_TIMEOUT=${USER_SERVICE_DB_IDLE_TIMEOUT}
+      - DB_CONNECTION_TIMEOUT=${USER_SERVICE_DB_CONNECTION_TIMEOUT}
       - EMAIL_USER=${EMAIL_USER}
       - GMAIL_APP_PASSWORD=${GMAIL_APP_PASSWORD}
       - EMAIL_HOST=${EMAIL_HOST}
@@ -147,18 +147,20 @@ services:
     depends_on:
       # - hashicorp_vault
       - postgreSQL
+      - redis
     ports:
       - "4001:4001"
     environment:
       - NODE_ENV=production
       - VAULT_ADDR=http://hashicorp_vault:8200
-      - DB_HOST=${DB_HOST}
-      - DB_NAME=${DB_NAME}
-      - DB_USER=${DB_USER}
-      - DB_PASSWORD=${DB_PASSWORD}
-      - DB_ROOT_PASSWORD=${DB_ROOT_PASSWORD}
-      - DB_PORT=${DB_PORT}
-      - DB_SAMPLE_NAME=${DB_SAMPLE_NAME}  
+      - DB_HOST=${GAME_SERVICE_DB_HOST}
+      - DB_NAME=${GAME_SERVICE_DB_NAME}
+      - DB_USER=${GAME_SERVICE_DB_USER}
+      - DB_PASSWORD=${GAME_SERVICE_DB_PASSWORD}
+      - DB_ROOT_PASSWORD=${GAME_SERVICE_DB_ROOT_PASSWORD}
+      - DB_PORT=${GAME_SERVICE_DB_PORT}
+      - DB_SAMPLE_NAME=${GAME_SERVICE_DB_SAMPLE_NAME}
+      - GAME_SERVICE_DATABASE_URL=${GAME_SERVICE_DATABASE_URL}
     restart: unless-stopped
   
 
@@ -188,13 +190,6 @@ services:
     environment:
       - NODE_ENV=production
       - VAULT_ADDR=http://hashicorp_vault:8200
-      - DB_HOST=${DB_HOST}
-      - DB_NAME=${DB_NAME}
-      - DB_USER=${DB_USER}
-      - DB_PASSWORD=${DB_PASSWORD}
-      - DB_ROOT_PASSWORD=${DB_ROOT_PASSWORD}
-      - DB_PORT=${DB_PORT}
-      - DB_SAMPLE_NAME=${DB_SAMPLE_NAME}  
     restart: unless-stopped
 
 
@@ -225,13 +220,6 @@ services:
     environment:
       - NODE_ENV=production
       - VAULT_ADDR=http://hashicorp_vault:8200
-      - DB_HOST=${DB_HOST}
-      - DB_NAME=${DB_NAME}
-      - DB_USER=${DB_USER}
-      - DB_PASSWORD=${DB_PASSWORD}
-      - DB_ROOT_PASSWORD=${DB_ROOT_PASSWORD}
-      - DB_PORT=${DB_PORT}
-      - DB_SAMPLE_NAME=${DB_SAMPLE_NAME}  
     restart: unless-stopped
 
 
@@ -257,13 +245,21 @@ services:
       - security-net
     restart: unless-stopped
     environment:
-      - DB_HOST=${DB_HOST}
-      - DB_NAME=${DB_NAME}
-      - DB_USER=${DB_USER}
-      - DB_PASSWORD=${DB_PASSWORD}
-      - DB_ROOT_PASSWORD=${DB_ROOT_PASSWORD}
-      - DB_PORT=${DB_PORT}
-      - DB_SAMPLE_NAME=${DB_SAMPLE_NAME}  
+      - USER_SERVICE_DB_HOST=${USER_SERVICE_DB_HOST}
+      - USER_SERVICE_DB_NAME=${USER_SERVICE_DB_NAME}
+      - USER_SERVICE_DB_USER=${USER_SERVICE_DB_USER}
+      - USER_SERVICE_DB_PASSWORD=${USER_SERVICE_DB_PASSWORD}
+      - USER_SERVICE_DB_ROOT_PASSWORD=${USER_SERVICE_DB_ROOT_PASSWORD}
+      - USER_SERVICE_DB_PORT=${USER_SERVICE_DB_PORT}
+      - USER_SERVICE_DB_SAMPLE_NAME=${USER_SERVICE_DB_SAMPLE_NAME}
+      - USER_SERVICE_DB_MAX_CLIENTS=${USER_SERVICE_DB_MAX_CLIENTS}
+      - GAME_SERVICE_DB_HOST=${GAME_SERVICE_DB_HOST}
+      - GAME_SERVICE_DB_NAME=${GAME_SERVICE_DB_NAME}
+      - GAME_SERVICE_DB_USER=${GAME_SERVICE_DB_USER}
+      - GAME_SERVICE_DB_PASSWORD=${GAME_SERVICE_DB_PASSWORD}
+      - GAME_SERVICE_DB_ROOT_PASSWORD=${GAME_SERVICE_DB_ROOT_PASSWORD}
+      - GAME_SERVICE_DB_PORT=${GAME_SERVICE_DB_PORT}
+      - GAME_SERVICE_DB_SAMPLE_NAME=${GAME_SERVICE_DB_SAMPLE_NAME}
     ports:
       - "5432:5432"
   #********************************************************************************#      
