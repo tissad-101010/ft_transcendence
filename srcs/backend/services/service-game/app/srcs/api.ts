@@ -6,21 +6,40 @@
 /*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/23 15:58:35 by tissad            #+#    #+#             */
-/*   Updated: 2025/10/07 18:06:50 by tissad           ###   ########.fr       */
+/*   Updated: 2025/11/03 11:17:38 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-// Game service
-
 import Fastify from 'fastify';
 import cors from '@fastify/cors';
+import fastifyCookie from '@fastify/cookie';
+
+
+// import plugins
+import redisPlugin from './plugins/redis.plugin';
+import { prismaPlugin } from './plugins/prisma.plugin';
+
 
 
 
 /* ************************************************************************** */
 
-// Import the Fastify framework
+// register the Fastify framework
 const app = Fastify({ logger: true });
+
+// Register cookie plugin
+app.register(fastifyCookie, {
+  secret: process.env.COOKIE_SECRET || 'supersecret', // optionnel (pour signer les cookies)
+});
+
+
+// Register plugins (database, redis, etc.)
+app.register(redisPlugin);
+app.register(prismaPlugin);
+
+
+
+// Register routes
 
 
 
@@ -42,8 +61,9 @@ const start = async () => {
       console.log('Headers de la requête :', req.headers);
     });
     
-    await app.listen({ port: 4001, host: '0.0.0.0' });
-    console.log('🚀 Game  server is running at http://localhost:4001');
+    await app.listen({ port: 4000, host: '0.0.0.0' });
+    console.log('🚀 Server is running');
+
   } catch (err) {
     app.log.error(err);
     process.exit(1);

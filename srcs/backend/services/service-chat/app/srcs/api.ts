@@ -6,7 +6,7 @@
 /*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/23 15:58:35 by tissad            #+#    #+#             */
-/*   Updated: 2025/10/10 17:52:18 by tissad           ###   ########.fr       */
+/*   Updated: 2025/11/04 11:18:12 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,6 +21,15 @@ import cors from '@fastify/cors';
 
 // Import the Fastify framework
 const app = Fastify({ logger: true });
+
+// import plugins
+import redisPlugin from './plugins/redis.plugin';
+import { prismaPlugin } from './plugins/prisma.plugin';
+
+
+// Register plugins
+app.register(redisPlugin);
+app.register(prismaPlugin);
 
 
 
