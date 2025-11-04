@@ -93,7 +93,7 @@ fi
 -- ========================================
 
 -- this version uses a global admin user to create databases and users for each service
--- dont delete this code sequence when you merge it with your own code
+-- dont delete this code sequence when you merge it with your own code (main branch also)
 -- Add this variables in your .env file and replace the placeholders
 -- GLOBAL_DB_ADMIN_PASSWORD=your_global_admin_password
 
