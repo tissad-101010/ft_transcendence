@@ -92,6 +92,11 @@ fi
 -- 🧩 INIT MULTI-DB + USERS PAR SERVICE (Optimisé)
 -- ========================================
 
+-- this version uses a global admin user to create databases and users for each service
+-- dont delete this code sequence when you merge it with your own code
+-- Add this variables in your .env file and replace the placeholders
+-- GLOBAL_DB_ADMIN_PASSWORD=your_global_admin_password
+
   -- 1. Créer le rôle admin s’il n’existe pas
   DO \$\$
   BEGIN
