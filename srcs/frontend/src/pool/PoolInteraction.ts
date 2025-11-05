@@ -109,6 +109,14 @@ export class PoolInteraction implements SpecificInteraction {
         this.sceneInteractor.getHighlightLayer().removeAllMeshes();
     }
 
+    public leave(buttonMeshes: AbstractMesh[])
+    {
+        console.log("J'entre ici avec ", buttonMeshes);
+        this.resetState(buttonMeshes);
+        this.updateButtons(buttonMeshes);
+        // displayFriendsWithEmpty(this.scene, this.sceneManager.getUserX.getFriends, this.sceneManager.getChair);
+        this.chat = null;
+    }
 
     public handlePointer(pointerInfo: PointerInfo, isClick: boolean, mesh: AbstractMesh): void {
         if (!this.sceneInteractor.areInteractionsEnabled()) return;
@@ -121,6 +129,7 @@ export class PoolInteraction implements SpecificInteraction {
 
         const nb = parseInt(pickedMesh.name[pickedMesh.name.length - 1]);
         const index = (getCurrentGroup(ZoneName.LOUNGE) * 6) + nb;
+            console.log("test4");
         if (isClick) {
             if (loungeMeshes.includes(pickedMesh))
             {
@@ -134,9 +143,12 @@ export class PoolInteraction implements SpecificInteraction {
             else if (buttonMeshes.includes(pickedMesh)) {
                 const current = getCurrentGroup(ZoneName.LOUNGE);
                 if (pickedMesh === buttonMeshes[0]) {
+            console.log("test2");
+
                     setCurrentGroup(ZoneName.LOUNGE, current - 1, this.userX.getFriends, this.scene);
                     this.updateButtons(buttonMeshes);
                 } else if (pickedMesh === buttonMeshes[1]) {
+            console.log("test3");
                     setCurrentGroup(ZoneName.LOUNGE, current + 1, this.userX.getFriends, this.scene);
                     this.sceneManager.setSpecificMesh(false);
                     this.updateButtons(buttonMeshes);
@@ -144,6 +156,7 @@ export class PoolInteraction implements SpecificInteraction {
             }
         }
          else {
+            console.log("test1");
             this.sceneInteractor.getHighlightLayer().removeAllMeshes();
             if (loungeMeshes.includes(pickedMesh) && index < this.userX.getFriends.length)
                     this.sceneInteractor.getHighlightLayer().addMesh(pickedMesh, new Color3(1, 0.75, 0.8));
@@ -187,6 +200,8 @@ export class PoolInteraction implements SpecificInteraction {
             this.chat.dispose();
             this.chat = null;
         }
+
+        this.resetState(this.sceneManager.getLoadedMeshes["buttonsPool"]);
         console.log("PoolInteraction: nettoyage terminé ✅");
     }
 }

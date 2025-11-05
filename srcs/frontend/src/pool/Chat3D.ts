@@ -244,7 +244,7 @@ export class Chat3D {
     addMessage = (sender: number, text: string, date: Date) => {
     const estHeight = this.estimateTextHeight(
         text,
-        20,      // taille police (fontSize)
+        34,      // taille police (fontSize)
         700,     // largeur conteneur en px
         "Arial"
     );
@@ -267,7 +267,7 @@ export class Chat3D {
         msgText.width = "100%";
         msgText.paddingLeft = "10px";
         msgText.paddingRight = "10px";
-        msgText.fontSize = 20;
+        msgText.fontSize = 24;
         msgText.textWrapping = true;
         msgText.resizeToFit = false;
         msgText.textHorizontalAlignment = Control.HORIZONTAL_ALIGNMENT_LEFT;
