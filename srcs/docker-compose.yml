@@ -1,24 +1,24 @@
 services:
 
-  hashicorp_vault:
-    image: hashicorp/vault
-    container_name: hashicorp_vault
-    volumes:
-      - LocalVaultData:/vault/data
-      - ./vault/config/vault.hcl:/vault/config/vault.hcl:ro
-      - ./vault/certs/vault.crt:/vault/certs/vault.crt:ro
-      - ./vault/certs/vault.key:/vault/certs/vault.key:ro
-    cap_add:
-      - IPC_LOCK
-    # environment:
-    #   - VAULT_ADDR=http://localhost:8200
-    ports:
-      - "8200:8200"
-      - "8201:8201"
-    networks:
-      - transcendence
-    restart: unless-stopped
-    entrypoint: ["vault", "server", "-config=/vault/config/vault.hcl"]
+  # hashicorp_vault:
+  #   image: hashicorp/vault
+  #   container_name: hashicorp_vault
+  #   volumes:
+  #     - LocalVaultData:/vault/data
+  #     - ./vault/config/vault.hcl:/vault/config/vault.hcl:ro
+  #     - ./vault/certs/vault.crt:/vault/certs/vault.crt:ro
+  #     - ./vault/certs/vault.key:/vault/certs/vault.key:ro
+  #   cap_add:
+  #     - IPC_LOCK
+  #   # environment:
+  #   #   - VAULT_ADDR=http://localhost:8200
+  #   ports:
+  #     - "8200:8200"
+  #     - "8201:8201"
+  #   networks:
+  #     - transcendence
+  #   restart: unless-stopped
+  #   entrypoint: ["vault", "server", "-config=/vault/config/vault.hcl"]
 
   frontend:
     image : frontend
@@ -36,52 +36,52 @@ services:
       - "3000:3000"
     restart: unless-stopped
   
-  backend:
-      image: backend
-      build:
-        context: ./backend
-        dockerfile: Dockerfile
-      restart: unless-stopped
-      container_name: backend
-      volumes:
-        - ./backend/app:/app
-        - /app/node_modules
-      # command: npm run dev
-      ports: 
-        - "4000:4000"
+#   backend:
+#       image: backend
+#       build:
+#         context: ./backend
+#         dockerfile: Dockerfile
+#       restart: unless-stopped
+#       container_name: backend
+#       volumes:
+#         - ./backend/app:/app
+#         - /app/node_modules
+#       # command: npm run dev
+#       ports: 
+#         - "4000:4000"
 
-  proxy:
-    image: proxy
-    build:
-      context: ./proxy
-      dockerfile: Dockerfile
-    container_name: proxy
-    depends_on:
-      - frontend
-    environment:
-      - SSL_CERT=/etc/nginx/ssl/server.crt
-      - SSL_CERT_KEY=/etc/nginx/ssl/server.key
-    volumes:
-      # Nginx HTML files
-      - ./frontend/build:/usr/share/nginx/html
-      # Nginx SSL certificates
-      - ./proxy/nginx/certs/server.crt:/etc/nginx/ssl/server.crt:ro
-      - ./proxy/nginx/certs/server.key:/etc/nginx/ssl/server.key:ro
-      # Nginx configuration files
-      - ./proxy/nginx/nginx.conf:/etc/nginx/templates/nginx.conf.template
-      - ./proxy/nginx/conf.d/default.conf:/etc/nginx/templates/conf.d/default.conf.template
-      - ./proxy/nginx/conf.d/modsecurity.conf:/etc/nginx/templates/conf.d/modsecurity.conf.template
-      # ModSecurity configuration files
-      - ./proxy/modsecurity/modsecurity.conf:/etc/nginx/modsecurity.d/modsecurity.conf
-      - ./proxy/modsecurity/modsecurity-override.conf:/etc/nginx/templates/modsecurity.d/modsecurity-override.conf.template
-      - ./proxy/modsecurity/setup.conf:/etc/nginx/templates/modsecurity.d/setup.conf.template
-      - ./proxy/modsecurity/crs:/etc/nginx/modsecurity.d/crs
-    ports:
-      - "8443:443"
-      # - "8080:80"
-    networks:
-      - transcendence
-    restart: unless-stopped
+#   proxy:
+#     image: proxy
+#     build:
+#       context: ./proxy
+#       dockerfile: Dockerfile
+#     container_name: proxy
+#     depends_on:
+#       - frontend
+#     environment:
+#       - SSL_CERT=/etc/nginx/ssl/server.crt
+#       - SSL_CERT_KEY=/etc/nginx/ssl/server.key
+#     volumes:
+#       # Nginx HTML files
+#       - ./frontend/build:/usr/share/nginx/html
+#       # Nginx SSL certificates
+#       - ./proxy/nginx/certs/server.crt:/etc/nginx/ssl/server.crt:ro
+#       - ./proxy/nginx/certs/server.key:/etc/nginx/ssl/server.key:ro
+#       # Nginx configuration files
+#       - ./proxy/nginx/nginx.conf:/etc/nginx/templates/nginx.conf.template
+#       - ./proxy/nginx/conf.d/default.conf:/etc/nginx/templates/conf.d/default.conf.template
+#       - ./proxy/nginx/conf.d/modsecurity.conf:/etc/nginx/templates/conf.d/modsecurity.conf.template
+#       # ModSecurity configuration files
+#       - ./proxy/modsecurity/modsecurity.conf:/etc/nginx/modsecurity.d/modsecurity.conf
+#       - ./proxy/modsecurity/modsecurity-override.conf:/etc/nginx/templates/modsecurity.d/modsecurity-override.conf.template
+#       - ./proxy/modsecurity/setup.conf:/etc/nginx/templates/modsecurity.d/setup.conf.template
+#       - ./proxy/modsecurity/crs:/etc/nginx/modsecurity.d/crs
+#     ports:
+#       - "8443:443"
+#       # - "8080:80"
+#     networks:
+#       - transcendence
+#     restart: unless-stopped
 
 networks:
     transcendence:
@@ -102,4 +102,4 @@ volumes:
       type: none
       device: ./frontend/build
       o: bind
-  #
+  

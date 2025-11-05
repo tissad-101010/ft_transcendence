@@ -18,7 +18,9 @@
     "web-vitals": "^2.1.4",
     "@babylonjs/core": "^8.14.1",
     "@babylonjs/gui": "^8.14.1",
-    "@babylonjs/loaders": "^8.14.1"
+    "@babylonjs/loaders": "^8.14.1",
+    "@babylonjs/inspector": "^8.14.1",
+    "chart.js": "4.5.1"
   },
   "scripts": {
     "start": "react-scripts start",
