@@ -9,6 +9,8 @@ AbstractMesh } from '@babylonjs/core';
 
 import { ZoneName } from './config.ts';
 import { Friend } from './Friend.ts';
+import { TournamentParticipant } from './Tournament.ts';
+
 /***********************
  *       INTERFACES    *
  ***********************/
@@ -87,7 +89,7 @@ export function normalizeRotation(rotation: Vector3): Vector3 {
 /***********************
  *   AFFICHAGE JOUEURS *
  ***********************/
-export function displayPlayers(scene: Scene, players: Player[], meshes: AbstractMesh[]) {
+export function displayPlayers(scene: Scene, players: TournamentParticipant[], meshes: AbstractMesh[]) {
     meshes.forEach((mesh, index) => {
         const mat = new PBRMaterial(`mat_${mesh.name}`, scene);
         mat.metallic = 0.0;
@@ -100,7 +102,7 @@ export function displayPlayers(scene: Scene, players: Player[], meshes: Abstract
         const player = players[index];
         if (player) {
             mat.albedoColor = new Color3(1.0, 0.5, 0.4); // couleur normale
-            dynTex.drawText(player.login, null, 280, "bold 80px Arial", "white", "transparent", true);
+            dynTex.drawText(player.alias, null, 280, "bold 80px Arial", "white", "transparent", true);
             dynTex.drawText(player.id.toString(), null, 600, "bold 250px Arial", "white", "transparent", true);
         } else {
             mat.albedoColor = new Color3(0.25, 0.9, 0.9); // couleur alternative
@@ -133,7 +135,7 @@ export function getCurrentGroup(type: ZoneName.TSHIRT | ZoneName.SEAT | ZoneName
 export function setCurrentGroup(
     type: ZoneName.TSHIRT | ZoneName.SEAT | ZoneName.LOUNGE,
     value: number,
-    items: Friend[],
+    items: Friend[] | TournamentParticipant[],
     scene: Scene
 ) {
     const config = groupConfigs[type];
@@ -144,7 +146,7 @@ export function setCurrentGroup(
 
     const start = config.currentIndex * config.groupSize;
 
-    const visibleItems: (Player | Friend | null)[] = [];
+    const visibleItems: (Player | Friend | null | TournamentParticipant)[] = [];
     for (let i = 0; i < config.groupSize; i++) {
         visibleItems.push(items[start + i] || null);
     }
@@ -152,7 +154,7 @@ export function setCurrentGroup(
     config.meshes.forEach(mesh => mesh.setEnabled(true));
 
     if (type === ZoneName.TSHIRT)
-        displayPlayersWithEmpty(scene, visibleItems as Friend[], config.meshes);
+        displayPlayersWithEmpty(scene, visibleItems as TournamentParticipant[], config.meshes);
      else
         displayFriendsWithEmpty(scene, visibleItems as Friend[], config.meshes);
 }
@@ -160,7 +162,7 @@ export function setCurrentGroup(
 /***********************
  *  AFFICHAGE AVEC EMPTY
  ***********************/
-export function displayPlayersWithEmpty(scene: Scene, players: Friend[], meshes: AbstractMesh[]) {
+export function displayPlayersWithEmpty(scene: Scene, players: Friend[] | TournamentParticipant[], meshes: AbstractMesh[]) {
     meshes.forEach((mesh, index) => {
         const mat = new PBRMaterial(`mat_${mesh.name}`, scene);
         mat.metallic = 0.0;
@@ -173,8 +175,16 @@ export function displayPlayersWithEmpty(scene: Scene, players: Friend[], meshes:
         const player = players[index];
         if (player) {
             mat.albedoColor = new Color3(1.0, 0.5, 0.4);
-            dynTex.drawText(player.getLogin, null, 280, "bold 80px Arial", "white", "transparent", true);
-            dynTex.drawText(player.getId.toString(), null, 600, "bold 250px Arial", "white", "transparent", true);
+            if (player instanceof Friend)
+            {
+                dynTex.drawText(player.getLogin, null, 280, "bold 80px Arial", "white", "transparent", true);
+                dynTex.drawText(player.getId.toString(), null, 600, "bold 250px Arial", "white", "transparent", true);
+            }
+            else
+            {
+                dynTex.drawText(player.alias, null, 280, "bold 80px Arial", "white", "transparent", true);
+                dynTex.drawText(player.id.toString(), null, 600, "bold 250px Arial", "white", "transparent", true);
+            }
         } else {
             mat.albedoColor = new Color3(0.5, 0.5, 0.5);
             ctx.fillStyle = "gray";

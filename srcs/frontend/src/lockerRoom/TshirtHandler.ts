@@ -93,7 +93,7 @@ export class TshirtHandler {
 
     private updateButtons(tshirtMeshes: AbstractMesh[]): void {
         const current = getCurrentGroup(ZoneName.TSHIRT);
-        const total = getTotalGroups(ZoneName.TSHIRT, this.sceneManager.getPlayers.length);
+        const total = getTotalGroups(ZoneName.TSHIRT, this.sceneManager.getUserX.getTournament?.getParticipants.length);
         this.handleButtonLocker(tshirtMeshes[10], current > 0);
         this.handleButtonLocker(tshirtMeshes[11], current < total - 1);
     }
@@ -116,8 +116,13 @@ export class TshirtHandler {
     }
 
     private resetState(tshirtMeshes: AbstractMesh[]): void {
-        setCurrentGroup(ZoneName.TSHIRT, 0, this.sceneManager.getPlayers, this.scene);
-
+        if (this.sceneManager.getUserX.getTournament)
+            setCurrentGroup(ZoneName.TSHIRT, 0, this.sceneManager.getUserX.getTournament?.getParticipants, this.scene);
+        else
+        {
+            console.error("Aucun tournoi en cours");
+            return ;
+        }
         // Éteindre les boutons gauche/droite
         this.handleButtonLocker(tshirtMeshes[10], false);
         this.handleButtonLocker(tshirtMeshes[11], false);
@@ -131,7 +136,10 @@ export class TshirtHandler {
      **************************************************/
    public handle(pickedMesh: AbstractMesh, tshirtMeshes: AbstractMesh[]): void {
     if (!pickedMesh) return;
-    const players = this.sceneManager.getPlayers;
+    const players = this.sceneManager.getUserX.getTournament?.getParticipants;
+
+    if (!players)
+        return ;
 
     // Clic sur un t-shirt
     if (pickedMesh.name.includes(ZoneName.TSHIRT)) {

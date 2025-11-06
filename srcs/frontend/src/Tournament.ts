@@ -6,8 +6,9 @@ import { Match, MatchRules, MatchTournament, MatchParticipant } from "./Match.ts
 import { shuffleArray } from "./utils.ts";
 
 import { SceneManager } from './scene/SceneManager.ts';
+import { displayPlayers } from './utils.ts';
 
-interface TournamentParticipant
+export interface TournamentParticipant
 {
     login: string,
     alias: string,
@@ -204,10 +205,10 @@ export class Tournament
     start() : void
     {
         this.createMatchs(shuffleArray(this.participants));
-        
+        displayPlayers(this.sceneManager.getScene(), this.participants, this.sceneManager.getTshirt);
     }
 
-    get getParticipants() : MatchParticipant[]
+    get getParticipants() : TournamentParticipant[]
     {
         return (this.participants);
     }

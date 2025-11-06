@@ -254,7 +254,8 @@ private players: Player[] = [
 
         this._tshirtMeshes = Object.values(this.meshMap).filter(m => m.name.startsWith("tshirt"));
         groupConfigs.tshirt.meshes = this._tshirtMeshes;
-        displayPlayers(this.scene, this.players, this._tshirtMeshes);
+        if (this.userX.getTournament)
+            displayPlayers(this.scene, this.userX.getTournament.getParticipants, this._tshirtMeshes);
 
         this._chairMeshes = Object.values(this.meshMap)
             .filter(m => m.name.startsWith("chair"))
@@ -413,6 +414,11 @@ private players: Player[] = [
 
     public get getLounge(): AbstractMesh[] {
         return this._loungeMeshes;
+    }
+
+    public get getTshirt() : AbstractMesh[]
+    {
+        return (this._tshirtMeshes)
     }
 
     public get getUserX() : UserX

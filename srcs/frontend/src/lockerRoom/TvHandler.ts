@@ -44,7 +44,6 @@ export class TvHandler {
 
     private turnOnTv(tvMeshes: AbstractMesh[]): void {
         const tvButton = tvMeshes[1];
-        //Ici fonction pour afficher le bouton off
         if (!tvButton || this.tvButtonMaterial) return;
             applyTextureToMesh(tvButton, this.scene, "/lockerRoom/textures/offTV.png");
     }
