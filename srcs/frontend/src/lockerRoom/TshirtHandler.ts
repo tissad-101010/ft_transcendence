@@ -1,16 +1,33 @@
 import {ZoneName} from '../config.ts';
+
 import {
-Scene,
-AbstractMesh,
-Animation,
-Color3,
-HighlightLayer,
-PBRMaterial
+    Scene,
+    AbstractMesh,
+    Animation,
+    Color3,
+    HighlightLayer,
+    PBRMaterial
 } from '@babylonjs/core';
+
+import { 
+    AdvancedDynamicTexture,
+    ScrollViewer,
+    StackPanel,
+    TextBlock,
+    Control,
+    Rectangle,
+    Grid,
+    Ellipse,
+    Button,
+    InputTextArea,
+    Line
+} from "@babylonjs/gui";
+
 
 import { SceneInteractor } from '../scene/SceneInteractor.ts';
 import { SceneManager } from '../scene/SceneManager.ts';
 import { getCurrentGroup, getTotalGroups, setCurrentGroup } from '../utils.ts';
+import { TournamentParticipant } from '../Tournament.ts';
 
 
 
@@ -25,6 +42,7 @@ export class TshirtHandler {
     private clicTshirt: boolean;
     private buttonHighlightLayer: HighlightLayer;
     private basePositions = new Map<AbstractMesh, number>();
+    private frame: AdvancedDynamicTexture | null = null;
 
     /**************************************************
      *                  CONSTRUCTOR                   *
@@ -40,8 +58,23 @@ export class TshirtHandler {
     /**************************************************
      *               PRIVATE METHODS                 *
      **************************************************/
-    private displayProfilePlayer(): void {
-        console.log("Affichage du profil du player");
+    private displayProfilePlayer(player: TournamentParticipant): void {
+        if (this.frame)
+            this.frame.dispose();
+        this.frame = AdvancedDynamicTexture.CreateForMesh(this.sceneManager.getScene().getMeshByName("frame"));
+        const rect = new Rectangle();
+        rect.background = "red";
+        rect.width = "100%";
+        rect.height = "100%";
+        this.frame.addControl(rect);
+
+        const login = new TextBlock();
+        login.text = player.login;
+        login.color = "black";
+        login.width = "100%";
+        login.height = "100%";
+        login.fontSize = 300;
+        rect.addControl(login);
     }
 
     private animateButtonLocker(mesh: AbstractMesh): void {
@@ -140,18 +173,28 @@ export class TshirtHandler {
 
     if (!players)
         return ;
-
+   
     // Clic sur un t-shirt
     if (pickedMesh.name.includes(ZoneName.TSHIRT)) {
         this.updateButtons(tshirtMeshes);
 
+        const nb = parseInt(pickedMesh.name[pickedMesh.name.length - 1]);
+        const index = (getCurrentGroup(ZoneName.TSHIRT) * 10) + nb;
         this.sceneInteractor.disableInteractions();
-        this.sceneManager.moveCameraTo(ZoneName.TSHIRT, () => {
-            this.clicTshirt = true;
-            this.turnOnExit(tshirtMeshes[12]);
-            this.displayProfilePlayer();
+        if (this.clicTshirt)
+        {
+            this.displayProfilePlayer(players[index]);
             this.sceneInteractor.enableInteractions();
-        });
+        }
+        else
+        {
+            this.sceneManager.moveCameraTo(ZoneName.TSHIRT, () => {
+                this.clicTshirt = true;
+                this.turnOnExit(tshirtMeshes[12]);
+                this.displayProfilePlayer(players[index]);
+                this.sceneInteractor.enableInteractions();
+            });
+        }
     }
 
     // Clic sur un bouton

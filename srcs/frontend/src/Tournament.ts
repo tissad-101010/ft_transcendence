@@ -121,6 +121,8 @@ export class Tournament
             return (4);
         if (this.participants.length % 2 !== 0)
             return (5);
+        if ((this.participants.length & (this.participants.length - 1)) !== 0)
+            return (7);
         let unready = 0;
         this.participants.forEach((p) => {
             if (p.ready === false)

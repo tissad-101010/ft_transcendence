@@ -61,6 +61,7 @@ function rowRound(container: StackPanel, utils: DataUtils, env: Env)
        myClearControls(utils.panelRound);
 
     const nbRound = Math.log(utils.tournament.getParticipants.length) / Math.log(2); // Nombre de tour du tournoi
+    console.log("Nombre de round pour le tournoi -> ", nbRound);
     let nbMatch = utils.nbMatchFirstRound / Math.pow(2, utils.currRound);
     if (utils.currRound !== 0)
     {
@@ -102,7 +103,7 @@ function rowRound(container: StackPanel, utils: DataUtils, env: Env)
     round.width = "100px";
     utils.panelRound.addControl(round);
 
-    if (utils.currRound < nbRound)
+    if (utils.currRound + 1 < nbRound)
     {
         const buttonRight = new Rectangle();
         buttonRight.width = "50px";
@@ -121,6 +122,7 @@ function rowRound(container: StackPanel, utils: DataUtils, env: Env)
 
         buttonRight.onPointerClickObservable.add(() => {
             utils.currRound++;
+            console.log(utils.currRound, nbRound);
             menuTournament(env, true, utils);
         });
 

@@ -63,7 +63,11 @@ export class UserX {
         this.addFriend("LunarLion", 5, true);
         this.addFriend("VortexViper", 6, true);
         this.addFriend("MegaMage", 7, true);
-        this.addFriend("PixelPilot", 8, false);
+        this.addFriend("PixelPilot", 8, true);
+        this.addFriend("PixelPilot2", 9, true);
+        this.addFriend("PixelPilot3", 10, true);
+        this.addFriend("PixelPilot4", 11, true);
+        this.addFriend("PixelPilot5", 12, true);
     }
 
     createTournament(a: string) : boolean

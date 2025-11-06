@@ -77,14 +77,16 @@ export function createButton(
                 env.errorMsg.text = "Temps avant engagement non renseigne";
                 break;
             case 4 :
-                env.errorMsg.text = "Pas suffisament de participant (4 minimum)";
+                env.errorMsg.text = "Pas suffisament de participants (4 minimum)";
                 break;
             case 5 :
-                env.errorMsg.text = "Le nombre de participant doit etre pair";
+                env.errorMsg.text = "Le nombre de participants doit etre pair";
                 break;
             case 6 :
                 env.errorMsg.text = "Des participants ne sont pas pret";
                 break;
+            case 7 :
+                env.errorMsg.text = "Le nombre de participants doit etre une puissance de 2 (4, 8, 16, ...)";
         }
     }
     else

@@ -55,7 +55,7 @@ export class SceneInteractor {
         if (!pointerInfo.pickInfo)
         {
             return;
-        }    
+        }   
         const pickRes = this.scene.pick(this.scene.pointerX, this.scene.pointerY);
         const pickedMesh = pickRes?.pickedMesh;
         //Je veux pouvoir survoler juste l echelle etd
