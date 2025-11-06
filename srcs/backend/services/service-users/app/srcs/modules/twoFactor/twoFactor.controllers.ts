@@ -6,13 +6,22 @@
 /*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/27 11:48:33 by tissad            #+#    #+#             */
-/*   Updated: 2025/11/04 16:32:19 by tissad           ###   ########.fr       */
+/*   Updated: 2025/11/04 22:32:37 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 // srcs/controllers/otp.controller.ts
 // print logs whit the file name
 //
+
+// il faut bien distinger le tmp token lors de l'activation de la 2fa et le token access pour l'authentification 2fa
+// si 2fa est activée on doit utiliser le token access pour l'authentification 2fa
+// sinon on doit utiliser le tmp token lors de l'activation de la 2fa
+// une fois la 2fa activée on doit supprimer le tmp token
+// il faut aussi envoyer un access token avec un flag 2fa_enabled a true ou false
+// il faut aussi envoyer un refresh token
+// une fois la 2fa verifiee la connexion est completee et l'utilisateur est authentifie
+
 
 
 const userId = 1; // temporary user id for testing
@@ -23,7 +32,8 @@ import { TwoFactorAuthService } from "./twoFactor.services";
 import {  OtpEmailRequest,
           VerifyOtpEmailRequest,
        } from "../../types/otp.type";
-
+import { TwoFactorType } from "../../prisma/prisma/generated/client/enums";
+import { send } from "process";
 
 export class TwoFactorAuthController {
   private twoFactorAuthService: TwoFactorAuthService;
@@ -43,9 +53,9 @@ export class TwoFactorAuthController {
         console.error("❌ [2fa.controller.ts] No JWT token found in cookies");
         return null;
       }
-      const payload = JwtUtils.verifyToken(token, process.env.TEMP_TOKEN_SECRET!);
-      if (!payload || typeof payload === "string") {
-        console.error("❌ [2fa.controller.ts] Invalid JWT token payload");
+      const payload = JwtUtils.verifyAccessToken(token);
+      if (!payload) {
+        console.error("❌ [2fa.controller.ts] Invalid JWT token");
         return null;
       }
       const { userId, email } = payload as { userId: number; email: string };
@@ -57,34 +67,31 @@ export class TwoFactorAuthController {
   };
   
   // enable TFA for user
-  enableTfa = async (
+  enableOtpEmailTfa = async (
     req: FastifyRequest,
     reply: FastifyReply
   ) => {
-    // extract coockies from the header
-
-    // extarct Jwt token from cookies
-    
-    // verify Jwt token and get user id and email
-    
-    
-    const { userId, method } = req.body as { userId: number; method: string };
-    const success = await this.twoFactorAuthService.enableTfaForUser(userId, method);
-    if (success) {
-      console.log("✅ [2fa.controller.ts] TFA enabled for user ID:", userId);
-      return reply.send({ message: "Two-factor authentication enabled ✅" });
-    } else {
-      console.error("❌ [2fa.controller.ts] Failed to enable TFA for user ID:", userId);
-      return reply.status(500).send({ message: "Failed to enable two-factor authentication ❌" });
+    // accessToken user id and email extraction from request
+    const user = TwoFactorAuthController.extactUserFromRequest(req);
+    if (!user) {
+      console.error("❌ [2fa.controller.ts] User not found");
+      return reply.status(401).send({ message: "Unauthorized ❌" });
     }
+    const userId  = user.userId;
+    const email   = user.email;
+    const type = TwoFactorType.EMAIL;
+    console.log("[2fa.controller.ts] Enabling TFA for user ID:", userId, "email:", email);
+    //send otp to email
+    this.SendOtpByEmail(req, reply);
   };
   
   // Send OTP via Email
   SendOtpByEmail = async (
-    req: FastifyRequest<{ Body: OtpEmailRequest }>,
+    req: FastifyRequest,
     reply: FastifyReply
   ) => {
-    const { email } = req.body;
+    // Tmp Token user id and email extraction from request
+    const email = (req.body as OtpEmailRequest).email;
     const mailSent = await this.twoFactorAuthService.sendOtpByEmail(email);
     
     // If mail sending failed, return error response
