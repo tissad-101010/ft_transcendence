@@ -10,16 +10,17 @@ import { displayPlayers } from './utils.ts';
 
 export interface TournamentParticipant
 {
-    login: string,
-    alias: string,
-    ready: boolean,
-    id: number
+    login: string;
+    alias: string;
+    ready: boolean;
+    eliminate: boolean;
+    id: number;
 }
 
 interface TournamentRules
 {
-    mode: number,
-    match: MatchRules
+    mode: number;
+    match: MatchRules;
 }
 
 export class Tournament
@@ -46,12 +47,13 @@ export class Tournament
 
     playMatch(match: Match, id: number, sceneManager: SceneManager) : boolean
     {
-
         return (match.play(id, sceneManager));
     }
 
     matchFinish(match: Match) : void
     {
+        if (!match.getSloatA || !match.getSloatB)
+            return ;
         if (match.getStatus !== 2 || !match.getWinner)
         {
             console.error("Le match n'est pas termine ou n'a pas de vainqueur");
@@ -60,14 +62,29 @@ export class Tournament
         const nextMatchId = match.getTournamentInfo?.nextMatchId;
         const nextMatch = this.matchs.find((m) => m.getId === nextMatchId);
         if (nextMatch === undefined)
-            {
-                console.error("Match suivant pas trouve");
+        {
+            console.error("Match suivant pas trouve");
+            return ;
+        }
+        if (match.getTournamentInfo?.nextMatchSlot === 0)
+            nextMatch.setSloatA = match.getWinner;
+        else
+            nextMatch.setSloatB = match.getWinner;
+        if (match.getSloatA.id === match.getWinner.id)
+        {
+            const other = this.participants.find((p) => p.id === match.getSloatB?.id);
+            if (!other)
                 return ;
-            }
-            if (match.getTournamentInfo?.nextMatchSlot === 0)
-                nextMatch.setSloatA = match.getWinner;
-            else
-                nextMatch.setSloatB = match.getWinner;
+            other.eliminate = true;
+        }
+        else
+        {
+            const other = this.participants.find((p) => p.id === match.getSloatA?.id);
+            if (!other)
+                return ;
+            other.eliminate = true;
+        }
+        displayPlayers(this.sceneManager.getScene(), this.participants, this.sceneManager.getTshirt);
         console.log("Le match est termine, etat de tournoi : ", this);
     }
 
@@ -95,6 +112,7 @@ export class Tournament
         })
         if (stop)
             return (1);
+        p.eliminate = false;
         this.participants.push(p);
         return (0);
     }

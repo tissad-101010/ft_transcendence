@@ -23,7 +23,6 @@ export class LightInteractor {
     public turnOnLights()
     {
         if (this.meshesBulb && this.meshesBulb.length > 0){
-            console.log("ETINCTION DES LUMIERES DU TERRAIN")
             this.lights.forEach(light => {
                 light.dispose();
             });
@@ -134,10 +133,6 @@ export class LightInteractor {
     //         sphere.material.emissiveColor = new Color3(1, 0, 0); // rouge = locker
     //     });
     // }
-
-
-
-
 
     public turnOffLights(){
         console.log("Lumieres eteintes");

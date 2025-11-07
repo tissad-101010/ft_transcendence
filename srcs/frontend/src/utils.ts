@@ -101,7 +101,10 @@ export function displayPlayers(scene: Scene, players: TournamentParticipant[], m
 
         const player = players[index];
         if (player) {
-            mat.albedoColor = new Color3(1.0, 0.5, 0.4); // couleur normale
+            if (!player.eliminate)
+                mat.albedoColor = new Color3(1.0, 0.5, 0.4); // couleur normale
+            else
+                mat.albedoColor = new Color3(0.5, 1, 0.4); // couleur normale
             dynTex.drawText(player.alias, null, 280, "bold 80px Arial", "white", "transparent", true);
             dynTex.drawText(player.id.toString(), null, 600, "bold 250px Arial", "white", "transparent", true);
         } else {
@@ -154,7 +157,7 @@ export function setCurrentGroup(
     config.meshes.forEach(mesh => mesh.setEnabled(true));
 
     if (type === ZoneName.TSHIRT)
-        displayPlayersWithEmpty(scene, visibleItems as TournamentParticipant[], config.meshes);
+        displayPlayers(scene, visibleItems as TournamentParticipant[], config.meshes);
      else
         displayFriendsWithEmpty(scene, visibleItems as Friend[], config.meshes);
 }
@@ -162,41 +165,41 @@ export function setCurrentGroup(
 /***********************
  *  AFFICHAGE AVEC EMPTY
  ***********************/
-export function displayPlayersWithEmpty(scene: Scene, players: Friend[] | TournamentParticipant[], meshes: AbstractMesh[]) {
-    meshes.forEach((mesh, index) => {
-        const mat = new PBRMaterial(`mat_${mesh.name}`, scene);
-        mat.metallic = 0.0;
-        mat.roughness = 0.4;
+// export function displayPlayersWithEmpty(scene: Scene, players: Friend[] | TournamentParticipant[], meshes: AbstractMesh[]) {
+//     meshes.forEach((mesh, index) => {
+//         const mat = new PBRMaterial(`mat_${mesh.name}`, scene);
+//         mat.metallic = 0.0;
+//         mat.roughness = 0.4;
 
-        const dynTex = new DynamicTexture(`dynTex_${mesh.name}`, { width: 1024, height: 1024 }, scene, true);
-        const ctx = dynTex.getContext();
-        ctx.clearRect(0, 0, 1024, 1024);
+//         const dynTex = new DynamicTexture(`dynTex_${mesh.name}`, { width: 1024, height: 1024 }, scene, true);
+//         const ctx = dynTex.getContext();
+//         ctx.clearRect(0, 0, 1024, 1024);
 
-        const player = players[index];
-        if (player) {
-            mat.albedoColor = new Color3(1.0, 0.5, 0.4);
-            if (player instanceof Friend)
-            {
-                dynTex.drawText(player.getLogin, null, 280, "bold 80px Arial", "white", "transparent", true);
-                dynTex.drawText(player.getId.toString(), null, 600, "bold 250px Arial", "white", "transparent", true);
-            }
-            else
-            {
-                dynTex.drawText(player.alias, null, 280, "bold 80px Arial", "white", "transparent", true);
-                dynTex.drawText(player.id.toString(), null, 600, "bold 250px Arial", "white", "transparent", true);
-            }
-        } else {
-            mat.albedoColor = new Color3(0.5, 0.5, 0.5);
-            ctx.fillStyle = "gray";
-            ctx.fillRect(0, 0, 1024, 1024);
-        }
+//         const player = players[index];
+//         if (player) {
+//             mat.albedoColor = new Color3(1.0, 0.5, 0.4);
+//             if (player instanceof Friend)
+//             {
+//                 dynTex.drawText(player.getLogin, null, 280, "bold 80px Arial", "white", "transparent", true);
+//                 dynTex.drawText(player.getId.toString(), null, 600, "bold 250px Arial", "white", "transparent", true);
+//             }
+//             else
+//             {
+//                 dynTex.drawText(player.alias, null, 280, "bold 80px Arial", "white", "transparent", true);
+//                 dynTex.drawText(player.id.toString(), null, 600, "bold 250px Arial", "white", "transparent", true);
+//             }
+//         } else {
+//             mat.albedoColor = new Color3(0.5, 0.5, 0.5);
+//             ctx.fillStyle = "gray";
+//             ctx.fillRect(0, 0, 1024, 1024);
+//         }
 
-        dynTex.update();
-        mat.emissiveTexture = dynTex;
-        mat.emissiveColor = Color3.White();
-        mesh.material = mat;
-    });
-}
+//         dynTex.update();
+//         mat.emissiveTexture = dynTex;
+//         mat.emissiveColor = Color3.White();
+//         mesh.material = mat;
+//     });
+// }
 
 export function displayFriendsWithEmpty(scene: Scene, friends: Friend[], meshes: AbstractMesh[]) {
     meshes.forEach((mesh, index) => {

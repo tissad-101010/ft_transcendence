@@ -6,7 +6,8 @@ import {
   StackPanel, 
   Rectangle, 
   TextBlock,
-  Control
+  Control,
+  ScrollViewer
 } from "@babylonjs/gui";
 
 import { UserX } from '../../UserX.ts';
@@ -37,7 +38,7 @@ interface Env
 interface DataUtils
 {
     panelRound: StackPanel | null,
-    panelMatch: StackPanel | null,
+    scrollViewerMatch: ScrollViewer | null,
     nbMatchFirstRound: number,
     currRound: number,
     tournament: Tournament
@@ -158,16 +159,26 @@ function listMatch(
     env: Env
 )
 {
-    if (utils.panelMatch !== null)
-       myClearControls(utils.panelMatch);
+    if (utils.scrollViewerMatch !== null)
+       myClearControls(utils.scrollViewerMatch);
     else
     {
-        utils.panelMatch = new StackPanel();
-        utils.panelMatch.width = "100%";
-        utils.panelMatch.isVertical = true;
-        utils.panelMatch.spacing = 5;
-        container.addControl(utils.panelMatch);
+        utils.scrollViewerMatch = new ScrollViewer("scrollViewerMatch");
+        utils.scrollViewerMatch.width = "90%";
+        utils.scrollViewerMatch.height = "400px";
+        utils.scrollViewerMatch.background = "transparent";
+        utils.scrollViewerMatch.barColor = env.UIData.text.color;
+        utils.scrollViewerMatch.thickness = 0;
+        utils.scrollViewerMatch.horizontalBarVisible = false;
+        container.addControl(utils.scrollViewerMatch);
     }
+
+    const panelMatch = new StackPanel();
+    panelMatch.width = "100%";
+    panelMatch.isVertical = true;
+    panelMatch.spacing = 5;
+    utils.scrollViewerMatch.addControl(panelMatch);
+
     let nbMatch = utils.nbMatchFirstRound / Math.pow(2, utils.currRound);
     let idStart = 0
     for (let i = 0; i < utils.currRound; i++)
@@ -180,7 +191,7 @@ function listMatch(
         matchRow.width = "70%";
         matchRow.thickness = 1;
         matchRow.color = env.UIData.text.color;
-        utils.panelMatch.addControl(matchRow);
+        panelMatch.addControl(matchRow);
 
         const panelRow = new StackPanel();
         panelRow.isVertical = false;
@@ -342,14 +353,14 @@ export function menuTournament(env: Env, refresh: boolean, utils: DataUtils | un
         utils = {
             tournament: env.userX.getTournament,
             panelRound: null,
-            panelMatch: null,
+            scrollViewerMatch: null,
             nbMatchFirstRound: env.userX.getTournament.getParticipants.length / 2,
             currRound: 0
         }
     }
     else if (utils !== undefined)
     {
-        utils.panelMatch = null;
+        utils.scrollViewerMatch = null;
         utils.panelRound = null;
     }
     if (utils === undefined)

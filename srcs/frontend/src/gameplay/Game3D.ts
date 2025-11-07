@@ -600,7 +600,6 @@ export default class Game3D
                     this.sceneManager.setSpecificMesh(false);
                     this.sceneManager.getSceneInteractor?.enableInteractions();
                     this.sceneManager.getLights().turnOnLights(); //ici
-
                 });
                 // this.sceneManager.getSceneInteractor.handleMainZoneClick(this.sceneManager.getMesh("furniture")[0], true);
             }

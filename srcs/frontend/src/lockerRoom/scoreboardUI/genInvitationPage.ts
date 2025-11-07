@@ -7,307 +7,159 @@ import
   Control,
   Grid,
   Rectangle,
-  Ellipse
+  Ellipse,
+  ScrollViewer
 } from "@babylonjs/gui";
 
 import { UIData } from "./utils.ts";
 
 import { UserX } from "../UserX.ts";
 import { myClearControls } from "../../utils.ts";
+import { Friend } from "../../Friend.ts";
 
 
-function genFriendList(env: UIData, userX: UserX, refreshAllLists: () => void) : Rectangle
+function genFriendList(env: UIData, userX: UserX, container: {scrollViewer: ScrollViewer}, lists: StackPanel) : ScrollViewer
 {
-    const blockFriend = new Rectangle();
+
+    const blockFriend = new ScrollViewer();
     blockFriend.width = "400px";
     blockFriend.height = "200px";
-    blockFriend.color = env.text.color;
+    blockFriend.background = "transparent";
+    blockFriend.barColor = env.text.color;
     blockFriend.thickness = 1;
+    blockFriend.horizontalBarVisible = false;
 
-    const rowFriend = new StackPanel();
-    rowFriend.height = "200px";
-    rowFriend.isVertical = false;
-    rowFriend.paddingLeft = "10px";
-    rowFriend.paddingRight = "10px";
-    rowFriend.spacing = 2;
-    rowFriend.horizontalAlignment = Control.HORIZONTAL_ALIGNMENT_LEFT;
-    blockFriend.addControl(rowFriend);
+    const panel = new StackPanel();
+    panel.width = "100%";
+    panel.isVertical = true;
+    panel.spacing = 5;
+    blockFriend.addControl(panel);
 
     const text = new TextBlock();
     text.text = "Amis";
     text.color = env.text.color;
-    text.width = "75px";
+    text.width = "100%";
     text.height = "50px";
     text.fontSize = env.text.fontSize - 3;
     text.fontFamily = env.text.fontFamily;
-    text.textHorizontalAlignment = Control.HORIZONTAL_ALIGNMENT_LEFT;
-    rowFriend.addControl(text);    
+    text.textHorizontalAlignment = Control.HORIZONTAL_ALIGNMENT_CENTER;
+    panel.addControl(text);    
 
-    let start = 0;
-    const nbToDisplay = 4;
-    let buttonLeft : Rectangle | null = null;
-    let buttonRight : Rectangle | null = null;
-    let block : StackPanel | null = null;
+    const friends = userX.getFriends.filter((f : Friend) => f.getOnline === true);
 
-    const friends = userX.getFriends.filter((f) => f.getOnline === true);
-
-    function refreshFriendList()
+    for (let i = 0; i < friends.length; i++)
     {
-        if (buttonLeft !== null)
-            buttonLeft.dispose();
-        if (start !== 0)
-        {
-            buttonLeft = new Rectangle();
-            buttonLeft.width = "25px";
-            buttonLeft.height = "25px";
-            buttonLeft.background = env.inputText.background;
-            buttonLeft.color = env.text.color;
-            buttonLeft.textColor = env.text.color;
-            buttonLeft.thickness = 1;
-            rowFriend.addControl(buttonLeft);
+        const test = new TextBlock();
+        test.text = friends[i].getLogin;
+        test.height = "50px";
+        test.width = "100%";
+        test.fontSize = env.text.fontSize - 3;
+        test.fontFamily = env.text.fontFamily;
+        test.color = env.text.color;
+        panel.addControl(test);
 
-            const labelLeft = new TextBlock();
-            labelLeft.text = "<";
-            labelLeft.color = env.text.color;
-            labelLeft.fontFamily = env.text.fontFamily;
-            buttonLeft.addControl(labelLeft);
+        test.onPointerClickObservable.add(() => {
+            if (!userX.getTournament?.addParticipant({login: test.text, alias: test.text, ready: true, id: friends[i].getId}))
+                genWaitingList(env, userX, container, lists);
+        })
 
-            buttonLeft.onPointerClickObservable.add(() => {
-                start -= nbToDisplay;
-                refreshFriendList();
-            });
-        }
+        test.onPointerEnterObservable.add(() => {
+            test.color = env.button.hoveredBackground;
+        });
 
-        if (block !== null)
-            block.dispose();
-        block = new StackPanel(); // CONTIENT LA LISTE DES LOGINS (CLIQUABLES)
-        block.isVertical = true;
-        block.width = "200px";
-        block.spacing = 1;
-        block.color = env.text.color;
-        rowFriend.addControl(block);
-            
-
-        function displayFriend()
-        {
-            for (let i = start; i < start + nbToDisplay && i < friends.length; i++)
-            {
-                const test = new TextBlock();
-                test.text = friends[i].getLogin;
-                test.height = "40px";
-                test.width = "200px";
-                test.fontSize = env.text.fontSize - 3;
-                test.fontFamily = env.text.fontFamily;
-                test.color = env.text.color;
-                block.addControl(test);
-
-                test.onPointerClickObservable.add(() => {
-                    userX.getTournament?.addParticipant({login: test.text, alias: test.text, ready: true, id: friends[i].getId});
-                    refreshAllLists();
-                })
-
-                test.onPointerEnterObservable.add(() => {
-                    test.color = env.button.hoveredBackground;
-                });
-
-                test.onPointerOutObservable.add(() => {
-                    test.color = env.text.color;
-                })
-            }
-        }
-
-        displayFriend();
-
-        if (buttonRight !== null)
-            buttonRight.dispose();
-        if (start + nbToDisplay < friends.length)
-        {
-            buttonRight = new Rectangle();
-            buttonRight.width = "25px";
-            buttonRight.height = "25px";
-            buttonRight.background = env.inputText.background;
-            buttonRight.color = env.text.color;
-            buttonRight.thickness = 1;
-            rowFriend.addControl(buttonRight);
-            
-            const labelRight = new TextBlock();
-            labelRight.text = ">";
-            labelRight.color = env.text.color;
-            labelRight.fontFamily = env.text.fontFamily;
-            buttonRight.addControl(labelRight);
-
-            buttonRight.onPointerClickObservable.add(() => {
-                start += nbToDisplay;
-                refreshFriendList();
-            })
-        }
+        test.onPointerOutObservable.add(() => {
+            test.color = env.text.color;
+        })
     }
-    
-    refreshFriendList();
-
     return (blockFriend);
 }
 
-function genWaitingList(env: UIData, userX: UserX, refreshAllLists: () => void) : Rectangle
+
+function genWaitingList(env: UIData, userX: UserX, container: {scrollViewer: ScrollViewer}, lists: StackPanel)
 {
     if (!userX.getTournament)
         return ;
-    const blockWaiting = new Rectangle();
-    blockWaiting.width = "400px";
-    blockWaiting.height = "200px";
-    blockWaiting.color = env.text.color;
-    blockWaiting.thickness = 1;
+    if (!container.scrollViewer)
+    {
+        container.scrollViewer = new ScrollViewer();
+        container.scrollViewer.width = "400px";
+        container.scrollViewer.height = "200px";
+        container.scrollViewer.background = "transparent";
+        container.scrollViewer.barColor = env.text.color;
+        container.scrollViewer.thickness = 1;
+        container.scrollViewer.horizontalBarVisible = false;
+        lists.addControl(container.scrollViewer);
+    }
+    else
+        container.scrollViewer.clearControls();
 
-    const rowWaiting = new StackPanel();
-    rowWaiting.height = "200px";
-    rowWaiting.paddingLeft = "10px";
-    rowWaiting.paddingRight = "10px";
-    rowWaiting.isVertical = false;
-    rowWaiting.spacing = 2;
-    rowWaiting.horizontalAlignment = Control.HORIZONTAL_ALIGNMENT_LEFT;
-    blockWaiting.addControl(rowWaiting);
+    const panel = new StackPanel();
+    panel.width = "100%";
+    panel.isVertical = true;
+    panel.spacing = 5;
+    container.scrollViewer.addControl(panel);
 
     const text = new TextBlock();
-    text.text = "Invite";
+    text.text = "Invites (" + userX.getTournament.getParticipants.length + ")";
     text.color = env.text.color;
-    text.width = "100px";
+    text.width = "100%";
     text.height = "50px";
     text.fontSize = env.text.fontSize - 3;
     text.fontFamily = env.text.fontFamily;
-    text.textHorizontalAlignment = Control.HORIZONTAL_ALIGNMENT_LEFT;
-    rowWaiting.addControl(text);
+    text.textHorizontalAlignment = Control.HORIZONTAL_ALIGNMENT_CENTER;
+    panel.addControl(text);    
 
-    let start = 0;
-    const nbToDisplay = 4;
-    let buttonLeft : Rectangle | null = null;
-    let buttonRight : Rectangle | null = null;
-    let block : StackPanel | null = null;
-
-    function refreshFriendList()
+    for (let i = 0; i < userX.getTournament.getParticipants.length; i++)
     {
-        if (!userX.getTournament)
-            return ;
-        if (buttonLeft !== null)
-            buttonLeft.dispose();
-        if (start !== 0)
-        {
-            buttonLeft = new Rectangle();
-            buttonLeft.width = "25px";
-            buttonLeft.height = "25px";
-            buttonLeft.background = env.inputText.background;
-            buttonLeft.color = env.text.color;
-            buttonLeft.textColor = env.text.color;
-            buttonLeft.thickness = 1;
-            rowWaiting.addControl(buttonLeft);
+        const row = new StackPanel();
+        row.isVertical = false;
+        row.height = "30px";
+        row.width = "100%";
+        row.spacing = 5;
+        panel.addControl(row);
 
-            const labelLeft = new TextBlock();
-            labelLeft.text = "<";
-            labelLeft.color = env.text.color;
-            labelLeft.fontFamily = env.text.fontFamily;
-            buttonLeft.addControl(labelLeft);
+        const test = new TextBlock();
+        test.text = userX.getTournament.getParticipants[i].login;
+        test.height = "50px";
+        test.width = "300px";
+        test.paddingLeft = "20px";
+        test.fontSize = env.text.fontSize - 3;
+        test.textHorizontalAlignment = Control.HORIZONTAL_ALIGNMENT_LEFT;
+        test.fontFamily = env.text.fontFamily;
+        test.color = env.text.color;
+        row.addControl(test);
 
-            buttonLeft.onPointerClickObservable.add(() => {
-                start -= nbToDisplay;
-                refreshFriendList();
-            });
-        }
-
-        if (block !== null)
-            block.dispose();
-        block = new StackPanel(); // CONTIENT LA LISTE DES LOGINS (CLIQUABLES)
-        block.isVertical = true;
-        block.width = "220px";
-        block.spacing = 1;
-        block.color = env.text.color;
-        block.horizontalAlignment = Control.HORIZONTAL_ALIGNMENT_CENTER;
-        rowWaiting.addControl(block);
-            
-
-        function displayWaiting()
-        {
+        test.onPointerClickObservable.add(() => {
             if (!userX.getTournament)
                 return ;
-            for (let i = start; i < start + nbToDisplay && i < userX.getTournament.getParticipants.length; i++)
-            {
-                const row = new StackPanel();
-                row.isVertical = false;
-                row.height = "30px";
-                row.spacing = 5;
-                block.addControl(row);
+            if (userX.getTournament.getParticipants[i].login !== userX.getUser.login)
+            userX.getTournament?.removeParticipant(userX.getTournament.getParticipants[i]);
+            genWaitingList(env, userX, container, lists);
+        })
 
-                const test = new TextBlock();
-                test.text = userX.getTournament.getParticipants[i].login;
-                test.height = "50px";
-                test.width = "200px";
-                test.fontSize = env.text.fontSize - 3;
-                test.textHorizontalAlignment = Control.HORIZONTAL_ALIGNMENT_CENTER;
-                test.fontFamily = env.text.fontFamily;
-                test.color = env.text.color;
-                row.addControl(test);
+        test.onPointerEnterObservable.add(() => {
+            test.color = env.button.hoveredBackground;
+        });
 
-                test.onPointerClickObservable.add(() => {
-                    if (!userX.getTournament)
-                        return ;
-                    if (userX.getTournament.getParticipants[i].login !== userX.getUser.login)
-                    userX.getTournament?.removeParticipant(userX.getTournament.getParticipants[i]);
-                    refreshAllLists();
-                })
+        test.onPointerOutObservable.add(() => {
+            test.color = env.text.color;
+        })
 
-                test.onPointerEnterObservable.add(() => {
-                    test.color = env.button.hoveredBackground;
-                });
-
-                test.onPointerOutObservable.add(() => {
-                    test.color = env.text.color;
-                })
-
-                const circle = new Ellipse();
-                circle.width = "10px";
-                circle.height = "10px";
-                circle.color = "black";
-                circle.thickness = 1;
-                if (userX.getTournament.getParticipants[i].ready)
-                    circle.background = "green";
-                else
-                    circle.background = "red";
-                row.addControl(circle);
-
-            }
-        }
-
-        displayWaiting();
-
-        if (buttonRight !== null)
-            buttonRight.dispose();
-        if (start + nbToDisplay < userX.getTournament.getParticipants.length)
-        {
-            buttonRight = new Rectangle();
-            buttonRight.width = "25px";
-            buttonRight.height = "25px";
-            buttonRight.background = env.inputText.background;
-            buttonRight.color = env.text.color;
-            buttonRight.thickness = 1;
-            rowWaiting.addControl(buttonRight);
-            
-            const labelRight = new TextBlock();
-            labelRight.text = ">";
-            labelRight.color = env.text.color;
-            labelRight.fontFamily = env.text.fontFamily;
-            buttonRight.addControl(labelRight);
-
-            buttonRight.onPointerClickObservable.add(() => {
-                start += nbToDisplay;
-                refreshFriendList();
-            })
-        }
+        const circle = new Ellipse();
+        circle.width = "10px";
+        circle.height = "10px";
+        circle.color = "black";
+        circle.paddingRight = "20px";
+        circle.thickness = 1;
+        if (userX.getTournament.getParticipants[i].ready)
+            circle.background = "green";
+        else
+            circle.background = "red";
+        row.addControl(circle);
     }
-    
-    refreshFriendList();
-
-    return (blockWaiting);
 }
 
-function genRowLogin(env: UIData, userX: UserX, refreshAllLists: () => void) : StackPanel
+function genRowLogin(env: UIData, userX: UserX, container: {scrollViewer: ScrollViewer}, lists: StackPanel) : StackPanel
 {
     const row = new StackPanel();
     row.height = "50px";
@@ -378,14 +230,18 @@ function genRowLogin(env: UIData, userX: UserX, refreshAllLists: () => void) : S
             ready: false
         };
         login.text = "";
-        userX.getTournament?.addParticipant(participant);
-        refreshAllLists();
+        if (!userX.getTournament?.addParticipant(participant))
+            genWaitingList(env, userX, container, lists);
     })
     return (row);
 }
 
 export function genInvitationPage(env: UIData, grid: Grid, userX: UserX) : StackPanel
 {
+    const container = {
+        scrollViewer : null
+    }
+
     const page = new StackPanel();
     page.isVertical = true;
     page.paddingTop = "70px";
@@ -400,26 +256,17 @@ export function genInvitationPage(env: UIData, grid: Grid, userX: UserX) : Stack
     title.height = "80px";
     
     page.addControl(title);
-    page.addControl(genRowLogin(env, userX, refreshAllLists));
-
     const listsContainer = new StackPanel();
     listsContainer.isVertical = false;
     listsContainer.height = "400px";
     listsContainer.spacing = 10;
     listsContainer.paddingLeft = "10px";
     listsContainer.paddingRight = "10px";
+
+    page.addControl(genRowLogin(env, userX, container, listsContainer));
     page.addControl(listsContainer);
+    listsContainer.addControl(genFriendList(env, userX, container, listsContainer));
+    genWaitingList(env, userX, container, listsContainer);
 
-    function refreshAllLists()
-    {
-        myClearControls(listsContainer);
-        if (userX.getFriends.length > 0)
-            listsContainer.addControl(genFriendList(env, userX, refreshAllLists));
-        if (userX.getTournament && userX.getTournament.getParticipants.length > 0)
-            listsContainer.addControl(genWaitingList(env, userX, refreshAllLists));
-    }
-
-    refreshAllLists();
-    
     return (page);
 }

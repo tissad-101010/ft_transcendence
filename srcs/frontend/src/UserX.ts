@@ -68,6 +68,24 @@ export class UserX {
         this.addFriend("PixelPilot3", 10, true);
         this.addFriend("PixelPilot4", 11, true);
         this.addFriend("PixelPilot5", 12, true);
+        this.addFriend("PixelPilot6", 13, true);
+        this.addFriend("PixelPilot7", 14, true);
+        this.addFriend("PixelPilot8", 15, true);
+        this.addFriend("PixelPilot9", 16, true);
+        this.addFriend("PixelPilot10", 17, true);
+        this.addFriend("PixelPilot11", 18, true);
+        this.addFriend("PixelPilot12", 19, true);
+        this.addFriend("PixelPilot13", 20, true);
+        this.addFriend("PixelPilot14", 21, true);
+        this.addFriend("PixelPilot15", 22, true);
+        this.addFriend("PixelPilot16", 23, true);
+        this.addFriend("PixelPilot17", 24, true);
+        this.addFriend("PixelPilot18", 25, true);
+        this.addFriend("PixelPilot19", 26, true);
+        this.addFriend("PixelPilot20", 27, true);
+        this.addFriend("PixelPilot21", 28, true);
+        this.addFriend("PixelPilot22", 29, true);
+        this.addFriend("PixelPilot23", 30, true);
     }
 
     createTournament(a: string) : boolean
