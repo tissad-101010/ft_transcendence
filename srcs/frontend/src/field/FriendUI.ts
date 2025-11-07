@@ -34,9 +34,8 @@ interface ContainerUI
     buttonsMenu: Rectangle[]
 }
 
-export default class FriendUI
+export class FriendUI
 {
-
     private containerUI: ContainerUI;
     private sceneManager: SceneManager;
     private friend: Friend;
@@ -44,7 +43,12 @@ export default class FriendUI
     private buttonMeshes: AbstractMesh[];
     private currValue : number;
  
-    constructor(sceneManager: SceneManager, friend: Friend, private updateChair : (buttonMeshes: AbstractMesh[]) => void, buttonMeshes: AbstractMesh[])
+    constructor(
+        sceneManager: SceneManager,
+        friend: Friend,
+        private updateChair : (buttonMeshes: AbstractMesh[]) => void,
+        buttonMeshes: AbstractMesh[]
+    )
     {
         this.sceneManager = sceneManager;
         this.containerUI = {
@@ -79,7 +83,7 @@ export default class FriendUI
     }
 
 
-    displayHeader()
+    displayHeader() : void
     {
         if (this.containerUI.headerPanel === null)
         {
@@ -120,7 +124,9 @@ export default class FriendUI
         this.containerUI.headerPanel.addControl(avatar);
     }
 
-    switchView(label: string)
+    switchView(
+        label: string
+    ) : void
     {
         if (label !== this.currView)
         {
@@ -129,8 +135,7 @@ export default class FriendUI
         }
     }
 
-
-    displayMenu()
+    displayMenu() : void
     {
         if (this.containerUI.menuPanel === null)
         {
@@ -198,7 +203,6 @@ export default class FriendUI
             rect.addControl(text);
             return (rect);
         }
-
         this.containerUI.menuPanel.addControl(createButton("Infos", this));
         this.containerUI.menuPanel.addControl(createButton("Stats globales", this));
         this.containerUI.menuPanel.addControl(createButton("Stats tournoi", this));
@@ -206,14 +210,18 @@ export default class FriendUI
         this.containerUI.menuPanel.addControl(createButton("Supprimer l'ami", this));
     }
 
-    calculateWinPercentages(matchs: IMatch[], userId: number, trancheSize: number = 5) {
+    calculateWinPercentages(
+        matchs: IMatch[],
+        userId: number,
+        trancheSize: number = 5
+    ) : {labels: string[], percentages: number[]}
+    {
         const percentages: number[] = [];
         const labels: string[] = [];
 
         for (let i = 0; i < matchs.length; i += trancheSize) {
             const tranche = matchs.slice(i, i + trancheSize);
             let wins = 0;
-
             tranche.forEach(match => {
             const userIndex = match.participants.indexOf(userId);
             if (userIndex !== -1) {
@@ -222,22 +230,18 @@ export default class FriendUI
                 if (userScore > opponentScore) wins++;
             }
             });
-
             percentages.push((wins / tranche.length) * 100);
             labels.push(`Matchs ${i + 1}-${i + tranche.length}`);
         }
-
         return { labels, percentages };
     }
 
-    displayDeleteFriend()
+    displayDeleteFriend() : void
     {
-
         const spacing = new Rectangle();
         spacing.height = "200px";
         spacing.thickness = 0;
         this.containerUI.viewPanel.addControl(spacing);
-
 
         const text = new TextBlock();
         text.text = "Consequences de la suppresion :";
@@ -298,7 +302,9 @@ export default class FriendUI
         })
     }
 
-    updateCanvas(value: number)
+    updateCanvas(
+        value: number
+    ) : void
     {
         const mesh = this.sceneManager.getMesh("scoreBoard")[1];
         const scene = this.sceneManager.getScene();
@@ -394,9 +400,7 @@ export default class FriendUI
         });
     }
 
-
-
-    displayStatsGlobals()
+    displayStatsGlobals() : void
     {
         const line = new StackPanel("lineStatsGlobals");
         line.isVertical = false;
@@ -457,7 +461,6 @@ export default class FriendUI
             rect.addControl(text);
             return (rect);
         }
-
         const rect = new Rectangle();
         rect.width = "175px";
         rect.thickness = 0;
@@ -469,8 +472,7 @@ export default class FriendUI
         this.updateCanvas(this.currValue);
     }
 
-
-    displayHistoric()
+    displayHistoric() : void
     {
         const matchs = this.friend.loadMatchs();
         
@@ -570,7 +572,7 @@ export default class FriendUI
         }
     }
 
-    displayDatas()
+    displayDatas() : void
     {
         if (this.containerUI.viewPanel === null)
         {
@@ -617,7 +619,7 @@ export default class FriendUI
             this.displayDeleteFriend();
     }
 
-    resetPanel()
+    resetPanel() : void
     {
         this.containerUI.buttonsMenu = [];
         if (this.containerUI.viewPanel)
@@ -647,7 +649,7 @@ export default class FriendUI
             div.remove();
     }
 
-    switchOff()
+    switchOff() : void
     {
         this.resetPanel();
         if (this.containerUI.header)
@@ -667,8 +669,9 @@ export default class FriendUI
         }
     }
 
-
-    update(friend: Friend) : void
+    update(
+        friend: Friend
+    ) : void
     {
         this.friend = friend;
         this.displayHeader();

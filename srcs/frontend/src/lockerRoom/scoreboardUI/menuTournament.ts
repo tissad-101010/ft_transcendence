@@ -44,7 +44,11 @@ interface DataUtils
     tournament: Tournament
 }
 
-function rowRound(container: StackPanel, utils: DataUtils, env: Env)
+function rowRound(
+    container: StackPanel,
+    utils: DataUtils,
+    env: Env
+) : void
 {
     if (utils.tournament === null)
     {
@@ -138,7 +142,11 @@ function rowRound(container: StackPanel, utils: DataUtils, env: Env)
     }
 }
 
-function displayPlayer(c: StackPanel, p: TournamentParticipant | null, env: Env)
+function displayPlayer(
+    c: StackPanel,
+    p: TournamentParticipant | null,
+    env: Env
+) : void
 {
     const player = new TextBlock();
     if (p)
@@ -157,7 +165,7 @@ function listMatch(
     container: StackPanel,
     utils: DataUtils,
     env: Env
-)
+) : void
 {
     if (utils.scrollViewerMatch !== null)
        myClearControls(utils.scrollViewerMatch);
@@ -275,7 +283,7 @@ function waitingScreen(
     utils : DataUtils,
     env: Env,
     match: Match
-)
+) : void
 {
     myClearControls(env.menuContainer);
     let panel = new StackPanel();
@@ -319,7 +327,7 @@ function waitingScreen(
             clearInterval(env.waitingInterval.id);
             env.menuContainer.dispose();
             if (!env.userX.playTournamentMatch(utils.tournament, match, env.sceneManager))
-                console.error("Je ne peux pas lancer le match");
+                console.error("Impossible de lancer le match");
             else
             {
                 env.sceneManager.getSceneInteractor?.disableInteractions();
@@ -328,16 +336,17 @@ function waitingScreen(
                     env.sceneManager.setSpecificMesh(false);
                     env.sceneManager.getSceneInteractor?.enableInteractionScene();
                 });
-                // if (env.sceneManager.getSceneInteractor)
-                //     env.sceneManager.getSceneInteractor.handleMainZoneClick(env.sceneManager.getMesh("field")[0], true);
-                
             }
             env.waitingInterval.id = -1;
         }
     }, 1000);
 }
 
-export function menuTournament(env: Env, refresh: boolean, utils: DataUtils | undefined) : void
+export function menuTournament(
+    env: Env,
+    refresh: boolean,
+    utils: DataUtils | undefined
+) : void
 {
     if (env.userX.getTournament === null)
         return ;

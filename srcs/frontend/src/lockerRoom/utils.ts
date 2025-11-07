@@ -54,7 +54,12 @@ export interface UIData
 /**************************************************
  *                    TV                          *
  **************************************************/
-export function pressButtonAnimation(mesh: AbstractMesh, scene: Scene, onComplete?: () => void) {
+export function pressButtonAnimation(
+    mesh: AbstractMesh,
+    scene: Scene,
+    onComplete?: () => void
+) : void 
+{
     const createScaleAnim = (axis: "x" | "y" | "z") => {
         return new Animation(
             `scale${axis.toUpperCase()}Anim`,
@@ -92,7 +97,12 @@ export function pressButtonAnimation(mesh: AbstractMesh, scene: Scene, onComplet
     }
 }
 
-export function applyTextureToMesh(mesh: AbstractMesh, scene: Scene, texturePath: string): void {
+export function applyTextureToMesh(
+    mesh: AbstractMesh,
+    scene: Scene,
+    texturePath: string
+): void 
+{
     if (!mesh) return;
 
     const mat = new StandardMaterial(`stdMat_${mesh.name}`, scene);
@@ -107,7 +117,10 @@ export function applyTextureToMesh(mesh: AbstractMesh, scene: Scene, texturePath
     mesh.material = mat;
 }
 
-export function disposeMaterialWithTexture(material?: StandardMaterial): void {
+export function disposeMaterialWithTexture(
+    material?: StandardMaterial
+): void 
+{
     if (!material) return;
 
     material.diffuseTexture?.dispose();
@@ -123,7 +136,8 @@ export function applyTextToMesh(
     fontFamily: string = 'Arial',
     textColor: Color3 = Color3.White(),
     backgroundColor: Color3 = new Color3(0, 0, 0)
-    ): void {
+    ): void 
+{
     const textureSize = 512;
 
     const dynamicTexture = new DynamicTexture(
@@ -254,7 +268,11 @@ export function applyTextToMesh(
 //     mesh.material = mat;
 // }
 
-export function moveSponge(mesh: AbstractMesh, scene: Scene) {
+export function moveSponge(
+    mesh: AbstractMesh,
+    scene: Scene
+) : void 
+{
     const startPos = mesh.position.clone();
 
     const midPos = new Vector3(

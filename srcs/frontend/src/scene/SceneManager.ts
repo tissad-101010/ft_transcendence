@@ -113,7 +113,10 @@ private players: Player[] = [
     /**************************************************
     *                 CONSTRUCTOR                     *
     **************************************************/
-    constructor(canvas: HTMLCanvasElement){
+    constructor(
+        canvas: HTMLCanvasElement
+    )
+    {
         this.canvas = canvas;
         this.engine = new Engine(canvas, true);
         Engine.MaxSimultaneousLights = 8; // ici, avant de créer la scène ou les materials
@@ -169,7 +172,8 @@ private players: Player[] = [
     }
 
 
-    private setupHDR(): void {
+    private setupHDR(): void
+    {
         const hdrTexture = new HDRCubeTexture("env.hdr", this.scene, 2048);
         this.scene.environmentTexture = hdrTexture;
 
@@ -182,7 +186,8 @@ private players: Player[] = [
         this.scene.imageProcessingConfiguration.exposure = 1.5;
     }
 
-    private createClouds(): void {
+    private createClouds(): void
+    {
         const cloudSystem = new ParticleSystem("clouds", 40, this.scene); // 50 nuages max
         cloudSystem.particleTexture = new Texture("/lockerRoom/textures/cloud.png", this.scene);
 
@@ -219,8 +224,8 @@ private players: Player[] = [
         });
     }
 
-
-    private async setupMeshes(): Promise<void> {
+    private async setupMeshes(): Promise<void> 
+    {
         this.createClouds();
 
         await SceneLoader.AppendAsync("/pool/", "strucPool.glb", this.scene);
@@ -275,18 +280,20 @@ private players: Player[] = [
 
         this.sceneInteractor = new SceneInteractor(this.scene, this.freeCamera, this);
         this.sceneInteractor.enableInteractionScene();
-       
     }
 
 
-    private convertToAbstractMesh(names: string[]): AbstractMesh[] {
+    private convertToAbstractMesh(
+        names: string[]
+    ): AbstractMesh[] 
+    {
         return names
             .map(name => this.meshMap[name])
             .filter((m): m is AbstractMesh => m !== undefined);
     }
 
 
-    private enableRotationOnly() : void{
+    private enableRotationOnly() : void {
         this.freeCamera.inputs.clear();
         this.freeCamera.attachControl(this.canvas, true);
         const mouseInput = new FreeCameraMouseInput();
@@ -296,7 +303,11 @@ private players: Player[] = [
     /**************************************************
      *                PUBLIC METHODS                  *
      **************************************************/
-    public moveCameraTo(zoneName: ZoneName, onArrived?: () => void) {
+    public moveCameraTo(
+        zoneName: ZoneName,
+        onArrived?: () => void
+    ) 
+    {
         //  if (zoneName === ZoneName.POOL || zoneName === ZoneName.SCREEN_TV ||
         //     zoneName === ZoneName.SCOREBOARD || zoneName.includes(ZoneName.TSHIRT))
         //     this.limitCameraRotation = false;
@@ -362,20 +373,23 @@ private players: Player[] = [
         }
     }
 
-    public setupEnvironment(): void {
+    public setupEnvironment(): void
+    {
         this.setupHDR();
        this.setupMeshes();
         this.advancedTexture = AdvancedDynamicTexture.CreateFullscreenUI("UI", true, this.scene);
         // this.createCoordinateLabels();
     }
 
-    public startRenderLoop(): void {
+    public startRenderLoop(): void
+    {
         this.engine.runRenderLoop(() => {
             this.scene.render();
         });
     }
 
-    public cleanRender(): void {
+    public cleanRender(): void
+    {
         this.engine.dispose();
         window.removeEventListener("resize", this.onResize);
     }
@@ -383,36 +397,45 @@ private players: Player[] = [
     /**************************************************
      *                    GETTERS                     *
      **************************************************/
-    public get getLoadedMeshes(): { [zone: string]: AbstractMesh[] } {
+    public get getLoadedMeshes(): { [zone: string]: AbstractMesh[] } 
+    {
         return this.loadedMeshes;
     }
 
-    getMesh(zone: string) : AbstractMesh[]
+    getMesh(
+        zone: string
+    ) : AbstractMesh[]
     {
         return (this.loadedMeshes[zone]);
     }
 
-    public get getSceneInteractor() : SceneInteractor | null{
+    public get getSceneInteractor() : SceneInteractor | null
+    {
         return (this.sceneInteractor);
     }
 
-    public get getFreeCamera() : FreeCamera {
+    public get getFreeCamera() : FreeCamera 
+    {
         return this.freeCamera;
     }
 
-    public get getPlayers() : Player[] {
+    public get getPlayers() : Player[] 
+    {
         return this.players;
     }
 
-    public get getFriends(): Friend[] {
+    public get getFriends(): Friend[] 
+    {
         return this.friends;
     }
 
-    public get getChair(): AbstractMesh[] {
+    public get getChair(): AbstractMesh[] 
+    {
         return this._chairMeshes;
     }
 
-    public get getLounge(): AbstractMesh[] {
+    public get getLounge(): AbstractMesh[] 
+    {
         return this._loungeMeshes;
     }
 
@@ -426,7 +449,8 @@ private players: Player[] = [
         return (this.userX);
     }
 
-    public get getSpecificMesh() : boolean{
+    public get getSpecificMesh() : boolean
+    {
         return this._specificMesh;
     }
 
@@ -435,13 +459,15 @@ private players: Player[] = [
         return (this.scene);
     }
 
-    public getLights() : LightInteractor{
+    public getLights() : LightInteractor
+    {
         return (this.lightInteractor);
     }
     // /**************************************************
     //  *                    SETTERS                     *
     //  **************************************************/
-    private createCoordinateLabels(): void {
+    private createCoordinateLabels(): void 
+    {
         const label = new TextBlock();
         label.color = "black";
         label.fontSize = 14;
@@ -465,7 +491,8 @@ private players: Player[] = [
         });
     }
 
-    public setSpecificMesh(value: boolean): void {
+    public setSpecificMesh(value: boolean): void 
+    {
         this._specificMesh = value;
     }
 

@@ -15,7 +15,7 @@ import { UIData } from '../utils.ts';
 
 import { DataMatchBlock, genRulesMatchBlock } from './genRulesMatch.ts';
 import { Tournament } from '../../Tournament.ts';
-import { backButton, createButton, invitationButton, rulesButton } from './navigationButton.ts';
+import { backButton, createButton, invitationButton, rulesButton, start } from './navigationButton.ts';
 
 import { myClearControls } from "../../utils.ts";
 import { ScoreboardHandler } from '../ScoreboardHandler.ts';
@@ -84,6 +84,7 @@ function buttonNavigation(
                 /***** ***** */
                 /*  A FAIRE  */
                 /***** ***** */
+                // startButton()
                 console.info("Ce bouton n'est pas encore fonctionnel");
                 break;
         }
@@ -102,7 +103,9 @@ function buttonNavigation(
     return (button);
 }
 
-function match(env: Env)
+function match(
+    env: Env
+) : void
 {
     myClearControls(env.menuContainer)
 
@@ -116,9 +119,9 @@ function match(env: Env)
 
     const settings : DataMatchBlock = {
         data: {
-            speed: "-1",
-            score: "-1",
-            timeBefore: "-1",
+            speed: "",
+            score: "",
+            timeBefore: "",
         },
         graph: {
             container: {
@@ -150,7 +153,9 @@ function match(env: Env)
     rowButtons.addControl(buttonNavigation("Retour", env, settings, grid));
 }
 
-function tournament(env: Env)
+function tournament(
+    env: Env
+) : void
 {
     myClearControls(env.menuContainer);
 
@@ -202,7 +207,9 @@ function tournament(env: Env)
     rowButtons.addControl(buttonNavigation("Retour", env, settings, grid));
 }
 
-export function menuCreate(env: Env)
+export function menuCreate(
+    env: Env
+) : void
 {
     myClearControls(env.menuContainer);
     const panel = new StackPanel();
@@ -219,9 +226,7 @@ export function menuCreate(env: Env)
     button1.thickness = 0;
     panel.addControl(button1);
 
-
-
-        // Effets de survol
+    // Effets de survol
     button1.onPointerEnterObservable.add(() => {
         button1.alpha = 0.7;           
         button1.scaleX = 1;          // agrandit légèrement

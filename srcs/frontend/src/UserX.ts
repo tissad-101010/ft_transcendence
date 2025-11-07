@@ -21,7 +21,8 @@ interface User
     Classe permettant de gérer les actions de l'utilisateur, lieu où seront stockées les données
 */
 
-export class UserX {
+export class UserX 
+{
     private match: Match | null;
     private tournament: Tournament | null;
     private currentZone: ZoneName | null;
@@ -42,7 +43,11 @@ export class UserX {
     }
 
     /* Juste garder le parametre login une fois le backend ajoute*/
-    private addFriend(login: string, id: number, online: boolean) : number
+    private addFriend(
+        login: string,
+        id: number,
+        online: boolean
+    ) : number
     {
         const test = this.friends.find((f) => f.getId === id || f.getLogin === login)
         if (test !== undefined)
@@ -54,7 +59,7 @@ export class UserX {
         return (0);
     }
 
-    private simuEnAttendantBDD()
+    private simuEnAttendantBDD() : void
     {
         this.addFriend("Lolo", 1, true);
         this.addFriend("Tissad", 2, false);
@@ -102,9 +107,23 @@ export class UserX {
         return (true);
     }
 
-    playTournamentMatch(t: Tournament, m: Match, sceneManager: SceneManager) : boolean
+    playTournamentMatch(
+        t: Tournament,
+        m: Match,
+        sceneManager: SceneManager
+    ) : boolean
     {
         return (t.playMatch(m, this.user.id, sceneManager));
+    }
+
+    deleteFriend(
+        f: Friend
+    ) : void
+    {
+        this.friends.splice(this.friends.findIndex(
+            (e) => e.getId === f.getId),
+            1
+        );
     }
 
     deleteTournament() : void
@@ -141,17 +160,23 @@ export class UserX {
         return (this.user);
     }
 
-    set setCurrentZone(zone: ZoneName)
+    set setCurrentZone(
+        zone: ZoneName
+    )
     {
         this.currentZone = zone;
     }
 
-    set setTournament(tournament: Tournament)
+    set setTournament(
+        tournament: Tournament
+    )
     {
         this.tournament = tournament;
     }
 
-    set setMatch(match: Match)
+    set setMatch(
+        match: Match
+    )
     {
         this.match = match;
     }

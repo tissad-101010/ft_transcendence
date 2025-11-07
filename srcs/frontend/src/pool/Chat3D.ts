@@ -21,8 +21,13 @@ export class Chat3D {
     private userX: UserX;
 
 
-    constructor(scene: Scene, mesh: AbstractMesh, friend: Friend, userX: UserX) {
-        console.log(friend);
+    constructor(
+        scene: Scene,
+        mesh: AbstractMesh,
+        friend: Friend,
+        userX: UserX
+    ) 
+    {
         this.mesh = mesh;
         this.online = false;
         this.friend = friend;
@@ -158,7 +163,12 @@ export class Chat3D {
         this.displayHistory();
     }
 
-    smoothScrollTo(scrollViewer: ScrollViewer, target: number, speed: number = 10) {
+    smoothScrollTo(
+        scrollViewer: ScrollViewer,
+        target: number,
+        speed: number = 10
+    ) : void 
+    {
         const step = () => {
             const diff = target - scrollViewer.scrollTop;
             if (Math.abs(diff) < 1) return; // fin du scroll
@@ -168,7 +178,10 @@ export class Chat3D {
         step();
     }
 
-    areMessagesOnDifferentDays(date: Date): boolean {
+    areMessagesOnDifferentDays(
+        date: Date
+    ): boolean 
+    {
         return (
             !this.lastDate ||
             this.lastDate.getFullYear() !== date.getFullYear() ||
@@ -177,25 +190,27 @@ export class Chat3D {
         );
     }
 
-    displayDate(date: Date): void {
+    displayDate(
+        date: Date
+    ): void 
+    {
+        // Texte de la date
+        const dateText = new TextBlock();
+        dateText.text = date.toLocaleDateString("fr-FR", {
+            weekday: "long",
+            day: "numeric",
+            month: "long"
+        });
+        dateText.color = "white";
+        dateText.fontSize = 18;
+        dateText.width = "100%";
+        dateText.height = "40px";
+        dateText.textHorizontalAlignment = Control.HORIZONTAL_ALIGNMENT_CENTER;
+        dateText.textVerticalAlignment = Control.VERTICAL_ALIGNMENT_CENTER;
+        this.chatContainer.addControl(dateText);
 
-    // Texte de la date
-    const dateText = new TextBlock();
-    dateText.text = date.toLocaleDateString("fr-FR", {
-        weekday: "long",
-        day: "numeric",
-        month: "long"
-    });
-    dateText.color = "white";
-    dateText.fontSize = 18;
-    dateText.width = "100%";
-    dateText.height = "40px";
-    dateText.textHorizontalAlignment = Control.HORIZONTAL_ALIGNMENT_CENTER;
-    dateText.textVerticalAlignment = Control.VERTICAL_ALIGNMENT_CENTER;
-    this.chatContainer.addControl(dateText);
-
-    this.lastDate = date;
-}
+        this.lastDate = date;
+    }
 
     displayHistory() : void
     {
@@ -208,7 +223,9 @@ export class Chat3D {
         });
     }
 
-    updateChat(friend: Friend)
+    updateChat(
+        friend: Friend
+    ) : void
     {
         this.loginText.text = friend.getLogin;
         this.onlineIcon.background = friend.getOnline ? "#128354ff" : "#e58ab8ff";
@@ -218,7 +235,14 @@ export class Chat3D {
         this.displayHistory();
     }
 
-    estimateTextHeight(text: string, fontSize: number, containerWidth: number, fontFamily = "Arial", lineHeight = 1.2) {
+    estimateTextHeight(
+        text: string,
+        fontSize: number,
+        containerWidth: number,
+        fontFamily = "Arial",
+        lineHeight = 1.2
+    ) : number 
+    {
         const canvas = document.createElement("canvas");
         const ctx = canvas.getContext("2d")!;
         ctx.font = `${fontSize}px ${fontFamily}`;
@@ -237,17 +261,21 @@ export class Chat3D {
                 line = testLine;
             }
         }
-        return lineCount * fontSize * lineHeight;
+        return (lineCount * fontSize * lineHeight);
     }
     
     // ================= Méthode pour ajouter un message =================
-    addMessage = (sender: number, text: string, date: Date) => {
-    const estHeight = this.estimateTextHeight(
-        text,
-        34,      // taille police (fontSize)
-        700,     // largeur conteneur en px
-        "Arial"
-    );
+    addMessage = (
+        sender: number,
+        text: string,
+        date: Date
+    ) => {
+        const estHeight = this.estimateTextHeight(
+            text,
+            34,      // taille police (fontSize)
+            700,     // largeur conteneur en px
+            "Arial"
+        );
         if (this.areMessagesOnDifferentDays(date))
                 this.displayDate(date);
         const msgRect = new Rectangle();
@@ -280,8 +308,8 @@ export class Chat3D {
         this.scrollViewer.verticalBar.value = this.scrollViewer.verticalBar.maximum;
     }
 
-
-    public dispose() {
+    public dispose() 
+    {
         console.log("Chat3D: nettoyage en cours...");
 
         if (this.advancedTexture) {

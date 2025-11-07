@@ -18,7 +18,12 @@ import { myClearControls } from "../../utils.ts";
 import { Friend } from "../../Friend.ts";
 
 
-function genFriendList(env: UIData, userX: UserX, container: {scrollViewer: ScrollViewer}, lists: StackPanel) : ScrollViewer
+function genFriendList(
+    env: UIData,
+    userX: UserX,
+    container: {scrollViewer: ScrollViewer},
+    lists: StackPanel
+) : ScrollViewer
 {
 
     const blockFriend = new ScrollViewer();
@@ -39,7 +44,7 @@ function genFriendList(env: UIData, userX: UserX, container: {scrollViewer: Scro
     text.text = "Amis";
     text.color = env.text.color;
     text.width = "100%";
-    text.height = "50px";
+    text.height = "30px";
     text.fontSize = env.text.fontSize - 3;
     text.fontFamily = env.text.fontFamily;
     text.textHorizontalAlignment = Control.HORIZONTAL_ALIGNMENT_CENTER;
@@ -51,7 +56,7 @@ function genFriendList(env: UIData, userX: UserX, container: {scrollViewer: Scro
     {
         const test = new TextBlock();
         test.text = friends[i].getLogin;
-        test.height = "50px";
+        test.height = "30px";
         test.width = "100%";
         test.fontSize = env.text.fontSize - 3;
         test.fontFamily = env.text.fontFamily;
@@ -75,7 +80,12 @@ function genFriendList(env: UIData, userX: UserX, container: {scrollViewer: Scro
 }
 
 
-function genWaitingList(env: UIData, userX: UserX, container: {scrollViewer: ScrollViewer}, lists: StackPanel)
+function genWaitingList(
+    env: UIData,
+    userX: UserX,
+    container: {scrollViewer: ScrollViewer},
+    lists: StackPanel
+) : void
 {
     if (!userX.getTournament)
         return ;
@@ -120,7 +130,7 @@ function genWaitingList(env: UIData, userX: UserX, container: {scrollViewer: Scr
 
         const test = new TextBlock();
         test.text = userX.getTournament.getParticipants[i].login;
-        test.height = "50px";
+        test.height = "30px";
         test.width = "300px";
         test.paddingLeft = "20px";
         test.fontSize = env.text.fontSize - 3;
@@ -159,10 +169,15 @@ function genWaitingList(env: UIData, userX: UserX, container: {scrollViewer: Scr
     }
 }
 
-function genRowLogin(env: UIData, userX: UserX, container: {scrollViewer: ScrollViewer}, lists: StackPanel) : StackPanel
+function genRowLogin(
+    env: UIData,
+    userX: UserX,
+    container: {scrollViewer: ScrollViewer},
+    lists: StackPanel
+) : StackPanel
 {
     const row = new StackPanel();
-    row.height = "50px";
+    row.height = "30px";
     row.isVertical = false;
     row.spacing = 10;
     row.paddingLeft = "5px";
@@ -236,7 +251,10 @@ function genRowLogin(env: UIData, userX: UserX, container: {scrollViewer: Scroll
     return (row);
 }
 
-export function genInvitationPage(env: UIData, grid: Grid, userX: UserX) : StackPanel
+export function genInvitationPage(
+    env: UIData,
+    userX: UserX
+) : StackPanel
 {
     const container = {
         scrollViewer : null

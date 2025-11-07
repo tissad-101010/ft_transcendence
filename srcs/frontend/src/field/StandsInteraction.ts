@@ -14,8 +14,9 @@ Material
 
 import {ZoneName} from '../config.ts';
 import {getCurrentGroup, setCurrentGroup, getTotalGroups, displayFriendsWithEmpty} from '../utils.ts';
-import FriendUI from './FriendUI.ts';
-import { Friend } from '../Friend.js';
+import { FriendUI } from './FriendUI.ts';
+import { MyProfilUI } from './MyProfilUI.ts';
+import { Friend } from '../Friend.ts';
 
 
 export class StandsInteraction implements SpecificInteraction {
@@ -31,6 +32,7 @@ export class StandsInteraction implements SpecificInteraction {
     private test: boolean = false;
     private friendUI: FriendUI | null;
     private materials: Material[];
+    private myProfilUI: MyProfilUI | null = null;
 
     /**************************************************
      *                  CONSTRUCTOR                   *
@@ -53,7 +55,11 @@ export class StandsInteraction implements SpecificInteraction {
     /**************************************************
      *               PRIVATE METHODS                  *
      **************************************************/    
-    private handleButtonField(mesh: AbstractMesh, active: boolean): void {
+    private handleButtonField(
+        mesh: AbstractMesh,
+        active: boolean
+    ): void 
+    {
         if (active) {
             mesh.isPickable = true;
             this.buttonHighlightLayer.addMesh(mesh, new Color3(0.53, 0.81, 0.92)); // bleu ciel
@@ -63,7 +69,10 @@ export class StandsInteraction implements SpecificInteraction {
         }
     }
 
-    private updateButtons(buttonMeshes: AbstractMesh[]): void {
+    private updateButtons(
+        buttonMeshes: AbstractMesh[]
+    ): void 
+    {
         const current = getCurrentGroup(ZoneName.SEAT);
         const total = getTotalGroups(ZoneName.SEAT, this.sceneManager.getUserX.getFriends.length);
         if (buttonMeshes[0])
@@ -73,20 +82,26 @@ export class StandsInteraction implements SpecificInteraction {
     }
 
 
-    private handleMyProfile() : void {
+    private handleMyProfile() : void 
+    {
         this.sceneInteractor.disableInteractions();
         this.sceneManager.moveCameraTo(ZoneName.ARBITRATOR, () => {
             this.clicArbitrator = true;
             this.sceneInteractor.enableInteractions();
+            if (this.myProfilUI === null)
+                this.myProfilUI = new MyProfilUI(this.sceneManager, this.sceneManager.getUserX);
         });
     }
 
-    private handleFriendsProfile(mesh: AbstractMesh, buttonMeshes: AbstractMesh[]): void {
+    private handleFriendsProfile(
+        mesh: AbstractMesh,
+        buttonMeshes: AbstractMesh[]
+    ): void 
+    {
         this.sceneInteractor.getHighlightLayer().removeAllMeshes();
         this.sceneInteractor.disableInteractions();
         this.sceneManager.moveCameraTo(ZoneName.SEAT, () => {
             this.clicSeat = true;
-
             displayFriendsWithEmpty(this.scene, this.sceneManager.getUserX.getFriends, this.sceneManager.getChair);
             this.updateButtons(buttonMeshes);
             this.sceneInteractor.enableInteractions();
@@ -94,7 +109,10 @@ export class StandsInteraction implements SpecificInteraction {
     }
 
 
-    private resetState(buttonMeshes: AbstractMesh[]): void {
+    private resetState(
+        buttonMeshes: AbstractMesh[]
+    ): void 
+    {
         setCurrentGroup(ZoneName.SEAT, 0, this.sceneManager.getUserX.getFriends, this.scene);
         this.sceneManager.getChair.forEach((mesh : AbstractMesh) => {
             const mat = mesh.material as PBRMaterial;
@@ -115,7 +133,9 @@ export class StandsInteraction implements SpecificInteraction {
     /**************************************************
      *                PUBLIC METHODS                  *
     **************************************************/
-    public updateChair(buttonMeshes: AbstractMesh[]) : void
+    public updateChair(
+        buttonMeshes: AbstractMesh[]
+    ) : void
     {
             this.resetState(buttonMeshes);
             this.updateButtons(buttonMeshes);
@@ -124,14 +144,19 @@ export class StandsInteraction implements SpecificInteraction {
             this.resetMaterialForScoreboard();
     }
 
-    public resetMaterialForScoreboard()
+    public resetMaterialForScoreboard() : void
     {
         this.sceneManager.getMesh("scoreBoard")[0].material = this.materials[0];
         this.sceneManager.getMesh("scoreBoard")[1].material = this.materials[1];
         this.sceneManager.getMesh("scoreBoard")[2].material = this.materials[2];
     }
 
-    public handlePointer(pointerInfo: PointerInfo, isClick: boolean, mesh: AbstractMesh): void {
+    public handlePointer(
+        pointerInfo: PointerInfo,
+        isClick: boolean,
+        mesh: AbstractMesh
+    ): void 
+    {
         if (!this.sceneInteractor.areInteractionsEnabled()) return;
         const pickedMesh = mesh;
         if (!pickedMesh)return;
@@ -140,7 +165,6 @@ export class StandsInteraction implements SpecificInteraction {
         const spectatorMeshes = this.sceneManager.getLoadedMeshes["spectator"];
         const friendMeshes = this.sceneManager.getLoadedMeshes["seatsFriends"];
         const buttonMeshes = this.sceneManager.getLoadedMeshes["buttonsField"];
-        const friends = this.sceneManager.getFriends;
 
         if (isClick) {
             if (friendMeshes.includes(pickedMesh) && this.test)
@@ -185,7 +209,15 @@ export class StandsInteraction implements SpecificInteraction {
                                 this.test = false;
                             }
                             else if (pickedMesh === buttonMeshes[3])
+                            {
+                                if (this.myProfilUI)
+                                {
+                                    this.myProfilUI.dispose();
+                                    this.myProfilUI = null;
+                                    this.sceneManager.getScene().getMeshByName("logo").isVisible = true;
+                                }
                                 this.clicArbitrator = false;
+                            }
                             this.sceneInteractor.enableInteractions();
                         });
                 }
@@ -216,11 +248,9 @@ export class StandsInteraction implements SpecificInteraction {
         }
     }
 
-
-
-    public dispose(): void {
+    public dispose(): void 
+    {
         console.log("StandsInteraction: nettoyage en cours...");
-
         this.buttonHighlightLayer.removeAllMeshes();
         this.sceneInteractor.getHighlightLayer().removeAllMeshes();
 
@@ -254,8 +284,6 @@ export class StandsInteraction implements SpecificInteraction {
             }
         });
         this.sceneInteractor.enableInteractions();
-
         console.log("StandsInteraction: nettoyage terminé.");
     }
-
 }

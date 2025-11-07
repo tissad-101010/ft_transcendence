@@ -45,12 +45,18 @@ export class Tournament
         this.sceneManager = sceneManager;
     }
 
-    playMatch(match: Match, id: number, sceneManager: SceneManager) : boolean
+    playMatch(
+        match: Match,
+        id: number,
+        sceneManager: SceneManager
+    ) : boolean
     {
         return (match.play(id, sceneManager));
     }
 
-    matchFinish(match: Match) : void
+    matchFinish(
+        match: Match
+    ) : void
     {
         if (!match.getSloatA || !match.getSloatB)
             return ;
@@ -88,7 +94,10 @@ export class Tournament
         console.log("Le match est termine, etat de tournoi : ", this);
     }
 
-    addRules(v: string, m: number) : void
+    addRules(
+        v: string,
+        m: number
+    ) : void
     {
         switch (m)
         {
@@ -103,7 +112,9 @@ export class Tournament
         }
     }
 
-    addParticipant(p: TournamentParticipant) : number
+    addParticipant(
+        p: TournamentParticipant
+    ) : number
     {
         let stop = false;
         this.participants.forEach((a) => {
@@ -117,7 +128,9 @@ export class Tournament
         return (0);
     }
 
-    removeParticipant(p: TournamentParticipant) : void
+    removeParticipant(
+        p: TournamentParticipant
+    ) : void
     {
         const index = this.participants.indexOf(p);
         if (index > -1)
@@ -151,7 +164,9 @@ export class Tournament
         return (0);
     }
 
-    createMatchs(p : TournamentParticipant[]) : void
+    createMatchs(
+        p : TournamentParticipant[]
+    ) : void
     {
         const nbTour = Math.log(p.length) / Math.log(2); /* Nombre de tours du tournoi */
         let nbMatch = p.length / 2; // Nombre de mathc du tournoi
