@@ -21,7 +21,7 @@ function App() {
       </div>
 
       {/* Overlay HomePage */}
-      {/* <div
+      <div
         style={{
           position: "absolute",
           top: 0,
@@ -32,7 +32,7 @@ function App() {
         }}
       >
         <HomePage />
-      </div> */}
+      </div>
     </div>
   );
 }

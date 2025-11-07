@@ -1,10 +1,53 @@
 import React, { useState } from "react";
 import "./HomePage.css";
 
+
+// Fonction externe pour gérer l'inscription
+async function registerUser(
+  username: string,
+  email: string,
+  password: string
+): Promise<{ success: boolean; message?: string }> {
+  try {
+    const response = await fetch("https://localhost:8443/api/user/auth/signup", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+      credentials: "include", // envoie les cookies si backend les utilise
+      body: JSON.stringify({ username, email, password }),
+    });
+
+    const data = await response.json();
+
+    if (response.ok && data.signupComplete) {
+      return { success: true };
+    } else {
+      return { success: false, message: data.message || "Registration failed" };
+    }
+  } catch (err) {
+    console.error(err);
+    return { success: false, message: "An error occurred during registration" };
+  }
+}
+
 const HomePage = () => {
   // État pour savoir si on affiche le formulaire d'inscription
   const [showRegister, setShowRegister] = useState(false);
+  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
 
+  const handleRegister = async () => {
+    const result = await registerUser(username, email, password);
+    if (result.success) {
+      setShowRegister(false);
+    } else {
+      setErrorMessage(result.message??"Registration failed");
+    }
+  };
   return (
     <div className="homepage-overlay">
       <div className="homepage-window">
@@ -30,7 +73,7 @@ const HomePage = () => {
               <input type="password" />
             </div>
 
-            <button className="homepage-button">Register</button>
+            <button className="homepage-button" onClick={handleRegister}>Register</button>
 
             <div className="Register">
               <p>
