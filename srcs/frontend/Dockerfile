@@ -1,16 +1,16 @@
-# Étape 1 : build de l'app
-FROM node:20
+# Utiliser Node 20 officiel
+FROM node:20-slim 
 
+# Dossier de travail
 WORKDIR /app
+
+# Copier uniquement package.json et package-lock.json pour installer deps
 COPY package*.json ./
-RUN npm install --no-cache && mkdir -p src public && chmod -R 777 src public
+RUN mkdir -p ./src ./public ./build && chmod -R 777 ./src ./public ./build
 COPY ./src/ ./src/
 COPY ./public/ ./public
-
-
-#CMD ["tail", "-f", "/dev/null"]
-
-# RUN npm run build
+COPY ./tsconfig.json ./
+COPY ./tools/entrypoint.sh /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
 # CMD ["tail", "-f", "/dev/null"]
-
-CMD ["npm", "start"]
