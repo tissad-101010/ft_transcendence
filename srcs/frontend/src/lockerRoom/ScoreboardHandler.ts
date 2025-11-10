@@ -54,7 +54,7 @@ export class ScoreboardHandler {
         this.clicScoreboard = false;
         this.userX = sceneManager.getUserX;
         this.interval = {id: -1};
-
+        console.log(this.userX);
         this.UIData = {
             title: {
                 color: "rgba(221, 16, 16, 1)",
@@ -105,7 +105,7 @@ export class ScoreboardHandler {
         if (this.advancedTexture !== null)
             this.advancedTexture.dispose();
         this.advancedTexture = AdvancedDynamicTexture.CreateForMesh(mesh);
-            mesh.isVisible = true;
+        mesh.isVisible = true;
         mesh.setEnabled(true);
 
         this.menuContainer.width = "100%";

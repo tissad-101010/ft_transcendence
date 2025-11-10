@@ -6,7 +6,8 @@ import {
   Button,
   TextBlock,
   Control,
-  Grid 
+  Grid,
+  ScrollViewer
 } from "@babylonjs/gui";
 
 import { UserX } from '../../UserX.ts';
@@ -15,10 +16,12 @@ import { UIData } from '../utils.ts';
 
 import { DataMatchBlock, genRulesMatchBlock } from './genRulesMatch.ts';
 import { Tournament } from '../../Tournament.ts';
-import { backButton, createButton, invitationButton, rulesButton, start } from './navigationButton.ts';
+
+import { backButton, createButton, invitationButton, joinButton, rulesButton, newButton } from './navigationButton.ts';
 
 import { myClearControls } from "../../utils.ts";
 import { ScoreboardHandler } from '../ScoreboardHandler.ts';
+import { Match } from '../../Match.js';
 
 
 interface Env
@@ -44,7 +47,7 @@ function buttonNavigation(
     const button = new Rectangle();
     button.height = "80px";
     button.width = "140px";
-    button.thickness = env.UIData.button.thickness;
+    button.thickness = env.UIData.button.thickness + 4;
     button.color = env.UIData.text.color;
     if (label === settings.currPage)
         button.background = env.UIData.button.clickedBackground;
@@ -73,6 +76,12 @@ function buttonNavigation(
                 break;
             case "Match" :
                 rulesButton(label, env, settings, grid)
+                break;
+            case "Nouveau" :
+                newButton(label, env, settings, grid);
+                break;
+            case "Rejoindre" :
+                joinButton(label, env, grid);
                 break;
             case "Participants" :
                 invitationButton(label, env, settings, grid);
@@ -103,8 +112,191 @@ function buttonNavigation(
     return (button);
 }
 
+export function genJoinMatch(env: UIData, userX: UserX) : StackPanel
+{
+    const page = new StackPanel();
+    page.isVertical = true;
+    page.paddingTop = "70px";
+    page.width = "90%";
+
+    const title = new TextBlock();
+    title.text = "Rejoindre un match";
+    title.color = env.title.color;
+    title.fontSize = env.title.fontSize;
+    title.fontFamily = env.title.fontFamily;
+    title.width = "500px";
+    title.height = "80px";
+    
+    page.addControl(title);
+   
+    const scrollViewer = new ScrollViewer();
+    scrollViewer.width = "100%";
+    scrollViewer.height = "300px";
+    scrollViewer.background = "red";
+    scrollViewer.barColor = env.text.color;
+    scrollViewer.thickness = 0;
+    scrollViewer.horizontalBarVisible = false;
+    page.addControl(scrollViewer);
+
+    const container = new StackPanel();
+    container.width = "100%";
+    container.isVertical = true;
+    container.spacing = 20;
+    scrollViewer.addControl(container);
+
+    /*
+        tableau utile pour simuler une liste de matchs crees par d'autres utilisateurs
+        id -> id du match
+        speed/time/score -> Regle defini pour le match
+    */
+    const matchs = [
+        {id: 0, login: "Lolo", speed: "2", time: "4", score: "5"},
+        {id: 1, login: "Lolo", speed: "2", time: "4", score: "5"},
+        {id: 2, login: "Lolo", speed: "2", time: "4", score: "5"},
+        {id: 3, login: "Lolo", speed: "2", time: "4", score: "5"},
+        {id: 4, login: "Lolo", speed: "2", time: "4", score: "5"},
+        {id: 5, login: "Lolo", speed: "2", time: "4", score: "5"},
+        {id: 6, login: "Lolo", speed: "2", time: "4", score: "5"},
+        {id: 7, login: "Lolo", speed: "2", time: "4", score: "5"},
+        {id: 8, login: "Lolo", speed: "2", time: "4", score: "5"},
+        {id: 9, login: "Lolo", speed: "2", time: "4", score: "5"},
+        {id: 10, login: "Lolo", speed: "2", time: "4", score: "5"},
+        {id: 11, login: "Lolo", speed: "2", time: "4", score: "5"},
+        {id: 12, login: "Lolo", speed: "2", time: "4", score: "5"},
+    ];
+
+    const rect = new Rectangle();
+    rect.width = "500px";
+    rect.height = "50px";
+    rect.background = "white";
+    rect.thickness = 5;
+    rect.color = "black";
+    container.addControl(rect);
+
+    const panel = new StackPanel();
+    panel.isVertical = false;
+    panel.width = "500px";
+    panel.height = "100px";
+    rect.addControl(panel);
+
+    const login = new TextBlock();
+    login.text = "Login";
+    login.fontSize = env.text.fontSize;
+    login.fontFamily = env.text.fontFamily;
+    login.width = "100px";
+    login.height = "100px";
+    login.color = "black";
+    panel.addControl(login);
+
+    const speed = new TextBlock();
+    speed.text = "Vitesse";
+    speed.fontSize = env.text.fontSize;
+    speed.fontFamily = env.text.fontFamily;
+    speed.width = "100px";
+    speed.height = "100px";
+    speed.color = "black";
+    panel.addControl(speed);
+
+    const time = new TextBlock();
+    time.text = "Delai";
+    time.fontSize = env.text.fontSize;
+    time.fontFamily = env.text.fontFamily;
+    time.width = "100px";
+    time.height = "100px";
+    time.color = "black";
+    panel.addControl(time);
+
+    const score = new TextBlock();
+    score.text = "Score";
+    score.fontSize = env.text.fontSize;
+    score.fontFamily = env.text.fontFamily;
+    score.width = "100px";
+    score.height = "100px";
+    score.color = "black";
+    panel.addControl(score);
+    container.addControl(rect);
+
+    matchs.forEach((m) => {
+        const rect = new Rectangle();
+        rect.width = "500px";
+        rect.height = "100px";
+        rect.background = "white";
+        rect.thickness = 3;
+        rect.color = "black";
+        container.addControl(rect);
+
+        const panel = new StackPanel();
+        panel.isVertical = false;
+        panel.width = "500px";
+        panel.height = "100px";
+        rect.addControl(panel);
+
+        const login = new TextBlock();
+        login.text = m.login;
+        login.fontSize = env.text.fontSize;
+        login.fontFamily = env.text.fontFamily;
+        login.width = "100px";
+        login.height = "100px";
+        login.color = "black";
+        panel.addControl(login);
+
+        const speed = new TextBlock();
+        speed.text = m.speed;
+        speed.fontSize = env.text.fontSize;
+        speed.fontFamily = env.text.fontFamily;
+        speed.width = "100px";
+        speed.height = "100px";
+        speed.color = "black";
+        panel.addControl(speed);
+
+        const time = new TextBlock();
+        time.text = m.time;
+        time.fontSize = env.text.fontSize;
+        time.fontFamily = env.text.fontFamily;
+        time.width = "100px";
+        time.height = "100px";
+        time.color = "black";
+        panel.addControl(time);
+
+        const score = new TextBlock();
+        score.text = m.score;
+        score.fontSize = env.text.fontSize;
+        score.fontFamily = env.text.fontFamily;
+        score.width = "100px";
+        score.height = "100px";
+        score.color = "black";
+        panel.addControl(score);
+
+        const button = new Rectangle();
+        button.height = "50px";
+        button.width = "50px";
+        button.thickness = env.button.thickness;
+        button.color = env.text.color;
+        panel.addControl(button);
+
+        const text = new TextBlock();
+        text.text = "Go";
+        text.color = env.text.color;
+        text.fontSize = env.text.fontSize - 4;
+        text.fontFamily = env.text.fontFamily;
+        button.addControl(text);
+        
+        button.onPointerClickObservable.add(() => {
+            const rules = {
+                speed: m.speed,
+                score: m.score,
+                timeBefore: m.time
+            };
+            userX.joinFriendlyMatch(rules, m.id);
+        });
+    });
+
+    return (page);
+}
+
+
 function match(
-    env: Env
+    env: Env,
 ) : void
 {
     myClearControls(env.menuContainer)
@@ -113,31 +305,30 @@ function match(
     grid.width = "100%";
     grid.height = "60%";
     grid.addColumnDefinition(1);
-    grid.addRowDefinition(0.7);
-    grid.addRowDefinition(0.3);
+    grid.addRowDefinition(0.8);
+    grid.addRowDefinition(0.05);
+    grid.addRowDefinition(0.15);
     env.menuContainer.addControl(grid);
-
     const settings : DataMatchBlock = {
         data: {
             speed: "",
             score: "",
-            timeBefore: "",
+            timeBefore: ""
         },
         graph: {
             container: {
                 width: "100%",
                 height: "100%",
                 thickness: 1,
-                color: "blue", 
+                color: "blue"
             },
             text : env.UIData.text,
             button: env.UIData.button,
             inputText: env.UIData.inputText
         },
         controlButtons: [],
-        currPage: "Match",
-        mode: -1,
-        login: ""
+        currPage: "Menu",
+        mode: -1
     }
 
     env.page = genRulesMatchBlock(settings, true);
@@ -147,9 +338,10 @@ function match(
     rowButtons.isVertical = false;
     rowButtons.height = "100%";
     rowButtons.spacing = 10;
-    grid.addControl(rowButtons, 1, 0);
+    grid.addControl(rowButtons, 2, 0);
 
-    rowButtons.addControl(buttonNavigation("Lancer", env, settings, grid));
+    rowButtons.addControl(buttonNavigation("Nouveau", env, settings, grid));
+    rowButtons.addControl(buttonNavigation("Rejoindre", env, settings, grid));
     rowButtons.addControl(buttonNavigation("Retour", env, settings, grid));
 }
 
@@ -189,7 +381,6 @@ function tournament(
         controlButtons: [],
         currPage: "Match",
         mode : -1,
-        login: ""
     }
     env.page = genRulesMatchBlock(settings, false);
     grid.addControl(env.page, 0, 0);

@@ -12,10 +12,10 @@ import {
 
 import { UserX } from '../../UserX.ts';
 import { UIData } from '../utils.ts';
-import { Tournament, TournamentParticipant } from '../../Tournament.ts';
+import { Tournament } from '../../Tournament.ts';
 
 import { myClearControls } from "../../utils.ts";
-import { Match } from "../../Match.ts";
+import { Match, MatchParticipant } from "../../Match.ts";
 import { SceneManager } from "../../scene/SceneManager.ts";
 import { ZoneName } from "../../config.ts";
 import { ScoreboardHandler } from '../ScoreboardHandler.ts';
@@ -144,10 +144,11 @@ function rowRound(
 
 function displayPlayer(
     c: StackPanel,
-    p: TournamentParticipant | null,
+    p: MatchParticipant | null,
     env: Env
 ) : void
 {
+    console.log("player : ", p);
     const player = new TextBlock();
     if (p)
         player.text = p.alias;

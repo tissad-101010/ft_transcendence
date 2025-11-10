@@ -65,14 +65,14 @@ export class Tournament
             console.error("Le match n'est pas termine ou n'a pas de vainqueur");
             return ;
         }
-        const nextMatchId = match.getTournamentInfo?.nextMatchId;
+        const nextMatchId = match.getMatchInfo?.nextMatchId;
         const nextMatch = this.matchs.find((m) => m.getId === nextMatchId);
         if (nextMatch === undefined)
         {
             console.error("Match suivant pas trouve");
             return ;
         }
-        if (match.getTournamentInfo?.nextMatchSlot === 0)
+        if (match.getMatchInfo?.nextMatchSlot === 0)
             nextMatch.setSloatA = match.getWinner;
         else
             nextMatch.setSloatB = match.getWinner;
@@ -193,8 +193,8 @@ export class Tournament
                 },
                 nextMatchId: targetMatch,
                 nextMatchSlot: targetSlot,
-                status: 0,
-                tournament: this
+                tournament: this,
+                type: "tournament"
             }
             indexP += 2;
             indexM++;
@@ -202,7 +202,7 @@ export class Tournament
                 targetSlot = 0;
             else
                 targetSlot = 1;
-            match.setTournamentInfo = settings;
+            match.setMatchInfo = settings;
             this.matchs.push(match);
         }
         for (let i = 2; i <= nbTour; i++)
@@ -227,11 +227,11 @@ export class Tournament
                     sloatB: null,
                     nextMatchId: targetMatch,
                     nextMatchSlot: targetSlot,
-                    status: 0,
-                    tournament: this
+                    tournament: this,
+                    type: "tournament"
                 }
                 indexM++;
-                match.setTournamentInfo = settings;
+                match.setMatchInfo = settings;
                 this.matchs.push(match);
             }
         }

@@ -375,7 +375,7 @@ private players: Player[] = [
 
     public setupEnvironment(): void
     {
-        this.setupHDR();
+        // this.setupHDR();
        this.setupMeshes();
         this.advancedTexture = AdvancedDynamicTexture.CreateFullscreenUI("UI", true, this.scene);
         // this.createCoordinateLabels();

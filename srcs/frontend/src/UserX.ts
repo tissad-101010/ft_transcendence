@@ -2,10 +2,10 @@ import {
   Scene,
 } from '@babylonjs/core';
 
-import { ZoneName } from "./config";
+import { ZoneName } from "./config.ts";
 import { TournamentParticipant, Tournament } from "./Tournament.ts";
 
-import { Match } from "./Match.ts";
+import { Match, MatchRules } from "./Match.ts";
 
 import { SceneManager } from './scene/SceneManager.ts';
 
@@ -114,6 +114,21 @@ export class UserX
     ) : boolean
     {
         return (t.playMatch(m, this.user.id, sceneManager));
+    }
+
+    joinFriendlyMatch(
+        r: MatchRules,
+        id: number
+    )
+    {
+        const match = new Match(r, "friendly", id, this.sceneManager);
+        match.play(0, this.sceneManager);
+        this.sceneManager.getSceneInteractor?.disableInteractions();
+        // this.scoreboard.setClic = false;
+        this.sceneManager.moveCameraTo(ZoneName.FIELD, () => {
+            this.sceneManager.setSpecificMesh(false);
+            this.sceneManager.getSceneInteractor?.enableInteractionScene();
+        });
     }
 
     deleteFriend(

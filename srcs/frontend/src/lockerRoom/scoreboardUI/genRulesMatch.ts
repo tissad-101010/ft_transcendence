@@ -59,8 +59,7 @@ export interface DataMatchBlock
     graph: DataGraph,
     controlButtons: Button[],
     currPage: string,
-    mode: number,
-    login: string
+    mode: number
 }
 
 function genRowSpeed(env: DataMatchBlock) : StackPanel

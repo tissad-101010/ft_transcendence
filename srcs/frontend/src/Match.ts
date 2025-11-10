@@ -33,13 +33,27 @@ interface IGame
 */
 export interface MatchTournament
 {
-    round: number | undefined,
-    sloatA: MatchParticipant | null,
-    sloatB: MatchParticipant | null,
-    nextMatchId: number | undefined,
-    nextMatchSlot: number | undefined,
-    status: number | undefined,
-    tournament: Tournament | undefined
+    round: number | undefined;
+    sloatA: MatchParticipant | null;
+    sloatB: MatchParticipant | null;
+    nextMatchId: number | undefined;
+    nextMatchSlot: number | undefined;
+    tournament: Tournament | undefined;
+    type: "tournament";
+}
+
+export interface MatchFriendly
+{
+    sloatA: MatchParticipant | null;
+    sloatB: MatchParticipant | null;
+    type: "friendly";
+}
+
+enum MatchStatus
+{
+    PENDING,
+    ONGOING,
+    FINISHED
 }
 
 export class Match
@@ -48,7 +62,7 @@ export class Match
     private sceneManager : SceneManager;
     private id: number;
     private mode: string;
-    private tournamentInfo: MatchTournament | null;
+    private matchInfo: MatchTournament | MatchFriendly | null;
     private winner: MatchParticipant | null;
     private score : number[];
     private rules: MatchRules;
@@ -56,6 +70,7 @@ export class Match
     private renderObserver: Observer<Scene> | null;
     private keys: Set<string>;
     private scene: Scene;
+    private status: MatchStatus;
     constructor(r: MatchRules, m: string, id: number, sceneManager : SceneManager)
     {
         this.sceneManager = sceneManager;
@@ -64,21 +79,26 @@ export class Match
         this.rules = r;
         if (this.mode = "tournament")
         {
-            this.tournamentInfo = {
+            this.matchInfo = {
                 round: undefined,
                 sloatA: null,
                 sloatB: null,
                 nextMatchId: undefined,
                 nextMatchSlot: undefined,
-                status: 0,
-                tournament: undefined
+                tournament: undefined,
+                type: "tournament"
             }
         } else
-            this.tournamentInfo = null;
+            this.matchInfo = {
+                sloatA: null,
+                sloatB: null,
+                type: "friendly"
+            };
         this.winner = null;
         this.score = [0,0];
         this.game = null;
         this.renderObserver = null;
+        this.status = MatchStatus.PENDING;
         this.keys = new Set<string>();
     }
 
@@ -102,9 +122,9 @@ export class Match
 
     play(id: number, sceneManager: SceneManager) : boolean
     {
-        if (!this.tournamentInfo || !this.tournamentInfo.sloatA || !this.tournamentInfo.sloatB
-            || !this.tournamentInfo.sloatA.ready 
-            || !this.tournamentInfo.sloatB.ready)
+        if (!this.matchInfo || !this.matchInfo.sloatA || !this.matchInfo.sloatB
+            || !this.matchInfo.sloatA.ready 
+            || !this.matchInfo.sloatB.ready)
         {
             console.error("Le match ne peut pas être lancé");
             return (false);
@@ -118,7 +138,7 @@ export class Match
                     countDownGoalTime: parseInt(this.rules.timeBefore),
                     allowPause: false
                 }, 
-                [this.tournamentInfo.sloatA, this.tournamentInfo.sloatB]),
+                [this.matchInfo.sloatA, this.matchInfo.sloatB]),
             interface: new Game3D(sceneManager)
         };
 
@@ -164,8 +184,8 @@ export class Match
                     this.game.interface.update(this.keys);
                 else if (this.game && this.game.logic.getState === 3)
                 {
-                    if (!this.tournamentInfo || !this.tournamentInfo.sloatA
-                        || !this.tournamentInfo.sloatB)
+                    if (!this.matchInfo || !this.matchInfo.sloatA
+                        || !this.matchInfo.sloatB)
                         return ;
                     this.game.interface.getPlayers.forEach((p) => {
                         p.mesh.dispose();
@@ -173,13 +193,15 @@ export class Match
                     this.score[0] = this.game.logic.getScore1;
                     this.score[1] = this.game.logic.getScore2;
                     if (this.score[0] > this.score[1])
-                        this.winner = this.tournamentInfo.sloatA;
+                        this.winner = this.matchInfo.sloatA;
                     else
-                        this.winner = this.tournamentInfo.sloatB;
-                    this.tournamentInfo.status = 2;
+                        this.winner = this.matchInfo.sloatB;
+                    this.status = 2;
                     this.game = null;
-                    if (this.tournamentInfo && this.tournamentInfo.tournament)
-                        this.tournamentInfo.tournament.matchFinish(this);
+                    if (this.matchInfo && this.matchInfo.type === "tournament" && this.matchInfo.tournament)
+                        this.matchInfo.tournament.matchFinish(this);
+                    else if (this.matchInfo && this.matchInfo.type === "friendly")
+                        console.log("Pas encore gere");
                     window.removeEventListener("keydown", this.keyDownHandler);
                     window.removeEventListener("keyup", this.keyUpHandler);
                     sceneManager.getScene().onBeforeRenderObservable.remove(this.renderObserver);
@@ -195,35 +217,33 @@ export class Match
         return (true);
     }
 
-    public set setTournamentInfo(i: MatchTournament)
+    public set setMatchInfo(i: MatchTournament | MatchFriendly)
     {
-        this.tournamentInfo = i;
+        this.matchInfo = i;
     }
 
     get getSloatA() : MatchParticipant | null
     {
-        if (!this.tournamentInfo)
+        if (!this.matchInfo)
             return (null);
-        return (this.tournamentInfo.sloatA);
+        return (this.matchInfo.sloatA);
     }
 
     get getSloatB() : MatchParticipant | null
     {
-        if (!this.tournamentInfo)
+        if (!this.matchInfo)
             return (null);
-        return (this.tournamentInfo.sloatB);
+        return (this.matchInfo.sloatB);
     }
 
     get getStatus() : number | undefined
     {
-        if (this.tournamentInfo === null)
-            return (undefined);
-        return (this.tournamentInfo.status);
+        return (this.status);
     }
 
-    get getTournamentInfo() : MatchTournament | null
+    get getMatchInfo() : MatchTournament | MatchFriendly | null
     {
-        return (this.tournamentInfo);
+        return (this.matchInfo);
     }
 
     get getId() : number
@@ -248,13 +268,13 @@ export class Match
 
     set setSloatA(p: MatchParticipant)
     {
-        if(this.tournamentInfo)
-            this.tournamentInfo.sloatA = p;
+        if(this.matchInfo)
+            this.matchInfo.sloatA = p;
     }
 
     set setSloatB(p: MatchParticipant)
     {
-        if(this.tournamentInfo)
-            this.tournamentInfo.sloatB = p;
+        if(this.matchInfo)
+            this.matchInfo.sloatB = p;
     }
 }

@@ -14,6 +14,7 @@ import { Tournament } from "../../Tournament.ts";
 import { DataMatchBlock, genRulesMatchBlock } from './genRulesMatch.ts';
 import { genInvitationPage } from './genInvitationPage.ts';
 import { ScoreboardHandler } from '../ScoreboardHandler.ts';
+import { genJoinMatch } from './menuCreate.ts';
 
 interface Env
 {
@@ -47,7 +48,7 @@ function swapPage(
 export function createButton(
     env: Env,
     grid: Grid    
-)
+) : void
 {
     const value = env.tournament.checkReady();
     if (value !== 0)
@@ -96,35 +97,74 @@ export function createButton(
     }
 }
 
+
 export function invitationButton(
     label: string,
     env: Env,
     settings: DataMatchBlock,
     grid: Grid
-)
+) : void
 {
     if (swapPage(label, env, settings) === true)
     {
-        env.page = genInvitationPage(env.UIData, grid, env.userX);
+        env.page = genInvitationPage(env.UIData, env.userX);
         grid.addControl(env.page, 0, 0);
     }
+    else
+        console.error("Error lors du changement de page pour " + label);
 }
+
+export function joinButton(
+    label: string,
+    env: Env,
+    grid: Grid
+) : void
+{
+    if (swapPage(label, env, grid) === true)
+    {
+        env.page = genJoinMatch(env.UIData, env.userX);
+        grid.addControl(env.page, 0, 0);
+    }   
+    else
+        console.error("Error lors du changement de page pour " + label);
+}
+
+export function newButton(
+    label: string,
+    env: Env,
+    settings: DataMatchBlock,
+    grid: Grid
+) : void
+{
+    if (swapPage(label, env, grid) === true)
+    {
+        env.page = genRulesMatchBlock(settings, true);
+        grid.addControl(env.page, 0, 0);
+    }   
+    else
+        console.error("Error lors du changement de page pour " + label);
+}
+
 
 export function rulesButton(
     label: string,
     env: Env,
     settings: DataMatchBlock,
     grid: Grid
-)
+) : void
 {
     if (swapPage(label, env, settings) === true)
     {
         env.page = genRulesMatchBlock(settings, false);
         grid.addControl(env.page, 0, 0);
     }
+    else
+        console.error("Error lors du changement de page pour " + label);
 }
 
-export function backButton(env: Env, fn: (e: Env) => void) : void
+export function backButton(
+    env: Env, fn: (e: Env) => void
+) : void
 {
     if (env.page !== null)
         env.page.dispose();
