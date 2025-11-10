@@ -3,23 +3,23 @@ SRCS=./srcs
 COMPOSE=$(SRCS)/docker-compose.yml
 
 start : local
-	docker-compose -f $(COMPOSE) up --build
+	docker compose -f $(COMPOSE) up --build
 build :
-	docker-compose -f $(COMPOSE) build
+	docker compose -f $(COMPOSE) build
 
 
 
 down : 
-	docker-compose -f $(COMPOSE) down -v
+	docker compose -f $(COMPOSE) down -v
 
 restart : down start
 
 up : local
-	docker-compose -f $(COMPOSE) up
+	docker compose -f $(COMPOSE) up
 
 
 clean :
-	docker-compose -f $(COMPOSE) down --rmi all --volumes --remove-orphans
+	docker compose -f $(COMPOSE) down --rmi all --volumes --remove-orphans
 # 	rm -rf ./srcs/frontend/build
 prune : clean
 	docker system prune -fa
@@ -44,9 +44,9 @@ npm_cache_clean:
 
 
 postgresql:
-	docker-compose -f srcs/docker-compose.yml up postgreSQL --build
+	docker compose -f srcs/docker-compose.yml up postgreSQL --build
 chat:
-	docker-compose -f srcs/docker-compose.yml up service-chat --build
+	docker compose -f srcs/docker-compose.yml up service-chat --build
 	
 
 .PHONY: start down restart up clean prune

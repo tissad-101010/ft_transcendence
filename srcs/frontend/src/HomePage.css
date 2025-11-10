@@ -1,0 +1,145 @@
+.homepage-overlay {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(10px);
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.homepage-window {
+  width: 600px;
+  padding: 40px 20px;
+  background-color: rgba(221, 101, 161, 1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border-radius: 100px;
+
+
+  opacity: 0;
+  animation: fadeIn 3s forwards;
+}
+
+@keyframes fadeIn {
+  to {
+    opacity: 1;
+  }
+}
+
+
+.homepage-input-container {
+  width: 80%;
+  margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.homepage-input-container label {
+  color: white;
+  margin-bottom: 5px;
+  font-size: 14px;
+  text-align: left;
+}
+
+.homepage-input-container input {
+  padding: 10px;
+  border-radius: 8px;
+  border: none;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.homepage-label-row {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 5px;
+}
+
+.forget-password {
+  font-size: 15px;
+  color: white;
+  text-decoration: none;
+}
+
+.forget-password:hover {
+  text-decoration: underline;
+}
+
+.homepage-input-container input:focus {
+  outline: 2px solid #089cc9;
+  box-shadow: 0 0 5px rgba(255, 105, 180, 0.5);
+}
+
+.homepage-button {
+  width: 80%;
+  padding: 12px;
+  margin-top: 20px;
+  border-radius: 8px;
+  border: none;
+  background-color: #2a9ecc;
+  color: white;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.homepage-button:hover {
+  background-color: #0084d1;
+}
+
+.homepage-logos {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.homepage-logos .logo {
+  width: 40px;
+  height: 40px;
+  cursor: pointer;
+}
+
+.homepage-logos .logo:hover {
+  transform: scale(1.2);
+}
+
+
+/*Register*/
+.Register p {
+  color: white;
+  font-size: 14px;
+  text-align: center;
+  margin-top: 30px;
+}
+
+.Register a {
+  color: #009ccc;
+  text-decoration: none;
+}
+
+.Register a:hover {
+  text-decoration: underline;
+}
+
+/*Guest*/
+.guest-button {
+  width: 40%;
+  padding: 12px;
+  margin-top: 20px;
+  border-radius: 8px;
+  border: none;
+  background-color: #f77cb9;
+  color: white;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.guest-button:hover {
+  background-color: rgb(250, 158, 219);
+}
+

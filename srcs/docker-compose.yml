@@ -50,7 +50,8 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
     volumes:
-      - frontend-build:/app:rw
+      - frontend-src:/app:rw
+      - frontend-build:/app/build
     networks:
       - global-net
     ports:
@@ -356,6 +357,7 @@ networks:
 #                              VOLUMES                                           #
 #********************************************************************************# 
 volumes:
+
   # Local volume for HashiCorp Vault data
   # This volume is used to persist Vault data across container restarts
   LocalVaultData:
@@ -368,6 +370,12 @@ volumes:
   # Local volume for frontend build artifacts
   # This volume is used to persist the build output of the frontend application
   frontend-build:
+    driver: local
+    driver_opts:
+      type: none
+      device: ./frontend/build
+      o: bind
+  frontend-src:
     driver: local
     driver_opts:
       type: none

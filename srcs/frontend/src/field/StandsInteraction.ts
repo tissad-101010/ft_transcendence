@@ -1,0 +1,261 @@
+import { SceneInteractor } from './scene/SceneInteractor.ts';
+import { SceneManager } from './scene/SceneManager.ts';
+import { SpecificInteraction } from './scene/SpecificInteraction.ts';
+import { 
+PointerInfo, 
+Scene,
+AbstractMesh,
+Color3,
+HighlightLayer,
+DynamicTexture,
+PBRMaterial,
+Material
+} from '@babylonjs/core';
+
+import {ZoneName} from '../config.ts';
+import {getCurrentGroup, setCurrentGroup, getTotalGroups, displayFriendsWithEmpty} from '../utils.ts';
+import FriendUI from './FriendUI.ts';
+import { Friend } from '../Friend.js';
+
+
+export class StandsInteraction implements SpecificInteraction {
+    /**************************************************
+     *           PRIVATE ATTRIBUTES                   *
+     **************************************************/
+    private scene: Scene;
+    private sceneManager: SceneManager;
+    private sceneInteractor: SceneInteractor;
+    private clicSeat : boolean;
+    private clicArbitrator : boolean;
+    private buttonHighlightLayer : HighlightLayer;
+    private test: boolean = false;
+    private friendUI: FriendUI | null;
+    private materials: Material[];
+
+    /**************************************************
+     *                  CONSTRUCTOR                   *
+     **************************************************/
+    constructor(scene: Scene, sceneManager: SceneManager, sceneInteractor: SceneInteractor) {
+        this.scene = scene;
+        this.sceneManager = sceneManager;
+        this.sceneInteractor = sceneInteractor;
+        this.clicSeat = false;
+        this.clicArbitrator = false;
+        this.buttonHighlightLayer = new HighlightLayer("hlButton", this.scene);
+        this.friendUI = null;
+        this.materials = [
+            this.sceneManager.getMesh("scoreBoard")[0].material,
+            this.sceneManager.getMesh("scoreBoard")[1].material,
+            this.sceneManager.getMesh("scoreBoard")[2].material
+        ];
+    }
+
+    /**************************************************
+     *               PRIVATE METHODS                  *
+     **************************************************/    
+    private handleButtonField(mesh: AbstractMesh, active: boolean): void {
+        if (active) {
+            mesh.isPickable = true;
+            this.buttonHighlightLayer.addMesh(mesh, new Color3(0.53, 0.81, 0.92)); // bleu ciel
+        } else {
+            mesh.isPickable = false;
+            this.buttonHighlightLayer.removeMesh(mesh);
+        }
+    }
+
+    private updateButtons(buttonMeshes: AbstractMesh[]): void {
+        const current = getCurrentGroup(ZoneName.SEAT);
+        const total = getTotalGroups(ZoneName.SEAT, this.sceneManager.getUserX.getFriends.length);
+        if (buttonMeshes[0])
+            this.handleButtonField(buttonMeshes[0], current > 0);
+        if (buttonMeshes[1])
+            this.handleButtonField(buttonMeshes[1], current < total - 1);
+    }
+
+
+    private handleMyProfile() : void {
+        this.sceneInteractor.disableInteractions();
+        this.sceneManager.moveCameraTo(ZoneName.ARBITRATOR, () => {
+            this.clicArbitrator = true;
+            this.sceneInteractor.enableInteractions();
+        });
+    }
+
+    private handleFriendsProfile(mesh: AbstractMesh, buttonMeshes: AbstractMesh[]): void {
+        this.sceneInteractor.getHighlightLayer().removeAllMeshes();
+        this.sceneInteractor.disableInteractions();
+        this.sceneManager.moveCameraTo(ZoneName.SEAT, () => {
+            this.clicSeat = true;
+
+            displayFriendsWithEmpty(this.scene, this.sceneManager.getUserX.getFriends, this.sceneManager.getChair);
+            this.updateButtons(buttonMeshes);
+            this.sceneInteractor.enableInteractions();
+        });
+    }
+
+
+    private resetState(buttonMeshes: AbstractMesh[]): void {
+        setCurrentGroup(ZoneName.SEAT, 0, this.sceneManager.getUserX.getFriends, this.scene);
+        this.sceneManager.getChair.forEach((mesh : AbstractMesh) => {
+            const mat = mesh.material as PBRMaterial;
+            if (!mat) return;
+ 
+            const dynTex = (mat as any)._loginTexture as DynamicTexture;
+            if (dynTex) {
+                const ctx = dynTex.getContext();
+                ctx.clearRect(0, 0, 1024, 1024);
+                dynTex.update();
+            }
+        });
+        this.buttonHighlightLayer.removeAllMeshes();
+        this.sceneInteractor.getHighlightLayer().removeAllMeshes();
+    }
+    
+    
+    /**************************************************
+     *                PUBLIC METHODS                  *
+    **************************************************/
+    public updateChair(buttonMeshes: AbstractMesh[]) : void
+    {
+            this.resetState(buttonMeshes);
+            this.updateButtons(buttonMeshes);
+            displayFriendsWithEmpty(this.scene, this.sceneManager.getUserX.getFriends, this.sceneManager.getChair);
+            this.friendUI = null;
+            this.resetMaterialForScoreboard();
+    }
+
+    public resetMaterialForScoreboard()
+    {
+        this.sceneManager.getMesh("scoreBoard")[0].material = this.materials[0];
+        this.sceneManager.getMesh("scoreBoard")[1].material = this.materials[1];
+        this.sceneManager.getMesh("scoreBoard")[2].material = this.materials[2];
+    }
+
+    public handlePointer(pointerInfo: PointerInfo, isClick: boolean, mesh: AbstractMesh): void {
+        if (!this.sceneInteractor.areInteractionsEnabled()) return;
+        const pickedMesh = mesh;
+        if (!pickedMesh)return;
+
+        const arbitratorMeshes = this.sceneManager.getLoadedMeshes["arbitrator"];
+        const spectatorMeshes = this.sceneManager.getLoadedMeshes["spectator"];
+        const friendMeshes = this.sceneManager.getLoadedMeshes["seatsFriends"];
+        const buttonMeshes = this.sceneManager.getLoadedMeshes["buttonsField"];
+        const friends = this.sceneManager.getFriends;
+
+        if (isClick) {
+            if (friendMeshes.includes(pickedMesh) && this.test)
+            {
+                const nb = parseInt(pickedMesh.name[pickedMesh.name.length - 1]);
+                const index = (getCurrentGroup(ZoneName.SEAT) * 4) + nb;
+                if (!this.friendUI)
+                    this.friendUI = new FriendUI(   
+                                                    this.sceneManager,
+                                                    this.sceneManager.getUserX.getFriends[index],
+                                                    this.updateChair.bind(this),
+                                                    buttonMeshes
+                                                );
+                else
+                    this.friendUI.update(this.sceneManager.getUserX.getFriends[index]);
+            } else if (arbitratorMeshes.includes(pickedMesh)) {
+                this.handleMyProfile();
+            } else if (spectatorMeshes.includes(pickedMesh)) {
+                this.handleFriendsProfile(pickedMesh, buttonMeshes);
+                this.test = true;
+            } else if (buttonMeshes.includes(pickedMesh)) {
+                const current = getCurrentGroup(ZoneName.SEAT);
+                if (pickedMesh === buttonMeshes[0] && this.clicSeat) {
+                    setCurrentGroup(ZoneName.SEAT, current - 1, this.sceneManager.getUserX.getFriends, this.scene);
+                    this.updateButtons(buttonMeshes);
+                } else if (pickedMesh === buttonMeshes[1] && this.clicSeat) {
+                    setCurrentGroup(ZoneName.SEAT, current + 1, this.sceneManager.getUserX.getFriends, this.scene);
+                    this.updateButtons(buttonMeshes);
+                }
+                else if (pickedMesh === buttonMeshes[2] || (pickedMesh === buttonMeshes[3] && this.clicArbitrator)){
+                    this.sceneInteractor.disableInteractions();
+                    if (this.friendUI)
+                    {
+                        this.friendUI.switchOff();
+                        this.friendUI = null;
+                        this.resetMaterialForScoreboard();
+                    }
+                    this.resetState(buttonMeshes);
+                    this.sceneManager.moveCameraTo(ZoneName.STANDS, () => {
+                            if (pickedMesh === buttonMeshes[2]){
+                                this.clicSeat = false;
+                                this.test = false;
+                            }
+                            else if (pickedMesh === buttonMeshes[3])
+                                this.clicArbitrator = false;
+                            this.sceneInteractor.enableInteractions();
+                        });
+                }
+            }
+        } else {
+            this.sceneInteractor.getHighlightLayer().removeAllMeshes();
+            if (spectatorMeshes.includes(pickedMesh) && !this.clicSeat){
+                spectatorMeshes.forEach((mesh: AbstractMesh) => {
+                    this.sceneInteractor.getHighlightLayer().addMesh(mesh, new Color3(1, 0.75, 0.8));
+                });
+            }
+            if (arbitratorMeshes.includes(pickedMesh))
+            {
+                this.sceneInteractor.getHighlightLayer().addMesh(pickedMesh, new Color3(1, 0.75, 0.8));
+            }
+            if (friendMeshes.includes(pickedMesh) && this.clicSeat)
+            {
+                this.sceneInteractor.getHighlightLayer().addMesh(pickedMesh, new Color3(1, 0.75, 0.8));
+            }
+            if (pickedMesh === buttonMeshes[2] && this.clicSeat)
+            {
+                this.sceneInteractor.getHighlightLayer().addMesh(buttonMeshes[2], new Color3(1, 0.75, 0.8));
+            }
+            if (pickedMesh === buttonMeshes[3] && this.clicArbitrator) 
+            {
+                this.sceneInteractor.getHighlightLayer().addMesh(buttonMeshes[3], new Color3(1, 0.75, 0.8));
+            }
+        }
+    }
+
+
+
+    public dispose(): void {
+        console.log("StandsInteraction: nettoyage en cours...");
+
+        this.buttonHighlightLayer.removeAllMeshes();
+        this.sceneInteractor.getHighlightLayer().removeAllMeshes();
+
+        if (this.buttonHighlightLayer) {
+            this.buttonHighlightLayer.dispose();
+        }
+
+        this.clicSeat = false;
+        this.clicArbitrator = false;
+
+        const arbitratorMeshes = this.sceneManager.getLoadedMeshes["arbitrator"];
+        const spectatorMeshes = this.sceneManager.getLoadedMeshes["spectator"];
+        const friendMeshes = this.sceneManager.getLoadedMeshes["seatsFriends"];
+        const buttonMeshes = this.sceneManager.getLoadedMeshes["buttonsField"];
+
+        [arbitratorMeshes, spectatorMeshes, friendMeshes, buttonMeshes].forEach(meshArray => {
+            if (meshArray && Array.isArray(meshArray)) {
+                meshArray.forEach(mesh => mesh.isPickable = false);
+            }
+        });
+
+        this.sceneManager.getChair.forEach((mesh : AbstractMesh) => {
+            const mat = mesh.material as PBRMaterial;
+            if (!mat) return;
+
+            const dynTex = (mat as any)._loginTexture as DynamicTexture;
+            if (dynTex) {
+                const ctx = dynTex.getContext();
+                ctx.clearRect(0, 0, 1024, 1024);
+                dynTex.update();
+            }
+        });
+        this.sceneInteractor.enableInteractions();
+
+        console.log("StandsInteraction: nettoyage terminé.");
+    }
+
+}

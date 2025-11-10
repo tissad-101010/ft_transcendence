@@ -1,0 +1,131 @@
+import { AbstractMesh} from '@babylonjs/core';
+
+import 
+{
+  Rectangle,
+  TextBlock,
+  AdvancedDynamicTexture,
+  Grid
+} from "@babylonjs/gui";
+
+import { UserX } from "../../UserX.ts";
+import { UIData } from "../utils.ts";
+import { Tournament } from "../../Tournament.ts";
+import { DataMatchBlock, genRulesMatchBlock } from './genRulesMatch.ts';
+import { genInvitationPage } from './genInvitationPage.ts';
+import { ScoreboardHandler } from '../ScoreboardHandler.ts';
+
+interface Env
+{
+    page: Rectangle | null,
+    menuContainer: Rectangle | null,
+    advancedTexture: AdvancedDynamicTexture | null,
+    meshScoreboard: AbstractMesh,
+    userX: UserX,
+    UIData: UIData,
+    tournament: Tournament,
+    errorMsg: TextBlock | null,
+    control: ScoreboardHandler
+}
+
+function swapPage(
+    label: string,
+    env: Env,
+    settings: DataMatchBlock
+) : boolean
+{
+    if (settings.currPage !== label)
+    {
+        if (env.page !== null)
+            env.page.dispose();
+        settings.currPage = label;
+        return (true);
+    }
+    return (false);
+}
+
+export function createButton(
+    env: Env,
+    grid: Grid    
+)
+{
+    const value = env.tournament.checkReady();
+    if (value !== 0)
+    {
+        if (env.errorMsg !== null)
+        {
+            grid.removeControl(env.errorMsg);
+            env.errorMsg.dispose();
+            env.errorMsg = null;
+        }
+        env.errorMsg = new TextBlock();
+        env.errorMsg.color = "red";
+        env.errorMsg.width = "100%";
+        env.errorMsg.height = "40px";
+        env.errorMsg.fontSize = env.UIData.text.fontSize;
+        env.errorMsg.fontFamily = env.UIData.text.fontFamily;
+        grid.addControl(env.errorMsg, 1, 0);
+        switch(value)
+        {
+            case 1 :
+                env.errorMsg.text = "Vitesse non renseignee";
+                break;
+            case 2 :
+                env.errorMsg.text = "Score non renseigne";
+                break;
+            case 3 :
+                env.errorMsg.text = "Temps avant engagement non renseigne";
+                break;
+            case 4 :
+                env.errorMsg.text = "Pas suffisament de participant (4 minimum)";
+                break;
+            case 5 :
+                env.errorMsg.text = "Le nombre de participant doit etre pair";
+                break;
+            case 6 :
+                env.errorMsg.text = "Des participants ne sont pas pret";
+                break;
+        }
+    }
+    else
+    {
+        env.tournament.start();
+        env.control.selectMenu(env.meshScoreboard);
+    }
+}
+
+export function invitationButton(
+    label: string,
+    env: Env,
+    settings: DataMatchBlock,
+    grid: Grid
+)
+{
+    if (swapPage(label, env, settings) === true)
+    {
+        env.page = genInvitationPage(env.UIData, grid, env.userX);
+        grid.addControl(env.page, 0, 0);
+    }
+}
+
+export function rulesButton(
+    label: string,
+    env: Env,
+    settings: DataMatchBlock,
+    grid: Grid
+)
+{
+    if (swapPage(label, env, settings) === true)
+    {
+        env.page = genRulesMatchBlock(settings, false);
+        grid.addControl(env.page, 0, 0);
+    }
+}
+
+export function backButton(env: Env, fn: (e: Env) => void) : void
+{
+    if (env.page !== null)
+        env.page.dispose();
+    env.page = null;
+    fn(env);
+}
