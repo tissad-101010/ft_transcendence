@@ -69,7 +69,7 @@ export class AuthService {
     async authenticateUser(inputData: LoginUserDTO) : Promise<LoginResponseDTO> {  
         // find user by username
         console.log('[Signin authservice] Authenticating user:', inputData.username);
-        const user = await this.userService.getUserByUsername(inputData.username)|| 
+        const user = await this.userService.getUserByUsername(inputData.username) ||
         await this.userService.getUserByEmail(inputData.username);
         console.log('[Signin authservice] User found:', user ? user.username : 'null');
         if (!user) {
@@ -96,7 +96,7 @@ export class AuthService {
             id: user.id,
             email: user.email,
         };
-        const twoFactorMethods = await this.userService.getTwoFactorMethods(user.id);
+        const twoFactorMethods = await this.userService.getUserTwoFactorMethods(user.id);
         const isTwoFactorEnabled = twoFactorMethods.length > 0;
 
         // if 2FA is enabled, return response indicating 2FA is required
@@ -142,7 +142,7 @@ export class AuthService {
             return null;
         }
         // return user profile data excluding sensitive information
-        const twoFactorMethods = await this.userService.getTwoFactorMethods(user.id);
+        const twoFactorMethods = await this.userService.getUserTwoFactorMethods(user.id);
         const isTwoFactorEnabled = twoFactorMethods.length > 0;
         return {
             email: user.email,

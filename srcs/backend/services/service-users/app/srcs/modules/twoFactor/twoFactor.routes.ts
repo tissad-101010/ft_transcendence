@@ -14,8 +14,7 @@ import { FastifyInstance } from "fastify";
 import { TwoFactorAuthController } from "./twoFactor.controllers";
 import { TwoFactorAuthService } from "./twoFactor.services";
 
-export  async function TwoFactorAuth(fastify: FastifyInstance) {
-  const twoFactorAuthService = new TwoFactorAuthService(fastify);
+export  async function TwoFactorAuth(fastify: FastifyInstance) {&&
   const twoFactorAuthController = new TwoFactorAuthController(twoFactorAuthService);
 
 
@@ -25,7 +24,7 @@ export  async function TwoFactorAuth(fastify: FastifyInstance) {
   // Generate OTP email
   fastify.post("/email-sendOtp", twoFactorAuthController.SendOtpByEmail);
   // Verify OTP email
-  fastify.post("/email-verify", twoFactorAuthController.verifyOtp);
+  fastify.post("/email-verify", twoFactorAuthController.verifyOtpByEmail);
   //need routes to disable email otp verification
   // fastify.post("/email-disable", twoFactorAuthController.disableEmailOtpForTfa);
 

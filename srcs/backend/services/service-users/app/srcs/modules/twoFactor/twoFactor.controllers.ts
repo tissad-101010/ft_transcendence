@@ -67,7 +67,7 @@ export class TwoFactorAuthController {
   };
   
   // enable TFA for user
-  enableOtpEmailTfa = async (
+  enableOtpEmailTfa = async (n
     req: FastifyRequest,
     reply: FastifyReply
   ) => {

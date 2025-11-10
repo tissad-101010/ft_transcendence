@@ -44,6 +44,7 @@ export class UsersService {
     }
 
     async getUserByUsername(username: string) {
+      console.log("====================>username ", username);
         return this.prismaClient.user.findUnique({
             where: { username },
         });
