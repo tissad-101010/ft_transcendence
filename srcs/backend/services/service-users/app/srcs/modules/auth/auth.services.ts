@@ -104,6 +104,13 @@ export class AuthService {
         // wen 2fa is successful, i will generate normal JWT tokens with refresh token  
         if (isTwoFactorEnabled) {
             const tempToken = JwtUtils.generateTwoFactorTempToken(loginResponse);
+            if (!tempToken) {
+                console.log('[Signin authservice] Failed to generate temp token for 2FA');
+                return {
+                    message: 'Authentication failed: Unable to generate temporary token for 2FA',
+                    signinComplete: false,
+                };
+            }
             return {
                 message: 'Two-factor authentication required',
                 signinComplete: true,
@@ -137,6 +144,7 @@ export class AuthService {
     }
 
     async getUserProfile(userId: string): Promise<UserProfile | null> {
+        console.log('(============================================[AuthService] Fetching profile for user ID:', userId);
         const user = await this.userService.getUserById(userId);
         if (!user) {
             return null;

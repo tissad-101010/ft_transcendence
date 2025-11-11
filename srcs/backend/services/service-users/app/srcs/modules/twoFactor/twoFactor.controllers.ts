@@ -26,20 +26,22 @@
 
 const userId = 1; // temporary user id for testing
 
-import { JwtUtils } from "../../utils/jwt.utils";
 import { FastifyReply, FastifyRequest } from "fastify";
+import { send } from "process";
+
+import { TwoFactorType } from "../../prisma/prisma/generated/client/enums";
+import { JwtUtils } from "../../utils/jwt.utils";
 import { TwoFactorAuthService } from "./twoFactor.services";
+
 import {  OtpEmailRequest,
           VerifyOtpEmailRequest,
        } from "../../types/otp.type";
-import { TwoFactorType } from "../../prisma/prisma/generated/client/enums";
-import { send } from "process";
 
 export class TwoFactorAuthController {
   private twoFactorAuthService: TwoFactorAuthService;
 
-  constructor(twoFactorAuthService: TwoFactorAuthService) {
-    this.twoFactorAuthService = twoFactorAuthService;
+  constructor(prismaClient: any) {
+    this.twoFactorAuthService = new TwoFactorAuthService(prismaClient);
   }
   // function that : 
       // extract coockies from the header
@@ -67,7 +69,7 @@ export class TwoFactorAuthController {
   };
   
   // enable TFA for user
-  enableOtpEmailTfa = async (n
+  enableOtpEmailTfa = async (
     req: FastifyRequest,
     reply: FastifyReply
   ) => {

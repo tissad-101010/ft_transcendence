@@ -60,3 +60,56 @@ export async function loginUser(
         return { success: false, message: "An error occurred during login" };
     }
 }
+
+
+export async function fetchUserProfile(): Promise<{ success: boolean; data?: any; message?: string }> {
+    try {
+        const response = await fetch("https://localhost:8443/api/user/profile", {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+                Accept: "application/json",
+            },
+            credentials: "include", // envoie les cookies si backend les utilise
+        });
+        
+        const data = await response.json(); 
+        if (response.ok) {
+            return { success: true, data };
+        }
+        else {
+            return { success: false, message: data.message || "Failed to fetch user profile" };
+        }
+    } catch (err) {
+        console.error(err);
+        return { success: false, message: "An error occurred while fetching user profile" };
+    }
+}
+
+
+
+
+
+export async function logoutUser(): Promise<{ success: boolean; message?: string }> {
+    try {
+        const response = await fetch("https://localhost:8443/api/user/auth/signout", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                Accept: "application/json",
+            },
+            credentials: "include", // envoie les cookies si backend les utilise
+        });
+        
+        if (response.ok) {
+            return { success: true };
+        }
+        else {
+            const data = await response.json(); 
+            return { success: false, message: data.message || "Logout failed" };
+        }
+    } catch (err) {
+        console.error(err);
+        return { success: false, message: "An error occurred during logout" };
+    }
+}

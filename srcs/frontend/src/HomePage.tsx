@@ -1,6 +1,7 @@
 import React, { use, useState } from "react";
 import {registerUser,
-  loginUser
+  loginUser,
+  fetchUserProfile
 } from "./auth/auth.api.ts";
 import "./HomePage.css";
 
@@ -28,6 +29,15 @@ const HomePage = () => {
     const result = await loginUser(username, password);
     if (result.success) {
       // Rediriger ou mettre à jour l'état de l'application après une connexion réussie
+      console.log("Login successful");
+      // Vous pouvez rediriger l'utilisateur ou mettre à jour l'état de l'application ici
+      const userProfile =  await fetchUserProfile();
+      if (userProfile.success) {
+        console.log("User Profile:", userProfile);
+      }
+      else {
+        console.log("Failed to fetch user profile:", userProfile.message);
+      }
     }
     else {
       setErrorMessage(result.message??"Login failed");
