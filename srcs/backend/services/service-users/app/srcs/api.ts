@@ -72,7 +72,7 @@ const start = async () => {
     // need more testing/!\
     await app.register(cors, {
       // reel origin is 'https://localhost:8443'
-      origin: 'http://localhost:3000',
+      origin: ['https://localhost:3000', 'https://localhost:8443'],
       methods: ['GET', 'POST'], // Allow specific methods
       credentials: true, // Allow credentials
     });

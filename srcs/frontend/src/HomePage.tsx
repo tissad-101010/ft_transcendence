@@ -3,6 +3,9 @@ import {registerUser,
   loginUser,
   fetchUserProfile
 } from "./auth/auth.api.ts";
+
+import { handleOAuth } from "./auth/oauth.api.ts";
+
 import "./HomePage.css";
 
 
@@ -79,9 +82,10 @@ const HomePage = () => {
             </div>
 
             <div className="homepage-logos">
-              <img src="/google-logo.png" alt="Google" className="logo" />
-              <img src="/github-logo.png" alt="Github" className="logo" />
-              <img src="/42-logo.png" alt="42" className="logo" />
+              {/* send request to backend to handle oauth */}
+              <img src="/google-logo.png" alt="Google" className="logo" onClick={() => handleOAuth("google")} />
+              <img src="/github-logo.png" alt="Github" className="logo" onClick={() => handleOAuth("github")} />
+              <img src="/42-logo.png" alt="42" className="logo" onClick={() => handleOAuth("42")} />
             </div>
           </>
         ) : (
