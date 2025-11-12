@@ -75,7 +75,7 @@ export async function fetchUserProfile(): Promise<{ success: boolean; data?: any
         
         const data = await response.json(); 
         if (response.ok) {
-            return { success: true, data };
+            return { success: true, data: data};
         }
         else {
             return { success: false, message: data.message || "Failed to fetch user profile" };

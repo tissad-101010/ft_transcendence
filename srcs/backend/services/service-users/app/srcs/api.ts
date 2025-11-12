@@ -6,7 +6,7 @@
 /*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/23 15:58:35 by tissad            #+#    #+#             */
-/*   Updated: 2025/10/31 15:22:02 by tissad           ###   ########.fr       */
+/*   Updated: 2025/11/12 16:29:10 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -72,7 +72,7 @@ const start = async () => {
     // need more testing/!\
     await app.register(cors, {
       // reel origin is 'https://localhost:8443'
-      origin: ['https://localhost:3000', 'https://localhost:8443'],
+      origin: ['http://localhost:3000', 'https://localhost:8443'],
       methods: ['GET', 'POST'], // Allow specific methods
       credentials: true, // Allow credentials
     });

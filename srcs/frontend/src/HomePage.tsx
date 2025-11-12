@@ -2,9 +2,9 @@ import React, { use, useState } from "react";
 import {registerUser,
   loginUser,
   fetchUserProfile
-} from "./auth/auth.api.ts";
+} from "./auth/controllers/auth.api.ts";
 
-import { handleOAuth } from "./auth/oauth.api.ts";
+import { handleOAuth } from "./auth/controllers/oauth.api.ts";
 
 import "./HomePage.css";
 
