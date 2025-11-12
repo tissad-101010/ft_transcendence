@@ -17,7 +17,7 @@ import { UIData } from '../utils.ts';
 import { DataMatchBlock, genRulesMatchBlock } from './genRulesMatch.ts';
 import { Tournament } from '../../Tournament.ts';
 
-import { backButton, createButton, invitationButton, joinButton, rulesButton, newButton } from './navigationButton.ts';
+import { backButton, createButton, invitationButton, joinButton, rulesButton, newButton, startButton } from './navigationButton.ts';
 
 import { myClearControls } from "../../utils.ts";
 import { ScoreboardHandler } from '../ScoreboardHandler.ts';
@@ -41,7 +41,7 @@ function buttonNavigation(
     label: string,
     env: Env,
     settings: DataMatchBlock,
-    grid: Grid,
+    grid: Grid
 ) : Rectangle
 {
     const button = new Rectangle();
@@ -93,7 +93,7 @@ function buttonNavigation(
                 /***** ***** */
                 /*  A FAIRE  */
                 /***** ***** */
-                // startButton()
+                startButton(env, settings);
                 console.info("Ce bouton n'est pas encore fonctionnel");
                 break;
         }
@@ -150,19 +150,19 @@ export function genJoinMatch(env: UIData, userX: UserX) : StackPanel
         speed/time/score -> Regle defini pour le match
     */
     const matchs = [
-        {id: 0, login: "Lolo", speed: "2", time: "4", score: "5"},
-        {id: 1, login: "Lolo", speed: "2", time: "4", score: "5"},
-        {id: 2, login: "Lolo", speed: "2", time: "4", score: "5"},
-        {id: 3, login: "Lolo", speed: "2", time: "4", score: "5"},
-        {id: 4, login: "Lolo", speed: "2", time: "4", score: "5"},
-        {id: 5, login: "Lolo", speed: "2", time: "4", score: "5"},
-        {id: 6, login: "Lolo", speed: "2", time: "4", score: "5"},
-        {id: 7, login: "Lolo", speed: "2", time: "4", score: "5"},
-        {id: 8, login: "Lolo", speed: "2", time: "4", score: "5"},
-        {id: 9, login: "Lolo", speed: "2", time: "4", score: "5"},
-        {id: 10, login: "Lolo", speed: "2", time: "4", score: "5"},
-        {id: 11, login: "Lolo", speed: "2", time: "4", score: "5"},
-        {id: 12, login: "Lolo", speed: "2", time: "4", score: "5"},
+        {idMatch: 0, idUser: 1, login: "Lolo", speed: "2", time: "4", score: "5"},
+        {idMatch: 1, idUser: 1, login: "Lolo", speed: "2", time: "4", score: "5"},
+        {idMatch: 2, idUser: 1, login: "Lolo", speed: "2", time: "4", score: "5"},
+        {idMatch: 3, idUser: 1, login: "Lolo", speed: "2", time: "4", score: "5"},
+        {idMatch: 4, idUser: 1, login: "Lolo", speed: "2", time: "4", score: "5"},
+        {idMatch: 5, idUser: 1, login: "Lolo", speed: "2", time: "4", score: "5"},
+        {idMatch: 6, idUser: 1, login: "Lolo", speed: "2", time: "4", score: "5"},
+        {idMatch: 7, idUser: 1, login: "Lolo", speed: "2", time: "4", score: "5"},
+        {idMatch: 8, idUser: 1, login: "Lolo", speed: "2", time: "4", score: "5"},
+        {idMatch: 9, idUser: 1, login: "Lolo", speed: "2", time: "4", score: "5"},
+        {idMatch: 10, idUser: 1, login: "Lolo", speed: "2", time: "4", score: "5"},
+        {idMatch: 11, idUser: 1, login: "Lolo", speed: "2", time: "4", score: "5"},
+        {idMatch: 12, idUser: 1, login: "Lolo", speed: "2", time: "4", score: "5"}
     ];
 
     const rect = new Rectangle();
@@ -287,7 +287,8 @@ export function genJoinMatch(env: UIData, userX: UserX) : StackPanel
                 score: m.score,
                 timeBefore: m.time
             };
-            userX.joinFriendlyMatch(rules, m.id);
+            if (!userX.joinFriendlyMatch(rules, m.idMatch, m.idUser, m.login))
+                button.background = "red";
         });
     });
 

@@ -10,9 +10,10 @@ import { SceneManager } from './scene/SceneManager.ts';
 
 export interface MatchParticipant
 {
-    alias: string,
-    id: number
-    ready: boolean,
+    alias: string;
+    id: number;
+    ready: boolean;
+    me: boolean;
 }
 
 export interface MatchRules
@@ -33,9 +34,9 @@ interface IGame
 */
 export interface MatchTournament
 {
-    round: number | undefined;
     sloatA: MatchParticipant | null;
     sloatB: MatchParticipant | null;
+    round: number | undefined;
     nextMatchId: number | undefined;
     nextMatchSlot: number | undefined;
     tournament: Tournament | undefined;
@@ -137,7 +138,7 @@ export class Match
                     playerSpeed: 1.25 * parseInt(this.rules.speed),
                     countDownGoalTime: parseInt(this.rules.timeBefore),
                     allowPause: false
-                }, 
+                },
                 [this.matchInfo.sloatA, this.matchInfo.sloatB]),
             interface: new Game3D(sceneManager)
         };

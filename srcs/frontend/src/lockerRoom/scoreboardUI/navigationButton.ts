@@ -124,7 +124,7 @@ export function joinButton(
     {
         env.page = genJoinMatch(env.UIData, env.userX);
         grid.addControl(env.page, 0, 0);
-    }   
+    }
     else
         console.error("Error lors du changement de page pour " + label);
 }
@@ -160,6 +160,19 @@ export function rulesButton(
     }
     else
         console.error("Error lors du changement de page pour " + label);
+}
+
+export function startButton(
+    env: Env,
+    setting: DataMatchBlock
+) : void
+{
+    const rules = {
+        speed: setting.data.speed,
+        timeBefore: setting.data.timeBefore,
+        score: setting.data.score
+    }
+    env.userX.createFriendlyMatch(rules);
 }
 
 export function backButton(

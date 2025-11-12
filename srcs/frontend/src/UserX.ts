@@ -10,6 +10,7 @@ import { Match, MatchRules } from "./Match.ts";
 import { SceneManager } from './scene/SceneManager.ts';
 
 import { Friend } from './Friend.ts';
+import { MatchFriendlyOnline } from './Match/MatchFriendlyOnLine.ts';
 
 interface User
 {
@@ -116,21 +117,59 @@ export class UserX
         return (t.playMatch(m, this.user.id, sceneManager));
     }
 
+    createFriendlyMatch(
+        r: MatchRules
+    ) : boolean
+    {
+        // Creer un nouveau match dans la bdd pour recuperer son ID, permet aussi de l'ajouter
+        // dans une liste de matchs en attente d'un joueur (creer une colonne pour dans la BDD)
+        /* var tmp en attendant bdd */ const idMatch = 2;
+        const match = new MatchFriendlyOnline(idMatch, r, this.sceneManager);
+
+        // Ecran d'attente d'un joueur
+
+
+        // Recuperer les informations du joueur qui a rejoint
+        const opp = {login: "test", id: 12};
+        const players = [
+            {alias: this.user.login, id: this.user.id, ready: false, me: true},
+            {alias: opp.login, id: opp.id, ready: false, me: false}
+        ];
+
+        if (!match.init(players))
+            return (false);
+
+        return (true);
+    }
+
     joinFriendlyMatch(
         r: MatchRules,
-        id: number
-    )
+        idMatch: number,
+        idOpp: number,
+        loginOpp: string
+    ) : boolean
     {
-        const match = new Match(r, "friendly", id, this.sceneManager);
-        match.play(0, this.sceneManager);
+        
+        
+        const match = new MatchFriendlyOnline(idMatch, r, this.sceneManager);
+
+        const players = [
+            {alias: loginOpp, id: idOpp, ready: false, me: false},
+            {alias: this.user.login, id: this.user.id, ready: false, me: true}
+        ];
+
+        if (!match.init(players))
+            return (false);
+        
         this.sceneManager.getSceneInteractor?.disableInteractions();
-        // this.scoreboard.setClic = false;
         this.sceneManager.moveCameraTo(ZoneName.FIELD, () => {
             this.sceneManager.setSpecificMesh(false);
             this.sceneManager.getSceneInteractor?.enableInteractionScene();
         });
+        return (true);
     }
 
+    
     deleteFriend(
         f: Friend
     ) : void
