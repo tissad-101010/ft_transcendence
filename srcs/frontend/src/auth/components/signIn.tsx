@@ -3,6 +3,8 @@ import { loginUser, fetchUserProfile } from "../controllers/auth.api";
 import { providerOAuth } from "../controllers/oauth.api";
 import { useAuth } from "../context";
 
+
+
 interface SignInProps {
   onSwitch: () => void;
 }
@@ -11,21 +13,33 @@ const SignIn: React.FC<SignInProps> = ({ onSwitch }) => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
-  const { login } = useAuth(); // Récupère la fonction login du contexte
+  const { login, setPending2FA } = useAuth();
+
 
   const handleLogin = async () => {
     try {
       const result = await loginUser(username, password);
       if (result.success) {
+        const data = result.data;
+        if (data.twoFactorRequired) {
+          setPending2FA({
+            required: true,
+            methods: data.methodsEnabled || [],
+          });
+        }
+        else {
+        // Pas de 2FA → on récupère le profile et on login direct
         const profile = await fetchUserProfile();
         if (profile.success && profile.data) {
-          login(profile.data); // met à jour le contexte global
-        } else {
-          setErrorMessage("Unable to fetch user profile.");
+          login(profile.data);  // <-- passe l'objet user dans le context
         }
+      }
       } else {
         setErrorMessage(result.message ?? "Login failed");
       }
+
+
+
     } catch (err) {
       console.error(err);
       setErrorMessage("Network error during login");

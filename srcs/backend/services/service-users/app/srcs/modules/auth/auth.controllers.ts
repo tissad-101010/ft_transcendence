@@ -6,7 +6,7 @@
 /*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/27 11:44:30 by tissad            #+#    #+#             */
-/*   Updated: 2025/10/31 17:11:43 by tissad           ###   ########.fr       */
+/*   Updated: 2025/11/13 15:27:38 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,8 +25,7 @@ import { CredentialUtils } from '../../utils/credential.utils';
 import { AuthService } from './auth.services';
 import { CryptUtils } from '../../utils/crypt.utils';
 import { JwtUtils } from '../../utils/jwt.utils';
-import { log } from 'console';
-import { auth } from 'firebase-admin';
+
 /***********************************/
 /*     Auth Controllers            */
 /***********************************/
@@ -86,7 +85,7 @@ export async function signupController(
         
         // Successful registration redirect to signin page
         console.log('[Signup Controller] User registered successfully');
-        return reply.code(201).send(signupResponse).redirect('https://localhost:8443/signin');
+        return reply.code(201).send(signupResponse);
     
     
     } catch (error) {
@@ -125,7 +124,7 @@ export async function signinController(
 
         // handle 2FA requirement
         if ( loginResponse.twoFactorRequired ) {    
-            console.log('[Signin Controller] 2FA required, sending response without tokens');
+            console.log('[Signin Controller] 2FA required, sending response without access tokens');
             JwtUtils.setTempTokenCookie(reply, loginResponse.tempToken!); 
             return reply.code(200).send(responseData);// or redirect to 2FA page
         }
@@ -136,6 +135,8 @@ export async function signinController(
         // set JWT cookies
         JwtUtils.setAccessTokenCookie(reply, loginResponse.accessToken!);
         JwtUtils.setRefreshTokenCookie(reply, loginResponse.refreshToken!);
+        console.log('[Signin Controller] JWT cookies set successfully');
+        console.log('[Signin Controller] reponseData:', responseData);
         return reply.code(200).send(responseData);
 
         
