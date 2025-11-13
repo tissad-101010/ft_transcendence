@@ -12,6 +12,8 @@ import { SceneManager } from './scene/SceneManager.ts';
 import { Friend } from './Friend.ts';
 import { MatchFriendlyOnline } from './Match/MatchFriendlyOnLine.ts';
 
+import { Env } from './lockerRoom/scoreboardUI/menuCreate.ts';
+
 interface User
 {
     login: string,
@@ -146,11 +148,10 @@ export class UserX
         r: MatchRules,
         idMatch: number,
         idOpp: number,
-        loginOpp: string
+        loginOpp: string,
+        env: Env
     ) : boolean
     {
-        
-        
         const match = new MatchFriendlyOnline(idMatch, r, this.sceneManager);
 
         const players = [
@@ -162,10 +163,14 @@ export class UserX
             return (false);
         
         this.sceneManager.getSceneInteractor?.disableInteractions();
+        env.menuContainer.dispose();
+        env.clicScoreboard = false;
         this.sceneManager.moveCameraTo(ZoneName.FIELD, () => {
             this.sceneManager.setSpecificMesh(false);
             this.sceneManager.getSceneInteractor?.enableInteractionScene();
         });
+
+        match.play();
         return (true);
     }
 

@@ -124,7 +124,8 @@ export class ScoreboardHandler {
                 meshScoreboard: mesh,
                 userX: this.userX,
                 UIData: this.UIData,
-                control: this
+                control: this,
+                clicScoreboard: this.clicScoreboard
             }
             menuCreate(env);
         }
@@ -163,7 +164,7 @@ export class ScoreboardHandler {
 
     public handle(pickedMesh : AbstractMesh, scoreMeshes: AbstractMesh[]) : void{
         if (!pickedMesh) return;
-
+        console.log("Etat de clicScoreboard", this.clicScoreboard);
         if (pickedMesh === scoreMeshes[0] && this.clicScoreboard === false){
             this.sceneInteractor.disableInteractions();
             this.sceneManager.moveCameraTo(ZoneName.SCOREBOARD, () => {

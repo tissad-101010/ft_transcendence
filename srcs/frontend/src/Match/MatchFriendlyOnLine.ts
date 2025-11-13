@@ -40,7 +40,8 @@ export class MatchFriendlyOnline extends MatchBase
                     countDownGoalTime: parseInt(this.rules.timeBefore),
                     allowPause: false
                 },
-                [this.participants[0], this.participants[1]]
+                [this.participants[0], this.participants[1]],
+                0
             ),
             interface: new Game3D(this.sceneManager)
         };

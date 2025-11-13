@@ -48,7 +48,7 @@ export default class GameLogic
     private field: IField | null;
     private score: IScore;
     private scored: number;
-    constructor(rules : IRules, p: MatchParticipant[])
+    constructor(rules : IRules, p: MatchParticipant[], mode: number)
     {
         this.rules = rules;
         this.field = null;
@@ -56,8 +56,11 @@ export default class GameLogic
         this.control = {pause: "p"};
         this.ball = new BallLogic(this.rules.ballSpeed);    
         this.countDownGoal = {active: false, value: this.rules.countDownGoalTime, id: 0};
-        this.players = [new PlayerLogic(p[0].id, this.rules.playerSpeed, 1, 0, p[0].alias),
-                            new PlayerLogic(p[1].id, this.rules.playerSpeed, 2, 0, p[1].alias)];
+        if (mode === 0)
+            this.players = [new PlayerLogic(p[0], this.rules.playerSpeed, 1, 0),
+                new PlayerLogic(p[1], this.rules.playerSpeed, 2, 0)];
+        else
+            this.players = [];
         this.winner = 0;
         this.score = {team1: 0, team2: 0};
         this.scored = 0;

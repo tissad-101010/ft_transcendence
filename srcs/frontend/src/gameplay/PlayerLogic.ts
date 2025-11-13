@@ -1,3 +1,5 @@
+import { MatchParticipant } from "../Match.ts"
+
 interface IControl
 {
     up: string,
@@ -31,9 +33,9 @@ export default class PlayerLogic
         1. Humain en ligne
         2. IA
     */
-    constructor(id: number, speed: number, team: number, type: number, alias: string)
+    constructor(player: MatchParticipant, speed: number, team: number, type: number)
     {
-        this.id = id;
+        this.id = player.id;
         this.height = 0;
         this.width = 0;
         this.color = "rgb(255,255,255)";
@@ -44,10 +46,10 @@ export default class PlayerLogic
         this.speed = speed;
         this.team = team;
         this.type = type;
-        this.alias = alias;
-        if (this.id === 0)
+        this.alias = player.alias;
+        if (player.me)
             this.control = {up: "q", down: "a"};
-        else if (this.id === 1 && this.type === 0)
+        else if (this.type === 0)
             this.control = {up: "ArrowUp", down: "ArrowDown"};
         else 
             this.control = null;

@@ -16,18 +16,7 @@ import { genInvitationPage } from './genInvitationPage.ts';
 import { ScoreboardHandler } from '../ScoreboardHandler.ts';
 import { genJoinMatch } from './menuCreate.ts';
 
-interface Env
-{
-    page: Rectangle | null,
-    menuContainer: Rectangle | null,
-    advancedTexture: AdvancedDynamicTexture | null,
-    meshScoreboard: AbstractMesh,
-    userX: UserX,
-    UIData: UIData,
-    tournament: Tournament,
-    errorMsg: TextBlock | null,
-    control: ScoreboardHandler
-}
+import { Env } from './menuCreate.ts';
 
 function swapPage(
     label: string,
@@ -122,7 +111,7 @@ export function joinButton(
 {
     if (swapPage(label, env, grid) === true)
     {
-        env.page = genJoinMatch(env.UIData, env.userX);
+        env.page = genJoinMatch(env);
         grid.addControl(env.page, 0, 0);
     }
     else

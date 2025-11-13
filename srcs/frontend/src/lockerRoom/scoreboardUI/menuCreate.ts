@@ -21,20 +21,22 @@ import { backButton, createButton, invitationButton, joinButton, rulesButton, ne
 
 import { myClearControls } from "../../utils.ts";
 import { ScoreboardHandler } from '../ScoreboardHandler.ts';
-import { Match } from '../../Match.js';
+
+import { Match } from '../../Match.ts';
 
 
-interface Env
+export interface Env
 {
-    page: Rectangle | null,
-    menuContainer: Rectangle | null,
-    advancedTexture: AdvancedDynamicTexture | null,
-    meshScoreboard: AbstractMesh,
-    userX: UserX,
-    UIData: UIData,
-    tournament: Tournament,
-    errorMsg: TextBlock | null,
-    control: ScoreboardHandler
+    page: Rectangle | null;
+    menuContainer: Rectangle | null;
+    advancedTexture: AdvancedDynamicTexture | null;
+    meshScoreboard: AbstractMesh;
+    userX: UserX;
+    UIData: UIData;
+    tournament: Tournament;
+    errorMsg: TextBlock | null;
+    control: ScoreboardHandler;
+    clicScoreboard: boolean;
 }
 
 function buttonNavigation(
@@ -112,7 +114,7 @@ function buttonNavigation(
     return (button);
 }
 
-export function genJoinMatch(env: UIData, userX: UserX) : StackPanel
+export function genJoinMatch(env: Env) : StackPanel
 {
     const page = new StackPanel();
     page.isVertical = true;
@@ -121,9 +123,9 @@ export function genJoinMatch(env: UIData, userX: UserX) : StackPanel
 
     const title = new TextBlock();
     title.text = "Rejoindre un match";
-    title.color = env.title.color;
-    title.fontSize = env.title.fontSize;
-    title.fontFamily = env.title.fontFamily;
+    title.color = env.UIData.title.color;
+    title.fontSize = env.UIData.title.fontSize;
+    title.fontFamily = env.UIData.title.fontFamily;
     title.width = "500px";
     title.height = "80px";
     
@@ -133,7 +135,7 @@ export function genJoinMatch(env: UIData, userX: UserX) : StackPanel
     scrollViewer.width = "100%";
     scrollViewer.height = "300px";
     scrollViewer.background = "red";
-    scrollViewer.barColor = env.text.color;
+    scrollViewer.barColor = env.UIData.text.color;
     scrollViewer.thickness = 0;
     scrollViewer.horizontalBarVisible = false;
     page.addControl(scrollViewer);
@@ -181,8 +183,8 @@ export function genJoinMatch(env: UIData, userX: UserX) : StackPanel
 
     const login = new TextBlock();
     login.text = "Login";
-    login.fontSize = env.text.fontSize;
-    login.fontFamily = env.text.fontFamily;
+    login.fontSize = env.UIData.text.fontSize;
+    login.fontFamily = env.UIData.text.fontFamily;
     login.width = "100px";
     login.height = "100px";
     login.color = "black";
@@ -190,8 +192,8 @@ export function genJoinMatch(env: UIData, userX: UserX) : StackPanel
 
     const speed = new TextBlock();
     speed.text = "Vitesse";
-    speed.fontSize = env.text.fontSize;
-    speed.fontFamily = env.text.fontFamily;
+    speed.fontSize = env.UIData.text.fontSize;
+    speed.fontFamily = env.UIData.text.fontFamily;
     speed.width = "100px";
     speed.height = "100px";
     speed.color = "black";
@@ -199,8 +201,8 @@ export function genJoinMatch(env: UIData, userX: UserX) : StackPanel
 
     const time = new TextBlock();
     time.text = "Delai";
-    time.fontSize = env.text.fontSize;
-    time.fontFamily = env.text.fontFamily;
+    time.fontSize = env.UIData.text.fontSize;
+    time.fontFamily = env.UIData.text.fontFamily;
     time.width = "100px";
     time.height = "100px";
     time.color = "black";
@@ -208,8 +210,8 @@ export function genJoinMatch(env: UIData, userX: UserX) : StackPanel
 
     const score = new TextBlock();
     score.text = "Score";
-    score.fontSize = env.text.fontSize;
-    score.fontFamily = env.text.fontFamily;
+    score.fontSize = env.UIData.text.fontSize;
+    score.fontFamily = env.UIData.text.fontFamily;
     score.width = "100px";
     score.height = "100px";
     score.color = "black";
@@ -233,8 +235,8 @@ export function genJoinMatch(env: UIData, userX: UserX) : StackPanel
 
         const login = new TextBlock();
         login.text = m.login;
-        login.fontSize = env.text.fontSize;
-        login.fontFamily = env.text.fontFamily;
+        login.fontSize = env.UIData.text.fontSize;
+        login.fontFamily = env.UIData.text.fontFamily;
         login.width = "100px";
         login.height = "100px";
         login.color = "black";
@@ -242,8 +244,8 @@ export function genJoinMatch(env: UIData, userX: UserX) : StackPanel
 
         const speed = new TextBlock();
         speed.text = m.speed;
-        speed.fontSize = env.text.fontSize;
-        speed.fontFamily = env.text.fontFamily;
+        speed.fontSize = env.UIData.text.fontSize;
+        speed.fontFamily = env.UIData.text.fontFamily;
         speed.width = "100px";
         speed.height = "100px";
         speed.color = "black";
@@ -251,8 +253,8 @@ export function genJoinMatch(env: UIData, userX: UserX) : StackPanel
 
         const time = new TextBlock();
         time.text = m.time;
-        time.fontSize = env.text.fontSize;
-        time.fontFamily = env.text.fontFamily;
+        time.fontSize = env.UIData.text.fontSize;
+        time.fontFamily = env.UIData.text.fontFamily;
         time.width = "100px";
         time.height = "100px";
         time.color = "black";
@@ -260,8 +262,8 @@ export function genJoinMatch(env: UIData, userX: UserX) : StackPanel
 
         const score = new TextBlock();
         score.text = m.score;
-        score.fontSize = env.text.fontSize;
-        score.fontFamily = env.text.fontFamily;
+        score.fontSize = env.UIData.text.fontSize;
+        score.fontFamily = env.UIData.text.fontFamily;
         score.width = "100px";
         score.height = "100px";
         score.color = "black";
@@ -270,15 +272,15 @@ export function genJoinMatch(env: UIData, userX: UserX) : StackPanel
         const button = new Rectangle();
         button.height = "50px";
         button.width = "50px";
-        button.thickness = env.button.thickness;
-        button.color = env.text.color;
+        button.thickness = env.UIData.button.thickness;
+        button.color = env.UIData.text.color;
         panel.addControl(button);
 
         const text = new TextBlock();
         text.text = "Go";
-        text.color = env.text.color;
-        text.fontSize = env.text.fontSize - 4;
-        text.fontFamily = env.text.fontFamily;
+        text.color = env.UIData.text.color;
+        text.fontSize = env.UIData.text.fontSize - 4;
+        text.fontFamily = env.UIData.text.fontFamily;
         button.addControl(text);
         
         button.onPointerClickObservable.add(() => {
@@ -287,7 +289,7 @@ export function genJoinMatch(env: UIData, userX: UserX) : StackPanel
                 score: m.score,
                 timeBefore: m.time
             };
-            if (!userX.joinFriendlyMatch(rules, m.idMatch, m.idUser, m.login))
+            if (!env.userX.joinFriendlyMatch(rules, m.idMatch, m.idUser, m.login, env))
                 button.background = "red";
         });
     });
