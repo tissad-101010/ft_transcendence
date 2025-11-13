@@ -133,7 +133,7 @@ export const CAMERA_CONFIGS: Record<ZoneName, CameraConfig> = {
     },
 
     [ZoneName.SEAT]: {
-        position: new Vector3(0.1, 57.8, -93.7),
+        position: new Vector3(0.1, 47, -93.7),
         rotation: new Vector3(
             Math.PI * 1.9 / 180,
             Math.PI * -178.7 / 180,
@@ -144,8 +144,8 @@ export const CAMERA_CONFIGS: Record<ZoneName, CameraConfig> = {
     [ZoneName.ARBITRATOR]: {
         position: new Vector3(-0.5, 102.9, -53),
         rotation: new Vector3(
-            Math.PI * 89.4 / 180,
-            Math.PI * -179 / 180,
+            Math.PI * 89.9 / 180,
+            Math.PI * -179.9 / 180,
             0
         ),
     },
