@@ -1,0 +1,53 @@
+{
+  "name": "test-fastify",
+  "version": "1.0.0",
+  "main": "srcs/api.js",
+  "scripts": {
+    "dev": "ts-node-dev --respawn --clear --transpile-only srcs/api.ts",
+    "build": "tsc",
+    "start": "node dist/srcs/api.js",
+    "prisma:generate": "prisma generate --schema=./srcs/prisma/prisma/schema.prisma",
+    "prisma:migrate": "prisma migrate dev --schema=./srcs/prisma/prisma/schema.prisma --name initUserTable",
+    "prisma:reset": "prisma migrate reset --force --schema=./srcs/prisma/prisma/schema.prisma",
+    "prisma:studio": "prisma studio --schema=./srcs/prisma/prisma/schema.prisma"
+  },
+  "keywords": [],
+  "author": "tissad",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "@fastify/cookie": "^11.0.2",
+    "@fastify/cors": "^11.0.1",
+    "@fastify/oauth2": "^8.1.2",
+    "@fastify/postgres": "^6.0.2",
+    "@fastify/secure-session": "^8.2.0",
+    "@prisma/client": "^6.18.0",
+    "@types/pg": "^8.15.5",
+    "@types/qrcode": "^1.5.5",
+    "@types/speakeasy": "^2.0.10",
+    "bcryptjs": "^3.0.2",
+    "fastify": "^5.6.1",
+    "firebase-admin": "^13.5.0",
+    "node-fetch": "^3.3.2",
+    "pg": "^8.16.3",
+    "qrcode": "^1.5.4",
+    "speakeasy": "^2.0.0"
+  },
+  "devDependencies": {
+    "@fastify/redis": "^7.0.0",
+    "@types/better-sqlite3": "7.6.13",
+    "@types/jsonwebtoken": "^9.0.2",
+    "@types/node": "^24.7.1",
+    "@types/nodemailer": "^6.4.7",
+    "@types/twilio": "^3.19.2",
+    "better-sqlite3": "11.10.0",
+    "jsonwebtoken": "^9.0.2",
+    "nodemailer": "^7.0.9",
+    "nodemon": "^3.x",
+    "prisma": "^6.18.0",
+    "ts-node": "^10.x",
+    "ts-node-dev": "^2.0.0",
+    "twilio": "^4.15.0",
+    "typescript": "^5.8.3"
+  }
+}

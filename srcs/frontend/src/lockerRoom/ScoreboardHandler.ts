@@ -42,6 +42,7 @@ export class ScoreboardHandler {
     private interval: Interval;
     private originalMaterial: Material | null = null;
     private scoreboardMesh : AbstractMesh;
+    private playMatch: boolean = false;
 
     /**************************************************
      *                  CONSTRUCTOR                   *
@@ -125,7 +126,7 @@ export class ScoreboardHandler {
                 userX: this.userX,
                 UIData: this.UIData,
                 control: this,
-                clicScoreboard: this.clicScoreboard
+                scoreboard: this
             }
             menuCreate(env);
         }
@@ -169,7 +170,8 @@ export class ScoreboardHandler {
             this.sceneInteractor.disableInteractions();
             this.sceneManager.moveCameraTo(ZoneName.SCOREBOARD, () => {
                 this.sceneInteractor.getHighlightLayer().removeMesh(pickedMesh);
-                this.selectMenu(scoreMeshes[0]);
+                if (!this.playMatch)
+                    this.selectMenu(scoreMeshes[0]);
                 this.sceneManager.setSpecificMesh(true);
                 this.clicScoreboard = true;
                 this.sceneInteractor.enableInteractions();
@@ -208,5 +210,10 @@ export class ScoreboardHandler {
     set setClic(b: boolean)
     {
         this.clicScoreboard = b;
+    }
+
+    set setPlayMatch(b: boolean)
+    {
+        this.playMatch = b;
     }
 }

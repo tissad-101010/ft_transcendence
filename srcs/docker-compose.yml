@@ -1,105 +1,401 @@
 services:
+  #********************************************************************************#
+  #                              PROXY SERVICE                                     #
+  #********************************************************************************#
+  # Nginx reverse proxy with ModSecurity for security and SSL termination
+  proxy:
+    image: proxy
+    build:
+      context: ./proxy
+      dockerfile: Dockerfile
+    container_name: proxy
+    depends_on:
+      - service-users
+    environment:
+      - SSL_CERT=/etc/nginx/ssl/server.crt
+      - SSL_CERT_KEY=/etc/nginx/ssl/server.key
+    volumes:
+      # Nginx HTML files
+      - ./frontend/build:/usr/share/nginx/html
+      # Nginx SSL certificates
+      - ./proxy/nginx/certs/server.crt:/etc/nginx/ssl/server.crt:ro
+      - ./proxy/nginx/certs/server.key:/etc/nginx/ssl/server.key:ro
+      # Nginx configuration files
+      - ./proxy/nginx/nginx.conf:/etc/nginx/templates/nginx.conf.template
+      - ./proxy/nginx/conf.d/default.conf:/etc/nginx/templates/conf.d/default.conf.template
+      - ./proxy/nginx/conf.d/modsecurity.conf:/etc/nginx/templates/conf.d/modsecurity.conf.template
+      # ModSecurity configuration files
+      - ./proxy/modsecurity/modsecurity.conf:/etc/nginx/modsecurity.d/modsecurity.conf
+      - ./proxy/modsecurity/modsecurity-override.conf:/etc/nginx/templates/modsecurity.d/modsecurity-override.conf.template
+      - ./proxy/modsecurity/setup.conf:/etc/nginx/templates/modsecurity.d/setup.conf.template
+      - ./proxy/modsecurity/crs:/etc/nginx/modsecurity.d/crs
+    ports:
+      - "8443:443"
+      - "8080:80"
+    networks:
+      - global-net
+    restart: unless-stopped
+  #********************************************************************************#
 
-  # hashicorp_vault:
-  #   image: hashicorp/vault
-  #   container_name: hashicorp_vault
-  #   volumes:
-  #     - LocalVaultData:/vault/data
-  #     - ./vault/config/vault.hcl:/vault/config/vault.hcl:ro
-  #     - ./vault/certs/vault.crt:/vault/certs/vault.crt:ro
-  #     - ./vault/certs/vault.key:/vault/certs/vault.key:ro
-  #   cap_add:
-  #     - IPC_LOCK
-  #   # environment:
-  #   #   - VAULT_ADDR=http://localhost:8200
-  #   ports:
-  #     - "8200:8200"
-  #     - "8201:8201"
-  #   networks:
-  #     - transcendence
-  #   restart: unless-stopped
-  #   entrypoint: ["vault", "server", "-config=/vault/config/vault.hcl"]
 
+
+
+  #********************************************************************************#
+  #                              FRONTEND SERVICE                                  #
+  #********************************************************************************#
   frontend:
     image : frontend
     container_name: frontend
     build:
       context: ./frontend
       dockerfile: Dockerfile
-    # depends_on:
-    #   - hashicorp_vault
     volumes:
-      - frontend-build:/app/build:rw
+      - frontend-src:/app:rw
+      - frontend-build:/app/build
     networks:
-      - transcendence
+      - global-net
     ports:
       - "3000:3000"
+    environment:
+     - RECAPTCHA_SITE_KEY=${RECAPTCHA_SITE_KEY}
+    restart: unless-stopped
+  #********************************************************************************#
+
+
+
+#**********************************************************************************#
+#                              BACKEND SMICROSERVICES                              #
+#**********************************************************************************#
+  #********************************************************************************#
+  #                            USER SERVICE                                        #
+  #********************************************************************************#
+  # User service for managing user accounts, login, and registration
+  service-users:
+    image: service-users
+    build:
+      context: ./backend/services/service-users
+      dockerfile: Dockerfile
+    container_name: service-users
+    volumes:
+      - ./backend/services/service-users/app:/app
+      - /app/node_modules
+      - DataUserService:/data
+    networks:
+      - global-net
+      - security-net
+    depends_on:
+      # - hashicorp_vault
+      - redis
+      - postgreSQL
+    ports:
+      - "4000:4000"
+    environment:
+      - NODE_ENV=production
+      - VAULT_ADDR=http://hashicorp_vault:8200
+      - GLOBAL_DB_ADMIN_PASSWORD=${GLOBAL_DB_ADMIN_PASSWORD}
+      - DATABASE_URL=${USER_SERVICE_DATABASE_URL}
+      - DB_HOST=${USER_SERVICE_DB_HOST}
+      - DB_NAME=${USER_SERVICE_DB_NAME}
+      - DB_USER=${USER_SERVICE_DB_USER}
+      - DB_PASSWORD=${USER_SERVICE_DB_PASSWORD}
+      - DB_ROOT_PASSWORD=${USER_SERVICE_DB_ROOT_PASSWORD}
+      - DB_PORT=${USER_SERVICE_DB_PORT}
+      - DB_SAMPLE_NAME=${USER_SERVICE_DB_SAMPLE_NAME}
+      - DB_MAX_CLIENTS=${USER_SERVICE_DB_MAX_CLIENTS}
+      - DB_IDLE_TIMEOUT=${USER_SERVICE_DB_IDLE_TIMEOUT}
+      - DB_CONNECTION_TIMEOUT=${USER_SERVICE_DB_CONNECTION_TIMEOUT}
+      - EMAIL_USER=${EMAIL_USER}
+      - GMAIL_APP_PASSWORD=${GMAIL_APP_PASSWORD}
+      - EMAIL_HOST=${EMAIL_HOST}
+      - EMAIL_PORT=${EMAIL_PORT}
+      - REKAPTCHA_API_KEY=${REKAPTCHA_API_KEY}
+      - GITHUB_CLIENT_ID=${GITHUB_CLIENT_ID}
+      - GITHUB_CLIENT_SECRET=${GITHUB_CLIENT_SECRET}
+      - GITHUB_REDIRECT_URI=${GITHUB_REDIRECT_URI}
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
+      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
+      - GOOGLE_REDIRECT_URI=${GOOGLE_REDIRECT_URI}
+      - FORTYTWO_CLIENT_ID=${FORTYTWO_CLIENT_ID}
+      - FORTYTWO_CLIENT_SECRET=${FORTYTWO_CLIENT_SECRET}
+      - FORTYTWO_REDIRECT_URI=${FORTYTWO_REDIRECT_URI}
+      - ACCESS_TOKEN_SECRET=${ACCESS_TOKEN_SECRET}
+      - REFRESH_TOKEN_SECRET=${REFRESH_TOKEN_SECRET}
+      - ACCESS_TOKEN_EXPIRATION=${ACCESS_TOKEN_EXPIRATION}
+      - REFRESH_TOKEN_EXPIRATION=${REFRESH_TOKEN_EXPIRATION}
+    restart: unless-stopped
+  #********************************************************************************#
+
+  
+  
+  
+  #********************************************************************************#
+  #                            GAME SERVICE                                        #
+  #********************************************************************************#
+  # Game service for managing game sessions, matchmaking, and real-time interactions
+
+  service-game:
+    image: service-game
+    build:
+      context: ./backend/services/service-game
+      dockerfile: Dockerfile
+    container_name: service-game
+    volumes:
+      - ./backend/services/service-game/app:/app
+      - /app/node_modules
+      - DataUserService:/data
+    networks:
+      - global-net
+      - security-net
+    depends_on:
+      # - hashicorp_vault
+      - postgreSQL
+      - redis
+    ports:
+      - "4001:4001"
+    environment:
+      - NODE_ENV=production
+      - VAULT_ADDR=http://hashicorp_vault:8200
+      - GLOBAL_DB_ADMIN_PASSWORD=${GLOBAL_DB_ADMIN_PASSWORD}
+      - DB_HOST=${GAME_SERVICE_DB_HOST}
+      - DB_NAME=${GAME_SERVICE_DB_NAME}
+      - DB_USER=${GAME_SERVICE_DB_USER}
+      - DB_PASSWORD=${GAME_SERVICE_DB_PASSWORD}
+      - DB_ROOT_PASSWORD=${GAME_SERVICE_DB_ROOT_PASSWORD}
+      - DB_PORT=${GAME_SERVICE_DB_PORT}
+      - DB_SAMPLE_NAME=${GAME_SERVICE_DB_SAMPLE_NAME}
+      - GAME_SERVICE_DATABASE_URL=${GAME_SERVICE_DATABASE_URL}
     restart: unless-stopped
   
-#   backend:
-#       image: backend
-#       build:
-#         context: ./backend
-#         dockerfile: Dockerfile
-#       restart: unless-stopped
-#       container_name: backend
-#       volumes:
-#         - ./backend/app:/app
-#         - /app/node_modules
-#       # command: npm run dev
-#       ports: 
-#         - "4000:4000"
 
-#   proxy:
-#     image: proxy
-#     build:
-#       context: ./proxy
-#       dockerfile: Dockerfile
-#     container_name: proxy
-#     depends_on:
-#       - frontend
-#     environment:
-#       - SSL_CERT=/etc/nginx/ssl/server.crt
-#       - SSL_CERT_KEY=/etc/nginx/ssl/server.key
-#     volumes:
-#       # Nginx HTML files
-#       - ./frontend/build:/usr/share/nginx/html
-#       # Nginx SSL certificates
-#       - ./proxy/nginx/certs/server.crt:/etc/nginx/ssl/server.crt:ro
-#       - ./proxy/nginx/certs/server.key:/etc/nginx/ssl/server.key:ro
-#       # Nginx configuration files
-#       - ./proxy/nginx/nginx.conf:/etc/nginx/templates/nginx.conf.template
-#       - ./proxy/nginx/conf.d/default.conf:/etc/nginx/templates/conf.d/default.conf.template
-#       - ./proxy/nginx/conf.d/modsecurity.conf:/etc/nginx/templates/conf.d/modsecurity.conf.template
-#       # ModSecurity configuration files
-#       - ./proxy/modsecurity/modsecurity.conf:/etc/nginx/modsecurity.d/modsecurity.conf
-#       - ./proxy/modsecurity/modsecurity-override.conf:/etc/nginx/templates/modsecurity.d/modsecurity-override.conf.template
-#       - ./proxy/modsecurity/setup.conf:/etc/nginx/templates/modsecurity.d/setup.conf.template
-#       - ./proxy/modsecurity/crs:/etc/nginx/modsecurity.d/crs
-#     ports:
-#       - "8443:443"
-#       # - "8080:80"
-#     networks:
-#       - transcendence
-#     restart: unless-stopped
+  #********************************************************************************#
+  #                            CHAT SERVICE                                        #
+  #********************************************************************************#
+  # Chat service for managing chat sessions, messaging and real-time interactions
 
+  service-chat:
+    image: service-chat
+    build:
+      context: ./backend/services/service-chat
+      dockerfile: Dockerfile
+    container_name: service-chat
+    volumes:
+      - ./backend/services/service-chat/app:/app
+      - /app/node_modules
+      - DataUserService:/data
+    networks:
+      - global-net
+      - security-net
+    depends_on:
+      # - hashicorp_vault
+      - redis
+      - postgreSQL
+    ports:
+      - "4002:4002"
+    environment:
+      - NODE_ENV=production
+      - VAULT_ADDR=http://hashicorp_vault:8200
+      - GLOBAL_DB_ADMIN_PASSWORD=${GLOBAL_DB_ADMIN_PASSWORD}
+      - DB_HOST=${CHAT_SERVICE_DB_HOST}
+      - DB_NAME=${CHAT_SERVICE_DB_NAME}
+      - DB_USER=${CHAT_SERVICE_DB_USER}
+      - DB_PASSWORD=${CHAT_SERVICE_DB_PASSWORD}
+      - DB_ROOT_PASSWORD=${CHAT_SERVICE_DB_ROOT_PASSWORD}
+      - DB_PORT=${CHAT_SERVICE_DB_PORT}
+      - DB_SAMPLE_NAME=${CHAT_SERVICE_DB_SAMPLE_NAME}
+      - DATABASE_URL=${CHAT_SERVICE_DATABASE_URL}
+    restart: unless-stopped
+
+
+
+  #********************************************************************************#
+  #                            FRIENDS SERVICE                                     #
+  #********************************************************************************#
+  # Friends service for managing Friends sessions, matchmaking, and real-time interactions
+
+  service-friends:
+    image: service-friends
+    build:
+      context: ./backend/services/service-friends
+      dockerfile: Dockerfile
+    container_name: service-friends
+    volumes:
+      - ./backend/services/service-friends/app:/app
+      - /app/node_modules
+      - DataUserService:/data
+    networks:
+      - global-net
+      - security-net
+    depends_on:
+      # - hashicorp_vault
+      - postgreSQL
+    ports:
+      - "4003:4003"
+    environment:
+      - NODE_ENV=production
+      - VAULT_ADDR=http://hashicorp_vault:8200
+    restart: unless-stopped
+
+
+
+
+
+  #********************************************************************************#
+  #                            POSTGRES SERVICE                                    #
+  #********************************************************************************#
+  # PostgreSQL service for storing user data and application state
+  postgreSQL:
+    image: postgresql
+    build:
+      context: ./backend/postgresql
+      dockerfile: Dockerfile
+    container_name: postgreSQL
+    volumes:
+      - PostgresData:/var/lib/postgresql/data
+      - ./backend/postgresql/config/postgresql.conf:/etc/postgresql/postgresql.conf:ro
+      - ./backend/postgresql/config/pg_hba.conf:/etc/postgresql/pg_hba.conf:ro
+      - ./backend/postgresql/config/pg_ident.conf:/etc/postgresql/pg_ident.conf:ro
+    networks:
+      - security-net
+    restart: unless-stopped
+    environment:
+      - GLOBAL_DB_ADMIN_PASSWORD=${GLOBAL_DB_ADMIN_PASSWORD}
+      - USER_SERVICE_DB_HOST=${USER_SERVICE_DB_HOST}
+      - USER_SERVICE_DB_NAME=${USER_SERVICE_DB_NAME}
+      - USER_SERVICE_DB_USER=${USER_SERVICE_DB_USER}
+      - USER_SERVICE_DB_PASSWORD=${USER_SERVICE_DB_PASSWORD}
+      - USER_SERVICE_DB_ROOT_PASSWORD=${USER_SERVICE_DB_ROOT_PASSWORD}
+      - USER_SERVICE_DB_PORT=${USER_SERVICE_DB_PORT}
+      - USER_SERVICE_DB_SAMPLE_NAME=${USER_SERVICE_DB_SAMPLE_NAME}
+      - USER_SERVICE_DB_MAX_CLIENTS=${USER_SERVICE_DB_MAX_CLIENTS}
+      - GAME_SERVICE_DB_HOST=${GAME_SERVICE_DB_HOST}
+      - GAME_SERVICE_DB_NAME=${GAME_SERVICE_DB_NAME}
+      - GAME_SERVICE_DB_USER=${GAME_SERVICE_DB_USER}
+      - GAME_SERVICE_DB_PASSWORD=${GAME_SERVICE_DB_PASSWORD}
+      - GAME_SERVICE_DB_ROOT_PASSWORD=${GAME_SERVICE_DB_ROOT_PASSWORD}
+      - GAME_SERVICE_DB_PORT=${GAME_SERVICE_DB_PORT}
+      - GAME_SERVICE_DB_SAMPLE_NAME=${GAME_SERVICE_DB_SAMPLE_NAME}
+      - CHAT_SERVICE_DB_HOST=${CHAT_SERVICE_DB_HOST}
+      - CHAT_SERVICE_DB_NAME=${CHAT_SERVICE_DB_NAME}
+      - CHAT_SERVICE_DB_USER=${CHAT_SERVICE_DB_USER}
+      - CHAT_SERVICE_DB_PASSWORD=${CHAT_SERVICE_DB_PASSWORD}
+      - CHAT_SERVICE_DB_ROOT_PASSWORD=${CHAT_SERVICE_DB_ROOT_PASSWORD}
+      - CHAT_SERVICE_DB_PORT=${CHAT_SERVICE_DB_PORT}
+      - CHAT_SERVICE_DB_SAMPLE_NAME=${CHAT_SERVICE_DB_SAMPLE_NAME}
+    ports:
+      - "5432:5432"
+  #********************************************************************************#      
+  #********************************************************************************#
+
+
+
+
+
+  #********************************************************************************#
+  #                               HASHICORP VAULT                                  #
+  #********************************************************************************#
+  # HashiCorp Vault service for managing secrets and sensitive data
+  hashicorp_vault:
+    image: hashicorp_vault
+    build:
+      context: ./backend/vault
+      dockerfile: Dockerfile
+    container_name: hashicorp_vault
+    volumes:
+      - LocalVaultData:/vault/data
+      - ./backend/vault/config/vault.hcl:/vault/config/vault.hcl:ro
+      - ./backend/vault/certs/vault.crt:/vault/certs/vault.crt:ro
+      - ./backend/vault/certs/vault.key:/vault/certs/vault.key:ro
+    cap_add:
+      - IPC_LOCK
+    # environment:
+    #   - VAULT_ADDR=http://localhost:8200
+    ports:
+      - "8200:8200"
+      - "8201:8201"
+    networks:
+      - global-net
+      - security-net
+    restart: unless-stopped
+  #********************************************************************************#
+
+  #****************************************************************************#
+  #                                  REDIS                                     #
+  #****************************************************************************#
+  redis: # Name of the Redis service
+    build: # Build the image
+      context: ./backend/redis # Build the image using the Dockerfile
+    
+    image: redis # Image name
+
+    container_name: redis # Container name
+
+    labels: # Labels for the description of the container
+      - com.redis.description="Redis Server" # Container description
+
+    expose: # Expose the port of the container
+      - "6379" # Expose the port 6379
+    networks: # Use the network for communication between containers
+      - global-net # Network name
+
+    restart: unless-stopped # Restart the container unless it is stopped
+  #*******************************REDIS-SERVER*********************************#
+
+#********************************************************************************#
+
+#********************************************************************************#
+#                              NETWORKS                                          #
+#********************************************************************************#
 networks:
-    transcendence:
+  # Global network for all services
+    global-net:
       driver: bridge
+  #******************************************************************************#
+  # Security network for sensitive services
+    security-net:
+      driver: bridge
+#********************************************************************************#
+#                              VOLUMES                                           #
+#********************************************************************************# 
 volumes:
-    # Volume pour les données de Vault
-    # Utilisation d'un volume local pour éviter les problèmes de permission  
+
+  # Local volume for HashiCorp Vault data
+  # This volume is used to persist Vault data across container restarts
   LocalVaultData:
     driver: local
     driver_opts:
       type: none
-      device: ./vault/data
+      device: ./backend/vault/data
       o: bind
-    # pour éviter les problèmes de permission avec le volume local
+  #*******************************************************************************#
+  # Local volume for frontend build artifacts
+  # This volume is used to persist the build output of the frontend application
   frontend-build:
     driver: local
     driver_opts:
       type: none
       device: ./frontend/build
       o: bind
-  
+  frontend-src:
+    driver: local
+    driver_opts:
+      type: none
+      device: ./frontend
+      o: bind
+  #*******************************************************************************#
+  # this volume is used to store the backend data
+  DataUserService:
+    driver: local
+    driver_opts:
+      type: none
+      device: ./backend/services/service-users/data
+      o: bind
+  #*******************************************************************************#
+  # Local volume for PostgreSQL data
+  # This volume is used to persist PostgreSQL data across container restarts
+  PostgresData:
+    driver: local
+    driver_opts: 
+      type: none
+      device: ./backend/postgresql/data
+      o: bind
+  #*******************************************************************************#

@@ -261,16 +261,16 @@ export class StandsInteraction implements SpecificInteraction {
         this.clicSeat = false;
         this.clicArbitrator = false;
 
-        const arbitratorMeshes = this.sceneManager.getLoadedMeshes["arbitrator"];
-        const spectatorMeshes = this.sceneManager.getLoadedMeshes["spectator"];
-        const friendMeshes = this.sceneManager.getLoadedMeshes["seatsFriends"];
-        const buttonMeshes = this.sceneManager.getLoadedMeshes["buttonsField"];
+        // const arbitratorMeshes = this.sceneManager.getLoadedMeshes["arbitrator"];
+        // const spectatorMeshes = this.sceneManager.getLoadedMeshes["spectator"];
+        // const friendMeshes = this.sceneManager.getLoadedMeshes["seatsFriends"];
+        // const buttonMeshes = this.sceneManager.getLoadedMeshes["buttonsField"];
 
-        [arbitratorMeshes, spectatorMeshes, friendMeshes, buttonMeshes].forEach(meshArray => {
-            if (meshArray && Array.isArray(meshArray)) {
-                meshArray.forEach(mesh => mesh.isPickable = false);
-            }
-        });
+        // [arbitratorMeshes, spectatorMeshes, friendMeshes, buttonMeshes].forEach(meshArray => {
+        //     if (meshArray && Array.isArray(meshArray)) {
+        //         meshArray.forEach(mesh => mesh.isPickable = false);
+        //     }
+        // });
 
         this.sceneManager.getChair.forEach((mesh : AbstractMesh) => {
             const mat = mesh.material as PBRMaterial;

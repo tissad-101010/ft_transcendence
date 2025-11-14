@@ -117,4 +117,6 @@ export class LockerInteraction implements SpecificInteraction {
 
         // console.log("LockerInteraction: nettoyage terminé.");
     }
+
+  
 }

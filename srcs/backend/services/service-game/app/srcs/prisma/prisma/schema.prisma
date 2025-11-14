@@ -1,0 +1,91 @@
+// Prisma schema file
+
+// =====================
+// Generator
+// =====================
+generator client {
+  provider = "prisma-client"
+  output = "./generated/client"
+}
+
+
+
+// =====================
+// Datasource
+// =====================
+datasource db {
+  provider = "postgresql"
+  url      = env("GAME_SERVICE_DATABASE_URL")
+}
+
+
+
+// =====================
+// User Profile
+// =====================
+model GameProfile {
+  id         String   @id @default(cuid())
+  username   String   @unique
+  email      String   @unique
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+
+
+}
+
+// =====================
+// User Model (for game sessions)
+// =====================
+// rp: this table stores information about players who can join games
+model User {
+  id        Int      @id @default(autoincrement()) // rp: unique number for each player, automatically increases (1, 2, 3...)
+  login     String   @unique @db.VarChar(255) // rp: player username, must be unique (no duplicates allowed)
+  email     String   @unique @db.VarChar(255) // rp: player email address, must be unique
+  password  String   @db.VarChar(255) // rp: player password (stored as text, should be encrypted in production)
+  createdAt DateTime @default(now()) @map("created_at") // rp: date and time when this player was created in the database
+  
+  gamesAsP1 Game[]   @relation("Player1") // rp: list of all games where this player is player 1
+  gamesAsP2 Game[]   @relation("Player2") // rp: list of all games where this player is player 2
+
+  @@map("users") // rp: the actual table name in the database will be "users"
+}
+
+// =====================
+// Game Model
+// =====================
+// rp: this table stores information about each game session (like a match between two players)
+model Game {
+  id         Int       @id @default(autoincrement()) // rp: unique number for each game, automatically increases
+  player1_id Int? // rp: the user id of the first player, can be empty (null) if not set yet
+  player2_id Int? // rp: the user id of the second player, can be empty (null) if waiting for second player
+  status     String    @default("waiting") @db.VarChar(50) // rp: game status like "waiting" (for player 2) or "playing" (both players joined)
+  createdAt  DateTime  @default(now()) @map("created_at") // rp: date and time when this game was created
+  
+  player1    User?     @relation("Player1", fields: [player1_id], references: [id]) // rp: link to the User table for player 1
+  player2    User?     @relation("Player2", fields: [player2_id], references: [id]) // rp: link to the User table for player 2
+  gameState  GameState? // rp: link to the GameState table that stores ball position, scores, etc.
+
+  @@map("games") // rp: the actual table name in the database will be "games"
+}
+
+// =====================
+// GameState Model
+// =====================
+// rp: this table stores the current state of a game during play (ball position, player positions, scores)
+model GameState {
+  gameId    Int     @id @map("game_id") // rp: the game id this state belongs to, also the primary key
+  game      Game    @relation(fields: [gameId], references: [id], onDelete: Cascade) // rp: link to the Game table, if game is deleted, this state is deleted too
+  
+  ballX     Float   @default(0) @map("ball_x") // rp: horizontal position of the ball on the screen (x coordinate)
+  ballY     Float   @default(0) @map("ball_y") // rp: vertical position of the ball on the screen (y coordinate)
+  ballDx    Float   @default(0.3) @map("ball_dx") // rp: horizontal speed of the ball (how fast it moves left/right)
+  ballDy    Float   @default(0.3) @map("ball_dy") // rp: vertical speed of the ball (how fast it moves up/down)
+  player1Y  Float   @default(0) @map("player1_y") // rp: vertical position of player 1's paddle on the screen
+  player2Y  Float   @default(0) @map("player2_y") // rp: vertical position of player 2's paddle on the screen
+  score1    Int     @default(0) // rp: current score of player 1 (number of points)
+  score2    Int     @default(0) // rp: current score of player 2 (number of points)
+
+  @@map("game_states") // rp: the actual table name in the database will be "game_states"
+}
+

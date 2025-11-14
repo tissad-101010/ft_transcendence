@@ -14,6 +14,8 @@ import { UIData } from "../utils.ts";
 
 import { MatchRules } from "../../Match.ts";
 
+import { log } from "../../apiUtils.ts";
+
 export interface DataGraph
 {
     container: {
@@ -59,7 +61,8 @@ export interface DataMatchBlock
     graph: DataGraph,
     controlButtons: Button[],
     currPage: string,
-    mode: number
+    mode: number,
+    errorMsg?: TextBlock | null
 }
 
 function genRowSpeed(env: DataMatchBlock) : StackPanel
@@ -299,7 +302,6 @@ function genRowMode(env: DataMatchBlock) : StackPanel
     row.addControl(text);
 
     const buttons : Button = [];
-    let inputLogin : null | InputText = null;
 
     function createButton(label: string) 
     {
@@ -322,40 +324,10 @@ function genRowMode(env: DataMatchBlock) : StackPanel
                 b.background = env.graph.button.background;
             })
             button.background = env.graph.button.clickedBackground;
-            if (label === "Local")
-            {
-                if (env.mode !== 0)
-                {
+            if (label === "Local" && env.mode !== 0)
                     env.mode = 0;
-                    if (inputLogin !== null)
-                    {
-                        row.removeControl(inputLogin);
-                        inputLogin.dispose();
-                        inputLogin = null;
-                    }
-                }
-            }
-            else if (label === "En ligne")
-            {
-                if (env.mode !== 1)
-                {
+            else if (label === "En ligne" && env.mode !== 1)
                     env.mode = 1;
-                    inputLogin = new InputText();
-                    inputLogin.width = "100px";
-                    inputLogin.height = "30px";
-                    inputLogin.fontSize = env.graph.inputText.fontSize;
-                    inputLogin.fontFamily = env.graph.inputText.fontFamily;
-                    inputLogin.background = env.graph.inputText.background;
-                    inputLogin.color = env.graph.inputText.color;
-                    inputLogin.focusedBackground = env.graph.inputText.focusedBackground;
-                    inputLogin.thickness = env.graph.inputText.thickness;
-                    row.addControl(inputLogin);
-    
-                    inputLogin.onTextChangedObservable.add(() => {
-                        env.login = inputLogin.text;
-                    });                
-                }
-            }
         });
 
         button.onPointerEnterObservable.add(() => {
@@ -381,6 +353,40 @@ function genRowMode(env: DataMatchBlock) : StackPanel
     return (row);
 }
 
+function isValid(
+    env: DataMatchBlock,
+    panel: StackPanel
+) : boolean
+{
+    if (!env.errorMsg)
+    {
+        env.errorMsg = new TextBlock();
+        panel.addControl(env.errorMsg);
+    }
+    env.errorMsg.text = "";
+    if (env.data.score === "")
+        env.errorMsg.text = "Score non renseigne";
+    else if (env.data.speed === "")
+        env.errorMsg.text = "Vitesse non renseigne";
+    else if (env.data.timeBefore === "")
+        env.errorMsg.text = "Temps avant engagement non renseigne";
+    else if (env.mode === -1)
+        env.errorMsg.text = "Mode de jeu non renseigne";
+
+    if (env.errorMsg.text !== "")
+    {
+        env.errorMsg.color = "red";
+        env.errorMsg.fontSize = env.graph.text.fontSize;
+        env.errorMsg.fontFamily = env.graph.text.fontFamily;
+        env.errorMsg.width = "100%";
+        env.errorMsg.height = "100px";
+        return (false);
+    }
+    else
+        env.errorMsg.dispose();
+    return (true);
+}
+
 export function genRulesMatchBlock(env: DataMatchBlock, selectMode: boolean) : Rectangle
 {
     const container = new Rectangle();
@@ -398,7 +404,62 @@ export function genRulesMatchBlock(env: DataMatchBlock, selectMode: boolean) : R
     panel.addControl(genRowSpeed(env));
     panel.addControl(genRowScore(env));
     panel.addControl(genRowTime(env));
+
     if (selectMode)
+    {
         panel.addControl(genRowMode(env));
+
+        const button = new Rectangle();
+        button.width = "100px";
+        button.height = "50px";
+        button.color = env.graph.button.color;
+        button.thickness = 2;
+        button.background = env.graph.button.background;
+        panel.addControl(button);
+    
+        const text = new TextBlock();
+        text.text = "Creer";
+        text.width = "100%";
+        text.height = "100%";
+        text.color = env.graph.text.color;
+        text.fontSize = env.graph.text.fontSize;
+        text.fontFamily = env.graph.text.fontFamily;
+        button.addControl(text);
+
+        env.errorMsg = null;
+    
+        button.onPointerClickObservable.add(() => {
+            console.log("Verifier form pour creation de match amical a faire", env);
+            if (isValid(env, panel))
+            {
+                console.log("OK");
+                // try {
+                //     log('📤 Tentative de création de partie...');
+                // const response = await fetch(`${apiBase}/api/game/create`, { // rp hit create endpoint relative to base
+                //     method: 'POST',
+                //     headers: {
+                //         'Content-Type': 'application/json'
+                //     },
+                //     body: JSON.stringify({
+                //         player1_id: 1
+                //     })
+                // });
+                // }
+
+                // La creation du match peut se faire
+            }
+            else
+                console.log("KO");
+        });
+    
+        button.onPointerEnterObservable.add(() => {
+            button.background = env.graph.button.hoveredBackground;
+        });
+    
+        button.onPointerOutObservable.add(() => {
+            button.background = env.graph.button.background;
+        });
+    }
+
     return (container);
 }

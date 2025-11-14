@@ -326,7 +326,7 @@ function waitingScreen(
         )
         {
             clearInterval(env.waitingInterval.id);
-            env.menuContainer.dispose();
+            // env.menuContainer.dispose();
             if (!env.userX.playTournamentMatch(utils.tournament, match, env.sceneManager))
                 console.error("Impossible de lancer le match");
             else

@@ -36,7 +36,7 @@ export interface Env
     tournament: Tournament;
     errorMsg: TextBlock | null;
     control: ScoreboardHandler;
-    clicScoreboard: boolean;
+    scoreboard: ScoreboardHandler;
 }
 
 function buttonNavigation(
@@ -134,7 +134,7 @@ export function genJoinMatch(env: Env) : StackPanel
     const scrollViewer = new ScrollViewer();
     scrollViewer.width = "100%";
     scrollViewer.height = "300px";
-    scrollViewer.background = "red";
+    scrollViewer.background = "transparent";
     scrollViewer.barColor = env.UIData.text.color;
     scrollViewer.thickness = 0;
     scrollViewer.horizontalBarVisible = false;

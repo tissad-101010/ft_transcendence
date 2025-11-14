@@ -163,8 +163,9 @@ export class UserX
             return (false);
         
         this.sceneManager.getSceneInteractor?.disableInteractions();
-        env.menuContainer.dispose();
-        env.clicScoreboard = false;
+        // env.menuContainer.dispose();
+        env.scoreboard.setClic = false;
+        env.scoreboard.setPlayMatch = true;
         this.sceneManager.moveCameraTo(ZoneName.FIELD, () => {
             this.sceneManager.setSpecificMesh(false);
             this.sceneManager.getSceneInteractor?.enableInteractionScene();
