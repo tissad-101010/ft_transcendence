@@ -86,7 +86,6 @@ export function createButton(
     }
 }
 
-
 export function invitationButton(
     label: string,
     env: Env,

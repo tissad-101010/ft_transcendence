@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   oauth.controllers.ts                               :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
+/*   By: glions <glions@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/27 12:12:03 by tissad            #+#    #+#             */
-/*   Updated: 2025/10/31 17:10:07 by tissad           ###   ########.fr       */
+/*   Updated: 2025/11/14 15:59:11 by glions           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,6 +35,12 @@ export async function googleProviderRedirect(req: FastifyRequest,
         `client_id=${googleClientId}&redirect_uri=${googleredirectUri}&`+
         `response_type=code&scope=openid%20email%20profile`;
     console.log("[OauthGoogle.controller] Redirecting to:", googleAuthUrl);
+    reply.clearCookie('access_token', {
+  path: '/',
+  secure: true,
+  sameSite: 'none',
+});
+    
     return reply.redirect(googleAuthUrl);
 }
 

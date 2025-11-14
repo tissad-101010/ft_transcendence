@@ -8,7 +8,10 @@
  * 🟢 You can import this file directly.
  */
 export type * from './models/GameProfile'
+<<<<<<< HEAD
 export type * from './models/User'
 export type * from './models/Game'
 export type * from './models/GameState'
+=======
+>>>>>>> main
 export type * from './commonInputTypes'

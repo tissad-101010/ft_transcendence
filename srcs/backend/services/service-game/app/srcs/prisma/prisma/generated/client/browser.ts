@@ -21,6 +21,7 @@ export * from './enums';
  * 
  */
 export type GameProfile = Prisma.GameProfileModel
+<<<<<<< HEAD
 /**
  * Model User
  * 
@@ -36,3 +37,5 @@ export type Game = Prisma.GameModel
  * 
  */
 export type GameState = Prisma.GameStateModel
+=======
+>>>>>>> main

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   auth.controllers.ts                                :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
+/*   By: glions <glions@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/27 11:44:30 by tissad            #+#    #+#             */
-/*   Updated: 2025/10/31 17:11:43 by tissad           ###   ########.fr       */
+/*   Updated: 2025/11/14 15:42:38 by glions           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,8 +25,6 @@ import { CredentialUtils } from '../../utils/credential.utils';
 import { AuthService } from './auth.services';
 import { CryptUtils } from '../../utils/crypt.utils';
 import { JwtUtils } from '../../utils/jwt.utils';
-import { log } from 'console';
-import { auth } from 'firebase-admin';
 /***********************************/
 /*     Auth Controllers            */
 /***********************************/
@@ -86,7 +84,7 @@ export async function signupController(
         
         // Successful registration redirect to signin page
         console.log('[Signup Controller] User registered successfully');
-        return reply.code(201).send(signupResponse).redirect('https://localhost:8443/signin');
+        return reply.code(201).send(signupResponse);
     
     
     } catch (error) {
@@ -114,7 +112,6 @@ export async function signinController(
             return reply.code(401).send(loginResponse);
         }
         console.log('[Signin Controller] User authenticated successfully');
-        loginResponse.twoFactorRequired = true; // TO BE REMOVED AFTER TESTING
         // prepare BASIC response data
         const responseData: LoginResponseDTO = {
             message: loginResponse.message,
@@ -125,9 +122,8 @@ export async function signinController(
         
 
         // handle 2FA requirement
-        
         if ( loginResponse.twoFactorRequired ) {    
-            console.log('[Signin Controller] 2FA required, sending response without tokens');
+            console.log('[Signin Controller] 2FA required, sending response without access tokens');
             JwtUtils.setTempTokenCookie(reply, loginResponse.tempToken!); 
             return reply.code(200).send(responseData);// or redirect to 2FA page
         }
@@ -138,6 +134,8 @@ export async function signinController(
         // set JWT cookies
         JwtUtils.setAccessTokenCookie(reply, loginResponse.accessToken!);
         JwtUtils.setRefreshTokenCookie(reply, loginResponse.refreshToken!);
+        console.log('[Signin Controller] JWT cookies set successfully');
+        console.log('[Signin Controller] reponseData:', responseData);
         return reply.code(200).send(responseData);
 
         
@@ -156,28 +154,25 @@ export async function getProfileController(
     request: FastifyRequest,
     reply: FastifyReply
 ) {
-    const access_token = request.cookies['access_token'];
-    if (!access_token) {
-        return reply.code(401).send({ message: 'Unauthorized: No access token provided' });
-    }
+    console.log('[Profile Controller] Received profile request');
     const authService = new AuthService(request.server);
-    const payload = JwtUtils.verifyAccessToken(access_token);
-    if (!payload) {
-        return reply.code(401).send({ message: 'Unauthorized: Invalid access token' });
+    // extract user from cookies from header request
+    const user = JwtUtils.extractUserFromRequest(request);
+    if (!user) {
+        console.error('[Profile Controller] Unauthorized: No valid user found in request');
+        return reply.code(401).send({ message: 'Unauthorized ❌' });
     }
     try {
-        const user = await authService.getUserById(payload.id);
-        if (!user) {
-            return reply.code(404).send({ message: 'User not found' });
+        const userProfile = await authService.getUserProfile(user.userId);
+        if (!userProfile) {
+            console.error('[Profile Controller] User profile not found for user ID:', user.userId);
+            return reply.code(404).send({ message: 'User profile not found ❌' });
         }
-        const profie_data = await authService.getUserProfile(user.id);
-        if (profie_data === null) {
-            return reply.code(404).send({ message: 'User profile not found' });
-        }
-        return reply.code(200).send({ profile: profie_data});
+        console.log('[Profile Controller] User profile retrieved successfully for user ID:', user.userId);
+        return reply.code(200).send(userProfile);
     } catch (error) {
-        console.error('[Get Profile Controller] Error fetching user profile:', error);
-        return reply.code(500).send({ message: 'Internal server error' });
+        console.error('[Profile Controller] Error retrieving user profile:', error);
+        return reply.code(500).send({ message: 'Internal server error ❌' });
     }
 }
 

@@ -50,5 +50,7 @@ game:
 	docker compose -f srcs/docker-compose.yml up service-game --build
 front:
 	docker compose -f srcs/docker-compose.yml up frontend --build
+user:
+	docker compose -f srcs/docker-compose.yml up service-users --build
 
 .PHONY: start down restart up clean prune

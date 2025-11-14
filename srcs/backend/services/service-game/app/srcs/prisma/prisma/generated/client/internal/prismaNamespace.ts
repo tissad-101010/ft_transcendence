@@ -389,10 +389,14 @@ type FieldRefInputType<Model, FieldType> = Model extends never ? never : FieldRe
 
 
 export const ModelName = {
+<<<<<<< HEAD
   GameProfile: 'GameProfile',
   User: 'User',
   Game: 'Game',
   GameState: 'GameState'
+=======
+  GameProfile: 'GameProfile'
+>>>>>>> main
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -408,7 +412,11 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
+<<<<<<< HEAD
     modelProps: "gameProfile" | "user" | "game" | "gameState"
+=======
+    modelProps: "gameProfile"
+>>>>>>> main
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -486,6 +494,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+<<<<<<< HEAD
     User: {
       payload: Prisma.$UserPayload<ExtArgs>
       fields: Prisma.UserFieldRefs
@@ -708,6 +717,8 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+=======
+>>>>>>> main
   }
 } & {
   other: {
@@ -758,6 +769,7 @@ export const GameProfileScalarFieldEnum = {
 export type GameProfileScalarFieldEnum = (typeof GameProfileScalarFieldEnum)[keyof typeof GameProfileScalarFieldEnum]
 
 
+<<<<<<< HEAD
 export const UserScalarFieldEnum = {
   id: 'id',
   login: 'login',
@@ -795,6 +807,8 @@ export const GameStateScalarFieldEnum = {
 export type GameStateScalarFieldEnum = (typeof GameStateScalarFieldEnum)[keyof typeof GameStateScalarFieldEnum]
 
 
+=======
+>>>>>>> main
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -811,6 +825,7 @@ export const QueryMode = {
 export type QueryMode = (typeof QueryMode)[keyof typeof QueryMode]
 
 
+<<<<<<< HEAD
 export const NullsOrder = {
   first: 'first',
   last: 'last'
@@ -819,6 +834,8 @@ export const NullsOrder = {
 export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder]
 
 
+=======
+>>>>>>> main
 
 /**
  * Field references
@@ -866,6 +883,7 @@ export type IntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'In
 export type ListIntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int[]'>
     
 
+<<<<<<< HEAD
 
 /**
  * Reference to a field of type 'Float'
@@ -880,6 +898,8 @@ export type FloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, '
 export type ListFloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float[]'>
     
 
+=======
+>>>>>>> main
 /**
  * Batch Payload for updateMany & deleteMany & createMany
  */
@@ -968,9 +988,12 @@ export interface PrismaClientOptions {
 }
 export type GlobalOmitConfig = {
   gameProfile?: Prisma.GameProfileOmit
+<<<<<<< HEAD
   user?: Prisma.UserOmit
   game?: Prisma.GameOmit
   gameState?: Prisma.GameStateOmit
+=======
+>>>>>>> main
 }
 
 /* Types for Logging */

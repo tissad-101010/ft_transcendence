@@ -17,17 +17,38 @@ The project involves:
 
 ## 📦 Section 1: Selected Modules
 
-| Module                                  | Grade     | Status | Notes                             |
-|-----------------------------------------|-----------|--------|-----------------------------------|
-| 🔐 WAF with ModSecurity/HashiCorp Vault |Major      | ✅     | Implemented via Docker            |
-| OAuth Authentication (42 API)           |           | ⬜     | Planned for backend integration   |
-| User Profiles                           |           | ⬜     | Avatar, stats, history            |
-| Friends System & Blocking               |           | ⬜     | Relationship management           |
-| Public/Private Chat                     |           | ⬜     | Roles, mute/ban, channel types    |
-| Real-Time Pong Game                     |           | ⬜     | Gameplay + WebSocket              |
-| Matchmaking & Spectator Mode            |           | ⬜     | Room management                   |
-| 2FA + JWT Authentication                |           | ⬜     | Planned                           |
-| Monitoring (Prometheus/Grafana)         |           | ⬜     | Optional                          |
+## 🧩 Optional Modules (Bonus)
+
+| Category            | Module Description                                                                                      | Level  | ✅ Selected|
+|---------------------|---------------------------------------------------------------------------------------------------------|--------|------------|
+| **Web**             | Use a backend framework                                                                                 | Major  | ✅         |
+|                     | Use a frontend framework or toolkit                                                                     | Minor  | ✅         |
+|                     | Use a database for backend                                                                              | Minor  | ⬜         |
+|                     | Store tournament scores on the Blockchain                                                               | Major  | ⬜         |
+| **User Management** | Standard user management, auth, cross-tournament user support                                           | Major  | ✅         |
+|                     | Implement remote authentication                                                                         | Major  | ✅         |
+| **Gameplay & UX**   | Support remote players                                                                                  | Major  | ⬜         |
+|                     | Multiplayer (more than 2 players in-game)                                                               | Major  | ⬜         |
+|                     | Add a second game with matchmaking and history                                                          | Major  | ⬜         |
+|                     | Game customization options                                                                              | Minor  | ⬜         |
+|                     | Live chat                                                                                               | Major  | ⬜         |
+| **AI & Analytics**  | Implement an AI opponent                                                                                | Major  | ⬜         |
+|                     | User and game statistics dashboard                                                                      | Minor  | ⬜         |
+| **Cybersecurity**   | WAF/ModSecurity + hardened config + Vault integration                                                   | Major  | ✅         |
+|                     | GDPR compliance: anonymization, local data, account deletion                                            | Minor  | ⬜         |
+|                     | Two-Factor Auth (2FA) and JWT integration                                                               | Major  | ⬜         |
+| **DevOps**          | Infrastructure for centralized log management                                                           | Major  | ⬜         |
+|                     | Monitoring system (e.g. Prometheus/Grafana)                                                             | Minor  | ⬜         |
+|                     | Backend microservices architecture                                                                      | Major  | ✅         |
+| **Graphics**        | Advanced 3D graphics                                                                                    | Major  | ⬜         |
+| **Accessibility**   | Support for all devices                                                                                 | Minor  | ⬜         |
+|                     | Browser compatibility expansion                                                                         | Minor  | ⬜         |
+|                     | Multilingual support                                                                                    | Minor  | ⬜         |
+|                     | Accessibility for visually impaired users                                                               | Minor  | ⬜         |
+|                     | Server-Side Rendering (SSR)                                                                             | Minor  | ⬜         |
+| **Server-Side Pong**| Full server-side Pong implementation + API                                                              | Major  | ⬜         |
+|                     | CLI Pong vs web users through API                                                                       | Major  | ⬜         |
+
 
 ---
 
@@ -46,7 +67,8 @@ The project involves:
 - ✅ Attack test script implemented (SQLi, XSS, etc.)
 - ✅ Nginx configured as reverse proxy serving static pages
 ### 🔐 2.2 – Security: HashiCorp Vault 
-
+- ✅ HashiCorp Vault running in a dedicated container
+- 
 
 ## 🐳 Docker Architecture
 

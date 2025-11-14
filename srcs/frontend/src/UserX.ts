@@ -102,7 +102,8 @@ export class UserX
             login: this.user.login,
             alias: a,
             ready: true,
-            id: this.user.id
+            id: this.user.id,
+            eliminate: false
         } 
         this.tournament = new Tournament(this.sceneManager);
         this.tournament.addParticipant(p);

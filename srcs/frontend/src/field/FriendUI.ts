@@ -94,7 +94,7 @@ export class FriendUI
             this.containerUI.headerPanel.background = "green";
             this.containerUI.headerPanel.horizontalAlignment = Control.HORIZONTAL_ALIGNMENT_CENTER;
             this.containerUI.headerPanel.verticalAlignment = Control.VERTICAL_ALIGNMENT_CENTER;
-            this.containerUI.headerPanel.verticalContentAlignment = Control.VERTICAL_ALIGNMENT_CENTER;
+            // this.containerUI.headerPanel.verticalContentAlignment = Control.VERTICAL_ALIGNMENT_CENTER;
             this.containerUI.headerPanel.paddingTop = "0px";
             this.containerUI.headerPanel.paddingBottom = "0px";
             this.containerUI.headerPanel.paddingLeft = "0px";

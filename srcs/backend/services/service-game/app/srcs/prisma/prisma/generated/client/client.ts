@@ -46,6 +46,7 @@ path.join(process.cwd(), "srcs/prisma/prisma/generated/client/libquery_engine-de
  * 
  */
 export type GameProfile = Prisma.GameProfileModel
+<<<<<<< HEAD
 /**
  * Model User
  * 
@@ -61,3 +62,5 @@ export type Game = Prisma.GameModel
  * 
  */
 export type GameState = Prisma.GameStateModel
+=======
+>>>>>>> main

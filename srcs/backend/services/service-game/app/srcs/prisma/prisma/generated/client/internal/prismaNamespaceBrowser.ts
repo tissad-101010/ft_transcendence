@@ -48,10 +48,14 @@ export const AnyNull = runtime.objectEnumValues.instances.AnyNull
 
 
 export const ModelName = {
+<<<<<<< HEAD
   GameProfile: 'GameProfile',
   User: 'User',
   Game: 'Game',
   GameState: 'GameState'
+=======
+  GameProfile: 'GameProfile'
+>>>>>>> main
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -81,6 +85,7 @@ export const GameProfileScalarFieldEnum = {
 export type GameProfileScalarFieldEnum = (typeof GameProfileScalarFieldEnum)[keyof typeof GameProfileScalarFieldEnum]
 
 
+<<<<<<< HEAD
 export const UserScalarFieldEnum = {
   id: 'id',
   login: 'login',
@@ -118,6 +123,8 @@ export const GameStateScalarFieldEnum = {
 export type GameStateScalarFieldEnum = (typeof GameStateScalarFieldEnum)[keyof typeof GameStateScalarFieldEnum]
 
 
+=======
+>>>>>>> main
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -133,6 +140,7 @@ export const QueryMode = {
 
 export type QueryMode = (typeof QueryMode)[keyof typeof QueryMode]
 
+<<<<<<< HEAD
 
 export const NullsOrder = {
   first: 'first',
@@ -141,3 +149,5 @@ export const NullsOrder = {
 
 export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder]
 
+=======
+>>>>>>> main
