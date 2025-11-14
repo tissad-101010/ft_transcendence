@@ -35,6 +35,12 @@ export async function googleProviderRedirect(req: FastifyRequest,
         `client_id=${googleClientId}&redirect_uri=${googleredirectUri}&`+
         `response_type=code&scope=openid%20email%20profile`;
     console.log("[OauthGoogle.controller] Redirecting to:", googleAuthUrl);
+    reply.clearCookie('access_token', {
+  path: '/',
+  secure: true,
+  sameSite: 'none',
+});
+    
     return reply.redirect(googleAuthUrl);
 }
 

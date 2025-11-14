@@ -1,36 +1,16 @@
-import React, { useState } from "react";
+import React, { use, useState } from "react";
+import {registerUser,
+  loginUser,
+  fetchUserProfile
+} from "./auth/controllers/auth.api.ts";
+
+import { handleOAuth } from "./auth/controllers/oauth.api.ts";
+
 import "./HomePage.css";
 
 
 // Fonction externe pour gérer l'inscription
-async function registerUser(
-  username: string,
-  email: string,
-  password: string
-): Promise<{ success: boolean; message?: string }> {
-  try {
-    const response = await fetch("https://localhost:8443/api/user/auth/signup", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-      },
-      credentials: "include", // envoie les cookies si backend les utilise
-      body: JSON.stringify({ username, email, password }),
-    });
 
-    const data = await response.json();
-
-    if (response.ok && data.signupComplete) {
-      return { success: true };
-    } else {
-      return { success: false, message: data.message || "Registration failed" };
-    }
-  } catch (err) {
-    console.error(err);
-    return { success: false, message: "An error occurred during registration" };
-  }
-}
 
 const HomePage = () => {
   // État pour savoir si on affiche le formulaire d'inscription
@@ -48,6 +28,25 @@ const HomePage = () => {
       setErrorMessage(result.message??"Registration failed");
     }
   };
+  const handleLogin = async () => {
+    const result = await loginUser(username, password);
+    if (result.success) {
+      // Rediriger ou mettre à jour l'état de l'application après une connexion réussie
+      console.log("Login successful");
+      // Vous pouvez rediriger l'utilisateur ou mettre à jour l'état de l'application ici
+      const userProfile =  await fetchUserProfile();
+      if (userProfile.success) {
+        console.log("User Profile:", userProfile);
+      }
+      else {
+        console.log("Failed to fetch user profile:", userProfile.message);
+      }
+    }
+    else {
+      setErrorMessage(result.message??"Login failed");
+    }
+  };
+
   return (
     <div className="homepage-overlay">
       <div className="homepage-window">
@@ -60,20 +59,20 @@ const HomePage = () => {
 
             <div className="homepage-input-container">
               <label>Username</label>
-              <input type="text" />
+              <input  type="text" onChange={(e) => setUsername(e.target.value)} />
             </div>
 
             <div className="homepage-input-container">
               <label>Email</label>
-              <input type="email" />
+              <input type="email" onChange={(e) => setEmail(e.target.value)} />
             </div>
 
             <div className="homepage-input-container">
               <label>Password</label>
-              <input type="password" />
+              <input type="password" onChange={(e) => setPassword(e.target.value)} />
             </div>
 
-            <button className="homepage-button" onClick={handleRegister}>Register</button>
+            <button className="homepage-button" onClick={handleRegister}>Sign Up</button>
 
             <div className="Register">
               <p>
@@ -83,9 +82,10 @@ const HomePage = () => {
             </div>
 
             <div className="homepage-logos">
-              <img src="/google-logo.png" alt="Google" className="logo" />
-              <img src="/github-logo.png" alt="Github" className="logo" />
-              <img src="/42-logo.png" alt="42" className="logo" />
+              {/* send request to backend to handle oauth */}
+              <img src="/google-logo.png" alt="Google" className="logo" onClick={() => handleOAuth("google")} />
+              <img src="/github-logo.png" alt="Github" className="logo" onClick={() => handleOAuth("github")} />
+              <img src="/42-logo.png" alt="42" className="logo" onClick={() => handleOAuth("42")} />
             </div>
           </>
         ) : (
@@ -95,7 +95,7 @@ const HomePage = () => {
             <h1 style={{ color: "white", textAlign: "center" }}> Sign in to Moonset</h1>
             <div className="homepage-input-container">
               <label>Username or Email</label>
-              <input type="text" />
+              <input type="text" onChange={(e) => setUsername(e.target.value)} />
             </div>
 
             <div className="homepage-input-container">
@@ -103,10 +103,10 @@ const HomePage = () => {
                 <label>Password</label>
                 <a href="#" className="forget-password">Forget Password?</a>
               </div>
-              <input type="password" />
+              <input type="password" onChange={(e) => setPassword(e.target.value)} />
             </div>
 
-            <button className="homepage-button">Sign In</button>
+            <button className="homepage-button" onClick={handleLogin}>Sign In</button>
 
             <div className="homepage-logos">
               <img src="/google-logo.png" alt="Google" className="logo" />

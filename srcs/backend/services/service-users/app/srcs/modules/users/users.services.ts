@@ -6,12 +6,13 @@
 /*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/27 11:51:29 by tissad            #+#    #+#             */
-/*   Updated: 2025/10/31 10:58:04 by tissad           ###   ########.fr       */
+/*   Updated: 2025/11/04 15:21:42 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 
 
+import { create } from "domain";
 import { OAuthProvider, OAuthProviderType } from "../../types/user.types";
 /***********************************/
 /*       Users Service Class       */
@@ -43,6 +44,7 @@ export class UsersService {
     }
 
     async getUserByUsername(username: string) {
+      console.log("====================>username ", username);
         return this.prismaClient.user.findUnique({
             where: { username },
         });
@@ -133,8 +135,25 @@ export class UsersService {
     async listUsers() {
         return this.prismaClient.user.findMany();
     }
+    /**********************************************************/
+    /*                       2FA Methods                      */
+    /**********************************************************/
+    // add 2FA method to user
+    async addUserTwoFactorMethod(userId: number, method: string) {
+      return this.prismaClient.twoFactorMethod.create({
+        data: {
+          type: method,
+          enabled: true,
+          createdAt: new Date(),
+          user: { 
+            connect: { id: userId } },
+        },
+      });
+    }
 
-    async getTwoFactorMethods(userId: string) {
+    
+    // Get enabled 2FA methods for a user
+    async getUserTwoFactorMethods(userId: number): Promise<any[]> {
       const userWith2FA = await this.prismaClient.user.findUnique({
         where: { id: userId },
         include: {
