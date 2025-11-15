@@ -20,130 +20,76 @@ export type UserModel = runtime.Types.Result.DefaultSelection<Prisma.$UserPayloa
 
 export type AggregateUser = {
   _count: UserCountAggregateOutputType | null
+  _avg: UserAvgAggregateOutputType | null
+  _sum: UserSumAggregateOutputType | null
   _min: UserMinAggregateOutputType | null
   _max: UserMaxAggregateOutputType | null
 }
 
+export type UserAvgAggregateOutputType = {
+  id: number | null
+}
+
+export type UserSumAggregateOutputType = {
+  id: number | null
+}
+
 export type UserMinAggregateOutputType = {
-  id: string | null
+  id: number | null
+  login: string | null
   email: string | null
-  username: string | null
-  passwordHash: string | null
-  phoneNumber: string | null
-  isVerified: boolean | null
-  emailVerified: boolean | null
-  phoneVerified: boolean | null
-  firstName: string | null
-  lastName: string | null
-  dateOfBirth: Date | null
-  lastLogin: Date | null
-  displayName: string | null
-  avatarUrl: string | null
-  role: $Enums.UserRole | null
+  password: string | null
   createdAt: Date | null
-  updatedAt: Date | null
 }
 
 export type UserMaxAggregateOutputType = {
-  id: string | null
+  id: number | null
+  login: string | null
   email: string | null
-  username: string | null
-  passwordHash: string | null
-  phoneNumber: string | null
-  isVerified: boolean | null
-  emailVerified: boolean | null
-  phoneVerified: boolean | null
-  firstName: string | null
-  lastName: string | null
-  dateOfBirth: Date | null
-  lastLogin: Date | null
-  displayName: string | null
-  avatarUrl: string | null
-  role: $Enums.UserRole | null
+  password: string | null
   createdAt: Date | null
-  updatedAt: Date | null
 }
 
 export type UserCountAggregateOutputType = {
   id: number
+  login: number
   email: number
-  username: number
-  passwordHash: number
-  phoneNumber: number
-  isVerified: number
-  emailVerified: number
-  phoneVerified: number
-  firstName: number
-  lastName: number
-  dateOfBirth: number
-  lastLogin: number
-  displayName: number
-  avatarUrl: number
-  role: number
+  password: number
   createdAt: number
-  updatedAt: number
   _all: number
 }
 
 
+export type UserAvgAggregateInputType = {
+  id?: true
+}
+
+export type UserSumAggregateInputType = {
+  id?: true
+}
+
 export type UserMinAggregateInputType = {
   id?: true
+  login?: true
   email?: true
-  username?: true
-  passwordHash?: true
-  phoneNumber?: true
-  isVerified?: true
-  emailVerified?: true
-  phoneVerified?: true
-  firstName?: true
-  lastName?: true
-  dateOfBirth?: true
-  lastLogin?: true
-  displayName?: true
-  avatarUrl?: true
-  role?: true
+  password?: true
   createdAt?: true
-  updatedAt?: true
 }
 
 export type UserMaxAggregateInputType = {
   id?: true
+  login?: true
   email?: true
-  username?: true
-  passwordHash?: true
-  phoneNumber?: true
-  isVerified?: true
-  emailVerified?: true
-  phoneVerified?: true
-  firstName?: true
-  lastName?: true
-  dateOfBirth?: true
-  lastLogin?: true
-  displayName?: true
-  avatarUrl?: true
-  role?: true
+  password?: true
   createdAt?: true
-  updatedAt?: true
 }
 
 export type UserCountAggregateInputType = {
   id?: true
+  login?: true
   email?: true
-  username?: true
-  passwordHash?: true
-  phoneNumber?: true
-  isVerified?: true
-  emailVerified?: true
-  phoneVerified?: true
-  firstName?: true
-  lastName?: true
-  dateOfBirth?: true
-  lastLogin?: true
-  displayName?: true
-  avatarUrl?: true
-  role?: true
+  password?: true
   createdAt?: true
-  updatedAt?: true
   _all?: true
 }
 
@@ -185,6 +131,18 @@ export type UserAggregateArgs<ExtArgs extends runtime.Types.Extensions.InternalA
   /**
    * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
    * 
+   * Select which fields to average
+  **/
+  _avg?: UserAvgAggregateInputType
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+   * 
+   * Select which fields to sum
+  **/
+  _sum?: UserSumAggregateInputType
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+   * 
    * Select which fields to find the minimum value
   **/
   _min?: UserMinAggregateInputType
@@ -215,29 +173,21 @@ export type UserGroupByArgs<ExtArgs extends runtime.Types.Extensions.InternalArg
   take?: number
   skip?: number
   _count?: UserCountAggregateInputType | true
+  _avg?: UserAvgAggregateInputType
+  _sum?: UserSumAggregateInputType
   _min?: UserMinAggregateInputType
   _max?: UserMaxAggregateInputType
 }
 
 export type UserGroupByOutputType = {
-  id: string
+  id: number
+  login: string
   email: string
-  username: string
-  passwordHash: string | null
-  phoneNumber: string | null
-  isVerified: boolean
-  emailVerified: boolean
-  phoneVerified: boolean
-  firstName: string | null
-  lastName: string | null
-  dateOfBirth: Date | null
-  lastLogin: Date | null
-  displayName: string | null
-  avatarUrl: string | null
-  role: $Enums.UserRole
+  password: string
   createdAt: Date
-  updatedAt: Date
   _count: UserCountAggregateOutputType | null
+  _avg: UserAvgAggregateOutputType | null
+  _sum: UserSumAggregateOutputType | null
   _min: UserMinAggregateOutputType | null
   _max: UserMaxAggregateOutputType | null
 }
@@ -261,583 +211,298 @@ export type UserWhereInput = {
   AND?: Prisma.UserWhereInput | Prisma.UserWhereInput[]
   OR?: Prisma.UserWhereInput[]
   NOT?: Prisma.UserWhereInput | Prisma.UserWhereInput[]
-  id?: Prisma.StringFilter<"User"> | string
+  id?: Prisma.IntFilter<"User"> | number
+  login?: Prisma.StringFilter<"User"> | string
   email?: Prisma.StringFilter<"User"> | string
-  username?: Prisma.StringFilter<"User"> | string
-  passwordHash?: Prisma.StringNullableFilter<"User"> | string | null
-  phoneNumber?: Prisma.StringNullableFilter<"User"> | string | null
-  isVerified?: Prisma.BoolFilter<"User"> | boolean
-  emailVerified?: Prisma.BoolFilter<"User"> | boolean
-  phoneVerified?: Prisma.BoolFilter<"User"> | boolean
-  firstName?: Prisma.StringNullableFilter<"User"> | string | null
-  lastName?: Prisma.StringNullableFilter<"User"> | string | null
-  dateOfBirth?: Prisma.DateTimeNullableFilter<"User"> | Date | string | null
-  lastLogin?: Prisma.DateTimeNullableFilter<"User"> | Date | string | null
-  displayName?: Prisma.StringNullableFilter<"User"> | string | null
-  avatarUrl?: Prisma.StringNullableFilter<"User"> | string | null
-  role?: Prisma.EnumUserRoleFilter<"User"> | $Enums.UserRole
+  password?: Prisma.StringFilter<"User"> | string
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
-  updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
-  twoFactorMethods?: Prisma.TwoFactorMethodListRelationFilter
-  oauthProviders?: Prisma.OAuthProviderListRelationFilter
+  gamesAsP1?: Prisma.GameListRelationFilter
+  gamesAsP2?: Prisma.GameListRelationFilter
 }
 
 export type UserOrderByWithRelationInput = {
   id?: Prisma.SortOrder
+  login?: Prisma.SortOrder
   email?: Prisma.SortOrder
-  username?: Prisma.SortOrder
-  passwordHash?: Prisma.SortOrderInput | Prisma.SortOrder
-  phoneNumber?: Prisma.SortOrderInput | Prisma.SortOrder
-  isVerified?: Prisma.SortOrder
-  emailVerified?: Prisma.SortOrder
-  phoneVerified?: Prisma.SortOrder
-  firstName?: Prisma.SortOrderInput | Prisma.SortOrder
-  lastName?: Prisma.SortOrderInput | Prisma.SortOrder
-  dateOfBirth?: Prisma.SortOrderInput | Prisma.SortOrder
-  lastLogin?: Prisma.SortOrderInput | Prisma.SortOrder
-  displayName?: Prisma.SortOrderInput | Prisma.SortOrder
-  avatarUrl?: Prisma.SortOrderInput | Prisma.SortOrder
-  role?: Prisma.SortOrder
+  password?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
-  updatedAt?: Prisma.SortOrder
-  twoFactorMethods?: Prisma.TwoFactorMethodOrderByRelationAggregateInput
-  oauthProviders?: Prisma.OAuthProviderOrderByRelationAggregateInput
+  gamesAsP1?: Prisma.GameOrderByRelationAggregateInput
+  gamesAsP2?: Prisma.GameOrderByRelationAggregateInput
 }
 
 export type UserWhereUniqueInput = Prisma.AtLeast<{
-  id?: string
+  id?: number
+  login?: string
   email?: string
-  username?: string
-  phoneNumber?: string
   AND?: Prisma.UserWhereInput | Prisma.UserWhereInput[]
   OR?: Prisma.UserWhereInput[]
   NOT?: Prisma.UserWhereInput | Prisma.UserWhereInput[]
-  passwordHash?: Prisma.StringNullableFilter<"User"> | string | null
-  isVerified?: Prisma.BoolFilter<"User"> | boolean
-  emailVerified?: Prisma.BoolFilter<"User"> | boolean
-  phoneVerified?: Prisma.BoolFilter<"User"> | boolean
-  firstName?: Prisma.StringNullableFilter<"User"> | string | null
-  lastName?: Prisma.StringNullableFilter<"User"> | string | null
-  dateOfBirth?: Prisma.DateTimeNullableFilter<"User"> | Date | string | null
-  lastLogin?: Prisma.DateTimeNullableFilter<"User"> | Date | string | null
-  displayName?: Prisma.StringNullableFilter<"User"> | string | null
-  avatarUrl?: Prisma.StringNullableFilter<"User"> | string | null
-  role?: Prisma.EnumUserRoleFilter<"User"> | $Enums.UserRole
+  password?: Prisma.StringFilter<"User"> | string
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
-  updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
-  twoFactorMethods?: Prisma.TwoFactorMethodListRelationFilter
-  oauthProviders?: Prisma.OAuthProviderListRelationFilter
-}, "id" | "email" | "username" | "phoneNumber">
+  gamesAsP1?: Prisma.GameListRelationFilter
+  gamesAsP2?: Prisma.GameListRelationFilter
+}, "id" | "login" | "email">
 
 export type UserOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
+  login?: Prisma.SortOrder
   email?: Prisma.SortOrder
-  username?: Prisma.SortOrder
-  passwordHash?: Prisma.SortOrderInput | Prisma.SortOrder
-  phoneNumber?: Prisma.SortOrderInput | Prisma.SortOrder
-  isVerified?: Prisma.SortOrder
-  emailVerified?: Prisma.SortOrder
-  phoneVerified?: Prisma.SortOrder
-  firstName?: Prisma.SortOrderInput | Prisma.SortOrder
-  lastName?: Prisma.SortOrderInput | Prisma.SortOrder
-  dateOfBirth?: Prisma.SortOrderInput | Prisma.SortOrder
-  lastLogin?: Prisma.SortOrderInput | Prisma.SortOrder
-  displayName?: Prisma.SortOrderInput | Prisma.SortOrder
-  avatarUrl?: Prisma.SortOrderInput | Prisma.SortOrder
-  role?: Prisma.SortOrder
+  password?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
-  updatedAt?: Prisma.SortOrder
   _count?: Prisma.UserCountOrderByAggregateInput
+  _avg?: Prisma.UserAvgOrderByAggregateInput
   _max?: Prisma.UserMaxOrderByAggregateInput
   _min?: Prisma.UserMinOrderByAggregateInput
+  _sum?: Prisma.UserSumOrderByAggregateInput
 }
 
 export type UserScalarWhereWithAggregatesInput = {
   AND?: Prisma.UserScalarWhereWithAggregatesInput | Prisma.UserScalarWhereWithAggregatesInput[]
   OR?: Prisma.UserScalarWhereWithAggregatesInput[]
   NOT?: Prisma.UserScalarWhereWithAggregatesInput | Prisma.UserScalarWhereWithAggregatesInput[]
-  id?: Prisma.StringWithAggregatesFilter<"User"> | string
+  id?: Prisma.IntWithAggregatesFilter<"User"> | number
+  login?: Prisma.StringWithAggregatesFilter<"User"> | string
   email?: Prisma.StringWithAggregatesFilter<"User"> | string
-  username?: Prisma.StringWithAggregatesFilter<"User"> | string
-  passwordHash?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
-  phoneNumber?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
-  isVerified?: Prisma.BoolWithAggregatesFilter<"User"> | boolean
-  emailVerified?: Prisma.BoolWithAggregatesFilter<"User"> | boolean
-  phoneVerified?: Prisma.BoolWithAggregatesFilter<"User"> | boolean
-  firstName?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
-  lastName?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
-  dateOfBirth?: Prisma.DateTimeNullableWithAggregatesFilter<"User"> | Date | string | null
-  lastLogin?: Prisma.DateTimeNullableWithAggregatesFilter<"User"> | Date | string | null
-  displayName?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
-  avatarUrl?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
-  role?: Prisma.EnumUserRoleWithAggregatesFilter<"User"> | $Enums.UserRole
+  password?: Prisma.StringWithAggregatesFilter<"User"> | string
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"User"> | Date | string
-  updatedAt?: Prisma.DateTimeWithAggregatesFilter<"User"> | Date | string
 }
 
 export type UserCreateInput = {
-  id?: string
+  login: string
   email: string
-  username: string
-  passwordHash?: string | null
-  phoneNumber?: string | null
-  isVerified?: boolean
-  emailVerified?: boolean
-  phoneVerified?: boolean
-  firstName?: string | null
-  lastName?: string | null
-  dateOfBirth?: Date | string | null
-  lastLogin?: Date | string | null
-  displayName?: string | null
-  avatarUrl?: string | null
-  role?: $Enums.UserRole
+  password: string
   createdAt?: Date | string
-  updatedAt?: Date | string
-  twoFactorMethods?: Prisma.TwoFactorMethodCreateNestedManyWithoutUserInput
-  oauthProviders?: Prisma.OAuthProviderCreateNestedManyWithoutUserInput
+  gamesAsP1?: Prisma.GameCreateNestedManyWithoutPlayer1Input
+  gamesAsP2?: Prisma.GameCreateNestedManyWithoutPlayer2Input
 }
 
 export type UserUncheckedCreateInput = {
-  id?: string
+  id?: number
+  login: string
   email: string
-  username: string
-  passwordHash?: string | null
-  phoneNumber?: string | null
-  isVerified?: boolean
-  emailVerified?: boolean
-  phoneVerified?: boolean
-  firstName?: string | null
-  lastName?: string | null
-  dateOfBirth?: Date | string | null
-  lastLogin?: Date | string | null
-  displayName?: string | null
-  avatarUrl?: string | null
-  role?: $Enums.UserRole
+  password: string
   createdAt?: Date | string
-  updatedAt?: Date | string
-  twoFactorMethods?: Prisma.TwoFactorMethodUncheckedCreateNestedManyWithoutUserInput
-  oauthProviders?: Prisma.OAuthProviderUncheckedCreateNestedManyWithoutUserInput
+  gamesAsP1?: Prisma.GameUncheckedCreateNestedManyWithoutPlayer1Input
+  gamesAsP2?: Prisma.GameUncheckedCreateNestedManyWithoutPlayer2Input
 }
 
 export type UserUpdateInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
+  login?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
-  username?: Prisma.StringFieldUpdateOperationsInput | string
-  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  phoneNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  isVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  phoneVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  firstName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  lastName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  dateOfBirth?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  lastLogin?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  password?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  twoFactorMethods?: Prisma.TwoFactorMethodUpdateManyWithoutUserNestedInput
-  oauthProviders?: Prisma.OAuthProviderUpdateManyWithoutUserNestedInput
+  gamesAsP1?: Prisma.GameUpdateManyWithoutPlayer1NestedInput
+  gamesAsP2?: Prisma.GameUpdateManyWithoutPlayer2NestedInput
 }
 
 export type UserUncheckedUpdateInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  login?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
-  username?: Prisma.StringFieldUpdateOperationsInput | string
-  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  phoneNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  isVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  phoneVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  firstName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  lastName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  dateOfBirth?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  lastLogin?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  password?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  twoFactorMethods?: Prisma.TwoFactorMethodUncheckedUpdateManyWithoutUserNestedInput
-  oauthProviders?: Prisma.OAuthProviderUncheckedUpdateManyWithoutUserNestedInput
+  gamesAsP1?: Prisma.GameUncheckedUpdateManyWithoutPlayer1NestedInput
+  gamesAsP2?: Prisma.GameUncheckedUpdateManyWithoutPlayer2NestedInput
 }
 
 export type UserCreateManyInput = {
-  id?: string
+  id?: number
+  login: string
   email: string
-  username: string
-  passwordHash?: string | null
-  phoneNumber?: string | null
-  isVerified?: boolean
-  emailVerified?: boolean
-  phoneVerified?: boolean
-  firstName?: string | null
-  lastName?: string | null
-  dateOfBirth?: Date | string | null
-  lastLogin?: Date | string | null
-  displayName?: string | null
-  avatarUrl?: string | null
-  role?: $Enums.UserRole
+  password: string
   createdAt?: Date | string
-  updatedAt?: Date | string
 }
 
 export type UserUpdateManyMutationInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
+  login?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
-  username?: Prisma.StringFieldUpdateOperationsInput | string
-  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  phoneNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  isVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  phoneVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  firstName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  lastName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  dateOfBirth?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  lastLogin?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  password?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type UserUncheckedUpdateManyInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  login?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
-  username?: Prisma.StringFieldUpdateOperationsInput | string
-  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  phoneNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  isVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  phoneVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  firstName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  lastName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  dateOfBirth?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  lastLogin?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  password?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type UserCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
+  login?: Prisma.SortOrder
   email?: Prisma.SortOrder
-  username?: Prisma.SortOrder
-  passwordHash?: Prisma.SortOrder
-  phoneNumber?: Prisma.SortOrder
-  isVerified?: Prisma.SortOrder
-  emailVerified?: Prisma.SortOrder
-  phoneVerified?: Prisma.SortOrder
-  firstName?: Prisma.SortOrder
-  lastName?: Prisma.SortOrder
-  dateOfBirth?: Prisma.SortOrder
-  lastLogin?: Prisma.SortOrder
-  displayName?: Prisma.SortOrder
-  avatarUrl?: Prisma.SortOrder
-  role?: Prisma.SortOrder
+  password?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
-  updatedAt?: Prisma.SortOrder
+}
+
+export type UserAvgOrderByAggregateInput = {
+  id?: Prisma.SortOrder
 }
 
 export type UserMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
+  login?: Prisma.SortOrder
   email?: Prisma.SortOrder
-  username?: Prisma.SortOrder
-  passwordHash?: Prisma.SortOrder
-  phoneNumber?: Prisma.SortOrder
-  isVerified?: Prisma.SortOrder
-  emailVerified?: Prisma.SortOrder
-  phoneVerified?: Prisma.SortOrder
-  firstName?: Prisma.SortOrder
-  lastName?: Prisma.SortOrder
-  dateOfBirth?: Prisma.SortOrder
-  lastLogin?: Prisma.SortOrder
-  displayName?: Prisma.SortOrder
-  avatarUrl?: Prisma.SortOrder
-  role?: Prisma.SortOrder
+  password?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
-  updatedAt?: Prisma.SortOrder
 }
 
 export type UserMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
+  login?: Prisma.SortOrder
   email?: Prisma.SortOrder
-  username?: Prisma.SortOrder
-  passwordHash?: Prisma.SortOrder
-  phoneNumber?: Prisma.SortOrder
-  isVerified?: Prisma.SortOrder
-  emailVerified?: Prisma.SortOrder
-  phoneVerified?: Prisma.SortOrder
-  firstName?: Prisma.SortOrder
-  lastName?: Prisma.SortOrder
-  dateOfBirth?: Prisma.SortOrder
-  lastLogin?: Prisma.SortOrder
-  displayName?: Prisma.SortOrder
-  avatarUrl?: Prisma.SortOrder
-  role?: Prisma.SortOrder
+  password?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
-  updatedAt?: Prisma.SortOrder
 }
 
-export type UserScalarRelationFilter = {
-  is?: Prisma.UserWhereInput
-  isNot?: Prisma.UserWhereInput
+export type UserSumOrderByAggregateInput = {
+  id?: Prisma.SortOrder
 }
 
-export type StringFieldUpdateOperationsInput = {
-  set?: string
+export type UserNullableScalarRelationFilter = {
+  is?: Prisma.UserWhereInput | null
+  isNot?: Prisma.UserWhereInput | null
 }
 
-export type NullableStringFieldUpdateOperationsInput = {
-  set?: string | null
+export type IntFieldUpdateOperationsInput = {
+  set?: number
+  increment?: number
+  decrement?: number
+  multiply?: number
+  divide?: number
 }
 
-export type BoolFieldUpdateOperationsInput = {
-  set?: boolean
-}
-
-export type NullableDateTimeFieldUpdateOperationsInput = {
-  set?: Date | string | null
-}
-
-export type EnumUserRoleFieldUpdateOperationsInput = {
-  set?: $Enums.UserRole
-}
-
-export type DateTimeFieldUpdateOperationsInput = {
-  set?: Date | string
-}
-
-export type UserCreateNestedOneWithoutTwoFactorMethodsInput = {
-  create?: Prisma.XOR<Prisma.UserCreateWithoutTwoFactorMethodsInput, Prisma.UserUncheckedCreateWithoutTwoFactorMethodsInput>
-  connectOrCreate?: Prisma.UserCreateOrConnectWithoutTwoFactorMethodsInput
+export type UserCreateNestedOneWithoutGamesAsP1Input = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutGamesAsP1Input, Prisma.UserUncheckedCreateWithoutGamesAsP1Input>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutGamesAsP1Input
   connect?: Prisma.UserWhereUniqueInput
 }
 
-export type UserUpdateOneRequiredWithoutTwoFactorMethodsNestedInput = {
-  create?: Prisma.XOR<Prisma.UserCreateWithoutTwoFactorMethodsInput, Prisma.UserUncheckedCreateWithoutTwoFactorMethodsInput>
-  connectOrCreate?: Prisma.UserCreateOrConnectWithoutTwoFactorMethodsInput
-  upsert?: Prisma.UserUpsertWithoutTwoFactorMethodsInput
-  connect?: Prisma.UserWhereUniqueInput
-  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutTwoFactorMethodsInput, Prisma.UserUpdateWithoutTwoFactorMethodsInput>, Prisma.UserUncheckedUpdateWithoutTwoFactorMethodsInput>
-}
-
-export type UserCreateNestedOneWithoutOauthProvidersInput = {
-  create?: Prisma.XOR<Prisma.UserCreateWithoutOauthProvidersInput, Prisma.UserUncheckedCreateWithoutOauthProvidersInput>
-  connectOrCreate?: Prisma.UserCreateOrConnectWithoutOauthProvidersInput
+export type UserCreateNestedOneWithoutGamesAsP2Input = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutGamesAsP2Input, Prisma.UserUncheckedCreateWithoutGamesAsP2Input>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutGamesAsP2Input
   connect?: Prisma.UserWhereUniqueInput
 }
 
-export type UserUpdateOneRequiredWithoutOauthProvidersNestedInput = {
-  create?: Prisma.XOR<Prisma.UserCreateWithoutOauthProvidersInput, Prisma.UserUncheckedCreateWithoutOauthProvidersInput>
-  connectOrCreate?: Prisma.UserCreateOrConnectWithoutOauthProvidersInput
-  upsert?: Prisma.UserUpsertWithoutOauthProvidersInput
+export type UserUpdateOneWithoutGamesAsP1NestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutGamesAsP1Input, Prisma.UserUncheckedCreateWithoutGamesAsP1Input>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutGamesAsP1Input
+  upsert?: Prisma.UserUpsertWithoutGamesAsP1Input
+  disconnect?: Prisma.UserWhereInput | boolean
+  delete?: Prisma.UserWhereInput | boolean
   connect?: Prisma.UserWhereUniqueInput
-  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutOauthProvidersInput, Prisma.UserUpdateWithoutOauthProvidersInput>, Prisma.UserUncheckedUpdateWithoutOauthProvidersInput>
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutGamesAsP1Input, Prisma.UserUpdateWithoutGamesAsP1Input>, Prisma.UserUncheckedUpdateWithoutGamesAsP1Input>
 }
 
-export type UserCreateWithoutTwoFactorMethodsInput = {
-  id?: string
+export type UserUpdateOneWithoutGamesAsP2NestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutGamesAsP2Input, Prisma.UserUncheckedCreateWithoutGamesAsP2Input>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutGamesAsP2Input
+  upsert?: Prisma.UserUpsertWithoutGamesAsP2Input
+  disconnect?: Prisma.UserWhereInput | boolean
+  delete?: Prisma.UserWhereInput | boolean
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutGamesAsP2Input, Prisma.UserUpdateWithoutGamesAsP2Input>, Prisma.UserUncheckedUpdateWithoutGamesAsP2Input>
+}
+
+export type UserCreateWithoutGamesAsP1Input = {
+  login: string
   email: string
-  username: string
-  passwordHash?: string | null
-  phoneNumber?: string | null
-  isVerified?: boolean
-  emailVerified?: boolean
-  phoneVerified?: boolean
-  firstName?: string | null
-  lastName?: string | null
-  dateOfBirth?: Date | string | null
-  lastLogin?: Date | string | null
-  displayName?: string | null
-  avatarUrl?: string | null
-  role?: $Enums.UserRole
+  password: string
   createdAt?: Date | string
-  updatedAt?: Date | string
-  oauthProviders?: Prisma.OAuthProviderCreateNestedManyWithoutUserInput
+  gamesAsP2?: Prisma.GameCreateNestedManyWithoutPlayer2Input
 }
 
-export type UserUncheckedCreateWithoutTwoFactorMethodsInput = {
-  id?: string
+export type UserUncheckedCreateWithoutGamesAsP1Input = {
+  id?: number
+  login: string
   email: string
-  username: string
-  passwordHash?: string | null
-  phoneNumber?: string | null
-  isVerified?: boolean
-  emailVerified?: boolean
-  phoneVerified?: boolean
-  firstName?: string | null
-  lastName?: string | null
-  dateOfBirth?: Date | string | null
-  lastLogin?: Date | string | null
-  displayName?: string | null
-  avatarUrl?: string | null
-  role?: $Enums.UserRole
+  password: string
   createdAt?: Date | string
-  updatedAt?: Date | string
-  oauthProviders?: Prisma.OAuthProviderUncheckedCreateNestedManyWithoutUserInput
+  gamesAsP2?: Prisma.GameUncheckedCreateNestedManyWithoutPlayer2Input
 }
 
-export type UserCreateOrConnectWithoutTwoFactorMethodsInput = {
+export type UserCreateOrConnectWithoutGamesAsP1Input = {
   where: Prisma.UserWhereUniqueInput
-  create: Prisma.XOR<Prisma.UserCreateWithoutTwoFactorMethodsInput, Prisma.UserUncheckedCreateWithoutTwoFactorMethodsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutGamesAsP1Input, Prisma.UserUncheckedCreateWithoutGamesAsP1Input>
 }
 
-export type UserUpsertWithoutTwoFactorMethodsInput = {
-  update: Prisma.XOR<Prisma.UserUpdateWithoutTwoFactorMethodsInput, Prisma.UserUncheckedUpdateWithoutTwoFactorMethodsInput>
-  create: Prisma.XOR<Prisma.UserCreateWithoutTwoFactorMethodsInput, Prisma.UserUncheckedCreateWithoutTwoFactorMethodsInput>
-  where?: Prisma.UserWhereInput
-}
-
-export type UserUpdateToOneWithWhereWithoutTwoFactorMethodsInput = {
-  where?: Prisma.UserWhereInput
-  data: Prisma.XOR<Prisma.UserUpdateWithoutTwoFactorMethodsInput, Prisma.UserUncheckedUpdateWithoutTwoFactorMethodsInput>
-}
-
-export type UserUpdateWithoutTwoFactorMethodsInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  email?: Prisma.StringFieldUpdateOperationsInput | string
-  username?: Prisma.StringFieldUpdateOperationsInput | string
-  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  phoneNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  isVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  phoneVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  firstName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  lastName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  dateOfBirth?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  lastLogin?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  oauthProviders?: Prisma.OAuthProviderUpdateManyWithoutUserNestedInput
-}
-
-export type UserUncheckedUpdateWithoutTwoFactorMethodsInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  email?: Prisma.StringFieldUpdateOperationsInput | string
-  username?: Prisma.StringFieldUpdateOperationsInput | string
-  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  phoneNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  isVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  phoneVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  firstName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  lastName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  dateOfBirth?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  lastLogin?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  oauthProviders?: Prisma.OAuthProviderUncheckedUpdateManyWithoutUserNestedInput
-}
-
-export type UserCreateWithoutOauthProvidersInput = {
-  id?: string
+export type UserCreateWithoutGamesAsP2Input = {
+  login: string
   email: string
-  username: string
-  passwordHash?: string | null
-  phoneNumber?: string | null
-  isVerified?: boolean
-  emailVerified?: boolean
-  phoneVerified?: boolean
-  firstName?: string | null
-  lastName?: string | null
-  dateOfBirth?: Date | string | null
-  lastLogin?: Date | string | null
-  displayName?: string | null
-  avatarUrl?: string | null
-  role?: $Enums.UserRole
+  password: string
   createdAt?: Date | string
-  updatedAt?: Date | string
-  twoFactorMethods?: Prisma.TwoFactorMethodCreateNestedManyWithoutUserInput
+  gamesAsP1?: Prisma.GameCreateNestedManyWithoutPlayer1Input
 }
 
-export type UserUncheckedCreateWithoutOauthProvidersInput = {
-  id?: string
+export type UserUncheckedCreateWithoutGamesAsP2Input = {
+  id?: number
+  login: string
   email: string
-  username: string
-  passwordHash?: string | null
-  phoneNumber?: string | null
-  isVerified?: boolean
-  emailVerified?: boolean
-  phoneVerified?: boolean
-  firstName?: string | null
-  lastName?: string | null
-  dateOfBirth?: Date | string | null
-  lastLogin?: Date | string | null
-  displayName?: string | null
-  avatarUrl?: string | null
-  role?: $Enums.UserRole
+  password: string
   createdAt?: Date | string
-  updatedAt?: Date | string
-  twoFactorMethods?: Prisma.TwoFactorMethodUncheckedCreateNestedManyWithoutUserInput
+  gamesAsP1?: Prisma.GameUncheckedCreateNestedManyWithoutPlayer1Input
 }
 
-export type UserCreateOrConnectWithoutOauthProvidersInput = {
+export type UserCreateOrConnectWithoutGamesAsP2Input = {
   where: Prisma.UserWhereUniqueInput
-  create: Prisma.XOR<Prisma.UserCreateWithoutOauthProvidersInput, Prisma.UserUncheckedCreateWithoutOauthProvidersInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutGamesAsP2Input, Prisma.UserUncheckedCreateWithoutGamesAsP2Input>
 }
 
-export type UserUpsertWithoutOauthProvidersInput = {
-  update: Prisma.XOR<Prisma.UserUpdateWithoutOauthProvidersInput, Prisma.UserUncheckedUpdateWithoutOauthProvidersInput>
-  create: Prisma.XOR<Prisma.UserCreateWithoutOauthProvidersInput, Prisma.UserUncheckedCreateWithoutOauthProvidersInput>
+export type UserUpsertWithoutGamesAsP1Input = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutGamesAsP1Input, Prisma.UserUncheckedUpdateWithoutGamesAsP1Input>
+  create: Prisma.XOR<Prisma.UserCreateWithoutGamesAsP1Input, Prisma.UserUncheckedCreateWithoutGamesAsP1Input>
   where?: Prisma.UserWhereInput
 }
 
-export type UserUpdateToOneWithWhereWithoutOauthProvidersInput = {
+export type UserUpdateToOneWithWhereWithoutGamesAsP1Input = {
   where?: Prisma.UserWhereInput
-  data: Prisma.XOR<Prisma.UserUpdateWithoutOauthProvidersInput, Prisma.UserUncheckedUpdateWithoutOauthProvidersInput>
+  data: Prisma.XOR<Prisma.UserUpdateWithoutGamesAsP1Input, Prisma.UserUncheckedUpdateWithoutGamesAsP1Input>
 }
 
-export type UserUpdateWithoutOauthProvidersInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
+export type UserUpdateWithoutGamesAsP1Input = {
+  login?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
-  username?: Prisma.StringFieldUpdateOperationsInput | string
-  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  phoneNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  isVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  phoneVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  firstName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  lastName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  dateOfBirth?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  lastLogin?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  password?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  twoFactorMethods?: Prisma.TwoFactorMethodUpdateManyWithoutUserNestedInput
+  gamesAsP2?: Prisma.GameUpdateManyWithoutPlayer2NestedInput
 }
 
-export type UserUncheckedUpdateWithoutOauthProvidersInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
+export type UserUncheckedUpdateWithoutGamesAsP1Input = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  login?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
-  username?: Prisma.StringFieldUpdateOperationsInput | string
-  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  phoneNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  isVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  phoneVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  firstName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  lastName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  dateOfBirth?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  lastLogin?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  password?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  twoFactorMethods?: Prisma.TwoFactorMethodUncheckedUpdateManyWithoutUserNestedInput
+  gamesAsP2?: Prisma.GameUncheckedUpdateManyWithoutPlayer2NestedInput
+}
+
+export type UserUpsertWithoutGamesAsP2Input = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutGamesAsP2Input, Prisma.UserUncheckedUpdateWithoutGamesAsP2Input>
+  create: Prisma.XOR<Prisma.UserCreateWithoutGamesAsP2Input, Prisma.UserUncheckedCreateWithoutGamesAsP2Input>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutGamesAsP2Input = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutGamesAsP2Input, Prisma.UserUncheckedUpdateWithoutGamesAsP2Input>
+}
+
+export type UserUpdateWithoutGamesAsP2Input = {
+  login?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  gamesAsP1?: Prisma.GameUpdateManyWithoutPlayer1NestedInput
+}
+
+export type UserUncheckedUpdateWithoutGamesAsP2Input = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  login?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  gamesAsP1?: Prisma.GameUncheckedUpdateManyWithoutPlayer1NestedInput
 }
 
 
@@ -846,13 +511,13 @@ export type UserUncheckedUpdateWithoutOauthProvidersInput = {
  */
 
 export type UserCountOutputType = {
-  twoFactorMethods: number
-  oauthProviders: number
+  gamesAsP1: number
+  gamesAsP2: number
 }
 
 export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  twoFactorMethods?: boolean | UserCountOutputTypeCountTwoFactorMethodsArgs
-  oauthProviders?: boolean | UserCountOutputTypeCountOauthProvidersArgs
+  gamesAsP1?: boolean | UserCountOutputTypeCountGamesAsP1Args
+  gamesAsP2?: boolean | UserCountOutputTypeCountGamesAsP2Args
 }
 
 /**
@@ -868,105 +533,57 @@ export type UserCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extensi
 /**
  * UserCountOutputType without action
  */
-export type UserCountOutputTypeCountTwoFactorMethodsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  where?: Prisma.TwoFactorMethodWhereInput
+export type UserCountOutputTypeCountGamesAsP1Args<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.GameWhereInput
 }
 
 /**
  * UserCountOutputType without action
  */
-export type UserCountOutputTypeCountOauthProvidersArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  where?: Prisma.OAuthProviderWhereInput
+export type UserCountOutputTypeCountGamesAsP2Args<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.GameWhereInput
 }
 
 
 export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
+  login?: boolean
   email?: boolean
-  username?: boolean
-  passwordHash?: boolean
-  phoneNumber?: boolean
-  isVerified?: boolean
-  emailVerified?: boolean
-  phoneVerified?: boolean
-  firstName?: boolean
-  lastName?: boolean
-  dateOfBirth?: boolean
-  lastLogin?: boolean
-  displayName?: boolean
-  avatarUrl?: boolean
-  role?: boolean
+  password?: boolean
   createdAt?: boolean
-  updatedAt?: boolean
-  twoFactorMethods?: boolean | Prisma.User$twoFactorMethodsArgs<ExtArgs>
-  oauthProviders?: boolean | Prisma.User$oauthProvidersArgs<ExtArgs>
+  gamesAsP1?: boolean | Prisma.User$gamesAsP1Args<ExtArgs>
+  gamesAsP2?: boolean | Prisma.User$gamesAsP2Args<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
 export type UserSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
+  login?: boolean
   email?: boolean
-  username?: boolean
-  passwordHash?: boolean
-  phoneNumber?: boolean
-  isVerified?: boolean
-  emailVerified?: boolean
-  phoneVerified?: boolean
-  firstName?: boolean
-  lastName?: boolean
-  dateOfBirth?: boolean
-  lastLogin?: boolean
-  displayName?: boolean
-  avatarUrl?: boolean
-  role?: boolean
+  password?: boolean
   createdAt?: boolean
-  updatedAt?: boolean
 }, ExtArgs["result"]["user"]>
 
 export type UserSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
+  login?: boolean
   email?: boolean
-  username?: boolean
-  passwordHash?: boolean
-  phoneNumber?: boolean
-  isVerified?: boolean
-  emailVerified?: boolean
-  phoneVerified?: boolean
-  firstName?: boolean
-  lastName?: boolean
-  dateOfBirth?: boolean
-  lastLogin?: boolean
-  displayName?: boolean
-  avatarUrl?: boolean
-  role?: boolean
+  password?: boolean
   createdAt?: boolean
-  updatedAt?: boolean
 }, ExtArgs["result"]["user"]>
 
 export type UserSelectScalar = {
   id?: boolean
+  login?: boolean
   email?: boolean
-  username?: boolean
-  passwordHash?: boolean
-  phoneNumber?: boolean
-  isVerified?: boolean
-  emailVerified?: boolean
-  phoneVerified?: boolean
-  firstName?: boolean
-  lastName?: boolean
-  dateOfBirth?: boolean
-  lastLogin?: boolean
-  displayName?: boolean
-  avatarUrl?: boolean
-  role?: boolean
+  password?: boolean
   createdAt?: boolean
-  updatedAt?: boolean
 }
 
-export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "email" | "username" | "passwordHash" | "phoneNumber" | "isVerified" | "emailVerified" | "phoneVerified" | "firstName" | "lastName" | "dateOfBirth" | "lastLogin" | "displayName" | "avatarUrl" | "role" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
+export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "login" | "email" | "password" | "createdAt", ExtArgs["result"]["user"]>
 export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  twoFactorMethods?: boolean | Prisma.User$twoFactorMethodsArgs<ExtArgs>
-  oauthProviders?: boolean | Prisma.User$oauthProvidersArgs<ExtArgs>
+  gamesAsP1?: boolean | Prisma.User$gamesAsP1Args<ExtArgs>
+  gamesAsP2?: boolean | Prisma.User$gamesAsP2Args<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type UserIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -975,27 +592,15 @@ export type UserIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensi
 export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "User"
   objects: {
-    twoFactorMethods: Prisma.$TwoFactorMethodPayload<ExtArgs>[]
-    oauthProviders: Prisma.$OAuthProviderPayload<ExtArgs>[]
+    gamesAsP1: Prisma.$GamePayload<ExtArgs>[]
+    gamesAsP2: Prisma.$GamePayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
-    id: string
+    id: number
+    login: string
     email: string
-    username: string
-    passwordHash: string | null
-    phoneNumber: string | null
-    isVerified: boolean
-    emailVerified: boolean
-    phoneVerified: boolean
-    firstName: string | null
-    lastName: string | null
-    dateOfBirth: Date | null
-    lastLogin: Date | null
-    displayName: string | null
-    avatarUrl: string | null
-    role: $Enums.UserRole
+    password: string
     createdAt: Date
-    updatedAt: Date
   }, ExtArgs["result"]["user"]>
   composites: {}
 }
@@ -1390,8 +995,8 @@ readonly fields: UserFieldRefs;
  */
 export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
-  twoFactorMethods<T extends Prisma.User$twoFactorMethodsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$twoFactorMethodsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TwoFactorMethodPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-  oauthProviders<T extends Prisma.User$oauthProvidersArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$oauthProvidersArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$OAuthProviderPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  gamesAsP1<T extends Prisma.User$gamesAsP1Args<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$gamesAsP1Args<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$GamePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  gamesAsP2<T extends Prisma.User$gamesAsP2Args<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$gamesAsP2Args<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$GamePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1421,23 +1026,11 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
  * Fields of the User model
  */
 export interface UserFieldRefs {
-  readonly id: Prisma.FieldRef<"User", 'String'>
+  readonly id: Prisma.FieldRef<"User", 'Int'>
+  readonly login: Prisma.FieldRef<"User", 'String'>
   readonly email: Prisma.FieldRef<"User", 'String'>
-  readonly username: Prisma.FieldRef<"User", 'String'>
-  readonly passwordHash: Prisma.FieldRef<"User", 'String'>
-  readonly phoneNumber: Prisma.FieldRef<"User", 'String'>
-  readonly isVerified: Prisma.FieldRef<"User", 'Boolean'>
-  readonly emailVerified: Prisma.FieldRef<"User", 'Boolean'>
-  readonly phoneVerified: Prisma.FieldRef<"User", 'Boolean'>
-  readonly firstName: Prisma.FieldRef<"User", 'String'>
-  readonly lastName: Prisma.FieldRef<"User", 'String'>
-  readonly dateOfBirth: Prisma.FieldRef<"User", 'DateTime'>
-  readonly lastLogin: Prisma.FieldRef<"User", 'DateTime'>
-  readonly displayName: Prisma.FieldRef<"User", 'String'>
-  readonly avatarUrl: Prisma.FieldRef<"User", 'String'>
-  readonly role: Prisma.FieldRef<"User", 'UserRole'>
+  readonly password: Prisma.FieldRef<"User", 'String'>
   readonly createdAt: Prisma.FieldRef<"User", 'DateTime'>
-  readonly updatedAt: Prisma.FieldRef<"User", 'DateTime'>
 }
     
 
@@ -1826,51 +1419,51 @@ export type UserDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.Internal
 }
 
 /**
- * User.twoFactorMethods
+ * User.gamesAsP1
  */
-export type User$twoFactorMethodsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+export type User$gamesAsP1Args<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   /**
-   * Select specific fields to fetch from the TwoFactorMethod
+   * Select specific fields to fetch from the Game
    */
-  select?: Prisma.TwoFactorMethodSelect<ExtArgs> | null
+  select?: Prisma.GameSelect<ExtArgs> | null
   /**
-   * Omit specific fields from the TwoFactorMethod
+   * Omit specific fields from the Game
    */
-  omit?: Prisma.TwoFactorMethodOmit<ExtArgs> | null
+  omit?: Prisma.GameOmit<ExtArgs> | null
   /**
    * Choose, which related nodes to fetch as well
    */
-  include?: Prisma.TwoFactorMethodInclude<ExtArgs> | null
-  where?: Prisma.TwoFactorMethodWhereInput
-  orderBy?: Prisma.TwoFactorMethodOrderByWithRelationInput | Prisma.TwoFactorMethodOrderByWithRelationInput[]
-  cursor?: Prisma.TwoFactorMethodWhereUniqueInput
+  include?: Prisma.GameInclude<ExtArgs> | null
+  where?: Prisma.GameWhereInput
+  orderBy?: Prisma.GameOrderByWithRelationInput | Prisma.GameOrderByWithRelationInput[]
+  cursor?: Prisma.GameWhereUniqueInput
   take?: number
   skip?: number
-  distinct?: Prisma.TwoFactorMethodScalarFieldEnum | Prisma.TwoFactorMethodScalarFieldEnum[]
+  distinct?: Prisma.GameScalarFieldEnum | Prisma.GameScalarFieldEnum[]
 }
 
 /**
- * User.oauthProviders
+ * User.gamesAsP2
  */
-export type User$oauthProvidersArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+export type User$gamesAsP2Args<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   /**
-   * Select specific fields to fetch from the OAuthProvider
+   * Select specific fields to fetch from the Game
    */
-  select?: Prisma.OAuthProviderSelect<ExtArgs> | null
+  select?: Prisma.GameSelect<ExtArgs> | null
   /**
-   * Omit specific fields from the OAuthProvider
+   * Omit specific fields from the Game
    */
-  omit?: Prisma.OAuthProviderOmit<ExtArgs> | null
+  omit?: Prisma.GameOmit<ExtArgs> | null
   /**
    * Choose, which related nodes to fetch as well
    */
-  include?: Prisma.OAuthProviderInclude<ExtArgs> | null
-  where?: Prisma.OAuthProviderWhereInput
-  orderBy?: Prisma.OAuthProviderOrderByWithRelationInput | Prisma.OAuthProviderOrderByWithRelationInput[]
-  cursor?: Prisma.OAuthProviderWhereUniqueInput
+  include?: Prisma.GameInclude<ExtArgs> | null
+  where?: Prisma.GameWhereInput
+  orderBy?: Prisma.GameOrderByWithRelationInput | Prisma.GameOrderByWithRelationInput[]
+  cursor?: Prisma.GameWhereUniqueInput
   take?: number
   skip?: number
-  distinct?: Prisma.OAuthProviderScalarFieldEnum | Prisma.OAuthProviderScalarFieldEnum[]
+  distinct?: Prisma.GameScalarFieldEnum | Prisma.GameScalarFieldEnum[]
 }
 
 /**
