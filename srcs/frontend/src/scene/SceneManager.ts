@@ -373,12 +373,10 @@ private players: Player[] = [
         }
     }
 
-    public setupEnvironment(): void
-    {
+    public async setupEnvironment(): Promise<void> {
         this.setupHDR();
-       this.setupMeshes();
+        await this.setupMeshes(); // attendre les GLB
         this.advancedTexture = AdvancedDynamicTexture.CreateFullscreenUI("UI", true, this.scene);
-        // this.createCoordinateLabels();
     }
 
     public startRenderLoop(): void
@@ -494,6 +492,11 @@ private players: Player[] = [
     public setSpecificMesh(value: boolean): void 
     {
         this._specificMesh = value;
+    }
+
+    public set setUser(user: any)
+    {
+        this.userX.setUser = user;
     }
 
 }

@@ -144,7 +144,7 @@ export class ScoreboardHandler {
         }
     }
 
-    private leaveMenu() {
+    public leaveMenu() {
         if (this.menuContainer)
             this.menuContainer.isVisible = false;
 

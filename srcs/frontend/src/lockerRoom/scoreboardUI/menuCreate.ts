@@ -291,6 +291,8 @@ export function genJoinMatch(env: Env) : StackPanel
             };
             if (!env.userX.joinFriendlyMatch(rules, m.idMatch, m.idUser, m.login, env))
                 button.background = "red";
+            else
+                env.scoreboard.leaveMenu();
         });
     });
 

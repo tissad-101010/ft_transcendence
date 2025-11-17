@@ -39,6 +39,7 @@ local:
 	mkdir -p ./srcs/backend/services/service-users/data
 	mkdir -p ./srcs/backend/services/service-game/data
 	cp ./srcs/.env ~/.env.local
+	
 npm_cache_clean:
 	npm cache clean --force
 

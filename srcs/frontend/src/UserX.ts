@@ -26,78 +26,46 @@ interface User
 
 export class UserX 
 {
-    private match: Match | null;
-    private tournament: Tournament | null;
-    private currentZone: ZoneName | null;
+    private match: Match | null = null;
+    private tournament: Tournament | null = null;
+    private currentZone: ZoneName | null = null;
 
-    private friends : Friend[];
+    private friends : Friend[] = [];
     private sceneManager : SceneManager;
-    private user: User;
+    private user: User | null = null;
 
     constructor(sceneManager : SceneManager)
     {
-        this.match = null;
-        this.tournament = null;
-        this.currentZone = null;
-        this.user = {login: "Nostag", id : 0}; // A changer avec la BDD suite a la connexion
-        this.friends = [];
         this.sceneManager = sceneManager;
         this.simuEnAttendantBDD();
     }
 
     /* Juste garder le parametre login une fois le backend ajoute*/
-    private addFriend(
+    public addFriend(
         login: string,
-        id: number,
-        online: boolean
     ) : number
     {
-        const test = this.friends.find((f) => f.getId === id || f.getLogin === login)
+        const test = this.friends.find((f) => f.getLogin === login)
         if (test !== undefined)
         {
             console.log("Amis deja ajoute -> " + login);
             return (1);
         }
-        this.friends.push(new Friend(id, login, online));
+        this.friends.push(new Friend(1, login, true));
         return (0);
     }
 
     private simuEnAttendantBDD() : void
     {
-        this.addFriend("Lolo", 1, true);
-        this.addFriend("Tissad", 2, false);
-        this.addFriend("GlitchGuru", 3, true);
-        this.addFriend("BlazeWolf", 4, false);
-        this.addFriend("LunarLion", 5, true);
-        this.addFriend("VortexViper", 6, true);
-        this.addFriend("MegaMage", 7, true);
-        this.addFriend("PixelPilot", 8, true);
-        this.addFriend("PixelPilot2", 9, true);
-        this.addFriend("PixelPilot3", 10, true);
-        this.addFriend("PixelPilot4", 11, true);
-        this.addFriend("PixelPilot5", 12, true);
-        this.addFriend("PixelPilot6", 13, true);
-        this.addFriend("PixelPilot7", 14, true);
-        this.addFriend("PixelPilot8", 15, true);
-        this.addFriend("PixelPilot9", 16, true);
-        this.addFriend("PixelPilot10", 17, true);
-        this.addFriend("PixelPilot11", 18, true);
-        this.addFriend("PixelPilot12", 19, true);
-        this.addFriend("PixelPilot13", 20, true);
-        this.addFriend("PixelPilot14", 21, true);
-        this.addFriend("PixelPilot15", 22, true);
-        this.addFriend("PixelPilot16", 23, true);
-        this.addFriend("PixelPilot17", 24, true);
-        this.addFriend("PixelPilot18", 25, true);
-        this.addFriend("PixelPilot19", 26, true);
-        this.addFriend("PixelPilot20", 27, true);
-        this.addFriend("PixelPilot21", 28, true);
-        this.addFriend("PixelPilot22", 29, true);
-        this.addFriend("PixelPilot23", 30, true);
+        this.addFriend("Lolo");
+        this.addFriend("Tissad");
+        this.addFriend("Val");
     }
 
     createTournament(a: string) : boolean
     {
+        if (this.user === null)
+            return (false);
         const p : TournamentParticipant = {
             login: this.user.login,
             alias: a,
@@ -124,6 +92,8 @@ export class UserX
         r: MatchRules
     ) : boolean
     {
+        if (!this.user)
+            return (false);
         // Creer un nouveau match dans la bdd pour recuperer son ID, permet aussi de l'ajouter
         // dans une liste de matchs en attente d'un joueur (creer une colonne pour dans la BDD)
         /* var tmp en attendant bdd */ const idMatch = 2;
@@ -153,6 +123,8 @@ export class UserX
         env: Env
     ) : boolean
     {
+        if (!this.user)
+            return (false);
         const match = new MatchFriendlyOnline(idMatch, r, this.sceneManager);
 
         const players = [
@@ -216,7 +188,7 @@ export class UserX
         return (this.currentZone);
     }
 
-    get getUser() : User
+    get getUser() : User | null
     {
         return (this.user);
     }
@@ -240,5 +212,13 @@ export class UserX
     )
     {
         this.match = match;
+    }
+
+    set setUser(
+        user: any
+    )
+    {
+        this.user = user;
+        console.log("user vaut mtn", this.user);
     }
 }

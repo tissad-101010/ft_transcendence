@@ -1,5 +1,5 @@
 import { AbstractMesh, Vector3, Matrix } from "@babylonjs/core";
-import { AdvancedDynamicTexture, ScrollViewer, StackPanel, TextBlock, Control, Rectangle } from "@babylonjs/gui";
+import { AdvancedDynamicTexture, ScrollViewer, StackPanel, TextBlock, Control, Rectangle, InputText } from "@babylonjs/gui";
 
 import {
   Chart,
@@ -19,16 +19,18 @@ import { Friend } from "../Friend.ts";
 import { SceneManager } from "../scene/SceneManager.ts";
 
 import { IMatch } from "../Friend.ts";
+import { StandsInteraction } from "./StandsInteraction.ts";
+import { text } from "stream/consumers";
 
 Chart.register(LineController, LineElement, PointElement, LinearScale, CategoryScale, Title, Tooltip, Legend, Filler);
 
 interface ContainerUI
 {
-    header: AdvancedDynamicTexture;
+    header: AdvancedDynamicTexture | null;
     headerPanel: StackPanel | null;
-    menu: AdvancedDynamicTexture;
+    menu: AdvancedDynamicTexture | null;
     menuPanel: StackPanel | null;
-    view: AdvancedDynamicTexture;
+    view: AdvancedDynamicTexture | null;
     viewPanel: StackPanel | null;
     chartCanvas: HTMLCanvasElement | null;
     buttonsMenu: Rectangle[]
@@ -38,16 +40,18 @@ export class FriendUI
 {
     private containerUI: ContainerUI;
     private sceneManager: SceneManager;
-    private friend: Friend;
+    private friend: Friend | null;
     private currView: string;
     private buttonMeshes: AbstractMesh[];
     private currValue : number;
+    private standsInteraction: StandsInteraction;
  
     constructor(
         sceneManager: SceneManager,
-        friend: Friend,
+        friend: Friend | null,
         private updateChair : (buttonMeshes: AbstractMesh[]) => void,
-        buttonMeshes: AbstractMesh[]
+        buttonMeshes: AbstractMesh[],
+        standsInteraction: StandsInteraction
     )
     {
         this.sceneManager = sceneManager;
@@ -71,72 +75,38 @@ export class FriendUI
                     ),
             viewPanel: null,
             chartCanvas: null,
-            buttonsMenu: []
+            buttonsMenu: [],
         };
+        this.standsInteraction = standsInteraction;
         this.buttonMeshes = buttonMeshes;
         this.friend = friend;
         this.currView = "Infos";
         this.currValue = 5;
+        if (friend)
+            this.displayFriend();
+        else
+            this.displayNewFriend();
+    }
+
+    /**************************************************
+     *               FRIEND                           *
+     **************************************************/  
+
+    displayFriend() : void
+    {
         this.displayHeader();
         this.displayMenu();
-        this.displayDatas()
-    }
-
-
-    displayHeader() : void
-    {
-        if (this.containerUI.headerPanel === null)
-        {
-            this.containerUI.headerPanel = new StackPanel("panelHeader");
-            this.containerUI.headerPanel.isVertical = false;
-            this.containerUI.headerPanel.height = "100%";
-            this.containerUI.headerPanel.width = "1000px";
-            this.containerUI.headerPanel.background = "green";
-            this.containerUI.headerPanel.horizontalAlignment = Control.HORIZONTAL_ALIGNMENT_CENTER;
-            this.containerUI.headerPanel.verticalAlignment = Control.VERTICAL_ALIGNMENT_CENTER;
-            // this.containerUI.headerPanel.verticalContentAlignment = Control.VERTICAL_ALIGNMENT_CENTER;
-            this.containerUI.headerPanel.paddingTop = "0px";
-            this.containerUI.headerPanel.paddingBottom = "0px";
-            this.containerUI.headerPanel.paddingLeft = "0px";
-            this.containerUI.headerPanel.paddingRight = "0px";
-            this.containerUI.header.addControl(this.containerUI.headerPanel);
-        }
-        else
-            this.containerUI.headerPanel.clearControls();
-
-        const login = new TextBlock("textLogin");
-        login.text = this.friend.getLogin;
-        login.color = "black";
-        login.fontSize = 100;
-        login.width = "500px"
-        login.fontFamily = "Arial";
-        login.horizontalAlignment = Control.HORIZONTAL_ALIGNMENT_CENTER;
-        login.verticalAlignment = Control.VERTICAL_ALIGNMENT_CENTER;
-        this.containerUI.headerPanel.addControl(login);
-
-        const avatar = new Rectangle("RectAvatar");
-        avatar.width = "200px";
-        avatar.height = "200px";
-        avatar.thickness = 1;
-        avatar.color = "black";
-        avatar.horizontalAlignment = Control.HORIZONTAL_ALIGNMENT_CENTER;
-        avatar.verticalAlignment = Control.VERTICAL_ALIGNMENT_CENTER;
-        this.containerUI.headerPanel.addControl(avatar);
-    }
-
-    switchView(
-        label: string
-    ) : void
-    {
-        if (label !== this.currView)
-        {
-            this.currView = label;
-            this.displayDatas();
-        }
+        this.displayDatas();
     }
 
     displayMenu() : void
     {
+        if (this.containerUI.menu === null)
+            this.containerUI.menu =  AdvancedDynamicTexture.CreateForMesh(
+                        this.sceneManager.getMesh("scoreBoard")[1],
+                        1024, 1024,
+                        true
+                    );
         if (this.containerUI.menuPanel === null)
         {
             this.containerUI.menuPanel = new StackPanel("panelMenu");
@@ -203,41 +173,21 @@ export class FriendUI
             rect.addControl(text);
             return (rect);
         }
-        this.containerUI.menuPanel.addControl(createButton("Infos", this));
+
         this.containerUI.menuPanel.addControl(createButton("Stats globales", this));
         this.containerUI.menuPanel.addControl(createButton("Stats tournoi", this));
         this.containerUI.menuPanel.addControl(createButton("Historique", this));
         this.containerUI.menuPanel.addControl(createButton("Supprimer l'ami", this));
+        this.containerUI.menuPanel.addControl(createButton("Quitter", this));
     }
-
-    calculateWinPercentages(
-        matchs: IMatch[],
-        userId: number,
-        trancheSize: number = 5
-    ) : {labels: string[], percentages: number[]}
-    {
-        const percentages: number[] = [];
-        const labels: string[] = [];
-
-        for (let i = 0; i < matchs.length; i += trancheSize) {
-            const tranche = matchs.slice(i, i + trancheSize);
-            let wins = 0;
-            tranche.forEach(match => {
-            const userIndex = match.participants.indexOf(userId);
-            if (userIndex !== -1) {
-                const userScore = match.score[userIndex];
-                const opponentScore = match.score[1 - userIndex];
-                if (userScore > opponentScore) wins++;
-            }
-            });
-            percentages.push((wins / tranche.length) * 100);
-            labels.push(`Matchs ${i + 1}-${i + tranche.length}`);
-        }
-        return { labels, percentages };
-    }
+    
+    
 
     displayDeleteFriend() : void
     {
+        if (this.containerUI.viewPanel === null)
+            return ;
+
         const spacing = new Rectangle();
         spacing.height = "200px";
         spacing.thickness = 0;
@@ -302,6 +252,32 @@ export class FriendUI
         })
     }
 
+    calculateWinPercentages(
+        matchs: IMatch[],
+        userId: number,
+        trancheSize: number = 5
+    ) : {labels: string[], percentages: number[]}
+    {
+        const percentages: number[] = [];
+        const labels: string[] = [];
+
+        for (let i = 0; i < matchs.length; i += trancheSize) {
+            const tranche = matchs.slice(i, i + trancheSize);
+            let wins = 0;
+            tranche.forEach(match => {
+            const userIndex = match.participants.indexOf(userId);
+            if (userIndex !== -1) {
+                const userScore = match.score[userIndex];
+                const opponentScore = match.score[1 - userIndex];
+                if (userScore > opponentScore) wins++;
+            }
+            });
+            percentages.push((wins / tranche.length) * 100);
+            labels.push(`Matchs ${i + 1}-${i + tranche.length}`);
+        }
+        return { labels, percentages };
+    }
+
     updateCanvas(
         value: number
     ) : void
@@ -310,6 +286,11 @@ export class FriendUI
         const scene = this.sceneManager.getScene();
         const camera = scene.activeCamera;
         const engine = scene.getEngine();
+
+        if (camera === null)
+            return ;
+        if (this.friend === null)
+            return ;
 
         // Crée ou récupère le container HTML
         let container = document.getElementById("chartContainer");
@@ -334,14 +315,12 @@ export class FriendUI
         // Calcule la position et la taille du mesh projeté
         const bbox = mesh.getBoundingInfo().boundingBox;
         const corners = bbox.vectorsWorld;
-        const projected = corners.map(v =>
-            Vector3.Project(
-                v,
-                Matrix.Identity(),
-                scene.getTransformMatrix(),
-                camera.viewport.toGlobal(engine.getRenderWidth(), engine.getRenderHeight())
-            )
-        );
+        const projected = corners.map(v => camera ? Vector3.Project(
+            v,
+            Matrix.Identity(),
+            scene.getTransformMatrix(),
+            camera.viewport.toGlobal(engine.getRenderWidth(), engine.getRenderHeight())
+        ) : null).filter(p => p !== null) as Vector3[];
 
         const xs = projected.map(p => p.x);
         const ys = projected.map(p => p.y);
@@ -362,6 +341,8 @@ export class FriendUI
 
         // Dessine le graphique
         const ctx = this.containerUI.chartCanvas.getContext("2d");
+        if (ctx === null)
+            return ;
         const existingChart = Chart.getChart(this.containerUI.chartCanvas);
         if (existingChart) existingChart.destroy();
 
@@ -402,6 +383,8 @@ export class FriendUI
 
     displayStatsGlobals() : void
     {
+        if (this.containerUI.viewPanel === null)
+            return ;
         const line = new StackPanel("lineStatsGlobals");
         line.isVertical = false;
         line.width = "100%";
@@ -411,7 +394,7 @@ export class FriendUI
         line.verticalAlignment = Control.VERTICAL_ALIGNMENT_CENTER;
         this.containerUI.viewPanel.addControl(line);
 
-        const buttons : Rectangle = [];
+        const buttons : Rectangle[] = [];
         const self = this;
 
         function createButton(value: number) : Rectangle
@@ -453,7 +436,7 @@ export class FriendUI
             if (value === -1)
                 text.text = "Max";
             else
-                text.text = value;
+                text.text = value.toString();
             text.fontSize = 40;
             text.color = "black";
             text.width = "100%";
@@ -474,6 +457,10 @@ export class FriendUI
 
     displayHistoric() : void
     {
+        if (this.friend === null)
+            return ;
+        if (this.containerUI.viewPanel === null)
+            return ;
         const matchs = this.friend.loadMatchs();
         
         const rect = new Rectangle();
@@ -489,7 +476,6 @@ export class FriendUI
         scrollViewer.verticalAlignment = Control.VERTICAL_ALIGNMENT_CENTER;
         scrollViewer.barColor = "white";
         scrollViewer.thickness = 0;
-        scrollViewer.horizontalBarVisible = false;
         this.containerUI.viewPanel.addControl(scrollViewer);
 
         const historicContainer = new StackPanel();
@@ -528,14 +514,14 @@ export class FriendUI
             line.addControl(date);
 
             const p1 = new TextBlock();
-            p1.text = matchs[i].participants[0];
+            p1.text = matchs[i].participants[0].toString();
             p1.fontSize = 40;
             p1.color = "black";
             p1.width = "200px";
             line.addControl(p1);
 
             const sc1 = new TextBlock();
-            sc1.text = matchs[i].score[0];
+            sc1.text = matchs[i].score[0].toString();
             sc1.fontSize = 35;
             if (matchs[i].score[0] > matchs[i].score[1])
                 sc1.color = "green";
@@ -546,7 +532,7 @@ export class FriendUI
             line.addControl(sc1);
 
             const sc2 = new TextBlock();
-            sc2.text = matchs[i].score[1];
+            sc2.text = matchs[i].score[1].toString();
             if (matchs[i].score[1] > matchs[i].score[0])
                 sc2.color = "green";
             else
@@ -557,7 +543,7 @@ export class FriendUI
             line.addControl(sc2);
 
             const p2 = new TextBlock();
-            p2.text = matchs[i].participants[1];
+            p2.text = matchs[i].participants[1].toString();
             p2.fontSize = 40;
             p2.color = "black";
             p2.width = "200px";
@@ -574,6 +560,12 @@ export class FriendUI
 
     displayDatas() : void
     {
+        if (this.containerUI.view === null)
+            this.containerUI.view =  AdvancedDynamicTexture.CreateForMesh(
+                        this.sceneManager.getMesh("scoreBoard")[2],
+                        1024, 1024,
+                        true
+                    );
         if (this.containerUI.viewPanel === null)
         {
             this.containerUI.viewPanel = new StackPanel("panelView");
@@ -583,7 +575,6 @@ export class FriendUI
             this.containerUI.viewPanel.background = "lightgreen";
             this.containerUI.viewPanel.horizontalAlignment = Control.HORIZONTAL_ALIGNMENT_CENTER;
             this.containerUI.viewPanel.verticalAlignment = Control.VERTICAL_ALIGNMENT_CENTER;
-            this.containerUI.viewPanel.verticalContentAlignment = Control.VERTICAL_ALIGNMENT_CENTER;
             this.containerUI.viewPanel.paddingTop = "0px";
             this.containerUI.viewPanel.paddingBottom = "0px";
             this.containerUI.viewPanel.paddingLeft = "0px";
@@ -617,6 +608,201 @@ export class FriendUI
             this.displayHistoric();
         else if (this.currView === "Supprimer l'ami")
             this.displayDeleteFriend();
+    }
+
+    /**************************************************
+     *               NEW FRIEND                       *
+     **************************************************/
+
+    displayNewFriend() : void
+    {
+        this.displayHeader();
+        this.displayAddFriend();
+    }
+
+    displayAddFriend() : void
+    {
+        if (this.containerUI.menu === null)
+            this.containerUI.menu =  AdvancedDynamicTexture.CreateForMesh(
+                        this.sceneManager.getMesh("scoreBoard")[1],
+                        1024, 1024,
+                        true
+                    );
+        if (this.containerUI.menuPanel === null)
+        {
+            this.containerUI.menuPanel = new StackPanel("panelMenu");
+            this.containerUI.menuPanel.isVertical = true;
+            this.containerUI.menuPanel.height = "100%";
+            this.containerUI.menuPanel.width = "100%";
+            this.containerUI.menuPanel.background = "lightblue";
+            this.containerUI.menuPanel.paddingTop = "150px";
+            this.containerUI.menuPanel.paddingBottom = "0px";
+            this.containerUI.menuPanel.paddingLeft = "0px";
+            this.containerUI.menuPanel.paddingRight = "0px";
+            this.containerUI.menuPanel.spacing = 10;
+            this.containerUI.menu.addControl(this.containerUI.menuPanel);
+        }
+        else
+            this.containerUI.menuPanel.clearControls();
+
+        const space = new Rectangle();
+        space.height = "100px";
+        space.thickness = 0;
+        this.containerUI.menuPanel.addControl(space);
+
+        const title = new TextBlock();
+        title.text = "Ajouter un amis";
+        title.fontSize = 100;
+        title.fontFamily = "Arial";
+        title.color = "black";
+        title.width = "100%";
+        title.height = "100px";
+        this.containerUI.menuPanel.addControl(title);
+
+        const line = new StackPanel();
+        line.isVertical = false;
+        line.height = "200px";
+        line.spacing = 20;
+        this.containerUI.menuPanel.addControl(line);
+        
+        const inputText = new InputText();
+        inputText.width = "400px";
+        inputText.height = "100px";
+        inputText.fontSize = 50;
+        inputText.fontFamily = "Arial";
+        inputText.background = "white";
+        inputText.color = "black";
+        inputText.focusedBackground = "gray";
+        inputText.thickness = 2;
+        line.addControl(inputText);
+
+        let msgInfo : TextBlock | null = null;
+        let login : string = "";
+
+        inputText.onTextChangedObservable.add(() => {
+            login = inputText.text;
+        });
+
+        const button = new Rectangle();
+        button.width = "200px";
+        button.height = "100px";
+        button.thickness = 2;
+        button.background = "white";
+        button.color = "black";
+        line.addControl(button);
+
+        const self = this;
+        button.onPointerClickObservable.add(() => {
+            const val = self.sceneManager.getUserX.addFriend(login);
+            if (!msgInfo)
+            {
+                msgInfo = new TextBlock();
+                msgInfo.text = "";
+                msgInfo.fontSize = 50;
+                msgInfo.color = "black";
+                msgInfo.fontFamily = "Arial";
+                msgInfo.height = "100px";
+                msgInfo.width = "100%";
+                this.containerUI.menuPanel.addControl(msgInfo);
+            }
+            if (!val)
+                msgInfo.text = "Invitation envoyee";
+            else if (val === 1)
+                msgInfo.text = login + " est deja votre amis";
+        });
+
+        const textButton = new TextBlock();
+        textButton.text = "Envoyer";
+        textButton.height = "100%";
+        textButton.width = "100%";
+        textButton.color = "black";
+        textButton.fontSize = 50;
+        textButton.fontFamily = "Arial";
+        button.addControl(textButton);
+    }
+    
+    /**************************************************
+    *               UTILS                             *
+    **************************************************/
+
+    displayHeader() : void
+    {
+        if (this.containerUI.header === null)
+            this.containerUI.header = AdvancedDynamicTexture.CreateForMesh(
+                        this.sceneManager.getMesh("scoreBoard")[0],
+                        1024, 1024,
+                        true
+                    );
+        if (this.containerUI.headerPanel === null)
+        {
+            this.containerUI.headerPanel = new StackPanel("panelHeader");
+            this.containerUI.headerPanel.isVertical = false;
+            this.containerUI.headerPanel.height = "100%";
+            this.containerUI.headerPanel.width = "1000px";
+            this.containerUI.headerPanel.background = "green";
+            this.containerUI.headerPanel.horizontalAlignment = Control.HORIZONTAL_ALIGNMENT_CENTER;
+            this.containerUI.headerPanel.verticalAlignment = Control.VERTICAL_ALIGNMENT_CENTER;
+            this.containerUI.headerPanel.paddingTop = "0px";
+            this.containerUI.headerPanel.paddingBottom = "0px";
+            this.containerUI.headerPanel.paddingLeft = "0px";
+            this.containerUI.headerPanel.paddingRight = "0px";
+            this.containerUI.header.addControl(this.containerUI.headerPanel);
+        }
+        else
+            this.containerUI.headerPanel.clearControls();
+
+
+        if (this.friend)
+        {
+            const login = new TextBlock("textLogin");
+            login.text = this.friend.getLogin;
+            login.color = "black";
+            login.fontSize = 100;
+            login.width = "500px"
+            login.fontFamily = "Arial";
+            login.horizontalAlignment = Control.HORIZONTAL_ALIGNMENT_CENTER;
+            login.verticalAlignment = Control.VERTICAL_ALIGNMENT_CENTER;
+            this.containerUI.headerPanel.addControl(login);
+    
+            const avatar = new Rectangle("RectAvatar");
+            avatar.width = "200px";
+            avatar.height = "200px";
+            avatar.thickness = 1;
+            avatar.color = "black";
+            avatar.horizontalAlignment = Control.HORIZONTAL_ALIGNMENT_CENTER;
+            avatar.verticalAlignment = Control.VERTICAL_ALIGNMENT_CENTER;
+            this.containerUI.headerPanel.addControl(avatar);
+        }
+        else
+        {
+            const text = new TextBlock();
+            text.text = "Gestion amis";
+            text.color = "black";
+            text.fontSize = 100;
+            text.width = "100%";
+            text.fontFamily = "Arial";
+            text.textHorizontalAlignment = Control.HORIZONTAL_ALIGNMENT_CENTER;
+            text.textVerticalAlignment = Control.VERTICAL_ALIGNMENT_CENTER;
+            this.containerUI.headerPanel.addControl(text);
+        }
+    }
+
+    
+
+    switchView(
+        label: string
+    ) : void
+    {
+        if (label === "Quitter")
+        {
+            this.switchOff();
+            this.update(null);
+        }
+        else if (label !== this.currView)
+        {
+            this.currView = label;
+            this.displayDatas();
+        }
     }
 
     resetPanel() : void
@@ -667,13 +853,17 @@ export class FriendUI
             this.containerUI.menu.dispose();
             this.containerUI.menu = null;
         }
+        this.standsInteraction.resetMaterialForScoreboard();
     }
 
     update(
-        friend: Friend
+        friend: Friend | null
     ) : void
     {
         this.friend = friend;
-        this.displayHeader();
+        if (this.friend)
+            this.displayFriend();
+        else
+            this.displayNewFriend();
     }
 };

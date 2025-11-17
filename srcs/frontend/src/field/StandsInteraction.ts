@@ -105,6 +105,18 @@ export class StandsInteraction implements SpecificInteraction {
             displayFriendsWithEmpty(this.scene, this.sceneManager.getUserX.getFriends, this.sceneManager.getChair);
             this.updateButtons(buttonMeshes);
             this.sceneInteractor.enableInteractions();
+            if (this.friendUI === null)
+            {
+                this.friendUI = new FriendUI(   
+                                    this.sceneManager,
+                                    null,
+                                    this.updateChair.bind(this),
+                                    buttonMeshes,
+                                    this
+                                );
+            }
+            else
+                this.friendUI.update(null);
         });
     }
 
@@ -176,7 +188,8 @@ export class StandsInteraction implements SpecificInteraction {
                                                     this.sceneManager,
                                                     this.sceneManager.getUserX.getFriends[index],
                                                     this.updateChair.bind(this),
-                                                    buttonMeshes
+                                                    buttonMeshes,
+                                                    this
                                                 );
                 else
                     this.friendUI.update(this.sceneManager.getUserX.getFriends[index]);
