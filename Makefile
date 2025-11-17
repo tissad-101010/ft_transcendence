@@ -1,4 +1,3 @@
-
 SRCS=./srcs
 COMPOSE=$(SRCS)/docker-compose.yml
 
@@ -39,19 +38,20 @@ local:
 	mkdir -p ./srcs/backend/services/service-users/data
 	mkdir -p ./srcs/backend/services/service-game/data
 	cp ./srcs/.env ~/.env.local
-	
+	cp ./test_websocket.html ./srcs/frontend/build/test_websocket.html
+# mettre test_websocket dans le front pour test
 npm_cache_clean:
 	npm cache clean --force
+	rm -rf node_modules
+	rm -f package-lock.json
 
 postgresql:
 	docker compose -f srcs/docker-compose.yml up postgreSQL --build
 chat:
 	docker compose -f srcs/docker-compose.yml up service-chat --build
+
 game:
 	docker compose -f srcs/docker-compose.yml up service-game --build
-front:
-	docker compose -f srcs/docker-compose.yml up frontend --build
-user:
-	docker compose -f srcs/docker-compose.yml up service-users --build
-
+proxy:
+	docker compose -f srcs/docker-compose.yml up proxy --build
 .PHONY: start down restart up clean prune

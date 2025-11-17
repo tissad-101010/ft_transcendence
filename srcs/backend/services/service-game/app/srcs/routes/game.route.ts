@@ -15,11 +15,30 @@ const gameRooms = new Map<number, Set<any>>(); // rp keep a map of game id to se
 function broadcastToGame(gameId: number, message: any) { // rp send a payload to every socket in a game room
   const room = gameRooms.get(gameId); // rp retrieve sockets list for the game
   if (room) { // rp only broadcast when the room exists
+    const messageStr = JSON.stringify(message); // rp serialize once for all sockets
+    let sentCount = 0; // rp track successful sends
+    let failedCount = 0; // rp track failed sends
     room.forEach((ws: any) => { // rp iterate over each socket in the room
-      if (ws.readyState === ws.OPEN || ws.readyState === 1) { // rp ensure the socket is still open
-        ws.send(JSON.stringify(message)); // rp send the message as json string
-      } // rp end open guard
+      try { // rp wrap send in try-catch to handle errors gracefully
+        // rp check if socket is open - use WebSocket.OPEN constant or numeric value 1
+        const isOpen = ws.readyState === 1 || (typeof WebSocket !== 'undefined' && ws.readyState === WebSocket.OPEN);
+        if (isOpen) { // rp ensure the socket is still open
+          ws.send(messageStr); // rp send the message as json string
+          sentCount++; // rp increment success counter
+        } else { // rp log if socket is not open
+          console.log(`⚠️ Socket fermé, readyState: ${ws.readyState}`); // rp debug closed socket
+          failedCount++; // rp increment failure counter
+        } // rp end open guard
+      } catch (error: any) { // rp catch send errors
+        console.error(`❌ Erreur envoi message à socket:`, error); // rp log send failure
+        failedCount++; // rp increment failure counter
+      } // rp end error handling
     }); // rp finish broadcasting loop
+    if (sentCount > 0 || failedCount > 0) { // rp log broadcast results
+      console.log(`📤 Broadcast: ${sentCount} envoyé(s), ${failedCount} échec(s) sur ${room.size} socket(s)`); // rp log results
+    } // rp end logging
+  } else { // rp log if room doesn't exist
+    console.log(`⚠️ Aucune room trouvée pour gameId: ${gameId}`); // rp debug missing room
   } // rp nothing to send if room absent
 } // rp end broadcast helper
 
@@ -48,12 +67,14 @@ function handleJoinGame(ws: any, message: any) { // rp add a player websocket to
   const { gameId, userId } = message; // rp extract identifiers from payload
   if (!gameRooms.has(gameId)) { // rp create room if it does not exist yet
     gameRooms.set(gameId, new Set()); // rp initialize a new set for the room
+    console.log(`📦 Nouvelle room créée pour gameId: ${gameId}`); // rp log room creation
   } // rp end room creation
 
   gameRooms.get(gameId)!.add(ws); // rp place player socket inside room set
   activeConnections.set(userId, ws); // rp map the user id to this websocket
 
-  console.log(`Joueur ${userId} a rejoint la partie ${gameId}`); // rp keep server log for monitoring
+  const roomSize = gameRooms.get(gameId)!.size; // rp get current room size
+  console.log(`✅ Joueur ${userId} a rejoint la partie ${gameId} (room size: ${roomSize})`); // rp keep server log for monitoring
 
   broadcastToGame(gameId, { // rp notify other players about the join
     type: 'player_joined', // rp message type for clients
@@ -69,7 +90,13 @@ async function handlePlayerMove( // rp process movement events from clients
 ) { // rp start move handler
   const { gameId, playerId, direction } = message; // rp destructure required fields
 
+  console.log(`🎮 Mouvement reçu: joueur ${playerId}, direction ${direction}, gameId ${gameId}`); // rp log received move
+
   await updateGameState(fastify, gameId, playerId, direction); // rp persist movement in database
+
+  const room = gameRooms.get(gameId); // rp get room for logging
+  const roomSize = room ? room.size : 0; // rp get room size
+  console.log(`📢 Diffusion mouvement à ${roomSize} socket(s) dans la room ${gameId}`); // rp log broadcast info
 
   broadcastToGame(gameId, { // rp notify all players about the move
     type: 'player_move', // rp message label for clients
