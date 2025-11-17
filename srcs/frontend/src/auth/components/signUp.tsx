@@ -53,7 +53,7 @@ const SignUp: React.FC<SignUpProps> = ({ onSwitch }) => {
 
       <p>
         Already have an account?{" "}
-        <a href="#" onClick={onSwitch}>
+        <a href="#signin" onClick={onSwitch}>
           Sign in
         </a>
       </p>

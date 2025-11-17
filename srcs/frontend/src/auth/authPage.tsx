@@ -8,10 +8,14 @@ import "./styles/authPage.css";
 
 const AuthPage: React.FC = () => {
   const [showRegister, setShowRegister] = useState(false);
-  const { user, pending2FA } = useAuth();
+  const { user, pending2FA, loading } = useAuth();
 
   // Si l'utilisateur est déjà connecté → on ne rend pas la page d’authentification
   if (user) return null;
+  if (loading) return null;
+  // si l'état 2FA n'est pas requis → ne rien afficher (a tester/!\)
+  if (pending2FA && !pending2FA.required) return null;
+
 
   // Détermine quel écran afficher :
   // - Si 2FA est requis → affiche TwoFactor

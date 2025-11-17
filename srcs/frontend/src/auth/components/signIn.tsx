@@ -114,7 +114,7 @@ const SignIn: React.FC<SignInProps> = ({ onSwitch }) => {
 
       <p>
         New to Moonset?{" "}
-        <a href="#" onClick={onSwitch}>
+        <a href="#signup" onClick={onSwitch}>
           Create an account
         </a>
       </p>
