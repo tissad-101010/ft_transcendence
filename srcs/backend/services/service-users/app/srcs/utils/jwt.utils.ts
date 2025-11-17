@@ -6,7 +6,7 @@
 /*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/27 14:02:23 by tissad            #+#    #+#             */
-/*   Updated: 2025/10/31 16:52:20 by tissad           ###   ########.fr       */
+/*   Updated: 2025/11/17 17:56:40 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,7 +38,8 @@ export class JwtUtils {
         return this.generateToken(
             payload,
             process.env.ACCESS_TOKEN_SECRET!,
-            process.env.ACCESS_TOKEN_EXPIRATION!
+            // process.env.ACCESS_TOKEN_EXPIRATION!
+            '1min' // for testing purpose
         );
     }
 
@@ -66,7 +67,7 @@ export class JwtUtils {
             // secure: process.env.NODE_ENV === 'production',
             // sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'none',
             path: '/',
-            maxAge: 60 * 1, // 15 minutes
+            // maxAge: 60 * 15, // 15 minutes
         });
     }
     static setRefreshTokenCookie(reply: any, token: string) {
