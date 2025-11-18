@@ -435,10 +435,10 @@ export function menuCreate(
         button1.scaleY = 0.9;
     });
 
-    button1.onPointerUpObservable.add(() => {
+    button1.onPointerUpObservable.add(async () => {
         // Utiliser le login de l'utilisateur connecté comme alias
         const userLogin = env.userX.getUser?.login || "Player";
-        env.userX.createTournament(userLogin);
+        await env.userX.createTournament(userLogin);
         if (env.userX.getTournament)
             env.tournament = env.userX.getTournament;
         tournament(env);

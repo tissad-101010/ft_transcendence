@@ -62,7 +62,7 @@ export class UserX
         this.addFriend("Val");
     }
 
-    createTournament(a: string) : boolean
+    async createTournament(a: string) : Promise<boolean>
     {
         if (this.user === null)
         {
@@ -84,9 +84,48 @@ export class UserX
             console.log(`✅ Utilisateur ${this.user.login} ajouté automatiquement au tournoi`);
         } else {
             console.error(`❌ Erreur lors de l'ajout de l'utilisateur ${this.user.login} au tournoi`);
+            return (false);
         }
 
-        return (result === 0);
+        // Créer le tournoi dans la base de données (sans règles pour l'instant, elles seront ajoutées plus tard)
+        // Le tournoi sera créé avec les règles par défaut, puis mises à jour quand l'utilisateur les définit
+        try {
+            const response = await fetch("https://localhost:8443/api/tournament/create", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Accept: "application/json",
+                },
+                credentials: "include",
+                body: JSON.stringify({
+                    name: null,
+                    speed: "1", // Valeur par défaut, sera mise à jour
+                    scoreMax: "5", // Valeur par défaut, sera mise à jour
+                    timeBefore: "3", // Valeur par défaut, sera mise à jour
+                    player1_id: this.user.id,
+                }),
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                console.log("✅ Tournoi créé dans la base de données:", data.tournamentId);
+                this.tournament.setDbTournamentId = data.tournamentId;
+                
+                // Mettre à jour l'ID du participant dans la base de données
+                if (data.tournament && data.tournament.participants && data.tournament.participants.length > 0) {
+                    p.dbParticipantId = data.tournament.participants[0].id;
+                }
+                
+                return (true);
+            } else {
+                const errorData = await response.json();
+                console.error("Erreur lors de la création du tournoi:", errorData);
+                return (false);
+            }
+        } catch (error) {
+            console.error("Erreur lors de l'appel API pour créer le tournoi:", error);
+            return (false);
+        }
     }
 
     playTournamentMatch(

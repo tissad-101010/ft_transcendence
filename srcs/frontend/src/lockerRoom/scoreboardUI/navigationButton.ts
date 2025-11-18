@@ -81,8 +81,12 @@ export function createButton(
     }
     else
     {
-        env.tournament.start();
-        env.control.selectMenu(env.meshScoreboard);
+        env.tournament.start().then(() => {
+            env.control.selectMenu(env.meshScoreboard);
+        }).catch((error) => {
+            console.error("Erreur lors du démarrage du tournoi:", error);
+            env.control.selectMenu(env.meshScoreboard);
+        });
     }
 }
 

@@ -41,6 +41,8 @@ export interface MatchTournament
     nextMatchSlot: number | undefined;
     tournament: Tournament | undefined;
     type: "tournament";
+    dbMatchId?: number; // ID du match dans la base de données
+    dbTournamentId?: number; // ID du tournoi dans la base de données
 }
 
 export interface MatchFriendly
@@ -202,7 +204,9 @@ export class Match
                     this.status = 2;
                     this.game = null;
                     if (this.matchInfo && this.matchInfo.type === "tournament" && this.matchInfo.tournament)
-                        this.matchInfo.tournament.matchFinish(this);
+                        this.matchInfo.tournament.matchFinish(this).catch((error) => {
+                            console.error("Erreur lors de la fin du match:", error);
+                        });
                     else if (this.matchInfo && this.matchInfo.type === "friendly")
                         console.log("Pas encore gere");
                     window.removeEventListener("keydown", this.keyDownHandler);
