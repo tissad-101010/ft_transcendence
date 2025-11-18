@@ -16,3 +16,4 @@
 *.pid.lock
 *data
 *secrets
+*generated
