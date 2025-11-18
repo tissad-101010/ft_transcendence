@@ -6,7 +6,7 @@
 /*   By: glions <glions@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/27 11:44:27 by tissad            #+#    #+#             */
-/*   Updated: 2025/11/14 15:59:43 by glions           ###   ########.fr       */
+/*   Updated: 2025/11/18 11:08:22 by glions           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,7 +64,6 @@ export class AuthService {
             signupComplete: true,
         };
     }
-
     
     async authenticateUser(inputData: LoginUserDTO) : Promise<LoginResponseDTO> {  
         // find user by username
