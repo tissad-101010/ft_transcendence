@@ -6,7 +6,7 @@
 /*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/27 14:02:23 by tissad            #+#    #+#             */
-/*   Updated: 2025/11/17 17:56:40 by tissad           ###   ########.fr       */
+/*   Updated: 2025/11/18 18:18:07 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,7 +47,7 @@ export class JwtUtils {
         return this.generateToken(
             payload,
             process.env.REFRESH_TOKEN_SECRET!,
-            process.env.REFRESH_TOKEN_EXPIRATION!
+            '7d' // process.env.REFRESH_TOKEN_EXPIRATION!
         );
     }   
 
@@ -77,6 +77,9 @@ export class JwtUtils {
             sameSite: 'none', // to be changed to 'strict' in production
             // secure: process.env.NODE_ENV === 'production',
             // sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'none',
+            path: '/',
+            maxAge: 60 * 60 * 24 * 7, // 7 days
+            
         });
     }
     
@@ -101,25 +104,26 @@ export class JwtUtils {
         return this.verifyToken(token, process.env.REFRESH_TOKEN_SECRET!);
     }
 
-    static getTokenFromCookies(cookies: Record<string, string>, tokenName: string): string | null {
-        return cookies[tokenName] || null;
-    }
-
+    
     static clearTempTokenCookie(reply: any) {
         reply.clearCookie('temp_token');
     }
+    
+    static esxtractCookiesFromRequest(req: any): Record<string, string> {   
+        return req.cookies || {};
+    }
+    
+    static extractTokenFromCookies(cookies: Record<string, string>, tokenName: string): string | null {
+        return cookies[tokenName] || null;
+    }
 
-
-
-    static extractUserFromRequest = (req: any): { userId: string; email: string } | null => {
+    static extractUserFromAccessToken(access_token: string | null): { userId: string; email: string } | null {
         try {
-          const cookies = req.cookies;
-          const token = JwtUtils.getTokenFromCookies(cookies, 'access_token');
-          if (!token) {
+          if (!access_token) {
             console.error("❌ [jwt.utils.ts] No JWT token found in cookies");
             return null;
           }
-          const payload = JwtUtils.verifyAccessToken(token);
+          const payload = JwtUtils.verifyAccessToken(access_token);
           console.log("✅ [jwt.utils.ts] Extracted user from request:", payload);
           if (!payload) {
             console.error("❌ [jwt.utils.ts] Invalid JWT token");

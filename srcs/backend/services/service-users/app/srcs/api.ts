@@ -6,7 +6,7 @@
 /*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/23 15:58:35 by tissad            #+#    #+#             */
-/*   Updated: 2025/11/18 15:35:06 by tissad           ###   ########.fr       */
+/*   Updated: 2025/11/18 18:58:14 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,6 +54,7 @@ app.register(prismaPlugin);
 
 // Register routes
 app.register(authRoutes, { prefix: '/user/auth' });
+
 app.register(oauthRoutes, { prefix: '/user/oauth' });
 app.register(userRoutes, { prefix: '/user' });
 

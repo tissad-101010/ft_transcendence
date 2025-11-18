@@ -59,7 +59,7 @@ const SignIn: React.FC<SignInProps> = ({ onSwitch }) => {
     }
   };
   return (
-    <div className="authPage-window">
+    <div className="authPage-window" id ="signIn">
       <img
         src="/logoWhite.png"
         alt="Logo"

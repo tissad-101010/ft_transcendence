@@ -1,3 +1,17 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   auth.api.ts                                        :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/11/18 19:09:22 by tissad            #+#    #+#             */
+/*   Updated: 2025/11/18 19:16:38 by tissad           ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+import { authFetch } from '../authFetch';
+
 export async function registerUser(
   username: string,
   email: string,
@@ -15,6 +29,7 @@ export async function registerUser(
       },
       credentials: "include", // envoie les cookies si backend les utilise
       body: JSON.stringify({ username, email, password }),
+
     });
 
     const data = await response.json();
@@ -64,15 +79,15 @@ export async function loginUser(
 
 export async function fetchUserProfile(): Promise<{ success: boolean; data?: any; message?: string }> {
     try {
-        const response = await fetch("https://localhost:8443/api/user/profile", {
+        const requestOptions: RequestInit = {
             method: "GET",
             headers: {
                 "Content-Type": "application/json",
                 Accept: "application/json",
             },
             credentials: "include", // envoie les cookies si backend les utilise
-        });
-        
+        };
+        const response = await authFetch("https://localhost:8443/api/user/profile", requestOptions);
         const data = await response.json(); 
         if (response.ok) {
             return { success: true, data: data};
