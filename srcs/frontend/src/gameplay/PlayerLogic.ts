@@ -47,12 +47,23 @@ export default class PlayerLogic
         this.team = team;
         this.type = type;
         this.alias = player.alias;
-        if (player.me)
+        // Assigner les contrôles en fonction de l'équipe pour les matchs locaux
+        // Team 1 (gauche) : touches Q et A
+        // Team 2 (droite) : flèches haut/bas
+        if (this.type === 0) {
+            if (this.team === 1) {
+                this.control = {up: "q", down: "a"};
+            } else if (this.team === 2) {
+                this.control = {up: "ArrowUp", down: "ArrowDown"};
+            } else {
+                this.control = null;
+            }
+        } else if (player.me) {
+            // Pour les matchs en ligne, utiliser player.me si défini
             this.control = {up: "q", down: "a"};
-        else if (this.type === 0)
-            this.control = {up: "ArrowUp", down: "ArrowDown"};
-        else 
+        } else {
             this.control = null;
+        }
     };
 
     get getTeam()

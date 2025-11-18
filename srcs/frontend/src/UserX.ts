@@ -65,18 +65,28 @@ export class UserX
     createTournament(a: string) : boolean
     {
         if (this.user === null)
+        {
+            console.error("Impossible de créer un tournoi: utilisateur non connecté");
             return (false);
+        }
+        // Utiliser le login de l'utilisateur comme alias si aucun alias n'est fourni
+        const alias = a || this.user.login;
         const p : TournamentParticipant = {
             login: this.user.login,
-            alias: a,
+            alias: alias,
             ready: true,
             id: this.user.id,
             eliminate: false
         } 
         this.tournament = new Tournament(this.sceneManager);
-        this.tournament.addParticipant(p);
+        const result = this.tournament.addParticipant(p);
+        if (result === 0) {
+            console.log(`✅ Utilisateur ${this.user.login} ajouté automatiquement au tournoi`);
+        } else {
+            console.error(`❌ Erreur lors de l'ajout de l'utilisateur ${this.user.login} au tournoi`);
+        }
 
-        return (true);
+        return (result === 0);
     }
 
     playTournamentMatch(
@@ -218,7 +228,17 @@ export class UserX
         user: any
     )
     {
-        this.user = user;
-        console.log("user vaut mtn", this.user);
+        // Adapter la structure de l'utilisateur du contexte React vers UserX
+        // Le contexte React utilise 'username' mais UserX attend 'login'
+        if (user) {
+            this.user = {
+                login: user.username || user.login || "Unknown",
+                id: user.id || 0
+            };
+            console.log("✅ Utilisateur défini dans UserX:", this.user);
+        } else {
+            this.user = null;
+            console.log("⚠️ Utilisateur défini à null");
+        }
     }
 }

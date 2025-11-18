@@ -25,6 +25,7 @@ import { prismaPlugin } from './plugins/prisma.plugin';
 
 // import route
 import {gameRoutes, setupWebSocketRoute} from './routes/game.route'; // rp import game routes and websocket setup
+import {tournamentRoutes} from './routes/tournament.route'; // rp import tournament routes
 
 /* ************************************************************************** */
 
@@ -46,6 +47,7 @@ app.register(websocket); // rp : register websocket plugin
 
 // Register routes
 app.register(gameRoutes); // rp : register function with all REST game routes
+app.register(tournamentRoutes); // rp : register function with all REST tournament routes
 
 
 // Start the Fastify server

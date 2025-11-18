@@ -62,3 +62,18 @@ export type Game = Prisma.GameModel
  * 
  */
 export type GameState = Prisma.GameStateModel
+/**
+ * Model Tournament
+ * 
+ */
+export type Tournament = Prisma.TournamentModel
+/**
+ * Model TournamentParticipant
+ * 
+ */
+export type TournamentParticipant = Prisma.TournamentParticipantModel
+/**
+ * Model TournamentMatch
+ * 
+ */
+export type TournamentMatch = Prisma.TournamentMatchModel

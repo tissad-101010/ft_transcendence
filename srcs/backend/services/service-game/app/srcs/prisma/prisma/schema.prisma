@@ -47,6 +47,7 @@ model User {
   
   gamesAsP1 Game[]   @relation("Player1") // rp: list of all games where this player is player 1
   gamesAsP2 Game[]   @relation("Player2") // rp: list of all games where this player is player 2
+  tournamentParticipations TournamentParticipant[] // rp: list of all tournaments this player has participated in
 
   @@map("users") // rp: the actual table name in the database will be "users"
 }
@@ -87,5 +88,82 @@ model GameState {
   score2    Int     @default(0) // rp: current score of player 2 (number of points)
 
   @@map("game_states") // rp: the actual table name in the database will be "game_states"
+}
+
+// =====================
+// Tournament Model
+// =====================
+// rp: this table stores information about tournaments
+model Tournament {
+  id          Int       @id @default(autoincrement()) // rp: unique number for each tournament
+  name        String?   @db.VarChar(255) // rp: optional tournament name
+  status      String    @default("waiting") @db.VarChar(50) // rp: tournament status: waiting, in_progress, finished
+  speed       String    @db.VarChar(10) // rp: game speed setting ("1", "2", "3")
+  scoreMax    String    @db.VarChar(10) // rp: maximum score to win a match
+  timeBefore  String    @db.VarChar(10) // rp: time before match starts
+  createdAt   DateTime  @default(now()) @map("created_at") // rp: when tournament was created
+  startedAt   DateTime? @map("started_at") // rp: when tournament started
+  finishedAt  DateTime? @map("finished_at") // rp: when tournament finished
+  
+  // Relations
+  participants TournamentParticipant[] // rp: list of participants in this tournament
+  matches      TournamentMatch[]        // rp: list of matches in this tournament
+  
+  @@map("tournaments") // rp: the actual table name in the database will be "tournaments"
+}
+
+// =====================
+// Tournament Participant Model
+// =====================
+// rp: this table stores information about players participating in tournaments
+model TournamentParticipant {
+  id            Int       @id @default(autoincrement()) // rp: unique number for each participation
+  tournamentId  Int       @map("tournament_id") // rp: which tournament this participant is in
+  userId        Int       @map("user_id") // rp: which user is participating
+  alias         String    @db.VarChar(255) // rp: player alias/display name in this tournament
+  ready         Boolean   @default(false) // rp: whether player is ready to start
+  eliminated    Boolean   @default(false) // rp: whether player has been eliminated
+  position      Int?      // rp: position in bracket (optional, for seeding)
+  createdAt     DateTime  @default(now()) @map("created_at") // rp: when participant joined
+  
+  // Relations
+  tournament    Tournament @relation(fields: [tournamentId], references: [id], onDelete: Cascade) // rp: link to tournament
+  user          User       @relation(fields: [userId], references: [id]) // rp: link to user
+  matchesAsP1   TournamentMatch[] @relation("MatchPlayer1") // rp: matches where this participant is player 1
+  matchesAsP2   TournamentMatch[] @relation("MatchPlayer2") // rp: matches where this participant is player 2
+  matchesWon    TournamentMatch[] @relation("MatchWinner") // rp: matches this participant won
+  
+  @@unique([tournamentId, userId]) // rp: a user can only participate once per tournament
+  @@map("tournament_participants") // rp: the actual table name in the database will be "tournament_participants"
+}
+
+// =====================
+// Tournament Match Model
+// =====================
+// rp: this table stores information about matches within tournaments
+model TournamentMatch {
+  id            Int       @id @default(autoincrement()) // rp: unique number for each match
+  tournamentId  Int       @map("tournament_id") // rp: which tournament this match belongs to
+  round         Int       // rp: round number (1, 2, 3...)
+  matchNumber   Int       @map("match_number") // rp: match number within the round
+  player1Id     Int?      @map("player1_id") // rp: participant id for player 1 (null if not set yet)
+  player2Id     Int?      @map("player2_id") // rp: participant id for player 2 (null if not set yet)
+  winnerId     Int?       @map("winner_id") // rp: participant id of winner (null if not finished)
+  status        String    @default("pending") @db.VarChar(50) // rp: match status: pending, ongoing, finished
+  nextMatchId   Int?      @map("next_match_id") // rp: id of next match in bracket (null for final)
+  nextMatchSlot Int?      @map("next_match_slot") // rp: slot (0 or 1) in next match for winner
+  score1        Int       @default(0) // rp: final score of player 1
+  score2        Int       @default(0) // rp: final score of player 2
+  createdAt     DateTime  @default(now()) @map("created_at") // rp: when match was created
+  startedAt     DateTime? @map("started_at") // rp: when match started
+  finishedAt    DateTime? @map("finished_at") // rp: when match finished
+  
+  // Relations
+  tournament    Tournament @relation(fields: [tournamentId], references: [id], onDelete: Cascade) // rp: link to tournament
+  player1       TournamentParticipant? @relation("MatchPlayer1", fields: [player1Id], references: [id]) // rp: link to participant 1
+  player2       TournamentParticipant? @relation("MatchPlayer2", fields: [player2Id], references: [id]) // rp: link to participant 2
+  winner        TournamentParticipant? @relation("MatchWinner", fields: [winnerId], references: [id]) // rp: link to winner participant
+  
+  @@map("tournament_matches") // rp: the actual table name in the database will be "tournament_matches"
 }
 

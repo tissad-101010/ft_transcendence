@@ -35,7 +35,8 @@ export class MatchTournamentOnline extends MatchBase {
                     countDownGoalTime: parseInt(this.rules.timeBefore),
                     allowPause: false
                 },
-                [this.matchInfo.sloatA, this.matchInfo.sloatB]
+                [this.matchInfo.sloatA, this.matchInfo.sloatB],
+                0  // mode: 0 pour créer les joueurs (mode local)
             ),
             interface: new Game3D(this.sceneManager)
         };

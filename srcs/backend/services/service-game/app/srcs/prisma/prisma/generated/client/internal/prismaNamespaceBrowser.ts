@@ -52,7 +52,10 @@ export const ModelName = {
   GameProfile: 'GameProfile',
   User: 'User',
   Game: 'Game',
-  GameState: 'GameState'
+  GameState: 'GameState',
+  Tournament: 'Tournament',
+  TournamentParticipant: 'TournamentParticipant',
+  TournamentMatch: 'TournamentMatch'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -117,6 +120,56 @@ export const GameStateScalarFieldEnum = {
 } as const
 
 export type GameStateScalarFieldEnum = (typeof GameStateScalarFieldEnum)[keyof typeof GameStateScalarFieldEnum]
+
+
+export const TournamentScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  status: 'status',
+  speed: 'speed',
+  scoreMax: 'scoreMax',
+  timeBefore: 'timeBefore',
+  createdAt: 'createdAt',
+  startedAt: 'startedAt',
+  finishedAt: 'finishedAt'
+} as const
+
+export type TournamentScalarFieldEnum = (typeof TournamentScalarFieldEnum)[keyof typeof TournamentScalarFieldEnum]
+
+
+export const TournamentParticipantScalarFieldEnum = {
+  id: 'id',
+  tournamentId: 'tournamentId',
+  userId: 'userId',
+  alias: 'alias',
+  ready: 'ready',
+  eliminated: 'eliminated',
+  position: 'position',
+  createdAt: 'createdAt'
+} as const
+
+export type TournamentParticipantScalarFieldEnum = (typeof TournamentParticipantScalarFieldEnum)[keyof typeof TournamentParticipantScalarFieldEnum]
+
+
+export const TournamentMatchScalarFieldEnum = {
+  id: 'id',
+  tournamentId: 'tournamentId',
+  round: 'round',
+  matchNumber: 'matchNumber',
+  player1Id: 'player1Id',
+  player2Id: 'player2Id',
+  winnerId: 'winnerId',
+  status: 'status',
+  nextMatchId: 'nextMatchId',
+  nextMatchSlot: 'nextMatchSlot',
+  score1: 'score1',
+  score2: 'score2',
+  createdAt: 'createdAt',
+  startedAt: 'startedAt',
+  finishedAt: 'finishedAt'
+} as const
+
+export type TournamentMatchScalarFieldEnum = (typeof TournamentMatchScalarFieldEnum)[keyof typeof TournamentMatchScalarFieldEnum]
 
 
 export const SortOrder = {

@@ -116,6 +116,18 @@ export class Tournament
         p: TournamentParticipant
     ) : number
     {
+        // Validation: le participant doit avoir un ID valide
+        if (p.id === undefined || p.id === null || typeof p.id !== 'number') {
+            console.error('Participant invalide: id manquant ou invalide', p);
+            return (1);
+        }
+        
+        // Validation: le participant doit avoir un login
+        if (!p.login || p.login.trim() === '') {
+            console.error('Participant invalide: login manquant', p);
+            return (1);
+        }
+        
         let stop = false;
         this.participants.forEach((a) => {
             if (a.login === p.login)
@@ -123,7 +135,15 @@ export class Tournament
         })
         if (stop)
             return (1);
-        p.eliminate = false;
+        
+        // S'assurer que eliminate est défini
+        if (p.eliminate === undefined)
+            p.eliminate = false;
+        
+        // En mode local, tous les participants sont prêts par défaut
+        if (p.ready === undefined)
+            p.ready = true;
+            
         this.participants.push(p);
         return (0);
     }

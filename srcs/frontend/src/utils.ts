@@ -101,12 +101,20 @@ export function displayPlayers(scene: Scene, players: TournamentParticipant[], m
 
         const player = players[index];
         if (player) {
-            if (!player.eliminate)
-                mat.albedoColor = new Color3(1.0, 0.5, 0.4); // couleur normale
-            else
-                mat.albedoColor = new Color3(0.5, 1, 0.4); // couleur normale
-            dynTex.drawText(player.alias, null, 280, "bold 80px Arial", "white", "transparent", true);
-            dynTex.drawText(player.id.toString(), null, 600, "bold 250px Arial", "white", "transparent", true);
+            // Vérifier que le participant a toutes les propriétés requises
+            if (player.id === undefined || player.id === null) {
+                console.warn(`Participant à l'index ${index} n'a pas d'id défini:`, player);
+                mat.albedoColor = new Color3(0.5, 0.5, 0.5); // couleur grise pour les participants invalides
+                dynTex.drawText(player.alias || "?", null, 280, "bold 80px Arial", "white", "transparent", true);
+                dynTex.drawText("?", null, 600, "bold 250px Arial", "white", "transparent", true);
+            } else {
+                if (!player.eliminate)
+                    mat.albedoColor = new Color3(1.0, 0.5, 0.4); // couleur normale
+                else
+                    mat.albedoColor = new Color3(0.5, 1, 0.4); // couleur éliminé
+                dynTex.drawText(player.alias || player.login || "?", null, 280, "bold 80px Arial", "white", "transparent", true);
+                dynTex.drawText(player.id.toString(), null, 600, "bold 250px Arial", "white", "transparent", true);
+            }
         } else {
             mat.albedoColor = new Color3(0.25, 0.9, 0.9); // couleur alternative
         }

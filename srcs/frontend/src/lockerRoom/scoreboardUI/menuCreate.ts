@@ -436,7 +436,9 @@ export function menuCreate(
     });
 
     button1.onPointerUpObservable.add(() => {
-        env.userX.createTournament("nostag");
+        // Utiliser le login de l'utilisateur connecté comme alias
+        const userLogin = env.userX.getUser?.login || "Player";
+        env.userX.createTournament(userLogin);
         if (env.userX.getTournament)
             env.tournament = env.userX.getTournament;
         tournament(env);
