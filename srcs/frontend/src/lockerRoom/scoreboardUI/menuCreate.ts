@@ -371,6 +371,59 @@ export function genJoinMatch(env: Env) : StackPanel
                         button.background = "red";
                     });
                 });
+
+                // Bouton Supprimer
+                const deleteButton = new Rectangle();
+                deleteButton.height = "50px";
+                deleteButton.width = "80px";
+                deleteButton.thickness = env.UIData.button.thickness;
+                deleteButton.color = "white";
+                deleteButton.background = "red";
+                panel.addControl(deleteButton);
+
+                const deleteText = new TextBlock();
+                deleteText.text = "Supprimer";
+                deleteText.color = "white";
+                deleteText.fontSize = env.UIData.text.fontSize - 6;
+                deleteText.fontFamily = env.UIData.text.fontFamily;
+                deleteButton.addControl(deleteText);
+                
+                deleteButton.onPointerClickObservable.add(async () => {
+                    console.log("🗑️ Suppression du match:", m.idMatch);
+                    // Désactiver le bouton pendant la suppression
+                    deleteButton.isEnabled = false;
+                    deleteButton.background = "gray";
+                    
+                    const success = await env.userX.deleteFriendlyMatch(m.idMatch);
+                    if (success) {
+                        console.log("✅ Match supprimé, rafraîchissement de la liste...");
+                        // Rafraîchir immédiatement la liste des matchs
+                        if ((env as any).refreshJoinMatchList) {
+                            // Appeler immédiatement puis attendre un peu pour un second rafraîchissement
+                            (env as any).refreshJoinMatchList();
+                            setTimeout(() => {
+                                (env as any).refreshJoinMatchList();
+                            }, 500);
+                        } else {
+                            console.warn("⚠️ refreshJoinMatchList n'est pas défini");
+                        }
+                    } else {
+                        console.error("❌ Échec de la suppression du match");
+                        deleteButton.background = "darkred";
+                        deleteButton.isEnabled = true;
+                        setTimeout(() => {
+                            deleteButton.background = "red";
+                        }, 2000);
+                    }
+                });
+
+                deleteButton.onPointerEnterObservable.add(() => {
+                    deleteButton.background = "darkred";
+                });
+
+                deleteButton.onPointerOutObservable.add(() => {
+                    deleteButton.background = "red";
+                });
             });
         } catch (error) {
             console.error("❌ Erreur lors du chargement des matchs:", error);

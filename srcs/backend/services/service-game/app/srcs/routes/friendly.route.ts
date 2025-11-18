@@ -315,6 +315,52 @@ export async function friendlyRoutes(fastify: FastifyInstance) {
       });
     }
   });
+
+  // Supprimer un match amical
+  fastify.delete('/api/friendly/:matchId', async (request: any, reply: any) => {
+    try {
+      const { matchId } = request.params as { matchId: string };
+      const matchIdInt = parseInt(matchId, 10);
+
+      if (isNaN(matchIdInt)) {
+        return reply.code(400).send({
+          success: false,
+          message: 'ID de match invalide',
+        });
+      }
+
+      // Récupérer le match
+      const match = await (fastify.prisma as any).friendlyMatch.findUnique({
+        where: { id: matchIdInt },
+      });
+
+      if (!match) {
+        return reply.code(404).send({
+          success: false,
+          message: 'Match non trouvé',
+        });
+      }
+
+      // Supprimer le match
+      await (fastify.prisma as any).friendlyMatch.delete({
+        where: { id: matchIdInt },
+      });
+
+      fastify.log.info(`✅ Match amical ${matchId} supprimé`);
+
+      return reply.code(200).send({
+        success: true,
+        message: 'Match supprimé avec succès',
+      });
+    } catch (error: unknown) {
+      fastify.log.error(error, 'Erreur suppression match amical');
+      const normalizedError = error instanceof Error ? error : new Error(String(error));
+      return reply.code(500).send({
+        success: false,
+        message: normalizedError.message || 'Erreur lors de la suppression du match amical',
+      });
+    }
+  });
 }
 
 

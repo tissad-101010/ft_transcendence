@@ -264,6 +264,50 @@ export class UserX
         }
     }
 
+    async deleteFriendlyMatch(
+        matchId: number
+    ) : Promise<boolean>
+    {
+        if (!this.user) {
+            console.error("❌ Impossible de supprimer un match amical: utilisateur non défini dans UserX");
+            return (false);
+        }
+        
+        console.log("🔄 Suppression du match amical:", matchId);
+        
+        try {
+            const response = await fetch(`https://localhost:8443/api/friendly/${matchId}`, {
+                method: "DELETE",
+                headers: {
+                    Accept: "application/json",
+                },
+                credentials: "include",
+            });
+
+            console.log("📡 Réponse reçue:", response.status, response.statusText);
+            
+            if (!response.ok) {
+                const errorText = await response.text();
+                let errorData;
+                try {
+                    errorData = JSON.parse(errorText);
+                } catch {
+                    errorData = { message: errorText };
+                }
+                console.error("❌ Erreur lors de la suppression du match amical:", response.status, errorData);
+                return (false);
+            }
+
+            const data = await response.json();
+            console.log("✅ Match amical supprimé:", data.message);
+            
+            return (true);
+        } catch (error) {
+            console.error("Erreur lors de l'appel API pour supprimer le match amical:", error);
+            return (false);
+        }
+    }
+
     
     deleteFriend(
         f: Friend
