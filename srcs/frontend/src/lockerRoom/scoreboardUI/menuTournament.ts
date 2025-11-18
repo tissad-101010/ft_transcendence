@@ -244,12 +244,10 @@ function listMatch(
         }
         displayPlayer(panelRow, match.getSloatB, env);
 
-        // Match de l'utilisateur en attente ou match local (les deux participants sont prêts)
-        // En mode local, on peut lancer tous les matchs où l'utilisateur est présent
-        const userInMatch = (match.getSloatA && match.getSloatA.id === env.userX.getUser.id) ||
-                            (match.getSloatB && match.getSloatB.id === env.userX.getUser.id);
+        // En mode local, on peut lancer tous les matchs où les deux participants sont prêts
+        // Pas besoin de vérifier si l'utilisateur est dans le match en mode local
         const bothReady = (match.getSloatA && match.getSloatA.ready && match.getSloatB && match.getSloatB.ready);
-        const canLaunch = match.getStatus === 0 && userInMatch && bothReady;
+        const canLaunch = match.getStatus === 0 && bothReady;
         
         if (canLaunch)
         {
