@@ -14,15 +14,21 @@
 set -e
 
 
+set -e
+
+
 # echo "🔄 Generating Prisma client..."
 # npx prisma generate
 
-until pg_isready -h postgreSQL -p 5432 -U admin; do
-    echo "connecting to PostgreSQL at $POSTGRES_HOST:$POSTGRES_PORT as $POSTGRES_USER..."
-    echo "🔄 Waiting for PostgreSQL to be ready..."
+until pg_isready -h postgreSQL -p $DB_PORT -U admin; do
+  # echo "connecting to PostgreSQL at $DB_HOST:$DB_PORT as $DB_USER..."
+  echo "🔄 Waiting for PostgreSQL to be ready..."
   sleep 2
 done
-echo "pg_isready -h $POSTGRES_HOST -p $POSTGRES_PORT -U $POSTGRES_USER"
-echo "🚀 Starting Fastify app..."
-npm run dev
-# exec tail -f /dev/null &
+# echo "pg_isready -h postgreSQL -p $DB_PORT -U admin: PostgreSQL is ready!"
+echo "🚀 Starting service-users app..."
+npm run prisma:generate
+npm run prisma:reset
+npm run prisma:migrate
+npm run dev 
+# exec tail -f /dev/null 
