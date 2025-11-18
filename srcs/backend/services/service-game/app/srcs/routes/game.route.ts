@@ -63,7 +63,8 @@ async function updateGameState( // rp persist paddle movement in database
   } // rp end error handling
 } // rp finish updateGameState
 
-function handleJoinGame(ws: any, message: any) { // rp add a player websocket to a game room
+async function handleJoinGame(fastify: FastifyInstance, ws: any, message: any) { // rp add a player websocket to a game room
+  console.log('🔍 handleJoinGame appelé avec:', message); // rp debug
   const { gameId, userId } = message; // rp extract identifiers from payload
   if (!gameRooms.has(gameId)) { // rp create room if it does not exist yet
     gameRooms.set(gameId, new Set()); // rp initialize a new set for the room
@@ -75,6 +76,89 @@ function handleJoinGame(ws: any, message: any) { // rp add a player websocket to
 
   const roomSize = gameRooms.get(gameId)!.size; // rp get current room size
   console.log(`✅ Joueur ${userId} a rejoint la partie ${gameId} (room size: ${roomSize})`); // rp keep server log for monitoring
+
+  // Envoyer au nouveau joueur la liste des joueurs déjà connectés
+  const room = gameRooms.get(gameId)!;
+  const connectedUserIds: number[] = [];
+  room.forEach((socket: any) => {
+    // Trouver l'userId associé à ce socket
+    for (const [uid, socketRef] of activeConnections.entries()) {
+      if (socketRef === socket) {
+        if (uid !== userId) { // Ne pas inclure le joueur qui vient de rejoindre
+          connectedUserIds.push(uid);
+        }
+        break;
+      }
+    }
+  });
+  
+  // Envoyer au nouveau joueur les informations sur les joueurs déjà connectés
+  if (connectedUserIds.length > 0) {
+    try {
+      const messageStr = JSON.stringify({
+        type: 'players_already_connected',
+        gameId: gameId,
+        userIds: connectedUserIds,
+      });
+      if (ws.readyState === 1 || (typeof WebSocket !== 'undefined' && ws.readyState === WebSocket.OPEN)) {
+        ws.send(messageStr);
+        console.log(`📤 Envoyé players_already_connected à ${userId}:`, connectedUserIds);
+      }
+    } catch (error) {
+      console.error(`❌ Erreur envoi players_already_connected:`, error);
+    }
+  }
+
+  // Pour les matchs amicaux en ligne, vérifier si les deux joueurs sont connectés
+  // Si oui, mettre à jour le statut du match à 'ongoing' et envoyer un message de démarrage
+  if (roomSize === 2) {
+    try {
+      // Vérifier si c'est un match amical en ligne
+      const friendlyMatch = await (fastify.prisma as any).friendlyMatch.findUnique({
+        where: { id: gameId },
+      });
+
+      console.log(`🔍 Vérification match amical ${gameId}:`, {
+        exists: !!friendlyMatch,
+        isOnline: friendlyMatch?.isOnline,
+        status: friendlyMatch?.status,
+        player1Id: friendlyMatch?.player1Id,
+        player2Id: friendlyMatch?.player2Id,
+      });
+
+      if (friendlyMatch && friendlyMatch.isOnline && friendlyMatch.status === 'waiting') {
+        // Les deux joueurs sont connectés, mettre à jour le statut
+        await (fastify.prisma as any).friendlyMatch.update({
+          where: { id: gameId },
+          data: {
+            status: 'ongoing',
+            startedAt: new Date(),
+          },
+        });
+        console.log(`🎮 Match amical ${gameId} démarré (deux joueurs connectés)`);
+        
+        // Envoyer un message à tous les joueurs pour démarrer le match
+        console.log(`📤 Envoi message game_start pour match ${gameId}`);
+        broadcastToGame(gameId, {
+          type: 'game_start',
+          gameId: gameId,
+        });
+        console.log(`✅ Message game_start envoyé pour match ${gameId}`);
+      } else {
+        console.log(`⚠️ Match ${gameId} ne correspond pas aux critères:`, {
+          friendlyMatch: !!friendlyMatch,
+          isOnline: friendlyMatch?.isOnline,
+          status: friendlyMatch?.status,
+        });
+      }
+    } catch (error) {
+      // Si ce n'est pas un match amical, ignorer l'erreur
+      console.error(`❌ Erreur lors de la vérification du match amical ${gameId}:`, error);
+      fastify.log.debug('Match non trouvé ou erreur lors de la mise à jour du statut (peut être un match de tournoi)');
+    }
+  } else {
+    console.log(`ℹ️ Room size pour match ${gameId}: ${roomSize} (attendu: 2)`);
+  }
 
   broadcastToGame(gameId, { // rp notify other players about the join
     type: 'player_joined', // rp message type for clients
@@ -113,7 +197,7 @@ async function handleWebSocketMessage( // rp route websocket messages by type
 ) { // rp start router
   switch (message.type) { // rp inspect message type
     case 'join_game': // rp join command
-      handleJoinGame(ws, message); // rp process join logic
+      await handleJoinGame(fastify, ws, message); // rp process join logic
       break; // rp exit switch branch
     case 'player_move': // rp move command
       await handlePlayerMove(fastify, ws, message); // rp process movement
@@ -125,6 +209,7 @@ async function handleWebSocketMessage( // rp route websocket messages by type
 
 export function setupWebSocketRoute(fastify: FastifyInstance) { // rp register websocket endpoint
   fastify.get('/ws', { websocket: true } as any, (connection: any) => { // rp expose websocket route on /ws
+    console.log('✅ Nouvelle connexion WebSocket reçue'); // rp log new websocket connection
     fastify.log.info('✅ Nouvelle connexion WebSocket'); // rp log new websocket connection
 
     let socket: any = null; // rp placeholder to hold actual websocket object

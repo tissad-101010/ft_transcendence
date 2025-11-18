@@ -116,6 +116,18 @@ function buttonNavigation(
 
 export function genJoinMatch(env: Env) : StackPanel
 {
+    // Vérifier que env.advancedTexture existe et a une scène associée
+    if (!env.advancedTexture) {
+        console.error("❌ genJoinMatch: advancedTexture n'est pas défini");
+        const errorPage = new StackPanel();
+        errorPage.isVertical = true;
+        const errorText = new TextBlock();
+        errorText.text = "Erreur: Texture GUI non disponible";
+        errorText.color = "red";
+        errorPage.addControl(errorText);
+        return errorPage;
+    }
+
     const page = new StackPanel();
     page.isVertical = true;
     page.paddingTop = "70px";
@@ -143,6 +155,7 @@ export function genJoinMatch(env: Env) : StackPanel
     container.width = "100%";
     container.isVertical = true;
     container.spacing = 20;
+    // S'assurer que le container est lié à la texture GUI avant d'ajouter des contrôles
     scrollViewer.addControl(container);
 
     // En-tête du tableau
@@ -441,22 +454,60 @@ export function genJoinMatch(env: Env) : StackPanel
         }
     };
 
-    // Charger les matchs au chargement de la page
-    loadMatches();
-
-    // Rafraîchir la liste toutes les 2 secondes pour une meilleure réactivité
-    const refreshInterval = setInterval(() => {
-        loadMatches();
-    }, 2000);
-    
+    // Ne pas charger les matchs immédiatement, attendre que la page soit ajoutée à la grille
     // Stocker la fonction de rafraîchissement dans l'environnement pour pouvoir l'appeler depuis l'extérieur
     (env as any).refreshJoinMatchList = loadMatches;
     
-    // Stocker aussi l'intervalle pour pouvoir le nettoyer si nécessaire
-    (env as any).refreshJoinMatchInterval = refreshInterval;
-
-    // Nettoyer l'intervalle quand la page est fermée (optionnel)
-    // Note: Dans un vrai projet, il faudrait gérer le nettoyage proprement
+    // Charger les matchs après un court délai pour s'assurer que la page est ajoutée à la grille
+    // Vérifier que le container est correctement attaché en vérifiant s'il a un parent
+    const tryLoadMatches = () => {
+        // Vérifier que le container a un parent (signifie qu'il est attaché à la hiérarchie GUI)
+        // Si parent est null, le contrôle n'est plus attaché
+        if (container.parent) {
+            try {
+                loadMatches();
+                
+                // Rafraîchir la liste toutes les 2 secondes pour une meilleure réactivité
+                const refreshInterval = setInterval(() => {
+                    // Vérifier que le container a toujours un parent
+                    // Si parent devient null, cela signifie que le contrôle a été supprimé
+                    if (container.parent) {
+                        try {
+                            loadMatches();
+                        } catch (error) {
+                            console.error("❌ Erreur lors du rafraîchissement des matchs:", error);
+                            // Arrêter l'intervalle en cas d'erreur
+                            clearInterval(refreshInterval);
+                        }
+                    } else {
+                        // Si le container n'est plus attaché (parent est null), arrêter l'intervalle
+                        clearInterval(refreshInterval);
+                    }
+                }, 2000);
+                
+                // Stocker aussi l'intervalle pour pouvoir le nettoyer si nécessaire
+                (env as any).refreshJoinMatchInterval = refreshInterval;
+            } catch (error) {
+                console.error("❌ Erreur lors du chargement initial des matchs:", error);
+            }
+        } else {
+            // Réessayer après un court délai (maximum 10 tentatives pour éviter une boucle infinie)
+            const maxRetries = 10;
+            let retryCount = (env as any).__loadMatchesRetryCount || 0;
+            if (retryCount < maxRetries) {
+                (env as any).__loadMatchesRetryCount = retryCount + 1;
+                setTimeout(tryLoadMatches, 50);
+            } else {
+                console.warn("⚠️ Impossible de charger les matchs après plusieurs tentatives");
+            }
+        }
+    };
+    
+    // Réinitialiser le compteur de tentatives
+    (env as any).__loadMatchesRetryCount = 0;
+    
+    // Démarrer la tentative de chargement après un court délai
+    setTimeout(tryLoadMatches, 100);
 
     return (page);
 }

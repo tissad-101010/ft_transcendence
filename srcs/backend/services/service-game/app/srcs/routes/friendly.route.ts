@@ -164,6 +164,7 @@ export async function friendlyRoutes(fastify: FastifyInstance) {
       };
 
       let player2_id = body.player2_id;
+      fastify.log.info(`🔍 Tentative de rejoindre le match ${matchId} par le joueur ${player2_id}`);
 
       // Récupérer le match
       const match = await (fastify.prisma as any).friendlyMatch.findUnique({
@@ -179,11 +180,14 @@ export async function friendlyRoutes(fastify: FastifyInstance) {
       });
 
       if (!match) {
+        fastify.log.warn(`❌ Match ${matchId} non trouvé`);
         return reply.code(404).send({
           success: false,
           message: 'Match non trouvé',
         });
       }
+
+      fastify.log.info(`📋 Match ${matchId} trouvé: player1Id=${match.player1Id}, player2Id=${match.player2Id}, isOnline=${match.isOnline}, status=${match.status}`);
 
       if (match.status !== 'waiting') {
         return reply.code(400).send({
@@ -192,11 +196,155 @@ export async function friendlyRoutes(fastify: FastifyInstance) {
         });
       }
 
+      // Pour les matchs en ligne, permettre au créateur de "rejoindre" son propre match
+      // (pour se connecter via websocket, mais sans définir player2Id)
+      // Pour les matchs locaux, permettre au créateur de rejoindre son propre match
+      // (pour jouer en local avec deux joueurs sur le même clavier)
       if (match.player1Id === player2_id) {
+        if (match.isOnline) {
+          // Pour les matchs en ligne, le créateur peut se connecter via websocket
+          // Retourner le match sans modifier player2Id
+          fastify.log.info(`ℹ️ Créateur ${player2_id} rejoint son propre match en ligne ${matchId} (connexion websocket)`);
+          const existingMatch = await (fastify.prisma as any).friendlyMatch.findUnique({
+            where: { id: match.id },
+            include: {
+              player1: {
+                select: {
+                  id: true,
+                  login: true,
+                },
+              },
+              player2: {
+                select: {
+                  id: true,
+                  login: true,
+                },
+              },
+            },
+          });
+          return reply.code(200).send({
+            success: true,
+            match: {
+              ...existingMatch,
+              isOnline: match.isOnline || false,
+            },
+          });
+        } else {
+          // Pour les matchs locaux, le créateur peut rejoindre son propre match
+          // (pour jouer en local avec deux joueurs sur le même clavier)
+          // Si player2Id est déjà défini et différent de player1Id, un autre joueur a déjà rejoint
+          if (match.player2Id !== null && match.player2Id !== match.player1Id) {
+            fastify.log.warn(`⚠️ Match ${matchId} local: un autre joueur a déjà rejoint (player2Id=${match.player2Id})`);
+            return reply.code(400).send({
+              success: false,
+              message: 'Ce match est déjà complet',
+            });
+          }
+          
+          // Permettre au créateur de rejoindre son propre match local
+          fastify.log.info(`ℹ️ Créateur ${player2_id} rejoint son propre match local ${matchId} (joueur local)`);
+          
+          // Vérifier que l'utilisateur existe
+          let user = await (fastify.prisma as any).user.findUnique({
+            where: { id: player2_id },
+          });
+
+          if (!user) {
+            user = await (fastify.prisma as any).user.upsert({
+              where: { login: `player${player2_id}` },
+              update: {},
+              create: {
+                login: `player${player2_id}`,
+                email: `player${player2_id}@test.com`,
+                password: 'test123',
+              },
+            });
+            fastify.log.info(`✅ Utilisateur de test trouvé/créé: ID ${user.id}, login: ${user.login}`);
+            player2_id = user.id;
+          }
+          
+          // Mettre à jour le match pour permettre deux joueurs locaux sur le même clavier
+          // Si player2Id est null, le définir à player1Id pour permettre le match local
+          const updatedMatch = await (fastify.prisma as any).friendlyMatch.update({
+            where: { id: match.id },
+            data: {
+              player2Id: match.player2Id === null ? player2_id : match.player2Id,
+              status: 'ongoing',
+              startedAt: new Date(),
+            },
+            include: {
+              player1: {
+                select: {
+                  id: true,
+                  login: true,
+                },
+              },
+              player2: {
+                select: {
+                  id: true,
+                  login: true,
+                },
+              },
+            },
+          });
+
+          fastify.log.info(`✅ Match amical local ${matchId} rejoint par créateur ${player2_id} (match local)`);
+
+          return reply.code(200).send({
+            success: true,
+            match: {
+              ...updatedMatch,
+              isOnline: match.isOnline || false,
+            },
+          });
+        }
+      }
+
+      // Si le joueur a déjà rejoint ce match, retourner succès
+      if (match.player2Id === player2_id) {
+        fastify.log.info(`ℹ️ Joueur ${player2_id} a déjà rejoint le match ${matchId}`);
+        const existingMatch = await (fastify.prisma as any).friendlyMatch.findUnique({
+          where: { id: match.id },
+          include: {
+            player1: {
+              select: {
+                id: true,
+                login: true,
+              },
+            },
+            player2: {
+              select: {
+                id: true,
+                login: true,
+              },
+            },
+          },
+        });
+        return reply.code(200).send({
+          success: true,
+          match: {
+            ...existingMatch,
+            isOnline: match.isOnline || false,
+          },
+        });
+      }
+
+      // Pour les matchs en ligne, vérifier si un autre joueur a déjà rejoint
+      // (même si le statut est encore 'waiting', on ne peut avoir qu'un seul player2)
+      // Exception : si player2Id === player1Id, c'est que le créateur a rejoint son propre match
+      // dans une version antérieure, on permet à un autre joueur de remplacer
+      if (match.isOnline && match.player2Id !== null && match.player2Id !== match.player1Id) {
+        fastify.log.warn(`⚠️ Match ${matchId} en ligne: player2Id=${match.player2Id}, tentative de rejoindre avec player2_id=${player2_id}`);
+        fastify.log.warn(`⚠️ Détails: match.player1Id=${match.player1Id}, match.player2Id=${match.player2Id}, player2_id=${player2_id}, match.isOnline=${match.isOnline}`);
         return reply.code(400).send({
           success: false,
-          message: 'Vous ne pouvez pas rejoindre votre propre match',
+          message: 'Ce match est déjà complet',
         });
+      }
+
+      // Si player2Id === player1Id pour un match en ligne, on remplace par le nouveau joueur
+      if (match.isOnline && match.player2Id === match.player1Id) {
+        fastify.log.info(`🔄 Match ${matchId} en ligne: player2Id était égal à player1Id, remplacement par player2_id=${player2_id}`);
       }
 
       // Vérifier que l'utilisateur existe, sinon le créer
@@ -220,12 +368,18 @@ export async function friendlyRoutes(fastify: FastifyInstance) {
       }
 
       // Mettre à jour le match
+      // Pour les matchs en ligne, garder le statut 'waiting' jusqu'à ce que les deux joueurs soient connectés via websocket
+      // Pour les matchs locaux, passer à 'ongoing' immédiatement
+      const isOnline = match.isOnline || false;
+      const newStatus = isOnline ? 'waiting' : 'ongoing';
+      const startedAt = isOnline ? null : new Date();
+
       const updatedMatch = await (fastify.prisma as any).friendlyMatch.update({
         where: { id: match.id },
         data: {
           player2Id: player2_id,
-          status: 'ongoing',
-          startedAt: new Date(),
+          status: newStatus,
+          startedAt: startedAt,
         },
         include: {
           player1: {
@@ -247,7 +401,10 @@ export async function friendlyRoutes(fastify: FastifyInstance) {
 
       return reply.code(200).send({
         success: true,
-        match: updatedMatch,
+        match: {
+          ...updatedMatch,
+          isOnline: match.isOnline || false,
+        },
       });
     } catch (error: unknown) {
       fastify.log.error(error, 'Erreur rejoindre match amical');

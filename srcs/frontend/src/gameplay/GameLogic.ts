@@ -57,8 +57,13 @@ export default class GameLogic
         this.ball = new BallLogic(this.rules.ballSpeed);    
         this.countDownGoal = {active: false, value: this.rules.countDownGoalTime, id: 0};
         if (mode === 0)
+            // Mode local : deux joueurs sur le même clavier
             this.players = [new PlayerLogic(p[0], this.rules.playerSpeed, 1, 0),
                 new PlayerLogic(p[1], this.rules.playerSpeed, 2, 0)];
+        else if (mode === 1)
+            // Mode remote : joueurs en ligne via websockets
+            this.players = [new PlayerLogic(p[0], this.rules.playerSpeed, 1, 1),
+                new PlayerLogic(p[1], this.rules.playerSpeed, 2, 1)];
         else
             this.players = [];
         this.winner = 0;

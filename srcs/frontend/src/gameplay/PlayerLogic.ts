@@ -58,9 +58,15 @@ export default class PlayerLogic
             } else {
                 this.control = null;
             }
-        } else if (player.me) {
-            // Pour les matchs en ligne, utiliser player.me si défini
-            this.control = {up: "q", down: "a"};
+        } else if (this.type === 1) {
+            // Pour les matchs en ligne (type 1), assigner les contrôles selon si c'est moi ou l'adversaire
+            if (player.me) {
+                // Mon joueur : utiliser les flèches haut/bas pour tous les joueurs en ligne
+                this.control = {up: "ArrowUp", down: "ArrowDown"};
+            } else {
+                // Joueur distant : pas de contrôles locaux (sera contrôlé via websocket)
+                this.control = null;
+            }
         } else {
             this.control = null;
         }
@@ -98,6 +104,11 @@ export default class PlayerLogic
     get getAlias() : string
     {
         return (this.alias);
+    }
+
+    get getId() : number
+    {
+        return (this.id);
     }
 
     set setWidth(value: number)

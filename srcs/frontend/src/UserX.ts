@@ -214,8 +214,15 @@ export class UserX
         env: Env
     ) : Promise<boolean>
     {
-        if (!this.user)
+        console.log("🔍 joinFriendlyMatch appelé avec:", { idMatch, idOpp, loginOpp, user: this.user });
+        if (!this.user) {
+            console.error("❌ this.user est null dans joinFriendlyMatch");
             return (false);
+        }
+        if (this.user.id === undefined || this.user.id === null || this.user.id === 0) {
+            console.warn("⚠️ this.user.id est invalide ou 0:", this.user.id, "- Continuons quand même pour déboguer");
+            // On continue quand même pour voir ce qui se passe
+        }
         
         // Appeler l'API pour rejoindre le match
         try {
@@ -239,15 +246,26 @@ export class UserX
 
             const data = await response.json();
             console.log("✅ Match amical rejoint:", data.match);
+            console.log("🌐 Match en ligne:", data.match?.isOnline || false);
 
             const match = new MatchFriendlyOnline(idMatch, r, this.sceneManager);
+            const isOnline = data.match?.isOnline || false;
 
+            console.log("👥 Création des joueurs pour le match:", { 
+                user: this.user, 
+                loginOpp, 
+                idOpp,
+                isOnline 
+            });
+            
             const players = [
                 {alias: loginOpp, id: idOpp, ready: false, me: false},
                 {alias: this.user.login, id: this.user.id, ready: false, me: true}
             ];
+            
+            console.log("👥 Tableau players créé:", players);
 
-            if (!match.init(players))
+            if (!match.init(players, isOnline))
                 return (false);
             
             this.sceneManager.getSceneInteractor?.disableInteractions();
@@ -384,15 +402,25 @@ export class UserX
         // Adapter la structure de l'utilisateur du contexte React vers UserX
         // Le contexte React utilise 'username' mais UserX attend 'login'
         if (user) {
+            // Si l'utilisateur a un ID valide, l'utiliser, sinon garder l'ID existant ou utiliser 1 par défaut
+            const newId = (user.id !== undefined && user.id !== null && user.id > 0) 
+                ? user.id 
+                : (this.user?.id && this.user.id > 0 ? this.user.id : 1);
+            
             this.user = {
-                login: user.username || user.login || "Unknown",
-                id: user.id || 0
+                login: user.username || user.login || this.user?.login || "test",
+                id: newId
             };
             console.log("✅ Utilisateur défini dans UserX:", this.user);
-            console.log("📋 Détails de l'utilisateur - ID:", this.user.id, "Login:", this.user.login);
+            console.log("📋 Détails de l'utilisateur - ID:", this.user.id, "Login:", this.user.login, "ID source:", user.id);
         } else {
-            this.user = null;
-            console.log("⚠️ Utilisateur défini à null dans UserX");
+            // Si user est null, garder l'utilisateur de test existant au lieu de le mettre à null
+            if (!this.user || this.user.id === 0) {
+                this.user = { login: "test", id: 1 };
+                console.log("⚠️ Utilisateur null reçu, utilisation de l'utilisateur de test par défaut");
+            } else {
+                console.log("⚠️ Utilisateur null reçu, conservation de l'utilisateur existant:", this.user);
+            }
         }
     }
     
