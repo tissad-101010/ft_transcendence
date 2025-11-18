@@ -184,6 +184,7 @@ model FriendlyMatch {
   score1      Int       @default(0) // rp: final score of player 1
   score2      Int       @default(0) // rp: final score of player 2
   winnerId    Int?      @map("winner_id") // rp: user id of winner (null if not finished)
+  isOnline    Boolean   @default(false) @map("is_online") // rp: true if match is online (remote), false if local
   createdAt   DateTime  @default(now()) @map("created_at") // rp: when match was created
   startedAt   DateTime? @map("started_at") // rp: when match started
   finishedAt  DateTime? @map("finished_at") // rp: when match finished

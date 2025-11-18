@@ -13,9 +13,10 @@ export async function friendlyRoutes(fastify: FastifyInstance) {
         scoreMax: string;
         timeBefore: string;
         player1_id: number;
+        isOnline?: boolean;
       };
 
-      const { speed, scoreMax, timeBefore } = body;
+      const { speed, scoreMax, timeBefore, isOnline = false } = body;
       let player1_id = body.player1_id;
 
       // Validation des règles
@@ -74,6 +75,7 @@ export async function friendlyRoutes(fastify: FastifyInstance) {
           speed,
           scoreMax,
           timeBefore,
+          isOnline: isOnline,
         },
         include: {
           player1: {
@@ -134,6 +136,7 @@ export async function friendlyRoutes(fastify: FastifyInstance) {
           speed: match.speed,
           time: match.timeBefore,
           score: match.scoreMax,
+          isOnline: match.isOnline || false,
         }));
 
       fastify.log.info(`📋 ${formattedMatches.length} match(s) amical(aux) en attente trouvé(s)`);

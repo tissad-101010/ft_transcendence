@@ -1157,6 +1157,7 @@ export const FriendlyMatchScalarFieldEnum = {
   score1: 'score1',
   score2: 'score2',
   winnerId: 'winnerId',
+  isOnline: 'isOnline',
   createdAt: 'createdAt',
   startedAt: 'startedAt',
   finishedAt: 'finishedAt'

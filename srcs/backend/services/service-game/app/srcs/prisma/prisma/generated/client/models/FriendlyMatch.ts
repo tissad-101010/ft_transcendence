@@ -55,6 +55,7 @@ export type FriendlyMatchMinAggregateOutputType = {
   score1: number | null
   score2: number | null
   winnerId: number | null
+  isOnline: boolean | null
   createdAt: Date | null
   startedAt: Date | null
   finishedAt: Date | null
@@ -71,6 +72,7 @@ export type FriendlyMatchMaxAggregateOutputType = {
   score1: number | null
   score2: number | null
   winnerId: number | null
+  isOnline: boolean | null
   createdAt: Date | null
   startedAt: Date | null
   finishedAt: Date | null
@@ -87,6 +89,7 @@ export type FriendlyMatchCountAggregateOutputType = {
   score1: number
   score2: number
   winnerId: number
+  isOnline: number
   createdAt: number
   startedAt: number
   finishedAt: number
@@ -123,6 +126,7 @@ export type FriendlyMatchMinAggregateInputType = {
   score1?: true
   score2?: true
   winnerId?: true
+  isOnline?: true
   createdAt?: true
   startedAt?: true
   finishedAt?: true
@@ -139,6 +143,7 @@ export type FriendlyMatchMaxAggregateInputType = {
   score1?: true
   score2?: true
   winnerId?: true
+  isOnline?: true
   createdAt?: true
   startedAt?: true
   finishedAt?: true
@@ -155,6 +160,7 @@ export type FriendlyMatchCountAggregateInputType = {
   score1?: true
   score2?: true
   winnerId?: true
+  isOnline?: true
   createdAt?: true
   startedAt?: true
   finishedAt?: true
@@ -258,6 +264,7 @@ export type FriendlyMatchGroupByOutputType = {
   score1: number
   score2: number
   winnerId: number | null
+  isOnline: boolean
   createdAt: Date
   startedAt: Date | null
   finishedAt: Date | null
@@ -297,6 +304,7 @@ export type FriendlyMatchWhereInput = {
   score1?: Prisma.IntFilter<"FriendlyMatch"> | number
   score2?: Prisma.IntFilter<"FriendlyMatch"> | number
   winnerId?: Prisma.IntNullableFilter<"FriendlyMatch"> | number | null
+  isOnline?: Prisma.BoolFilter<"FriendlyMatch"> | boolean
   createdAt?: Prisma.DateTimeFilter<"FriendlyMatch"> | Date | string
   startedAt?: Prisma.DateTimeNullableFilter<"FriendlyMatch"> | Date | string | null
   finishedAt?: Prisma.DateTimeNullableFilter<"FriendlyMatch"> | Date | string | null
@@ -315,6 +323,7 @@ export type FriendlyMatchOrderByWithRelationInput = {
   score1?: Prisma.SortOrder
   score2?: Prisma.SortOrder
   winnerId?: Prisma.SortOrderInput | Prisma.SortOrder
+  isOnline?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   startedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   finishedAt?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -336,6 +345,7 @@ export type FriendlyMatchWhereUniqueInput = Prisma.AtLeast<{
   score1?: Prisma.IntFilter<"FriendlyMatch"> | number
   score2?: Prisma.IntFilter<"FriendlyMatch"> | number
   winnerId?: Prisma.IntNullableFilter<"FriendlyMatch"> | number | null
+  isOnline?: Prisma.BoolFilter<"FriendlyMatch"> | boolean
   createdAt?: Prisma.DateTimeFilter<"FriendlyMatch"> | Date | string
   startedAt?: Prisma.DateTimeNullableFilter<"FriendlyMatch"> | Date | string | null
   finishedAt?: Prisma.DateTimeNullableFilter<"FriendlyMatch"> | Date | string | null
@@ -354,6 +364,7 @@ export type FriendlyMatchOrderByWithAggregationInput = {
   score1?: Prisma.SortOrder
   score2?: Prisma.SortOrder
   winnerId?: Prisma.SortOrderInput | Prisma.SortOrder
+  isOnline?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   startedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   finishedAt?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -378,6 +389,7 @@ export type FriendlyMatchScalarWhereWithAggregatesInput = {
   score1?: Prisma.IntWithAggregatesFilter<"FriendlyMatch"> | number
   score2?: Prisma.IntWithAggregatesFilter<"FriendlyMatch"> | number
   winnerId?: Prisma.IntNullableWithAggregatesFilter<"FriendlyMatch"> | number | null
+  isOnline?: Prisma.BoolWithAggregatesFilter<"FriendlyMatch"> | boolean
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"FriendlyMatch"> | Date | string
   startedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"FriendlyMatch"> | Date | string | null
   finishedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"FriendlyMatch"> | Date | string | null
@@ -391,6 +403,7 @@ export type FriendlyMatchCreateInput = {
   score1?: number
   score2?: number
   winnerId?: number | null
+  isOnline?: boolean
   createdAt?: Date | string
   startedAt?: Date | string | null
   finishedAt?: Date | string | null
@@ -409,6 +422,7 @@ export type FriendlyMatchUncheckedCreateInput = {
   score1?: number
   score2?: number
   winnerId?: number | null
+  isOnline?: boolean
   createdAt?: Date | string
   startedAt?: Date | string | null
   finishedAt?: Date | string | null
@@ -422,6 +436,7 @@ export type FriendlyMatchUpdateInput = {
   score1?: Prisma.IntFieldUpdateOperationsInput | number
   score2?: Prisma.IntFieldUpdateOperationsInput | number
   winnerId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  isOnline?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   finishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -440,6 +455,7 @@ export type FriendlyMatchUncheckedUpdateInput = {
   score1?: Prisma.IntFieldUpdateOperationsInput | number
   score2?: Prisma.IntFieldUpdateOperationsInput | number
   winnerId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  isOnline?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   finishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -456,6 +472,7 @@ export type FriendlyMatchCreateManyInput = {
   score1?: number
   score2?: number
   winnerId?: number | null
+  isOnline?: boolean
   createdAt?: Date | string
   startedAt?: Date | string | null
   finishedAt?: Date | string | null
@@ -469,6 +486,7 @@ export type FriendlyMatchUpdateManyMutationInput = {
   score1?: Prisma.IntFieldUpdateOperationsInput | number
   score2?: Prisma.IntFieldUpdateOperationsInput | number
   winnerId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  isOnline?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   finishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -485,6 +503,7 @@ export type FriendlyMatchUncheckedUpdateManyInput = {
   score1?: Prisma.IntFieldUpdateOperationsInput | number
   score2?: Prisma.IntFieldUpdateOperationsInput | number
   winnerId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  isOnline?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   finishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -511,6 +530,7 @@ export type FriendlyMatchCountOrderByAggregateInput = {
   score1?: Prisma.SortOrder
   score2?: Prisma.SortOrder
   winnerId?: Prisma.SortOrder
+  isOnline?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   startedAt?: Prisma.SortOrder
   finishedAt?: Prisma.SortOrder
@@ -536,6 +556,7 @@ export type FriendlyMatchMaxOrderByAggregateInput = {
   score1?: Prisma.SortOrder
   score2?: Prisma.SortOrder
   winnerId?: Prisma.SortOrder
+  isOnline?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   startedAt?: Prisma.SortOrder
   finishedAt?: Prisma.SortOrder
@@ -552,6 +573,7 @@ export type FriendlyMatchMinOrderByAggregateInput = {
   score1?: Prisma.SortOrder
   score2?: Prisma.SortOrder
   winnerId?: Prisma.SortOrder
+  isOnline?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   startedAt?: Prisma.SortOrder
   finishedAt?: Prisma.SortOrder
@@ -658,6 +680,7 @@ export type FriendlyMatchCreateWithoutPlayer1Input = {
   score1?: number
   score2?: number
   winnerId?: number | null
+  isOnline?: boolean
   createdAt?: Date | string
   startedAt?: Date | string | null
   finishedAt?: Date | string | null
@@ -674,6 +697,7 @@ export type FriendlyMatchUncheckedCreateWithoutPlayer1Input = {
   score1?: number
   score2?: number
   winnerId?: number | null
+  isOnline?: boolean
   createdAt?: Date | string
   startedAt?: Date | string | null
   finishedAt?: Date | string | null
@@ -697,6 +721,7 @@ export type FriendlyMatchCreateWithoutPlayer2Input = {
   score1?: number
   score2?: number
   winnerId?: number | null
+  isOnline?: boolean
   createdAt?: Date | string
   startedAt?: Date | string | null
   finishedAt?: Date | string | null
@@ -713,6 +738,7 @@ export type FriendlyMatchUncheckedCreateWithoutPlayer2Input = {
   score1?: number
   score2?: number
   winnerId?: number | null
+  isOnline?: boolean
   createdAt?: Date | string
   startedAt?: Date | string | null
   finishedAt?: Date | string | null
@@ -758,6 +784,7 @@ export type FriendlyMatchScalarWhereInput = {
   score1?: Prisma.IntFilter<"FriendlyMatch"> | number
   score2?: Prisma.IntFilter<"FriendlyMatch"> | number
   winnerId?: Prisma.IntNullableFilter<"FriendlyMatch"> | number | null
+  isOnline?: Prisma.BoolFilter<"FriendlyMatch"> | boolean
   createdAt?: Prisma.DateTimeFilter<"FriendlyMatch"> | Date | string
   startedAt?: Prisma.DateTimeNullableFilter<"FriendlyMatch"> | Date | string | null
   finishedAt?: Prisma.DateTimeNullableFilter<"FriendlyMatch"> | Date | string | null
@@ -789,6 +816,7 @@ export type FriendlyMatchCreateManyPlayer1Input = {
   score1?: number
   score2?: number
   winnerId?: number | null
+  isOnline?: boolean
   createdAt?: Date | string
   startedAt?: Date | string | null
   finishedAt?: Date | string | null
@@ -804,6 +832,7 @@ export type FriendlyMatchCreateManyPlayer2Input = {
   score1?: number
   score2?: number
   winnerId?: number | null
+  isOnline?: boolean
   createdAt?: Date | string
   startedAt?: Date | string | null
   finishedAt?: Date | string | null
@@ -817,6 +846,7 @@ export type FriendlyMatchUpdateWithoutPlayer1Input = {
   score1?: Prisma.IntFieldUpdateOperationsInput | number
   score2?: Prisma.IntFieldUpdateOperationsInput | number
   winnerId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  isOnline?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   finishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -833,6 +863,7 @@ export type FriendlyMatchUncheckedUpdateWithoutPlayer1Input = {
   score1?: Prisma.IntFieldUpdateOperationsInput | number
   score2?: Prisma.IntFieldUpdateOperationsInput | number
   winnerId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  isOnline?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   finishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -848,6 +879,7 @@ export type FriendlyMatchUncheckedUpdateManyWithoutPlayer1Input = {
   score1?: Prisma.IntFieldUpdateOperationsInput | number
   score2?: Prisma.IntFieldUpdateOperationsInput | number
   winnerId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  isOnline?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   finishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -861,6 +893,7 @@ export type FriendlyMatchUpdateWithoutPlayer2Input = {
   score1?: Prisma.IntFieldUpdateOperationsInput | number
   score2?: Prisma.IntFieldUpdateOperationsInput | number
   winnerId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  isOnline?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   finishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -877,6 +910,7 @@ export type FriendlyMatchUncheckedUpdateWithoutPlayer2Input = {
   score1?: Prisma.IntFieldUpdateOperationsInput | number
   score2?: Prisma.IntFieldUpdateOperationsInput | number
   winnerId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  isOnline?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   finishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -892,6 +926,7 @@ export type FriendlyMatchUncheckedUpdateManyWithoutPlayer2Input = {
   score1?: Prisma.IntFieldUpdateOperationsInput | number
   score2?: Prisma.IntFieldUpdateOperationsInput | number
   winnerId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  isOnline?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   finishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -910,6 +945,7 @@ export type FriendlyMatchSelect<ExtArgs extends runtime.Types.Extensions.Interna
   score1?: boolean
   score2?: boolean
   winnerId?: boolean
+  isOnline?: boolean
   createdAt?: boolean
   startedAt?: boolean
   finishedAt?: boolean
@@ -928,6 +964,7 @@ export type FriendlyMatchSelectCreateManyAndReturn<ExtArgs extends runtime.Types
   score1?: boolean
   score2?: boolean
   winnerId?: boolean
+  isOnline?: boolean
   createdAt?: boolean
   startedAt?: boolean
   finishedAt?: boolean
@@ -946,6 +983,7 @@ export type FriendlyMatchSelectUpdateManyAndReturn<ExtArgs extends runtime.Types
   score1?: boolean
   score2?: boolean
   winnerId?: boolean
+  isOnline?: boolean
   createdAt?: boolean
   startedAt?: boolean
   finishedAt?: boolean
@@ -964,12 +1002,13 @@ export type FriendlyMatchSelectScalar = {
   score1?: boolean
   score2?: boolean
   winnerId?: boolean
+  isOnline?: boolean
   createdAt?: boolean
   startedAt?: boolean
   finishedAt?: boolean
 }
 
-export type FriendlyMatchOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "player1Id" | "player2Id" | "status" | "speed" | "scoreMax" | "timeBefore" | "score1" | "score2" | "winnerId" | "createdAt" | "startedAt" | "finishedAt", ExtArgs["result"]["friendlyMatch"]>
+export type FriendlyMatchOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "player1Id" | "player2Id" | "status" | "speed" | "scoreMax" | "timeBefore" | "score1" | "score2" | "winnerId" | "isOnline" | "createdAt" | "startedAt" | "finishedAt", ExtArgs["result"]["friendlyMatch"]>
 export type FriendlyMatchInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   player1?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   player2?: boolean | Prisma.FriendlyMatch$player2Args<ExtArgs>
@@ -1000,6 +1039,7 @@ export type $FriendlyMatchPayload<ExtArgs extends runtime.Types.Extensions.Inter
     score1: number
     score2: number
     winnerId: number | null
+    isOnline: boolean
     createdAt: Date
     startedAt: Date | null
     finishedAt: Date | null
@@ -1438,6 +1478,7 @@ export interface FriendlyMatchFieldRefs {
   readonly score1: Prisma.FieldRef<"FriendlyMatch", 'Int'>
   readonly score2: Prisma.FieldRef<"FriendlyMatch", 'Int'>
   readonly winnerId: Prisma.FieldRef<"FriendlyMatch", 'Int'>
+  readonly isOnline: Prisma.FieldRef<"FriendlyMatch", 'Boolean'>
   readonly createdAt: Prisma.FieldRef<"FriendlyMatch", 'DateTime'>
   readonly startedAt: Prisma.FieldRef<"FriendlyMatch", 'DateTime'>
   readonly finishedAt: Prisma.FieldRef<"FriendlyMatch", 'DateTime'>

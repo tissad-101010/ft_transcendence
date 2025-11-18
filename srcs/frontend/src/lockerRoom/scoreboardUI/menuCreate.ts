@@ -304,12 +304,13 @@ export function genJoinMatch(env: Env) : StackPanel
                 rect.addControl(panel);
 
                 const login = new TextBlock();
-                login.text = m.login;
+                // Afficher "R" si le match est en ligne
+                login.text = m.isOnline ? `${m.login} (R)` : m.login;
                 login.fontSize = env.UIData.text.fontSize;
                 login.fontFamily = env.UIData.text.fontFamily;
                 login.width = "100px";
                 login.height = "100px";
-                login.color = "black";
+                login.color = m.isOnline ? "blue" : "black"; // Bleu pour les matchs en ligne
                 panel.addControl(login);
 
                 const speed = new TextBlock();
@@ -497,7 +498,10 @@ function match(
         mode: -1,
         onCreateMatch: async (rules: MatchRules) => {
             console.log("🚀 onCreateMatch appelé avec les règles:", rules);
-            const success = await env.userX.createFriendlyMatch(rules);
+            // mode: 0 = Local, 1 = En ligne
+            const isOnline = settings.mode === 1;
+            console.log("🌐 Mode du match:", isOnline ? "En ligne" : "Local");
+            const success = await env.userX.createFriendlyMatch(rules, isOnline);
             if (success) {
                 console.log("✅ Match créé, rafraîchissement de la liste...");
                 // Rafraîchir la liste des matchs si on est sur la page "Rejoindre"

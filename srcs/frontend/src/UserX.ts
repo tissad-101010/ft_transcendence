@@ -144,7 +144,8 @@ export class UserX
     }
 
     async createFriendlyMatch(
-        r: MatchRules
+        r: MatchRules,
+        isOnline: boolean = false
     ) : Promise<boolean>
     {
         if (!this.user) {
@@ -154,6 +155,7 @@ export class UserX
         
         console.log("🔄 Création d'un match amical avec l'utilisateur:", this.user);
         console.log("📋 Règles du match:", r);
+        console.log("🌐 Mode:", isOnline ? "En ligne" : "Local");
         
         // Créer le match dans la base de données
         try {
@@ -162,6 +164,7 @@ export class UserX
                 scoreMax: r.score || "5",
                 timeBefore: r.timeBefore || "3",
                 player1_id: this.user.id,
+                isOnline: isOnline,
             };
             console.log("📤 Envoi de la requête POST /api/friendly/create avec:", requestBody);
             
