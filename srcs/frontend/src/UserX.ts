@@ -57,6 +57,12 @@ export class UserX
 
     private simuEnAttendantBDD() : void
     {
+        // Initialiser un utilisateur de test par défaut
+        // Cet utilisateur sera remplacé par l'utilisateur réel du contexte React
+        // si l'utilisateur est connecté via BabylonScene.tsx
+        this.user = { login: "test", id: 1 };
+        console.log("🔧 UserX initialisé avec utilisateur de test:", this.user);
+        
         this.addFriend("Lolo");
         this.addFriend("Tissad");
         this.addFriend("Val");
@@ -137,64 +143,125 @@ export class UserX
         return (t.playMatch(m, this.user.id, sceneManager));
     }
 
-    createFriendlyMatch(
+    async createFriendlyMatch(
         r: MatchRules
-    ) : boolean
+    ) : Promise<boolean>
     {
-        if (!this.user)
+        if (!this.user) {
+            console.error("❌ Impossible de créer un match amical: utilisateur non défini dans UserX");
             return (false);
-        // Creer un nouveau match dans la bdd pour recuperer son ID, permet aussi de l'ajouter
-        // dans une liste de matchs en attente d'un joueur (creer une colonne pour dans la BDD)
-        /* var tmp en attendant bdd */ const idMatch = 2;
-        const match = new MatchFriendlyOnline(idMatch, r, this.sceneManager);
+        }
+        
+        console.log("🔄 Création d'un match amical avec l'utilisateur:", this.user);
+        console.log("📋 Règles du match:", r);
+        
+        // Créer le match dans la base de données
+        try {
+            const requestBody = {
+                speed: r.speed || "1",
+                scoreMax: r.score || "5",
+                timeBefore: r.timeBefore || "3",
+                player1_id: this.user.id,
+            };
+            console.log("📤 Envoi de la requête POST /api/friendly/create avec:", requestBody);
+            
+            const response = await fetch("https://localhost:8443/api/friendly/create", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Accept: "application/json",
+                },
+                credentials: "include",
+                body: JSON.stringify(requestBody),
+            });
 
-        // Ecran d'attente d'un joueur
+            console.log("📡 Réponse reçue:", response.status, response.statusText);
+            
+            if (!response.ok) {
+                const errorText = await response.text();
+                let errorData;
+                try {
+                    errorData = JSON.parse(errorText);
+                } catch {
+                    errorData = { message: errorText };
+                }
+                console.error("❌ Erreur lors de la création du match amical:", response.status, errorData);
+                return (false);
+            }
 
-
-        // Recuperer les informations du joueur qui a rejoint
-        const opp = {login: "test", id: 12};
-        const players = [
-            {alias: this.user.login, id: this.user.id, ready: false, me: true},
-            {alias: opp.login, id: opp.id, ready: false, me: false}
-        ];
-
-        if (!match.init(players))
+            const data = await response.json();
+            console.log("✅ Match amical créé dans la base de données:", data.matchId);
+            console.log("📋 Détails du match créé:", data.match);
+            console.log("📊 Statut du match créé:", data.match?.status || "N/A");
+            
+            // Le match est créé et en attente d'un joueur
+            // L'écran d'attente sera géré par l'interface
+            return (true);
+        } catch (error) {
+            console.error("Erreur lors de l'appel API pour créer le match amical:", error);
             return (false);
-
-        return (true);
+        }
     }
 
-    joinFriendlyMatch(
+    async joinFriendlyMatch(
         r: MatchRules,
         idMatch: number,
         idOpp: number,
         loginOpp: string,
         env: Env
-    ) : boolean
+    ) : Promise<boolean>
     {
         if (!this.user)
             return (false);
-        const match = new MatchFriendlyOnline(idMatch, r, this.sceneManager);
-
-        const players = [
-            {alias: loginOpp, id: idOpp, ready: false, me: false},
-            {alias: this.user.login, id: this.user.id, ready: false, me: true}
-        ];
-
-        if (!match.init(players))
-            return (false);
         
-        this.sceneManager.getSceneInteractor?.disableInteractions();
-        // env.menuContainer.dispose();
-        env.scoreboard.setClic = false;
-        env.scoreboard.setPlayMatch = true;
-        this.sceneManager.moveCameraTo(ZoneName.FIELD, () => {
-            this.sceneManager.setSpecificMesh(false);
-            this.sceneManager.getSceneInteractor?.enableInteractionScene();
-        });
+        // Appeler l'API pour rejoindre le match
+        try {
+            const response = await fetch(`https://localhost:8443/api/friendly/${idMatch}/join`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Accept: "application/json",
+                },
+                credentials: "include",
+                body: JSON.stringify({
+                    player2_id: this.user.id,
+                }),
+            });
 
-        match.play();
-        return (true);
+            if (!response.ok) {
+                const errorData = await response.json();
+                console.error("Erreur lors de la jonction au match amical:", errorData);
+                return (false);
+            }
+
+            const data = await response.json();
+            console.log("✅ Match amical rejoint:", data.match);
+
+            const match = new MatchFriendlyOnline(idMatch, r, this.sceneManager);
+
+            const players = [
+                {alias: loginOpp, id: idOpp, ready: false, me: false},
+                {alias: this.user.login, id: this.user.id, ready: false, me: true}
+            ];
+
+            if (!match.init(players))
+                return (false);
+            
+            this.sceneManager.getSceneInteractor?.disableInteractions();
+            // env.menuContainer.dispose();
+            env.scoreboard.setClic = false;
+            env.scoreboard.setPlayMatch = true;
+            this.sceneManager.moveCameraTo(ZoneName.FIELD, () => {
+                this.sceneManager.setSpecificMesh(false);
+                this.sceneManager.getSceneInteractor?.enableInteractionScene();
+            });
+
+            match.play();
+            return (true);
+        } catch (error) {
+            console.error("Erreur lors de l'appel API pour rejoindre le match amical:", error);
+            return (false);
+        }
     }
 
     
@@ -275,9 +342,15 @@ export class UserX
                 id: user.id || 0
             };
             console.log("✅ Utilisateur défini dans UserX:", this.user);
+            console.log("📋 Détails de l'utilisateur - ID:", this.user.id, "Login:", this.user.login);
         } else {
             this.user = null;
-            console.log("⚠️ Utilisateur défini à null");
+            console.log("⚠️ Utilisateur défini à null dans UserX");
         }
+    }
+    
+    public get getUser() : User | null
+    {
+        return (this.user);
     }
 }

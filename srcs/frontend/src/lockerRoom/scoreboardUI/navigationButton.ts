@@ -159,12 +159,49 @@ export function startButton(
     setting: DataMatchBlock
 ) : void
 {
+    // Vérifier que l'utilisateur est défini
+    const user = (env.userX as any).getUser;
+    if (!user) {
+        console.error("❌ Impossible de créer un match: utilisateur non défini dans UserX");
+        alert("Erreur: Vous devez être connecté pour créer un match amical");
+        return;
+    }
+    
+    console.log("🔄 Création d'un match amical avec l'utilisateur:", user);
+    
     const rules = {
         speed: setting.data.speed,
         timeBefore: setting.data.timeBefore,
         score: setting.data.score
     }
-    env.userX.createFriendlyMatch(rules);
+    
+    console.log("📋 Règles du match:", rules);
+    
+    console.log("🚀 Appel de createFriendlyMatch avec les règles:", rules);
+    
+    env.userX.createFriendlyMatch(rules).then((success) => {
+        console.log("📥 Réponse de createFriendlyMatch:", success);
+        if (success) {
+            console.log("✅ Match amical créé avec succès");
+            // Rafraîchir la liste des matchs si on est sur la page "Rejoindre"
+            if ((env as any).refreshJoinMatchList) {
+                console.log("🔄 Rafraîchissement de la liste des matchs...");
+                // Augmenter le délai pour s'assurer que le match est bien enregistré
+                setTimeout(() => {
+                    console.log("🔄 Exécution du rafraîchissement de la liste...");
+                    (env as any).refreshJoinMatchList();
+                }, 1000); // Augmenter à 1 seconde pour être sûr
+            } else {
+                console.warn("⚠️ refreshJoinMatchList n'est pas défini");
+            }
+        } else {
+            console.error("❌ Échec de la création du match amical (success = false)");
+            alert("Erreur lors de la création du match amical. Vérifiez la console pour plus de détails.");
+        }
+    }).catch((error) => {
+        console.error("❌ Erreur lors de la création du match amical:", error);
+        alert("Erreur lors de la création du match amical: " + (error.message || String(error)));
+    });
 }
 
 export function backButton(

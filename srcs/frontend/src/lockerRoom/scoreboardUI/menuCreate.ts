@@ -137,7 +137,6 @@ export function genJoinMatch(env: Env) : StackPanel
     scrollViewer.background = "transparent";
     scrollViewer.barColor = env.UIData.text.color;
     scrollViewer.thickness = 0;
-    scrollViewer.horizontalBarVisible = false;
     page.addControl(scrollViewer);
 
     const container = new StackPanel();
@@ -146,155 +145,264 @@ export function genJoinMatch(env: Env) : StackPanel
     container.spacing = 20;
     scrollViewer.addControl(container);
 
-    /*
-        tableau utile pour simuler une liste de matchs crees par d'autres utilisateurs
-        id -> id du match
-        speed/time/score -> Regle defini pour le match
-    */
-    const matchs = [
-        {idMatch: 0, idUser: 1, login: "Lolo", speed: "2", time: "4", score: "5"},
-        {idMatch: 1, idUser: 1, login: "Lolo", speed: "2", time: "4", score: "5"},
-        {idMatch: 2, idUser: 1, login: "Lolo", speed: "2", time: "4", score: "5"},
-        {idMatch: 3, idUser: 1, login: "Lolo", speed: "2", time: "4", score: "5"},
-        {idMatch: 4, idUser: 1, login: "Lolo", speed: "2", time: "4", score: "5"},
-        {idMatch: 5, idUser: 1, login: "Lolo", speed: "2", time: "4", score: "5"},
-        {idMatch: 6, idUser: 1, login: "Lolo", speed: "2", time: "4", score: "5"},
-        {idMatch: 7, idUser: 1, login: "Lolo", speed: "2", time: "4", score: "5"},
-        {idMatch: 8, idUser: 1, login: "Lolo", speed: "2", time: "4", score: "5"},
-        {idMatch: 9, idUser: 1, login: "Lolo", speed: "2", time: "4", score: "5"},
-        {idMatch: 10, idUser: 1, login: "Lolo", speed: "2", time: "4", score: "5"},
-        {idMatch: 11, idUser: 1, login: "Lolo", speed: "2", time: "4", score: "5"},
-        {idMatch: 12, idUser: 1, login: "Lolo", speed: "2", time: "4", score: "5"}
-    ];
+    // En-tête du tableau
+    const headerRect = new Rectangle();
+    headerRect.width = "500px";
+    headerRect.height = "50px";
+    headerRect.background = "white";
+    headerRect.thickness = 5;
+    headerRect.color = "black";
+    headerRect.horizontalAlignment = Control.HORIZONTAL_ALIGNMENT_CENTER;
+    container.addControl(headerRect);
 
-    const rect = new Rectangle();
-    rect.width = "500px";
-    rect.height = "50px";
-    rect.background = "white";
-    rect.thickness = 5;
-    rect.color = "black";
-    container.addControl(rect);
+    const headerPanel = new StackPanel();
+    headerPanel.isVertical = false;
+    headerPanel.width = "500px";
+    headerPanel.height = "100px";
+    headerRect.addControl(headerPanel);
 
-    const panel = new StackPanel();
-    panel.isVertical = false;
-    panel.width = "500px";
-    panel.height = "100px";
-    rect.addControl(panel);
+    const headerLogin = new TextBlock();
+    headerLogin.text = "Login";
+    headerLogin.fontSize = env.UIData.text.fontSize;
+    headerLogin.fontFamily = env.UIData.text.fontFamily;
+    headerLogin.width = "100px";
+    headerLogin.height = "100px";
+    headerLogin.color = "black";
+    headerPanel.addControl(headerLogin);
 
-    const login = new TextBlock();
-    login.text = "Login";
-    login.fontSize = env.UIData.text.fontSize;
-    login.fontFamily = env.UIData.text.fontFamily;
-    login.width = "100px";
-    login.height = "100px";
-    login.color = "black";
-    panel.addControl(login);
+    const headerSpeed = new TextBlock();
+    headerSpeed.text = "Vitesse";
+    headerSpeed.fontSize = env.UIData.text.fontSize;
+    headerSpeed.fontFamily = env.UIData.text.fontFamily;
+    headerSpeed.width = "100px";
+    headerSpeed.height = "100px";
+    headerSpeed.color = "black";
+    headerPanel.addControl(headerSpeed);
 
-    const speed = new TextBlock();
-    speed.text = "Vitesse";
-    speed.fontSize = env.UIData.text.fontSize;
-    speed.fontFamily = env.UIData.text.fontFamily;
-    speed.width = "100px";
-    speed.height = "100px";
-    speed.color = "black";
-    panel.addControl(speed);
+    const headerTime = new TextBlock();
+    headerTime.text = "Delai";
+    headerTime.fontSize = env.UIData.text.fontSize;
+    headerTime.fontFamily = env.UIData.text.fontFamily;
+    headerTime.width = "100px";
+    headerTime.height = "100px";
+    headerTime.color = "black";
+    headerPanel.addControl(headerTime);
 
-    const time = new TextBlock();
-    time.text = "Delai";
-    time.fontSize = env.UIData.text.fontSize;
-    time.fontFamily = env.UIData.text.fontFamily;
-    time.width = "100px";
-    time.height = "100px";
-    time.color = "black";
-    panel.addControl(time);
+    const headerScore = new TextBlock();
+    headerScore.text = "Score";
+    headerScore.fontSize = env.UIData.text.fontSize;
+    headerScore.fontFamily = env.UIData.text.fontFamily;
+    headerScore.width = "100px";
+    headerScore.height = "100px";
+    headerScore.color = "black";
+    headerPanel.addControl(headerScore);
 
-    const score = new TextBlock();
-    score.text = "Score";
-    score.fontSize = env.UIData.text.fontSize;
-    score.fontFamily = env.UIData.text.fontFamily;
-    score.width = "100px";
-    score.height = "100px";
-    score.color = "black";
-    panel.addControl(score);
-    container.addControl(rect);
-
-    matchs.forEach((m) => {
-        const rect = new Rectangle();
-        rect.width = "500px";
-        rect.height = "100px";
-        rect.background = "white";
-        rect.thickness = 3;
-        rect.color = "black";
-        container.addControl(rect);
-
-        const panel = new StackPanel();
-        panel.isVertical = false;
-        panel.width = "500px";
-        panel.height = "100px";
-        rect.addControl(panel);
-
-        const login = new TextBlock();
-        login.text = m.login;
-        login.fontSize = env.UIData.text.fontSize;
-        login.fontFamily = env.UIData.text.fontFamily;
-        login.width = "100px";
-        login.height = "100px";
-        login.color = "black";
-        panel.addControl(login);
-
-        const speed = new TextBlock();
-        speed.text = m.speed;
-        speed.fontSize = env.UIData.text.fontSize;
-        speed.fontFamily = env.UIData.text.fontFamily;
-        speed.width = "100px";
-        speed.height = "100px";
-        speed.color = "black";
-        panel.addControl(speed);
-
-        const time = new TextBlock();
-        time.text = m.time;
-        time.fontSize = env.UIData.text.fontSize;
-        time.fontFamily = env.UIData.text.fontFamily;
-        time.width = "100px";
-        time.height = "100px";
-        time.color = "black";
-        panel.addControl(time);
-
-        const score = new TextBlock();
-        score.text = m.score;
-        score.fontSize = env.UIData.text.fontSize;
-        score.fontFamily = env.UIData.text.fontFamily;
-        score.width = "100px";
-        score.height = "100px";
-        score.color = "black";
-        panel.addControl(score);
-
-        const button = new Rectangle();
-        button.height = "50px";
-        button.width = "50px";
-        button.thickness = env.UIData.button.thickness;
-        button.color = env.UIData.text.color;
-        panel.addControl(button);
-
-        const text = new TextBlock();
-        text.text = "Go";
-        text.color = env.UIData.text.color;
-        text.fontSize = env.UIData.text.fontSize - 4;
-        text.fontFamily = env.UIData.text.fontFamily;
-        button.addControl(text);
+    // Fonction pour charger les matchs depuis l'API
+    const loadMatches = async () => {
+        console.log("🔄 Chargement des matchs amicaux...");
         
-        button.onPointerClickObservable.add(() => {
-            const rules = {
-                speed: m.speed,
-                score: m.score,
-                timeBefore: m.time
-            };
-            if (!env.userX.joinFriendlyMatch(rules, m.idMatch, m.idUser, m.login, env))
-                button.background = "red";
-            else
-                env.scoreboard.leaveMenu();
+        // Nettoyer le conteneur (garder seulement l'en-tête)
+        // On récupère tous les contrôles du conteneur sauf headerRect
+        const controlsToRemove: Control[] = [];
+        if (container.children) {
+            container.children.forEach((control) => {
+                if (control !== headerRect) {
+                    controlsToRemove.push(control);
+                }
+            });
+        }
+        
+        // Supprimer tous les contrôles sauf l'en-tête
+        controlsToRemove.forEach((control) => {
+            container.removeControl(control);
+            control.dispose();
         });
-    });
+
+        try {
+            console.log("🔄 Tentative de récupération des matchs amicaux...");
+            const response = await fetch("https://localhost:8443/api/friendly/list", {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                    Accept: "application/json",
+                },
+                credentials: "include",
+            });
+
+            console.log("📡 Réponse reçue:", response.status, response.statusText);
+
+            if (!response.ok) {
+                console.error("❌ Erreur lors de la récupération des matchs amicaux:", response.status, response.statusText);
+                const errorText = new TextBlock();
+                errorText.text = `Erreur de chargement (${response.status})`;
+                errorText.color = "red";
+                errorText.fontSize = env.UIData.text.fontSize;
+                errorText.fontFamily = env.UIData.text.fontFamily;
+                errorText.width = "500px";
+                errorText.height = "50px";
+                container.addControl(errorText);
+                return;
+            }
+
+            const data = await response.json();
+            console.log("✅ Données reçues:", data);
+            console.log("📦 Données brutes de l'API:", data);
+            
+            const matchs = data.matches || [];
+            
+            console.log("📋 Matchs récupérés depuis l'API:", matchs);
+            console.log("📊 Nombre de matchs:", matchs.length);
+
+            // Réajouter l'en-tête si nécessaire (au cas où il aurait été supprimé)
+            let headerExists = false;
+            if (container.children) {
+                container.children.forEach((control) => {
+                    if (control === headerRect) {
+                        headerExists = true;
+                    }
+                });
+            }
+            if (!headerExists) {
+                container.addControl(headerRect);
+            }
+
+            // Si aucun match, afficher un message
+            if (matchs.length === 0) {
+                console.log("ℹ️ Aucun match disponible");
+                const noMatchText = new TextBlock();
+                noMatchText.text = "Aucun match disponible";
+                noMatchText.color = env.UIData.text.color;
+                noMatchText.fontSize = env.UIData.text.fontSize;
+                noMatchText.fontFamily = env.UIData.text.fontFamily;
+                noMatchText.width = "500px";
+                noMatchText.height = "50px";
+                noMatchText.textHorizontalAlignment = Control.HORIZONTAL_ALIGNMENT_CENTER;
+                container.addControl(noMatchText);
+                return;
+            }
+
+            // Afficher les matchs
+            console.log("✅ Affichage de", matchs.length, "match(s)");
+            console.log("📦 Conteneur avant ajout des matchs:", container.children?.length || 0, "contrôles");
+            
+            matchs.forEach((m: any, index: number) => {
+                console.log(`  📋 Match ${index + 1}:`, m);
+                const rect = new Rectangle();
+                rect.width = "500px";
+                rect.height = "100px";
+                rect.background = "white";
+                rect.thickness = 3;
+                rect.color = "black";
+                rect.horizontalAlignment = Control.HORIZONTAL_ALIGNMENT_CENTER;
+                container.addControl(rect);
+                console.log(`  ✅ Rectangle du match ${index + 1} ajouté au conteneur (total: ${container.children?.length || 0} contrôles)`);
+
+                const panel = new StackPanel();
+                panel.isVertical = false;
+                panel.width = "500px";
+                panel.height = "100px";
+                rect.addControl(panel);
+
+                const login = new TextBlock();
+                login.text = m.login;
+                login.fontSize = env.UIData.text.fontSize;
+                login.fontFamily = env.UIData.text.fontFamily;
+                login.width = "100px";
+                login.height = "100px";
+                login.color = "black";
+                panel.addControl(login);
+
+                const speed = new TextBlock();
+                speed.text = m.speed;
+                speed.fontSize = env.UIData.text.fontSize;
+                speed.fontFamily = env.UIData.text.fontFamily;
+                speed.width = "100px";
+                speed.height = "100px";
+                speed.color = "black";
+                panel.addControl(speed);
+
+                const time = new TextBlock();
+                time.text = m.time;
+                time.fontSize = env.UIData.text.fontSize;
+                time.fontFamily = env.UIData.text.fontFamily;
+                time.width = "100px";
+                time.height = "100px";
+                time.color = "black";
+                panel.addControl(time);
+
+                const score = new TextBlock();
+                score.text = m.score;
+                score.fontSize = env.UIData.text.fontSize;
+                score.fontFamily = env.UIData.text.fontFamily;
+                score.width = "100px";
+                score.height = "100px";
+                score.color = "black";
+                panel.addControl(score);
+
+                const button = new Rectangle();
+                button.height = "50px";
+                button.width = "80px";
+                button.thickness = env.UIData.button.thickness;
+                button.color = env.UIData.text.color;
+                button.background = env.UIData.button.background;
+                panel.addControl(button);
+
+                const text = new TextBlock();
+                text.text = "Go";
+                text.color = env.UIData.text.color;
+                text.fontSize = env.UIData.text.fontSize - 4;
+                text.fontFamily = env.UIData.text.fontFamily;
+                button.addControl(text);
+                
+                button.onPointerClickObservable.add(() => {
+                    const rules = {
+                        speed: m.speed,
+                        score: m.score,
+                        timeBefore: m.time
+                    };
+                    env.userX.joinFriendlyMatch(rules, m.idMatch, m.idUser, m.login, env).then((success) => {
+                        if (!success) {
+                            button.background = "red";
+                        } else {
+                            env.scoreboard.leaveMenu();
+                        }
+                    }).catch((error) => {
+                        console.error("Erreur lors de la jonction au match:", error);
+                        button.background = "red";
+                    });
+                });
+            });
+        } catch (error) {
+            console.error("❌ Erreur lors du chargement des matchs:", error);
+            const errorMessage = error instanceof Error ? error.message : String(error);
+            console.error("❌ Détails de l'erreur:", errorMessage);
+            const errorText = new TextBlock();
+            errorText.text = `Erreur de connexion: ${errorMessage.substring(0, 50)}`;
+            errorText.color = "red";
+            errorText.fontSize = env.UIData.text.fontSize;
+            errorText.fontFamily = env.UIData.text.fontFamily;
+            errorText.width = "500px";
+            errorText.height = "50px";
+            container.addControl(errorText);
+        }
+    };
+
+    // Charger les matchs au chargement de la page
+    loadMatches();
+
+    // Rafraîchir la liste toutes les 2 secondes pour une meilleure réactivité
+    const refreshInterval = setInterval(() => {
+        loadMatches();
+    }, 2000);
+    
+    // Stocker la fonction de rafraîchissement dans l'environnement pour pouvoir l'appeler depuis l'extérieur
+    (env as any).refreshJoinMatchList = loadMatches;
+    
+    // Stocker aussi l'intervalle pour pouvoir le nettoyer si nécessaire
+    (env as any).refreshJoinMatchInterval = refreshInterval;
+
+    // Nettoyer l'intervalle quand la page est fermée (optionnel)
+    // Note: Dans un vrai projet, il faudrait gérer le nettoyage proprement
 
     return (page);
 }
@@ -333,7 +441,21 @@ function match(
         },
         controlButtons: [],
         currPage: "Menu",
-        mode: -1
+        mode: -1,
+        onCreateMatch: async (rules: MatchRules) => {
+            console.log("🚀 onCreateMatch appelé avec les règles:", rules);
+            const success = await env.userX.createFriendlyMatch(rules);
+            if (success) {
+                console.log("✅ Match créé, rafraîchissement de la liste...");
+                // Rafraîchir la liste des matchs si on est sur la page "Rejoindre"
+                if ((env as any).refreshJoinMatchList) {
+                    setTimeout(() => {
+                        (env as any).refreshJoinMatchList();
+                    }, 1000);
+                }
+            }
+            return success;
+        }
     }
 
     env.page = genRulesMatchBlock(settings, true);

@@ -104,13 +104,16 @@ export class MatchFriendlyOnline extends MatchBase
         this.renderObserver = this.sceneManager.getScene().onBeforeRenderObservable.add(() => {
             if (this.game && this.game.logic.getState !== 3)
                 this.game.interface.update(this.keys);
-            else if (this.game && this.game.logic.getState === 3)
-                this.onFinish();
+            else if (this.game && this.game.logic.getState === 3) {
+                this.onFinish().catch((error) => {
+                    console.error("Erreur lors de la fin du match amical:", error);
+                });
+            }
         })
         return (true);
     }
 
-    onFinish() : void
+    async onFinish() : Promise<void>
     {
         if (!this.game)
             return ;
@@ -128,6 +131,33 @@ export class MatchFriendlyOnline extends MatchBase
             
         console.log("Match amical terminé", this);
 
+        // Enregistrer le résultat dans la base de données
+        if (this.winner) {
+            try {
+                const response = await fetch(`https://localhost:8443/api/friendly/${this.id}/finish`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Accept: "application/json",
+                    },
+                    credentials: "include",
+                    body: JSON.stringify({
+                        winnerId: this.winner.id,
+                        score1: this.score[0],
+                        score2: this.score[1],
+                    }),
+                });
+
+                if (response.ok) {
+                    console.log("✅ Résultat du match amical enregistré dans la base de données");
+                } else {
+                    console.error("Erreur lors de l'enregistrement du résultat du match");
+                }
+            } catch (error) {
+                console.error("Erreur lors de l'appel API pour enregistrer le résultat:", error);
+            }
+        }
+
         window.removeEventListener("keydown", this.keyDownHandler);
         window.removeEventListener("keyup", this.keyUpHandler);
         this.sceneManager.getScene().onBeforeRenderObservable.remove(this.renderObserver);
@@ -139,7 +169,5 @@ export class MatchFriendlyOnline extends MatchBase
         
         // Nettoyer le game après avoir appelé showWinner
         this.game = null;
-
-        // ENREGISTRE LE SCORE DANS LA BDD
     }
 };

@@ -48,6 +48,8 @@ model User {
   gamesAsP1 Game[]   @relation("Player1") // rp: list of all games where this player is player 1
   gamesAsP2 Game[]   @relation("Player2") // rp: list of all games where this player is player 2
   tournamentParticipations TournamentParticipant[] // rp: list of all tournaments this player has participated in
+  friendlyMatchesAsP1 FriendlyMatch[] @relation("FriendlyPlayer1") // rp: list of friendly matches where this player is player 1
+  friendlyMatchesAsP2 FriendlyMatch[] @relation("FriendlyPlayer2") // rp: list of friendly matches where this player is player 2
 
   @@map("users") // rp: the actual table name in the database will be "users"
 }
@@ -165,5 +167,31 @@ model TournamentMatch {
   winner        TournamentParticipant? @relation("MatchWinner", fields: [winnerId], references: [id]) // rp: link to winner participant
   
   @@map("tournament_matches") // rp: the actual table name in the database will be "tournament_matches"
+}
+
+// =====================
+// Friendly Match Model
+// =====================
+// rp: this table stores information about friendly matches between two players
+model FriendlyMatch {
+  id          Int       @id @default(autoincrement()) // rp: unique number for each friendly match
+  player1Id   Int       @map("player1_id") // rp: user id of the first player (creator)
+  player2Id   Int?      @map("player2_id") // rp: user id of the second player (null if waiting for player 2)
+  status      String    @default("waiting") @db.VarChar(50) // rp: match status: waiting, ongoing, finished
+  speed       String    @db.VarChar(10) // rp: game speed setting ("1", "2", "3")
+  scoreMax    String    @db.VarChar(10) // rp: maximum score to win the match
+  timeBefore  String    @db.VarChar(10) // rp: time before match starts
+  score1      Int       @default(0) // rp: final score of player 1
+  score2      Int       @default(0) // rp: final score of player 2
+  winnerId    Int?      @map("winner_id") // rp: user id of winner (null if not finished)
+  createdAt   DateTime  @default(now()) @map("created_at") // rp: when match was created
+  startedAt   DateTime? @map("started_at") // rp: when match started
+  finishedAt  DateTime? @map("finished_at") // rp: when match finished
+  
+  // Relations
+  player1     User      @relation("FriendlyPlayer1", fields: [player1Id], references: [id]) // rp: link to player 1
+  player2     User?     @relation("FriendlyPlayer2", fields: [player2Id], references: [id]) // rp: link to player 2
+  
+  @@map("friendly_matches") // rp: the actual table name in the database will be "friendly_matches"
 }
 

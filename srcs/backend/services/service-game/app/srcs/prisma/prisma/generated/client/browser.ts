@@ -52,3 +52,8 @@ export type TournamentParticipant = Prisma.TournamentParticipantModel
  * 
  */
 export type TournamentMatch = Prisma.TournamentMatchModel
+/**
+ * Model FriendlyMatch
+ * 
+ */
+export type FriendlyMatch = Prisma.FriendlyMatchModel

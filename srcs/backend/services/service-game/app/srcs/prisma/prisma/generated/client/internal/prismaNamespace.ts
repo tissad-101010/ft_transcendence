@@ -396,7 +396,8 @@ export const ModelName = {
   GameState: 'GameState',
   Tournament: 'Tournament',
   TournamentParticipant: 'TournamentParticipant',
-  TournamentMatch: 'TournamentMatch'
+  TournamentMatch: 'TournamentMatch',
+  FriendlyMatch: 'FriendlyMatch'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -412,7 +413,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "gameProfile" | "user" | "game" | "gameState" | "tournament" | "tournamentParticipant" | "tournamentMatch"
+    modelProps: "gameProfile" | "user" | "game" | "gameState" | "tournament" | "tournamentParticipant" | "tournamentMatch" | "friendlyMatch"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -934,6 +935,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    FriendlyMatch: {
+      payload: Prisma.$FriendlyMatchPayload<ExtArgs>
+      fields: Prisma.FriendlyMatchFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.FriendlyMatchFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FriendlyMatchPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.FriendlyMatchFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FriendlyMatchPayload>
+        }
+        findFirst: {
+          args: Prisma.FriendlyMatchFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FriendlyMatchPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.FriendlyMatchFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FriendlyMatchPayload>
+        }
+        findMany: {
+          args: Prisma.FriendlyMatchFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FriendlyMatchPayload>[]
+        }
+        create: {
+          args: Prisma.FriendlyMatchCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FriendlyMatchPayload>
+        }
+        createMany: {
+          args: Prisma.FriendlyMatchCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.FriendlyMatchCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FriendlyMatchPayload>[]
+        }
+        delete: {
+          args: Prisma.FriendlyMatchDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FriendlyMatchPayload>
+        }
+        update: {
+          args: Prisma.FriendlyMatchUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FriendlyMatchPayload>
+        }
+        deleteMany: {
+          args: Prisma.FriendlyMatchDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.FriendlyMatchUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.FriendlyMatchUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FriendlyMatchPayload>[]
+        }
+        upsert: {
+          args: Prisma.FriendlyMatchUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FriendlyMatchPayload>
+        }
+        aggregate: {
+          args: Prisma.FriendlyMatchAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateFriendlyMatch>
+        }
+        groupBy: {
+          args: Prisma.FriendlyMatchGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.FriendlyMatchGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.FriendlyMatchCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.FriendlyMatchCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -1069,6 +1144,25 @@ export const TournamentMatchScalarFieldEnum = {
 } as const
 
 export type TournamentMatchScalarFieldEnum = (typeof TournamentMatchScalarFieldEnum)[keyof typeof TournamentMatchScalarFieldEnum]
+
+
+export const FriendlyMatchScalarFieldEnum = {
+  id: 'id',
+  player1Id: 'player1Id',
+  player2Id: 'player2Id',
+  status: 'status',
+  speed: 'speed',
+  scoreMax: 'scoreMax',
+  timeBefore: 'timeBefore',
+  score1: 'score1',
+  score2: 'score2',
+  winnerId: 'winnerId',
+  createdAt: 'createdAt',
+  startedAt: 'startedAt',
+  finishedAt: 'finishedAt'
+} as const
+
+export type FriendlyMatchScalarFieldEnum = (typeof FriendlyMatchScalarFieldEnum)[keyof typeof FriendlyMatchScalarFieldEnum]
 
 
 export const SortOrder = {
@@ -1257,6 +1351,7 @@ export type GlobalOmitConfig = {
   tournament?: Prisma.TournamentOmit
   tournamentParticipant?: Prisma.TournamentParticipantOmit
   tournamentMatch?: Prisma.TournamentMatchOmit
+  friendlyMatch?: Prisma.FriendlyMatchOmit
 }
 
 /* Types for Logging */
