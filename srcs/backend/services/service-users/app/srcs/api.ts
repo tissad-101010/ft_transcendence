@@ -6,7 +6,7 @@
 /*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/23 15:58:35 by tissad            #+#    #+#             */
-/*   Updated: 2025/11/12 16:29:10 by tissad           ###   ########.fr       */
+/*   Updated: 2025/11/18 15:35:06 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,10 +17,11 @@ import fastifyCookie from '@fastify/cookie';
 
 
 // import routes
-import { authRoutes,
-          oauthRoutes,
+import {  authRoutes,
           userRoutes
- } from './modules/auth/auth.routes';
+        } from './modules/auth/auth.routes';
+import { oauthRoutes } from './modules/oauth/routes/oauth.routes';
+ 
 // import { TwoFactorAuth } from './routes/TwoFactorAuth.routes';
 // import { githubRoutes } from './routes/OauthGithub.routes';
 // // import { googleRoutes } from './routes/OauthGoogle.routes';

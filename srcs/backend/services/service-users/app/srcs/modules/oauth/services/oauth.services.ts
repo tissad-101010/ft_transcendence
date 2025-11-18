@@ -6,14 +6,14 @@
 /*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/27 11:45:25 by tissad            #+#    #+#             */
-/*   Updated: 2025/10/30 17:20:51 by tissad           ###   ########.fr       */
+/*   Updated: 2025/11/18 15:33:12 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 import axios from "axios";
-import { GoogleOAuthProvider } from "./providers/google";
-import { GitHubOAuthProvider } from "./providers/github";
-import { Api42OAuthProvider } from "./providers/api42";
+import { GoogleOAuthProvider } from "../providers/google.provider";
+import { GitHubOAuthProvider } from "../providers/github.provider";
+import { Api42OAuthProvider } from "../providers/api42.provider";
 /***********************************/
 /*     Oauth Service Class         */
 /***********************************/
