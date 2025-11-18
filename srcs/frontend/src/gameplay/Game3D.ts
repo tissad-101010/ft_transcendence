@@ -471,7 +471,7 @@ export default class Game3D
         // ball.light.position.copyFrom(ball.mesh.getAbsolutePosition().add(new Vector3(0, 0.1, 0)));
     };
 
-    showWinner() {
+    showWinner(shouldReturnToMainMenu: boolean = false) {
         this.sceneManager.getSceneInteractor?.disableInteractions();
         this.sceneManager.moveCameraTo(ZoneName.WINNERPOV, () => {
             // this.sceneManager.getSceneInteractor?.enableInteractions();
@@ -567,11 +567,12 @@ export default class Game3D
         setTimeout(() => clearInterval(interval), 10000);
 
         this.showWinnerUI(
-            this.game?.logic.getPlayers[this.game?.logic.getWinner - 1].getAlias
+            this.game?.logic.getPlayers[this.game?.logic.getWinner - 1].getAlias,
+            shouldReturnToMainMenu
         );
     }
 
-    showWinnerUI(winnerName) {
+    showWinnerUI(winnerName, shouldReturnToMainMenu: boolean = false) {
         const ui = AdvancedDynamicTexture.CreateFullscreenUI("WinnerUI", true, this.scene);
 
         const panel = new StackPanel();
@@ -596,12 +597,29 @@ export default class Game3D
                 this.advancedTRight.dispose();
                 this.advancedTTime.dispose();
                 this.sceneManager.getSceneInteractor.disableInteractions();
-                this.sceneManager.moveCameraTo(ZoneName.LOCKER_ROOM, () => {
+                
+                // Nettoyer les interfaces de tournoi/match amical si nécessaire
+                if (shouldReturnToMainMenu && this.sceneManager.getUserX) {
+                    // Nettoyer le tournoi et le match pour éviter les interfaces restantes
+                    this.sceneManager.getUserX.setTournament = null;
+                    this.sceneManager.getUserX.setMatch = null;
+                }
+                
+                // Rediriger vers le menu principal si tournoi terminé ou match amical
+                const targetZone = shouldReturnToMainMenu ? ZoneName.START : ZoneName.LOCKER_ROOM;
+                this.sceneManager.moveCameraTo(targetZone, () => {
                     this.sceneManager.setSpecificMesh(false);
                     this.sceneManager.getSceneInteractor?.enableInteractions();
-                    this.sceneManager.getLights().turnOnLights(); //ici
+                    this.sceneManager.getLights().turnOnLights();
+                    
+                    // Si on retourne au menu principal, déclencher la navigation
+                    if (shouldReturnToMainMenu) {
+                        const startMesh = this.scene.getMeshByName(ZoneName.START);
+                        if (startMesh && this.sceneManager.getSceneInteractor) {
+                            this.sceneManager.getSceneInteractor.handleMainZoneClick(startMesh, true);
+                        }
+                    }
                 });
-                // this.sceneManager.getSceneInteractor.handleMainZoneClick(this.sceneManager.getMesh("furniture")[0], true);
             }
         }, 12000);
     }

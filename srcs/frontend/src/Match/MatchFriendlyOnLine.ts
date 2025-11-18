@@ -125,13 +125,20 @@ export class MatchFriendlyOnline extends MatchBase
             this.winner = this.participants[1];
 
         this.status = 2;
-        this.game = null;
             
-        console.log("Pas encore gere mais qqun a gagne", this);
+        console.log("Match amical terminé", this);
 
         window.removeEventListener("keydown", this.keyDownHandler);
         window.removeEventListener("keyup", this.keyUpHandler);
         this.sceneManager.getScene().onBeforeRenderObservable.remove(this.renderObserver);
+
+        // Passer l'information à showWinner pour redirection vers le menu principal (avant de mettre game à null)
+        if (this.game && this.game.interface) {
+            this.game.interface.showWinner(true); // true = rediriger vers le menu principal
+        }
+        
+        // Nettoyer le game après avoir appelé showWinner
+        this.game = null;
 
         // ENREGISTRE LE SCORE DANS LA BDD
     }
