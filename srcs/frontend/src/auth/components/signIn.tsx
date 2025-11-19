@@ -37,9 +37,6 @@ const SignIn: React.FC<SignInProps> = ({ onSwitch }) => {
       } else {
         setErrorMessage(result.message ?? "Login failed");
       }
-
-
-
     } catch (err) {
       console.error(err);
       setErrorMessage("Network error during login");

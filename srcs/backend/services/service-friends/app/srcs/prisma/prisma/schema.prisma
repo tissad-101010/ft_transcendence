@@ -8,8 +8,6 @@ generator client {
   output = "./generated/client"
 }
 
-
-
 // =====================
 // Datasource
 // =====================
@@ -18,16 +16,15 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-
-
 // =====================
-// User Profile
+// Friend Invitation
 // =====================
-model Freinds {
-  // =====================
-  // Basic Info
-  // =====================
-  id        Int      @id @default(autoincrement())
-  message   String
-  timestamp DateTime @default(now())
+model FriendInvitation {
+  id Int @id @default(autoincrement())
+  fromUserId String
+  toUserId String
+  status String @default("PENDING")
+  createdAt DateTime @default(now())
+
+  @@unique([fromUserId, toUserId])
 }
