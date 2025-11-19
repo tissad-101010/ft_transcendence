@@ -6,7 +6,7 @@
 /*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/27 11:44:27 by tissad            #+#    #+#             */
-/*   Updated: 2025/11/18 19:39:14 by tissad           ###   ########.fr       */
+/*   Updated: 2025/11/19 10:02:19 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -136,11 +136,12 @@ export class AuthService {
         
         // store refresh token in redis cache
         await this.redisClient.set(
-            `refresh_token:${user.id}`,
-            refreshToken,
+            `refresh_token:${refreshToken}`,
+            user.id,
             'EX',
-            60 * 60 * 24 * 7 // 7 days expiration
+            60 * 60 * 24 * 7
         );
+
         // store access token in redis cache (optional)
         await this.redisClient.set(
             `access_token:${user.id}`,
@@ -199,12 +200,12 @@ export class AuthService {
         const newAccessToken = JwtUtils.generateAccessToken({ id: user.id, email: user.email });    
         const newRefreshToken = JwtUtils.generateRefreshToken({ id: user.id, email: user.email });
         
-        // update tokens in redis cache
+        // store refresh token in redis cache
         await this.redisClient.set(
-            `refresh_token:${user.id}`,
-            newRefreshToken,
+            `refresh_token:${newRefreshToken}`,
+            user.id,
             'EX',
-            this.refreshTimeout // 7 days expiration
+            60 * 60 * 24 * 7
         );
         await this.redisClient.set(
             `access_token:${user.id}`,

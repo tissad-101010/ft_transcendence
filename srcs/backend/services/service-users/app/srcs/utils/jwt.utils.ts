@@ -6,7 +6,7 @@
 /*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/27 14:02:23 by tissad            #+#    #+#             */
-/*   Updated: 2025/11/18 18:18:07 by tissad           ###   ########.fr       */
+/*   Updated: 2025/11/19 09:57:58 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -137,5 +137,26 @@ export class JwtUtils {
           console.error("❌ [jwt.utils.ts] Error extracting user from request:", error);
           return null;
         }
-      };
+    };
+        static extractUserFromRefreshToken(refresh_token: string | null): { userId: string; email: string } | null {
+        try {
+          if (!refresh_token) {
+            console.error("❌ [jwt.utils.ts] No JWT token found in cookies");
+            return null;
+          }
+          const payload = JwtUtils.verifyRefreshToken(refresh_token);
+          console.log("✅ [jwt.utils.ts] Extracted user from request:", payload);
+          if (!payload) {
+            console.error("❌ [jwt.utils.ts] Invalid JWT token");
+            return null;
+          }
+          const userId = payload.id;
+          const email = payload.email;
+          console.log("✅ [jwt.utils.ts] Extracted userId and email:", userId, email);
+          return { userId, email };
+        } catch (error) {
+          console.error("❌ [jwt.utils.ts] Error extracting user from request:", error);
+          return null;
+        }
+    };
 }

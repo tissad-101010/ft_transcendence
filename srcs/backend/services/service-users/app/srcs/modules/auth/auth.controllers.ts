@@ -6,7 +6,7 @@
 /*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/27 11:44:30 by tissad            #+#    #+#             */
-/*   Updated: 2025/11/18 19:38:19 by tissad           ###   ########.fr       */
+/*   Updated: 2025/11/19 10:01:31 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -219,17 +219,20 @@ export async function refreshTokenController(
     const redisClient = request.server.redis;
     console.log('[Refresh Token Controller] Received refresh token request');
     const authService = new AuthService(request.server);
-    const cookies = JwtUtils.esxtractCookiesFromRequest(request);
-    const refresh_token = JwtUtils.extractTokenFromCookies(cookies, 'refresh_token');
-    if (!refresh_token) {
+    const incomingCookies = JwtUtils.esxtractCookiesFromRequest(request);
+    const incomingRefreshToken = JwtUtils.extractTokenFromCookies(incomingCookies, 'refresh_token');
+    const incomingUserId = JwtUtils.extractUserFromRefreshToken(incomingRefreshToken)?.userId;
+    if (!incomingRefreshToken || !incomingUserId) {
         console.error('[Refresh Token Controller] No refresh token found in request cookies');
         return reply.code(401).send({ message: 'Unauthorized ❌' });
     }
     try {
         // check if refresh token is valid in redis cache
-        const cachedToken = await redisClient.get(`refresh_token:${JwtUtils.verifyRefreshToken(refresh_token)?.id}`);
+        const userId = await redisClient.get(`refresh_token:${incomingRefreshToken}`);
+
+        // const cachedToken = await redisClient.get(`refresh_token:${JwtUtils.verifyRefreshToken(refresh_token)?.id}`);
         
-        if (!cachedToken || cachedToken !== refresh_token) {
+        if (!userId) {
             console.error('[Refresh Token Controller] Unauthorized: Refresh token not found or mismatch in cache');
             return reply.code(401).send({ message: 'Unauthorized ❌' });
         }else {
@@ -237,7 +240,7 @@ export async function refreshTokenController(
         }
         
         // refresh the tokens
-        const tokenResponse = await authService.refreshTokens(refresh_token);
+        const tokenResponse = await authService.refreshTokens(incomingUserId);
         if (!tokenResponse.refreshComplete) {
             console.error('[Refresh Token Controller] Refresh token invalid or expired');
             return reply.code(401).send(tokenResponse);
