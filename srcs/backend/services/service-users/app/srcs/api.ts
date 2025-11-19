@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   api.ts                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: glions <glions@student.42.fr>              +#+  +:+       +#+        */
+/*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/23 15:58:35 by tissad            #+#    #+#             */
-/*   Updated: 2025/11/14 15:56:16 by glions           ###   ########.fr       */
+/*   Updated: 2025/11/19 11:08:14 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,10 +17,11 @@ import fastifyCookie from '@fastify/cookie';
 
 
 // import routes
-import { authRoutes,
-          oauthRoutes,
+import {  authRoutes,
           userRoutes
- } from './modules/auth/auth.routes';
+        } from './modules/auth/auth.routes';
+import { oauthRoutes } from './modules/oauth/routes/oauth.routes';
+ 
 // import { TwoFactorAuth } from './routes/TwoFactorAuth.routes';
 // import { githubRoutes } from './routes/OauthGithub.routes';
 // // import { googleRoutes } from './routes/OauthGoogle.routes';
@@ -53,6 +54,7 @@ app.register(prismaPlugin);
 
 // Register routes
 app.register(authRoutes, { prefix: '/user/auth' });
+
 app.register(oauthRoutes, { prefix: '/user/oauth' });
 app.register(userRoutes, { prefix: '/user' });
 

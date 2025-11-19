@@ -133,38 +133,38 @@ services:
   #********************************************************************************#
   # Game service for managing game sessions, matchmaking, and real-time interactions
 
-  service-game:
-    image: service-game
-    build:
-      context: ./backend/services/service-game
-      dockerfile: Dockerfile
-    container_name: service-game
-    volumes:
-      - ./backend/services/service-game/app:/app
-      - /app/node_modules
-      - DataUserService:/data
-    networks:
-      - global-net
-      - security-net
-    depends_on:
-      # - hashicorp_vault
-      - postgreSQL
-      - redis
-    ports:
-      - "4001:4001"
-    environment:
-      - NODE_ENV=production
-      - VAULT_ADDR=http://hashicorp_vault:8200
-      - GLOBAL_DB_ADMIN_PASSWORD=${GLOBAL_DB_ADMIN_PASSWORD}
-      - DB_HOST=${GAME_SERVICE_DB_HOST}
-      - DB_NAME=${GAME_SERVICE_DB_NAME}
-      - DB_USER=${GAME_SERVICE_DB_USER}
-      - DB_PASSWORD=${GAME_SERVICE_DB_PASSWORD}
-      - DB_ROOT_PASSWORD=${GAME_SERVICE_DB_ROOT_PASSWORD}
-      - DB_PORT=${GAME_SERVICE_DB_PORT}
-      - DB_SAMPLE_NAME=${GAME_SERVICE_DB_SAMPLE_NAME}
-      - GAME_SERVICE_DATABASE_URL=${GAME_SERVICE_DATABASE_URL}
-    restart: unless-stopped
+  # service-game:
+  #   image: service-game
+  #   build:
+  #     context: ./backend/services/service-game
+  #     dockerfile: Dockerfile
+  #   container_name: service-game
+  #   volumes:
+  #     - ./backend/services/service-game/app:/app
+  #     - /app/node_modules
+  #     - DataUserService:/data
+  #   networks:
+  #     - global-net
+  #     - security-net
+  #   depends_on:
+  #     # - hashicorp_vault
+  #     - postgreSQL
+  #     - redis
+  #   ports:
+  #     - "4001:4001"
+  #   environment:
+  #     - NODE_ENV=production
+  #     - VAULT_ADDR=http://hashicorp_vault:8200
+  #     - GLOBAL_DB_ADMIN_PASSWORD=${GLOBAL_DB_ADMIN_PASSWORD}
+  #     - DB_HOST=${GAME_SERVICE_DB_HOST}
+  #     - DB_NAME=${GAME_SERVICE_DB_NAME}
+  #     - DB_USER=${GAME_SERVICE_DB_USER}
+  #     - DB_PASSWORD=${GAME_SERVICE_DB_PASSWORD}
+  #     - DB_ROOT_PASSWORD=${GAME_SERVICE_DB_ROOT_PASSWORD}
+  #     - DB_PORT=${GAME_SERVICE_DB_PORT}
+  #     - DB_SAMPLE_NAME=${GAME_SERVICE_DB_SAMPLE_NAME}
+  #     - GAME_SERVICE_DATABASE_URL=${GAME_SERVICE_DATABASE_URL}
+  #   restart: unless-stopped
   
 
   #********************************************************************************#
@@ -172,38 +172,38 @@ services:
   #********************************************************************************#
   # Chat service for managing chat sessions, messaging and real-time interactions
 
-  service-chat:
-    image: service-chat
-    build:
-      context: ./backend/services/service-chat
-      dockerfile: Dockerfile
-    container_name: service-chat
-    volumes:
-      - ./backend/services/service-chat/app:/app
-      - /app/node_modules
-      - DataUserService:/data
-    networks:
-      - global-net
-      - security-net
-    depends_on:
-      # - hashicorp_vault
-      - redis
-      - postgreSQL
-    ports:
-      - "4002:4002"
-    environment:
-      - NODE_ENV=production
-      - VAULT_ADDR=http://hashicorp_vault:8200
-      - GLOBAL_DB_ADMIN_PASSWORD=${GLOBAL_DB_ADMIN_PASSWORD}
-      - DB_HOST=${CHAT_SERVICE_DB_HOST}
-      - DB_NAME=${CHAT_SERVICE_DB_NAME}
-      - DB_USER=${CHAT_SERVICE_DB_USER}
-      - DB_PASSWORD=${CHAT_SERVICE_DB_PASSWORD}
-      - DB_ROOT_PASSWORD=${CHAT_SERVICE_DB_ROOT_PASSWORD}
-      - DB_PORT=${CHAT_SERVICE_DB_PORT}
-      - DB_SAMPLE_NAME=${CHAT_SERVICE_DB_SAMPLE_NAME}
-      - DATABASE_URL=${CHAT_SERVICE_DATABASE_URL}
-    restart: unless-stopped
+  # service-chat:
+  #   image: service-chat
+  #   build:
+  #     context: ./backend/services/service-chat
+  #     dockerfile: Dockerfile
+  #   container_name: service-chat
+  #   volumes:
+  #     - ./backend/services/service-chat/app:/app
+  #     - /app/node_modules
+  #     - DataUserService:/data
+  #   networks:
+  #     - global-net
+  #     - security-net
+  #   depends_on:
+  #     # - hashicorp_vault
+  #     - redis
+  #     - postgreSQL
+  #   ports:
+  #     - "4002:4002"
+  #   environment:
+  #     - NODE_ENV=production
+  #     - VAULT_ADDR=http://hashicorp_vault:8200
+  #     - GLOBAL_DB_ADMIN_PASSWORD=${GLOBAL_DB_ADMIN_PASSWORD}
+  #     - DB_HOST=${CHAT_SERVICE_DB_HOST}
+  #     - DB_NAME=${CHAT_SERVICE_DB_NAME}
+  #     - DB_USER=${CHAT_SERVICE_DB_USER}
+  #     - DB_PASSWORD=${CHAT_SERVICE_DB_PASSWORD}
+  #     - DB_ROOT_PASSWORD=${CHAT_SERVICE_DB_ROOT_PASSWORD}
+  #     - DB_PORT=${CHAT_SERVICE_DB_PORT}
+  #     - DB_SAMPLE_NAME=${CHAT_SERVICE_DB_SAMPLE_NAME}
+  #     - DATABASE_URL=${CHAT_SERVICE_DATABASE_URL}
+  #   restart: unless-stopped
 
 
 

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   auth.controllers.ts                                :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: glions <glions@student.42.fr>              +#+  +:+       +#+        */
+/*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/27 11:44:30 by tissad            #+#    #+#             */
-/*   Updated: 2025/11/18 11:03:11 by glions           ###   ########.fr       */
+/*   Updated: 2025/11/19 11:07:09 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,6 +25,8 @@ import { CredentialUtils } from '../../utils/credential.utils';
 import { AuthService } from './auth.services';
 import { CryptUtils } from '../../utils/crypt.utils';
 import { JwtUtils } from '../../utils/jwt.utils';
+
+
 /***********************************/
 /*     Auth Controllers            */
 /***********************************/
@@ -102,6 +104,7 @@ export async function signinController(
   request: FastifyRequest,  
   reply: FastifyReply 
 ) { 
+    
     console.log('[Signin Controller] Received signin request');
     const inputData = request.body as LoginUserDTO;
     const authService = new AuthService(request.server);
@@ -132,8 +135,9 @@ export async function signinController(
         // no 2FA required, set JWT cookies
         console.log('[Signin Controller] No 2FA required, setting JWT cookies');
         // set JWT cookies
-        JwtUtils.setAccessTokenCookie(reply, loginResponse.accessToken!);
         JwtUtils.setRefreshTokenCookie(reply, loginResponse.refreshToken!);
+        JwtUtils.setAccessTokenCookie(reply, loginResponse.accessToken!);
+        
         console.log('[Signin Controller] JWT cookies set successfully');
         console.log('[Signin Controller] reponseData:', responseData);
         return reply.code(200).send(responseData);
@@ -154,22 +158,51 @@ export async function getProfileController(
     request: FastifyRequest,
     reply: FastifyReply
 ) {
+    
     console.log('[Profile Controller] Received profile request');
+    const redisClient = request.server.redis;
     const authService = new AuthService(request.server);
-    // extract user from cookies from header request
-    const user = JwtUtils.extractUserFromRequest(request);
+    const cookies = JwtUtils.esxtractCookiesFromRequest(request);
+    const access_token = JwtUtils.extractTokenFromCookies(cookies, 'access_token');
+    // check if access token is valid in redis cache
+    if (access_token) {
+        const cachedToken = await redisClient.get(`access_token:${JwtUtils.verifyAccessToken(access_token)?.id}`);
+        if (!cachedToken || cachedToken !== access_token) {
+            console.error('[Profile Controller] Unauthorized: Access token not found or mismatch in cache');
+            return reply.code(401).send({ message: 'Unauthorized ❌' });
+        }
+        else {
+            console.log('======================✅ [Profile Controller] Access token validated from cache');
+        }
+    }
+    const user = JwtUtils.extractUserFromAccessToken(access_token);
     if (!user) {
         console.error('[Profile Controller] Unauthorized: No valid user found in request');
         return reply.code(401).send({ message: 'Unauthorized ❌' });
     }
     try {
-        const userProfile = await authService.getUserProfile(user.userId);
-        if (!userProfile) {
-            console.error('[Profile Controller] User profile not found for user ID:', user.userId);
-            return reply.code(404).send({ message: 'User profile not found ❌' });
+        // check if user profile is cached in redis
+        const cachedProfile = await redisClient.get(`user_profile:${user.userId}`);
+        if (cachedProfile) {
+            console.log('[Profile Controller] User profile retrieved from cache for user ID:', user.userId);
+            return reply.code(200).send( JSON.parse(cachedProfile) );
+        }else {
+            console.log('[Profile Controller] No cached profile found, fetching from database for user ID:', user.userId);
+            const userProfile = await authService.getUserProfile(user.userId);
+            if (!userProfile) {
+                console.error('[Profile Controller] User profile not found for user ID:', user.userId);
+                return reply.code(404).send({ message: 'User profile not found ❌' });
+            }
+            // store user profile in redis cache (optional) 
+            await redisClient.set(
+                `user_profile:${user.userId}`,
+                JSON.stringify(userProfile),
+                'EX',
+                15 * 60 // 15 minutes expiration
+            );
+            console.log('[Profile Controller] User profile retrieved successfully for user ID:', user.userId);
+            return reply.code(200).send(userProfile);
         }
-        console.log('[Profile Controller] User profile retrieved successfully for user ID:', user.userId);
-        return reply.code(200).send(userProfile);
     } catch (error) {
         console.error('[Profile Controller] Error retrieving user profile:', error);
         return reply.code(500).send({ message: 'Internal server error ❌' });
@@ -177,3 +210,55 @@ export async function getProfileController(
 }
 
 /* ************************************************************************** */
+
+// refresh token controller to handle refresh token requests
+export async function refreshTokenController(
+    request: FastifyRequest,
+    reply: FastifyReply
+) {
+    const redisClient = request.server.redis;
+    console.log('[Refresh Token Controller] Received refresh token request');
+    const authService = new AuthService(request.server);
+    const incomingCookies = JwtUtils.esxtractCookiesFromRequest(request);
+    const incomingRefreshToken = JwtUtils.extractTokenFromCookies(incomingCookies, 'refresh_token');
+    const incomingUserId = JwtUtils.extractUserFromRefreshToken(incomingRefreshToken)?.userId;
+    if (!incomingRefreshToken || !incomingUserId) {
+        console.error('[Refresh Token Controller] No refresh token found in request cookies');
+        return reply.code(401).send({ message: 'Unauthorized ❌' });
+    }
+    try {
+        // check if refresh token is valid in redis cache
+        const userId = await redisClient.get(`refresh_token:${incomingRefreshToken}`);
+
+        // const cachedToken = await redisClient.get(`refresh_token:${JwtUtils.verifyRefreshToken(refresh_token)?.id}`);
+        
+        if (!userId) {
+            console.error('[Refresh Token Controller] Unauthorized: Refresh token not found or mismatch in cache');
+            return reply.code(401).send({ message: 'Unauthorized ❌' });
+        }else {
+            console.log('======================✅ [Refresh Token Controller] Refresh token validated from cache');
+        }
+        
+        // refresh the tokens
+        const tokenResponse = await authService.refreshTokens(incomingUserId);
+        if (!tokenResponse.refreshComplete) {
+            console.error('[Refresh Token Controller] Refresh token invalid or expired');
+            return reply.code(401).send(tokenResponse);
+        }
+        console.log('[Refresh Token Controller] Tokens refreshed successfully, setting new cookies');
+        // set new JWT cookies
+        JwtUtils.setRefreshTokenCookie(reply, tokenResponse.refreshToken!);
+        JwtUtils.setAccessTokenCookie(reply, tokenResponse.accessToken!);  
+        console.log('[Refresh Token Controller] New JWT cookies set successfully');
+        return reply.code(200).send({
+            message: tokenResponse.message,
+            refreshComplete: tokenResponse.refreshComplete,
+        });
+    } catch (error) {
+        console.error('[Refresh Token Controller] Error during token refresh:', error);
+        return reply.code(500).send({
+            message: 'Internal server error during token refresh',
+            refreshComplete: false,
+        });
+    }   
+}

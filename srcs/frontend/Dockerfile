@@ -1,4 +1,4 @@
-# Utiliser Node 20 officiel
+
 FROM node:20-slim 
 
 # Dossier de travail
