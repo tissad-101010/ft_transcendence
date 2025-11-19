@@ -6,7 +6,7 @@
 /*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/27 11:44:27 by tissad            #+#    #+#             */
-/*   Updated: 2025/11/19 10:02:19 by tissad           ###   ########.fr       */
+/*   Updated: 2025/11/19 12:28:31 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -171,6 +171,7 @@ export class AuthService {
         const twoFactorMethods = await this.userService.getUserTwoFactorMethods(user.id);
         const isTwoFactorEnabled = twoFactorMethods.length > 0;
         return {
+            id: user.id,
             email: user.email,
             username: user.username,
             firstName: user.firstName,
