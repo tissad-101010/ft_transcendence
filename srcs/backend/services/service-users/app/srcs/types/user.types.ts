@@ -6,7 +6,7 @@
 /*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/25 15:14:54 by tissad            #+#    #+#             */
-/*   Updated: 2025/10/31 17:18:03 by tissad           ###   ########.fr       */
+/*   Updated: 2025/11/19 12:40:23 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,6 +47,7 @@ export interface OAuthProvider {
 /*          User Profile           */
 /***********************************/
 export interface UserProfile {
+  id?: string;
   email: string;
   username?: string;
   firstName?: string;
