@@ -6,7 +6,7 @@
 /*   By: glions <glions@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/27 11:51:29 by tissad            #+#    #+#             */
-/*   Updated: 2025/11/14 15:57:18 by glions           ###   ########.fr       */
+/*   Updated: 2025/11/20 15:22:49 by glions           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,7 @@ export class UsersService {
     constructor(prismaClient: any) {
         this.prismaClient = prismaClient;
     }
-    
+
     async createUser(data: any) {
         return this.prismaClient.user.create({
             data,

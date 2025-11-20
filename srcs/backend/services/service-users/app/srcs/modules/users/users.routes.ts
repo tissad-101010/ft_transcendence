@@ -1,24 +1,18 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   friends.model.ts                                   :+:      :+:    :+:   */
+/*   users.routes.ts                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: glions <glions@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/07/25 11:32:05 by tissad            #+#    #+#             */
-/*   Updated: 2025/11/20 12:37:03 by glions           ###   ########.fr       */
+/*   Created: 2025/11/20 15:27:31 by glions            #+#    #+#             */
+/*   Updated: 2025/11/20 15:31:45 by glions           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+/***********************************/
+/*        Auth Routes Setup        */
+/***********************************/
+import { FastifyInstance } from 'fastify';
 
-import { PrismaClient } from "@prisma/client";
-
-export const prisma = new PrismaClient();
-
-export type FriendInvitation = {
-    id: number;
-    fromUserId: string;
-    toUserId: string;
-    status: "PENDING" | "ACCEPTED" | "DECLINED" | "BLOCKED";
-    createdAt: Date;
-};
+// user routes

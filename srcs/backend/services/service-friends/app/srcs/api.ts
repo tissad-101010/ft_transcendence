@@ -6,32 +6,44 @@
 /*   By: glions <glions@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/23 15:58:35 by tissad            #+#    #+#             */
-/*   Updated: 2025/11/19 19:10:25 by glions           ###   ########.fr       */
+/*   Updated: 2025/11/20 15:43:15 by glions           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-// Chat service
-
 import Fastify from 'fastify';
 import cors from '@fastify/cors';
+import fastifyCookie from '@fastify/cookie';
 
 
 
-/* ************************************************************************** */
-
-// Import the Fastify framework
-const app = Fastify({ logger: true });
+// import routes
+import { friendsRoutes } from './routes/friends.routes';
 
 // import plugins
 import redisPlugin from './plugins/redis.plugin';
 import { prismaPlugin } from './plugins/prisma.plugin';
 
 
-// Register plugins
+
+
+/* ************************************************************************** */
+
+// register the Fastify framework
+const app = Fastify({ logger: true });
+
+// Register cookie plugin
+app.register(fastifyCookie, {
+  secret: process.env.COOKIE_SECRET || 'supersecret', // optionnel (pour signer les cookies)
+});
+
+
+// Register plugins (database, redis, etc.)
+// app.register(dbPlugin);
 app.register(redisPlugin);
 app.register(prismaPlugin);
 
-
+// Register routes
+app.register(friendsRoutes);
 
 // Start the Fastify server
 const start = async () => {
@@ -52,8 +64,9 @@ const start = async () => {
       console.log('Headers de la requête :', req.headers);
     });
     
-    await app.listen({ port: 4003, host: '0.0.0.0' });
-    console.log('🚀 Chat  server is running at http://localhost:4003');
+    await app.listen({ port: 4000, host: '0.0.0.0' });
+    console.log('🚀 Server is running');
+
   } catch (err) {
     app.log.error(err);
     process.exit(1);

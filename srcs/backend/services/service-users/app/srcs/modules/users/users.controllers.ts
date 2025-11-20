@@ -1,24 +1,22 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   friends.model.ts                                   :+:      :+:    :+:   */
+/*   users.controllers.ts                               :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: glions <glions@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/07/25 11:32:05 by tissad            #+#    #+#             */
-/*   Updated: 2025/11/20 12:37:03 by glions           ###   ########.fr       */
+/*   Created: 2025/11/20 15:29:01 by glions            #+#    #+#             */
+/*   Updated: 2025/11/20 15:38:06 by glions           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+import { FastifyReply, FastifyRequest } from 'fastify';
 
-import { PrismaClient } from "@prisma/client";
+import { UsersService } from '../users/users.services';
+import { CredentialUtils } from '../../utils/credential.utils';
+import { JwtUtils } from '../../utils/jwt.utils';
 
-export const prisma = new PrismaClient();
+/***********************************/
+/*     User Controllers            */
+/***********************************/
 
-export type FriendInvitation = {
-    id: number;
-    fromUserId: string;
-    toUserId: string;
-    status: "PENDING" | "ACCEPTED" | "DECLINED" | "BLOCKED";
-    createdAt: Date;
-};

@@ -6,38 +6,76 @@
 /*   By: glions <glions@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/16 19:00:31 by tissad            #+#    #+#             */
-/*   Updated: 2025/11/19 22:05:45 by glions           ###   ########.fr       */
+/*   Updated: 2025/11/20 15:37:10 by glions           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 import { FastifyReply, FastifyRequest } from "fastify";
 import { FriendsService } from "../services/friends.service";
+import { FriendInvitation } from "../models/friends.model";
 
-export async function getAllUsersController(request: FastifyRequest, reply: FastifyReply) {
-  try {
-    const service = new FriendsService(request.server);
-    const users = await service.getAllUsers();
-    return reply.send({ success: true, data: users });
-  } catch (err: any) {
-    console.error(err);
-    return reply.status(500).send({ success: false, message: err.message });
-  }
-}
+import { UsersApi } from "../../../../service-users/app/srcs/modules/users/users.api"
 
-export async function sendInviteController(request: FastifyRequest<{ Params: { friendId: string } }>, reply: FastifyReply) {
+export async function sendInviteController(
+  request: FastifyRequest<{ Params: { friendId: string } }>,
+  reply: FastifyReply
+) : Promise<
+    FastifyRequest<
+      {
+        success: boolean;
+        data?: FriendInvitation;
+        message?: string
+      }
+    >
+  >
+{
   try {
     const service = new FriendsService(request.server);
     const userId = request.cookies.userId; // ou extraire depuis JWT
-    const friendId = request.params.friendId;
-    const invite = await service.sendInvitation(userId, friendId);
+    if (!userId || typeof userId !== 'string') {
+      // Mauvaise requête si pas d'userId
+      return reply.code(400).send({ success: false, message: 'Missing or invalid userId cookie' });
+    }
+    const friendLogin = request.params.friendLogin;
+    if (!friendLogin)
+      return reply.code(400).send({ success: false, message: "Missing friendLogin parameter" });
+
+    // Crée le client HTTP vers le service User
+    const userServiceUrl = process.env.USER_SERVICE_URL;
+    if (!userServiceUrl)
+      throw new Error("USER_SERVICE_URL environment variable is not defined");
+
+    const userApi = new UsersApi(userServiceUrl);
+
+    const friendUser = await userApi.getUserByLogin(friendLogin);
+    if (!friendUser)
+      return reply.status(404).send({success: false, message: "Friend not found"});
+
+    // Crée l'invitation via le service Friends
+    const friendsService = new FriendsService(request.server);
+    const invite = await friendsService.sendInvitation(userId, friendUser.id);
+    
     return reply.send({ success: true, data: invite });
-  } catch (err: any) {
+  } catch (err: any) 
+  {
     console.error(err);
     return reply.status(400).send({ success: false, message: err.message });
   }
 }
 
-export async function acceptInviteController(request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) {
+export async function acceptInviteController(
+  request: FastifyRequest<{ Params: { id: string } }>,
+  reply: FastifyReply
+) : Promise<
+    FastifyRequest<
+      {
+        success: boolean;
+        data?: FriendInvitation;
+        message?: string
+      }
+    >
+  >
+{
   try {
     const service = new FriendsService(request.server);
     const updated = await service.acceptInvitation(Number(request.params.id));
@@ -48,7 +86,19 @@ export async function acceptInviteController(request: FastifyRequest<{ Params: {
   }
 }
 
-export async function declineInviteController(request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) {
+export async function declineInviteController(
+  request: FastifyRequest<{ Params: { id: string } }>,
+  reply: FastifyReply
+) : Promise<
+    FastifyRequest<
+      {
+        success: boolean;
+        data?: FriendInvitation;
+        message?: string
+      }
+    >
+  > 
+{
   try {
     const service = new FriendsService(request.server);
     const updated = await service.declineInvitation(Number(request.params.id));
@@ -59,7 +109,19 @@ export async function declineInviteController(request: FastifyRequest<{ Params: 
   }
 }
 
-export async function blockUserController(request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) {
+export async function blockUserController(
+  request: FastifyRequest<{ Params: { id: string } }>,
+  reply: FastifyReply
+) : Promise<
+    FastifyRequest<
+      {
+        success: boolean;
+        data?: FriendInvitation;
+        message?: string
+      }
+    >
+  > 
+{
   try {
     const service = new FriendsService(request.server);
     const updated = await service.blockUser(Number(request.params.id));
@@ -70,7 +132,19 @@ export async function blockUserController(request: FastifyRequest<{ Params: { id
   }
 }
 
-export async function removeFriendController(request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) {
+export async function removeFriendController(
+  request: FastifyRequest<{ Params: { id: string } }>,
+  reply: FastifyReply
+) : Promise<
+    FastifyRequest<
+      {
+        success: boolean;
+        data?: FriendInvitation;
+        message?: string
+      }
+    >
+  > 
+{
   try {
     const service = new FriendsService(request.server);
     const deleted = await service.removeFriend(Number(request.params.id));
@@ -81,31 +155,54 @@ export async function removeFriendController(request: FastifyRequest<{ Params: {
   }
 }
 
-export async function listSentInvitesController(request: FastifyRequest, reply: FastifyReply) {
+export async function listInvitationsController(
+  request: FastifyRequest,
+  reply: FastifyReply
+) : Promise<
+    FastifyRequest<
+      {
+        success: boolean;
+        data?: FriendInvitation;
+        message?: string
+      }
+    >
+  > 
+{
   try {
+    // Validation basique du cookie
+    const userId = request.cookies?.userId;
+    if (!userId || typeof userId !== 'string') {
+      // Mauvaise requête si pas d'userId
+      return reply.code(400).send({ success: false, message: 'Missing or invalid userId cookie' });
+    }
+
+    // Idéalement FriendsService est accessible via request.server.di ou fastify.decorate
     const service = new FriendsService(request.server);
-    const userId = request.cookies.userId;
-    const { sent } = await service.listInvitations(userId);
-    return reply.send({ success: true, data: sent });
-  } catch (err: any) {
-    console.error(err);
-    return reply.status(500).send({ success: false, message: err.message });
+    const data = await service.listInvitations(userId);
+
+    return reply.code(200).send({ success: true, data });
+  } catch (err: unknown) {
+    // Log plus sûr côté serveur
+    console.error('listInvitationsController error:', err);
+
+    // Ne pas exposer err.message directement au client
+    return reply.code(500).send({ success: false, message: 'Internal server error' });
   }
 }
 
-export async function listReceivedInvitesController(request: FastifyRequest, reply: FastifyReply) {
-  try {
-    const service = new FriendsService(request.server);
-    const userId = request.cookies.userId;
-    const { received } = await service.listInvitations(userId);
-    return reply.send({ success: true, data: received });
-  } catch (err: any) {
-    console.error(err);
-    return reply.status(500).send({ success: false, message: err.message });
-  }
-}
-
-export async function listFriendsController(request: FastifyRequest, reply: FastifyReply) {
+export async function listFriendsController(
+  request: FastifyRequest,
+  reply: FastifyReply
+) : Promise<
+    FastifyRequest<
+      {
+        success: boolean;
+        data?: FriendInvitation;
+        message?: string
+      }
+    >
+  > 
+{
   try {
     const service = new FriendsService(request.server);
     const userId = request.cookies.userId;

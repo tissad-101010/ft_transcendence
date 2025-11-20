@@ -242,6 +242,7 @@ services:
       - DB_PORT=${FRIENDS_SERVICE_DB_PORT}
       - DB_SAMPLE_NAME=${FRIENDS_SERVICE_DB_SAMPLE_NAME}
       - DATABASE_URL=${FRIENDS_SERVICE_DATABASE_URL}
+      - USER_SERVICE_URL=http://service-users:4000
     restart: unless-stopped
 
   #********************************************************************************#
