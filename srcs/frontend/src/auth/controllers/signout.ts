@@ -6,7 +6,7 @@
 /*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/20 12:26:37 by tissad            #+#    #+#             */
-/*   Updated: 2025/11/20 12:45:27 by tissad           ###   ########.fr       */
+/*   Updated: 2025/11/20 14:16:09 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,7 @@
 
 export async function logoutUser() {
   try {
-    const response = await fetch("https://localhost:8443/api/auth/logout", {
+    const response = await fetch("https://localhost:8443/api/user/auth/logout", {
       method: "POST",
       credentials: "include", // indispensable pour les cookies
     });
