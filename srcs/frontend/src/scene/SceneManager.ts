@@ -134,10 +134,10 @@ private players: Player[] = [
         this.freeCamera.attachControl(canvas, true);
 
         // Bloque deplacements clavier
-        this.freeCamera.keysUp = [];
-        this.freeCamera.keysDown = [];
-        this.freeCamera.keysLeft = [];
-        this.freeCamera.keysRight = [];
+        // this.freeCamera.keysUp = [];
+        // this.freeCamera.keysDown = [];
+        // this.freeCamera.keysLeft = [];
+        // this.freeCamera.keysRight = [];
         //Bloque zoom molette
         this.freeCamera.inputs.attached.mousewheel?.detachControl();
         this.scene.activeCamera = this.freeCamera;
@@ -374,9 +374,10 @@ private players: Player[] = [
     }
 
     public async setupEnvironment(): Promise<void> {
-        this.setupHDR();
+        // this.setupHDR();
         await this.setupMeshes(); // attendre les GLB
         this.advancedTexture = AdvancedDynamicTexture.CreateFullscreenUI("UI", true, this.scene);
+        // this.createCoordinateLabels();
     }
 
     public startRenderLoop(): void
