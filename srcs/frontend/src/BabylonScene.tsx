@@ -3,8 +3,7 @@ import { SceneManager } from './scene/SceneManager';
 import { useAuth } from "./auth/context";
 
 const BabylonScene = () => {
-  const { user, isAuthenticated } = useAuth();
-  const { logout } = useAuth();
+  const { user, isAuthenticated, pending2FA,  } = useAuth();
   const canvasRef = useRef(null);
   const managerRef = useRef<SceneManager | null>(null);
 
@@ -29,6 +28,10 @@ const BabylonScene = () => {
   useEffect(() => {
     if (isAuthenticated && user && managerRef.current) {
       managerRef.current.setUser = user;
+      console.log("User updated in SceneManager:", user);
+      console.log("2FA pending status:", pending2FA);
+      console.log("Is authenticated:", isAuthenticated);
+      console.log("Current user in SceneManager:", managerRef.current.getUserX);
     }
   }, [isAuthenticated, user]);
 

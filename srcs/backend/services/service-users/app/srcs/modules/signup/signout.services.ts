@@ -6,7 +6,7 @@
 /*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/20 12:57:38 by tissad            #+#    #+#             */
-/*   Updated: 2025/11/20 12:59:43 by tissad           ###   ########.fr       */
+/*   Updated: 2025/11/20 14:55:25 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,7 +27,7 @@ export class SignoutService {
         try {
             // Supprimer le refresh token de Redis
             await this.redisClient.del(`refresh_Token:${userId}`);
-            // await this.redisClient.del(`access_Token:${userId}`);
+            // await this.redisClient.del(`access_Token:${userId}`);// change set /!\ 
             console.log(`[SignoutService] User ${userId} logged out successfully.`);
             return true;
         } catch (error) {

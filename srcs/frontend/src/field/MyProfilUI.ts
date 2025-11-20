@@ -240,10 +240,26 @@ export class MyProfilUI
         centerPanel.addControl(avatarContainer);
 
         // image de l’avatar
-        const avatar = new Image("avatarImg", "textures/avatar.png");
-        avatar.width = 1;
-        avatar.height = 1;
-        avatarContainer.addControl(avatar);
+        console.log("==========================================================User Avatar URL:", this.userX.getUser?.avatarUrl);
+        console.log("==========================================================User Login:", this.userX.getUser?.username);
+        
+        let path = this.userX.getUser?.avatarUrl && this.userX.getUser?.avatarUrl !== "" ? this.userX.getUser?.avatarUrl : "logoPink.png";
+        console.log("Avatar URL:", path);
+        
+        // Use a rounded Rectangle as a mask/container for the image (Image doesn't have cornerRadius)
+        const avatarCircle = new Rectangle("avatarCircle");
+        avatarCircle.width = 1;
+        avatarCircle.height = 1;
+        avatarCircle.cornerRadius = 40;
+        avatarCircle.thickness = 0;
+        avatarCircle.background = "transparent";
+        avatarContainer.addControl(avatarCircle);
+        
+        const avatar = new Image("avatarImg", path); // ← URL distante OK
+        avatar.width = "100%";
+        avatar.height = "100%";
+        avatar.stretch = Image.STRETCH_UNIFORM;
+        avatarCircle.addControl(avatar);
 
         // --- Rectangle pour contenir le bouton ---
         const editButton = Button.CreateSimpleButton("editAvatar", "Modifier l'avatar");
@@ -287,8 +303,9 @@ export class MyProfilUI
 
 
         // LOGIN
+    
         const loginText = new TextBlock();
-        loginText.text = "Login: " + this.userX.getUser?.login;
+        loginText.text = "Login: " + this.userX.getUser?.username;
         loginText.height = "40px";
         loginText.fontSize = 19;
         loginText.paddingLeft = "5px";

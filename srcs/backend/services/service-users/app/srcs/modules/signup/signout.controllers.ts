@@ -6,7 +6,7 @@
 /*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/20 12:59:59 by tissad            #+#    #+#             */
-/*   Updated: 2025/11/20 14:22:45 by tissad           ###   ########.fr       */
+/*   Updated: 2025/11/20 15:35:52 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
 import { SignoutService } from './signout.services';
 import { JwtUtils } from '../../utils/jwt.utils';
+import { FastifyCookie } from '@fastify/cookie/types/plugin';
 
 /***********************************/
 /*   Signout Controller Class      */
@@ -28,8 +29,8 @@ export async function signoutController(
     console.log('[Signout Controller] Received logout request');
     const signoutService = new SignoutService(request.server);
     const cookies = JwtUtils.esxtractCookiesFromRequest(request);
-    const access_token = JwtUtils.extractTokenFromCookies(cookies, 'access_token');
-    const user = JwtUtils.extractUserFromAccessToken(access_token);
+    const refresh_Token = JwtUtils.extractTokenFromCookies(cookies, 'refresh_token');
+    const user = JwtUtils.extractUserFromRefreshToken(refresh_Token);
     if (!user) {
         console.error('[Signout Controller] Unauthorized: No valid user found in request');
         return reply.code(401).send({ message: 'Unauthorized ❌' });

@@ -6,15 +6,13 @@
 /*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/23 15:58:35 by tissad            #+#    #+#             */
-/*   Updated: 2025/11/20 14:14:19 by tissad           ###   ########.fr       */
+/*   Updated: 2025/11/20 14:40:07 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 import Fastify from 'fastify';
 import cors from '@fastify/cors';
 import fastifyCookie from '@fastify/cookie';
-
-
 
 // import routes
 import {  authRoutes,
@@ -81,7 +79,7 @@ const start = async () => {
       credentials: true, // Allow credentials
     });
 
-    app.addHook('onRequest', async (req, reply) => {
+    app.addHook('onRequest', async (req) => {
       console.log('Origin reçue :', req.headers.origin);
       console.log('Méthode reçue :', req.method);
       console.log('URL de la requête :', req.url);
