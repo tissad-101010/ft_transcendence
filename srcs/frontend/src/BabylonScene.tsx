@@ -4,6 +4,7 @@ import { useAuth } from "./auth/context";
 
 const BabylonScene = () => {
   const { user, isAuthenticated } = useAuth();
+  const { logout } = useAuth();
   const canvasRef = useRef(null);
   const managerRef = useRef<SceneManager | null>(null);
 

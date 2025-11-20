@@ -1,11 +1,7 @@
 import React, { createContext, useContext, useState, ReactNode, useEffect } from "react";
-import { TwoFactorMethod } from "./types/auth.types"; // ← ton type défini ailleurs
-import { fetchUserProfile } from "./controllers/auth.api"; 
+import { TwoFactorMethod } from "./types/auth.types";
+import { fetchUserProfile } from "./controllers/auth.api";
 
-
-// --------------------
-// Types
-// --------------------
 type User = {
   id: number;
   username: string;
@@ -16,7 +12,7 @@ type User = {
 type Pending2FA = {
   required: boolean;
   methods: TwoFactorMethod[];
-  userId?: number; // utile si tu veux identifier le user avant la 2FA
+  userId?: number;
 };
 
 type AuthContextType = {
@@ -29,14 +25,8 @@ type AuthContextType = {
   loading: boolean;
 };
 
-// --------------------
-// Context
-// --------------------
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// --------------------
-// Provider
-// --------------------
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [pending2FA, setPending2FA] = useState<Pending2FA | null>(null);
@@ -44,13 +34,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const login = (userData: User) => {
     setUser(userData);
-    setPending2FA(null); // reset état 2FA
+    setPending2FA(null);
   };
 
   const logout = () => {
     setUser(null);
     setPending2FA(null);
   };
+
   useEffect(() => {
     const initializeAuth = async () => {
       try {
@@ -66,6 +57,21 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     };
     initializeAuth();
   }, []);
+
+  // 🔥 AJOUT : écoute du logout externe
+  useEffect(() => {
+    const handleExternalLogout = () => {
+      console.log("🔌 Logout reçu depuis l’extérieur (BabylonJS)");
+      logout();
+    };
+
+    window.addEventListener("app-logout", handleExternalLogout);
+
+    return () => {
+      window.removeEventListener("app-logout", handleExternalLogout);
+    };
+  }, []);
+
   return (
     <AuthContext.Provider
       value={{
@@ -74,19 +80,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         pending2FA,
         login,
         logout,
-        setPending2FA,  
+        setPending2FA,
         loading,
       }}
     >
       {!loading && children}
     </AuthContext.Provider>
-
-  );  
+  );
 };
 
-// --------------------
-// Hook d’accès
-// --------------------
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context)

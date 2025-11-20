@@ -1,3 +1,8 @@
+
+// fuuction that logout user from the application
+import { logoutUser } from "../auth/controllers/signout.ts";
+
+
 import { 
     AbstractMesh,
     Vector3,
@@ -44,6 +49,7 @@ Chart.register(
     Legend,
     Filler
 );
+
 
 export class MyProfilUI
 {
@@ -440,8 +446,15 @@ export class MyProfilUI
             logoutButton.background = "rgba(255, 0, 0, 0.7)";
             logoutButton.cornerRadius = 10;
 
-            logoutButton.onPointerUpObservable.add(() => {
-                console.log("Déconnexion !");
+            logoutButton.onPointerUpObservable.add(async () => {
+                console.log("Déconnexion...");
+                const success = await logoutUser();
+                if (success) {
+
+                    console.log("Déconnecté avec succès");
+                } else {
+                    console.error("Échec de la déconnexion");
+                }
             });
 
             this.panel.addControl(logoutButton);

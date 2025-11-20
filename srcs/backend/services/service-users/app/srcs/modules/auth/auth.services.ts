@@ -6,7 +6,7 @@
 /*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/27 11:44:27 by tissad            #+#    #+#             */
-/*   Updated: 2025/11/19 12:36:43 by tissad           ###   ########.fr       */
+/*   Updated: 2025/11/20 12:53:03 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -219,5 +219,5 @@ export class AuthService {
                  refreshComplete: true,
                  message: "refresh successful"
         };
-    }   
+    }  
 }
