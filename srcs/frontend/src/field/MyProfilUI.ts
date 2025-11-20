@@ -55,7 +55,9 @@ export class MyProfilUI
     private profilePanel! :  Rectangle; //! dit que sera initialisee avant usage
     private panel! : StackPanel;
     private profileStack! : StackPanel;
-    private changePwd : boolean = false;
+    private flag : boolean = false;
+    private enable2faApp = false;
+    private enable2faMail = false;
 
     constructor(sceneManager: SceneManager, userX: UserX)
     {
@@ -69,55 +71,32 @@ export class MyProfilUI
         this.displayMenu();
     }
 
-
-    private enable2FaInterface(){
+    private enable2FaMailInterface(){
         const panel2fa = new StackPanel("panel2fa");
-        panel2fa.width = "100%";
+        panel2fa.width = "70%";
         panel2fa.height = "100%";
         panel2fa.background = "red";
         panel2fa.isVertical = true;
-        panel2fa.paddingTop = "50px";
+        panel2fa.paddingTop = "10px";
         panel2fa.paddingLeft = "20px";
         panel2fa.paddingRight = "20px";
-        panel2fa.spacing = 30;
+        panel2fa.spacing = 5;
         this.panel.addControl(panel2fa);
 
-        const recMsg = new Rectangle();
-        recMsg.height = "50px";
-        recMsg.thickness = 0;
-        panel2fa.addControl(recMsg);
-
         const infoMsg = new TextBlock();
-        infoMsg.text = "Scanne le code qr et donne ton code pd";
-        infoMsg.height = "100px";
+        infoMsg.text = "Un code de vérification à 6 chiffres vient de vous être envoyé par email. Veuillez saisir ce code dans le champ ci-dessous pour confirmer votre identité.";
+        infoMsg.height = "250px";
+        infoMsg.textWrapping = true; // <<< important
+        infoMsg.width = "500px";
         infoMsg.fontSize = 30;
         infoMsg.color = "white";
-        recMsg.addControl(infoMsg);
-
-        const qrImgRec = new Rectangle("qrImgRec");
-        qrImgRec.width = "200px";
-        qrImgRec.height = "200px";
-        qrImgRec.thickness = 0;
-        qrImgRec.background = "gray";
-        panel2fa.addControl(qrImgRec);
-
-        const qrImg = new Image("qrImgImg", "qrImg.png");
-        qrImg.width = 1;
-        qrImg.height = 1;
-        qrImgRec.addControl(qrImg);
-
-        const panelRec = new Rectangle();
-        panelRec.width = "40%";
-        panelRec.thickness = 0;
-        panelRec.height = "50px";
-        panel2fa.addControl(panelRec);
+        panel2fa.addControl(infoMsg);
 
         const input = new InputText();
         input.verticalAlignment = Control.VERTICAL_ALIGNMENT_TOP;
 
-        // input.paddingTop = "5px";
-        input.width = "100%";
-        input.height = "100%";
+        input.width = "40%";
+        input.height = "70px";
         input.color = "red";
         input.fontSize = 26;
         input.thickness = 0;
@@ -125,20 +104,143 @@ export class MyProfilUI
         input.focusedBackground = "white";   // garde fond blanc au clic
         input.placeholderText = "code de verification";
         input.placeholderColor = "gray";
-        panelRec.addControl(input);
+        panel2fa.addControl(input);
 
+        const confirmButton = Button.CreateSimpleButton("enabsle2fa", "✔");
+        confirmButton.height = "80px";
+        confirmButton.width = "100px";
+        confirmButton.color = "white";
+        confirmButton.fontSize = 20;
+        confirmButton.background = "#0066FF";
+        panel2fa.addControl(confirmButton);
 
-        // const confirmButton = Button.CreateSimpleButton("changedPwd", "✔");
-        // confirmButton.height = "60px";
-        // confirmButton.width = "40%";
-        // confirmButton.color = "white";
-        // confirmButton.fontSize = 20;
-        // confirmButton.background = "#0066FF";
-        // confirmButton.cornerRadius = 10;
-        // panel2fa.addControl(confirmButton);
+        confirmButton.onPointerUpObservable.add(() => {
+            console.log("code verification confirme");
+            // if (!input.text || input.text.trim() === "") {
+            //     infoMsg.text = "Le champ ne peut pas être vide !";
+            //     return;
+            // }
+            // if (input.text.trim().length !== 6){
+            //     infoMsg.text = "Le code doit contenir exactement 6 caractères !";
+            //     return;
+            // }
+            // this.flag = false;
+            // this.enable2faApp = true;
+            // console.log("Code valide :");
+            // this.displayMenu();
+        });
 
-        // confirmButton.onPointerUpObservable.add(() => {
-        // });
+    }
+
+    private enable2FaAppInterface(){
+        const panel2fa = new StackPanel("panel2faApp");
+        panel2fa.width = "100%";
+        panel2fa.height = "100%";
+        panel2fa.background = "red";
+        panel2fa.isVertical = true;
+        panel2fa.paddingTop = "10px";
+        panel2fa.paddingLeft = "20px";
+        panel2fa.paddingRight = "20px";
+        panel2fa.spacing = 10;
+        this.panel.addControl(panel2fa);
+
+        const stackElements1 = new StackPanel("stackElements1");
+        stackElements1.height = "30%";
+        stackElements1.background = "blue";
+        stackElements1.spacing = 10;
+        stackElements1.isVertical = true;
+        panel2fa.addControl(stackElements1);
+
+        const recElement1 = new Rectangle("recElement1");
+        recElement1.height = "20px";
+        recElement1.thickness = 0;
+        stackElements1.addControl(recElement1);
+
+        const infoMsg = new TextBlock();
+        infoMsg.text = "Scanne le code qr et donne ton code pd";
+        infoMsg.height = "50px";
+        infoMsg.fontSize = 30;
+        infoMsg.color = "white";
+        stackElements1.addControl(infoMsg);
+
+        const qrImgRec = new Rectangle("qrImgRec");
+        qrImgRec.width = "200px";
+        qrImgRec.height = "200px";
+        qrImgRec.thickness = 0;
+        qrImgRec.background = "gray";
+        stackElements1.addControl(qrImgRec);
+
+        const qrImg = new Image("qrImgImg", "qrImg.png");
+        qrImg.width = 1;
+        qrImg.height = 1;
+        qrImgRec.addControl(qrImg);
+
+        //LES ENFANTS NE DOIVENT PAS USE DE WIDTH EN %
+        const stackElements2 = new StackPanel("stackElements2");
+        stackElements2.height = "70px";
+        stackElements2.width = "50%";
+        stackElements2.isVertical = false;
+        stackElements2.paddingLeft = 0;
+        panel2fa.addControl(stackElements2);
+
+        const recElement2 = new Rectangle("recElement2");
+        // recElement2.height = "10%";
+        recElement2.width = "100px";
+        recElement2.thickness = 0;
+        stackElements2.addControl(recElement2);
+
+        const input = new InputText();
+        input.width = "200px";
+        input.height = "100%";
+        input.color = "red";
+        input.fontSize = 20;
+        input.thickness = 0;
+        input.background = "white";
+        input.focusedBackground = "white";   // garde fond blanc au clic
+        input.placeholderText = "code de verification";
+        input.placeholderColor = "gray";
+        input.onTextChangedObservable.add(() => {
+            if (input.text.length > 6) {
+                input.text = input.text.slice(0, 6); // tronque à 6 caractères max
+            }
+        });
+        stackElements2.addControl(input);
+
+        const recMsg = new Rectangle();
+        recMsg.height = "50px";
+        recMsg.thickness = 0;
+        panel2fa.addControl(recMsg);
+
+        const infoMsg1 = new TextBlock();
+        infoMsg1.text = "";
+        infoMsg1.height = "100px";
+        infoMsg1.fontSize = 20;
+        infoMsg1.color = "white";
+        recMsg.addControl(infoMsg1);
+
+        const confirmButton = Button.CreateSimpleButton("enabsle2fa", "✔");
+        confirmButton.height = "100%";
+        confirmButton.width = "100px";
+        confirmButton.color = "white";
+        confirmButton.fontSize = 20;
+        confirmButton.background = "#0066FF";
+        stackElements2.addControl(confirmButton);
+
+        confirmButton.onPointerUpObservable.add(() => {
+            console.log("code verification confirme");
+            if (!input.text || input.text.trim() === "") {
+                infoMsg1.text = "Le champ ne peut pas être vide !";
+                return;
+            }
+            if (input.text.trim().length !== 6){
+                infoMsg1.text = "Le code doit contenir exactement 6 caractères !";
+                return;
+            }
+            this.flag = false;
+            this.enable2faApp = true;
+            console.log("Code valide :");
+            this.displayMenu();
+        });
     }
 
     private createInputField(placeholderText: string, panelPwd : StackPanel) {
@@ -190,7 +292,7 @@ export class MyProfilUI
         panelPwd.paddingTop = "60px";
         panelPwd.paddingLeft = "20px";
         panelPwd.paddingRight = "20px";
-        panelPwd.spacing = 25;
+        panelPwd.spacing = 20;
         this.panel.addControl(panelPwd);
 
         const getOldPwd = this.createInputField("Ancien mot de passe", panelPwd);
@@ -219,7 +321,7 @@ export class MyProfilUI
         panelPwd.addControl(changePwdBtn);
 
         changePwdBtn.onPointerUpObservable.add(() => {
-            this.changePwd = false;
+            this.flag = false;
             const newPwd = getNewPwd();
             const confirmPwd = getConfirmPwd();
             const oldPwd = getOldPwd();
@@ -228,15 +330,14 @@ export class MyProfilUI
                 infoMsg.text = "Concentre toi le sang, les mp correspondent pas 🥱";
                 return;
             }
-            else if (!newPwd || !confirmPwd || !oldPwd || newPwd.trim() === ""
+            if (!newPwd || !confirmPwd || !oldPwd || newPwd.trim() === ""
             || confirmPwd.trim() === "" || oldPwd.trim() === ""){
                 infoMsg.text = "Vas y tu forces c est vide 😑";
                 return;
             }
-            else{
-                console.log("Mot de passe valide :", newPwd);
-                    this.displayMenu();
-                }
+            this.flag = false;
+            console.log("Mot de passe valide :", newPwd);
+            this.displayMenu();
         });
     }
 
@@ -273,44 +374,74 @@ export class MyProfilUI
 
         changePwdBtn.onPointerUpObservable.add(() => {
             console.log("Changer le mot de passe");
-            this.changePwd = true;
+            this.flag = true;
             this.mainInterfaceStruct();
             this.changePwdInterface();
         });
 
+        //BOUTON 2FA APP
         rightPanel.addControl(changePwdBtn);
+        let enable2faBtn = Button.CreateSimpleButton("enable2FAApp", "");
+        enable2faBtn.height = "50px";
+        enable2faBtn.width = "70%";
+        enable2faBtn.color = "white";
+        enable2faBtn.fontSize = 20;
+        enable2faBtn.cornerRadius = 10;
 
-        // // Bouton activer 2FA App
-        const enable2FAAppBtn = Button.CreateSimpleButton("enable2FAApp", "Activer la 2FA (App)");
-        enable2FAAppBtn.height = "50px";
-        enable2FAAppBtn.width = "70%";
-        enable2FAAppBtn.color = "white";
-        enable2FAAppBtn.fontSize = 20;
-        enable2FAAppBtn.background = "#009944";
-        enable2FAAppBtn.cornerRadius = 10;
+        if (!this.enable2faApp) {
+            enable2faBtn.textBlock.text = "Activer 2FA (App)";
+            enable2faBtn.background = "#009944";
 
-        enable2FAAppBtn.onPointerUpObservable.add(() => {
-            this.changePwd = true;
-            this.mainInterfaceStruct();
-            this.enable2FaInterface();
+        } else {
+            enable2faBtn.textBlock.text = "Desactiver 2FA (App)";
+            enable2faBtn.background = "#c200c2ff";
+        }
+        enable2faBtn.onPointerUpObservable.add(() => {
+            if (this.enable2faApp){
+                enable2faBtn.textBlock.text = "Activer 2FA (App)";
+                enable2faBtn.background = "#009944";
+                this.enable2faApp = false;
+            }
+            else{
+                this.flag = true;
+                this.mainInterfaceStruct();
+                this.enable2FaAppInterface();
+            }
+        });
+        rightPanel.addControl(enable2faBtn);
+
+
+        //BOUTON 2FA EMAIL
+        let enable2faMailBtn = Button.CreateSimpleButton("enable2FAMail", "")
+        enable2faMailBtn.height = "50px";
+        enable2faMailBtn.width = "70%";
+        enable2faMailBtn.color = "white";
+        enable2faMailBtn.fontSize = 20;
+        // enable2faMailBtn.background = "#CC8800";
+        enable2faMailBtn.cornerRadius = 10;
+
+        if (!this.enable2faMail){
+            enable2faMailBtn.textBlock.text = "Activer 2FA (Mail)";
+            enable2faMailBtn.background = "#009944";
+        }
+        else{
+            enable2faMailBtn.textBlock.text = "Desactiver 2FA (Mail)";
+            enable2faMailBtn.background = "#df0000ff";
+        }
+        enable2faMailBtn.onPointerUpObservable.add(() => {
+            if (this.enable2faMail){
+                enable2faBtn.textBlock.text = "Activer 2FA (App)";
+                enable2faBtn.background = "#009944";
+                this.enable2faMail = false;
+            }
+            else{
+                this.flag = true;
+                this.mainInterfaceStruct();
+                this.enable2FaMailInterface();
+            }
         });
 
-        rightPanel.addControl(enable2FAAppBtn);
-
-        // // Bouton activer 2FA Email
-        const enable2FAEmailBtn = Button.CreateSimpleButton("enable2FAEmail", "Activer la 2FA (Email)");
-        enable2FAEmailBtn.height = "50px";
-        enable2FAEmailBtn.width = "70%";
-        enable2FAEmailBtn.color = "white";
-        enable2FAEmailBtn.fontSize = 20;
-        enable2FAEmailBtn.background = "#CC8800";
-        enable2FAEmailBtn.cornerRadius = 10;
-
-        enable2FAEmailBtn.onPointerUpObservable.add(() => {
-            console.log("Activer 2FA Email");
-        });
-
-        rightPanel.addControl(enable2FAEmailBtn);
+        rightPanel.addControl(enable2faMailBtn);
     }
 
     private displayMainCat2() : void {
@@ -398,16 +529,6 @@ export class MyProfilUI
         mailText.textHorizontalAlignment = Control.HORIZONTAL_ALIGNMENT_LEFT;
         leftPanel.addControl(mailText);
 
-        // PHONE
-        const phoneText = new TextBlock();
-        phoneText.text = "​📞​ Tel: " + this.userX.getUser?.phone;
-        phoneText.height = "40px";
-        phoneText.fontSize = 19;
-        phoneText.paddingLeft = "5px";
-        phoneText.color = "black";
-        phoneText.textHorizontalAlignment = Control.HORIZONTAL_ALIGNMENT_LEFT;
-        leftPanel.addControl(phoneText);
-
         const recSection2 = new Rectangle();
         recSection2.height = "80px";
         recSection2.thickness = 0;
@@ -475,7 +596,7 @@ export class MyProfilUI
         horizontalLayout.height = "100%";
         titlePanel.addControl(horizontalLayout);
 
-        if (this.changePwd){
+        if (this.flag){
             const backButton = Button.CreateSimpleButton("backBtn", "←");
             backButton.width = "200px";
             backButton.height = "100%";
@@ -489,7 +610,7 @@ export class MyProfilUI
             btnLabel.paddingTop = "210px"; // pour éviter collé au bord 
             backButton.textBlock!.textHorizontalAlignment = Control.HORIZONTAL_ALIGNMENT_CENTER;
             backButton.onPointerUpObservable.add(() => {
-                this.changePwd = false;
+                this.flag = false;
                 this.displayMenu();
             });
             horizontalLayout.addControl(backButton);
@@ -497,7 +618,7 @@ export class MyProfilUI
         
         const title = new TextBlock("tiltetextblock");
         title.text = "Mon profil";
-        if (this.changePwd)
+        if (this.flag)
             title.width = "600px";
         else
             title.width = "1000px";
@@ -510,7 +631,7 @@ export class MyProfilUI
 
 
         // --- SECTION 2 : Profil utilisateur ---
-        if (!this.changePwd){
+        if (!this.flag){
         this.profilePanel = new Rectangle("this.profilePanel");
         this.profilePanel.width = "100%";
         this.profilePanel.height = "400px";
