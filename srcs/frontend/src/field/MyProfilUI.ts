@@ -61,83 +61,183 @@ export class MyProfilUI
     {
         this.sceneManager = sceneManager;
         this.sceneManager.getScene().getMeshByName("logo").isVisible = false;
+        this.sceneManager.getScene().getMeshByName("ballPong").isVisible = false;
 
         const mesh = this.sceneManager.getScene().getMeshByName("field");
-        this.container = AdvancedDynamicTexture.CreateForMesh(mesh,1024, 1024);
+        this.container = AdvancedDynamicTexture.CreateForMesh(mesh ,1024, 1024);
         this.userX = userX;
         this.displayMenu();
     }
 
-    private createInputField(placeholderText: string) {
-        const fieldContainer = new Rectangle();
-        fieldContainer.width = "80%";
-        fieldContainer.height = "70px";
-        fieldContainer.cornerRadius = 10;
-        fieldContainer.thickness = 2;
-        fieldContainer.color = "gray";
-        fieldContainer.background = "white";
-        fieldContainer.paddingLeft = "10px";
-        formPanel.addControl(fieldContainer);
 
-        // Champ de saisie
+    private enable2FaInterface(){
+        const panel2fa = new StackPanel("panel2fa");
+        panel2fa.width = "100%";
+        panel2fa.height = "100%";
+        panel2fa.background = "red";
+        panel2fa.isVertical = true;
+        panel2fa.paddingTop = "50px";
+        panel2fa.paddingLeft = "20px";
+        panel2fa.paddingRight = "20px";
+        panel2fa.spacing = 30;
+        this.panel.addControl(panel2fa);
+
+        const recMsg = new Rectangle();
+        recMsg.height = "50px";
+        recMsg.thickness = 0;
+        panel2fa.addControl(recMsg);
+
+        const infoMsg = new TextBlock();
+        infoMsg.text = "Scanne le code qr et donne ton code pd";
+        infoMsg.height = "100px";
+        infoMsg.fontSize = 30;
+        infoMsg.color = "white";
+        recMsg.addControl(infoMsg);
+
+        const qrImgRec = new Rectangle("qrImgRec");
+        qrImgRec.width = "200px";
+        qrImgRec.height = "200px";
+        qrImgRec.thickness = 0;
+        qrImgRec.background = "gray";
+        panel2fa.addControl(qrImgRec);
+
+        const qrImg = new Image("qrImgImg", "qrImg.png");
+        qrImg.width = 1;
+        qrImg.height = 1;
+        qrImgRec.addControl(qrImg);
+
+        const panelRec = new Rectangle();
+        panelRec.width = "40%";
+        panelRec.thickness = 0;
+        panelRec.height = "50px";
+        panel2fa.addControl(panelRec);
+
         const input = new InputText();
+        input.verticalAlignment = Control.VERTICAL_ALIGNMENT_TOP;
+
+        // input.paddingTop = "5px";
         input.width = "100%";
         input.height = "100%";
-        input.color = "black";
+        input.color = "red";
         input.fontSize = 26;
         input.thickness = 0;
-        input.background = "transparent";
-        fieldContainer.addControl(input);
+        input.background = "white";
+        input.focusedBackground = "white";   // garde fond blanc au clic
+        input.placeholderText = "code de verification";
+        input.placeholderColor = "gray";
+        panelRec.addControl(input);
 
-        // Placeholder (TextBlock par dessus)
-        const placeholder = new TextBlock();
-        placeholder.text = placeholderText;
-        placeholder.color = "gray";
-        placeholder.fontSize = 26;
-        placeholder.paddingLeft = 5;
-        placeholder.textHorizontalAlignment = Control.HORIZONTAL_ALIGNMENT_LEFT;
-        placeholder.textVerticalAlignment = Control.VERTICAL_ALIGNMENT_CENTER;
-        fieldContainer.addControl(placeholder);
+
+        // const confirmButton = Button.CreateSimpleButton("changedPwd", "✔");
+        // confirmButton.height = "60px";
+        // confirmButton.width = "40%";
+        // confirmButton.color = "white";
+        // confirmButton.fontSize = 20;
+        // confirmButton.background = "#0066FF";
+        // confirmButton.cornerRadius = 10;
+        // panel2fa.addControl(confirmButton);
+
+        // confirmButton.onPointerUpObservable.add(() => {
+        // });
     }
 
+    private createInputField(placeholderText: string, panelPwd : StackPanel) {
+        const panelRec = new Rectangle();
+        panelRec.width = "40%";
+        panelRec.thickness = 0;
+        panelRec.height = "60px";
+        panelPwd.addControl(panelRec);
 
-    private displayChangePwdInt() : void {
-        const zoneTxt = new Rectangle("zoneTxt");
-        zoneTxt.width = "100%";
-        zoneTxt.height = "100%";
-        zoneTxt.thickness = 0;
-        zoneTxt.background = "black"; 
-        zoneTxt.paddingTop = "20px";
-        zoneTxt.paddingLeft = "20px";
-        zoneTxt.paddingRight = "20px";
-        this.panel.addControl(zoneTxt);
+        const input = new InputText();
+        input.verticalAlignment = Control.VERTICAL_ALIGNMENT_TOP;
 
-        // const panel = new StackPanel();
-        // panel.isVertical = true;
-        // panel.width = "70%";
-        // panel.height = "100%";
-        // panel.paddingTop = "20px";
-        // zoneTxt.addControl(panel);
+        input.paddingTop = "5px";
+        input.width = "100%";
+        input.height = "100%";
+        input.color = "red";
+        input.fontSize = 26;
+        input.thickness = 0;
+        input.background = "white";
+        input.focusedBackground = "white";   // garde fond blanc au clic
+        input.placeholderText = placeholderText;
+        input.placeholderColor = "gray";
 
-        // const input = new InputText();
-        // input.width = "100%";
-        // input.height = "100%";
-        // input.color = "black";
-        // input.fontSize = 26;
-        // input.thickness = 0;
-        // input.background = "transparent";
-        // panel.addControl(input);
+        let realValue = "";
+        input.onTextChangedObservable.add(() => {
+            const lastChar = input.text.slice(realValue.length);
+            // si ajout
+            if (input.text.length > realValue.length) {
+                realValue += lastChar;
+            }
+            // si suppression
+            else {
+                realValue = realValue.slice(0, input.text.length);
+            }
 
-        // Placeholder (TextBlock par dessus)
-        // const placeholder = new TextBlock();
-        // placeholder.text = placeholderText;
-        // placeholder.color = "gray";
-        // placeholder.fontSize = 26;
-        // placeholder.paddingLeft = 5;
-        // placeholder.textHorizontalAlignment = Control.HORIZONTAL_ALIGNMENT_LEFT;
-        // placeholder.textVerticalAlignment = Control.VERTICAL_ALIGNMENT_CENTER;
-        // fieldContainer.addControl(placeholder);
+            input.text = "•".repeat(realValue.length);
+        });
+        panelRec.addControl(input);
+        return () => realValue;
 
+    }
+
+    private changePwdInterface() : void {
+        const panelPwd = new StackPanel("panelPwd");
+        panelPwd.width = "100%";
+        panelPwd.height = "100%";
+        panelPwd.background = "red";
+        panelPwd.isVertical = true;
+        panelPwd.paddingTop = "60px";
+        panelPwd.paddingLeft = "20px";
+        panelPwd.paddingRight = "20px";
+        panelPwd.spacing = 25;
+        this.panel.addControl(panelPwd);
+
+        const getOldPwd = this.createInputField("Ancien mot de passe", panelPwd);
+        const getNewPwd = this.createInputField("Nouveau mot de passe", panelPwd);
+        const getConfirmPwd = this.createInputField("Confirmation", panelPwd);
+
+        const recMsg = new Rectangle();
+        recMsg.height = "50px";
+        recMsg.thickness = 0;
+        panelPwd.addControl(recMsg);
+
+        const infoMsg = new TextBlock();
+        infoMsg.text = "";
+        infoMsg.height = "100px";
+        infoMsg.fontSize = 26;
+        infoMsg.color = "white";
+        recMsg.addControl(infoMsg);
+
+        const changePwdBtn = Button.CreateSimpleButton("changedPwd", "✔");
+        changePwdBtn.height = "60px";
+        changePwdBtn.width = "40%";
+        changePwdBtn.color = "white";
+        changePwdBtn.fontSize = 20;
+        changePwdBtn.background = "#0066FF";
+        changePwdBtn.cornerRadius = 10;
+        panelPwd.addControl(changePwdBtn);
+
+        changePwdBtn.onPointerUpObservable.add(() => {
+            this.changePwd = false;
+            const newPwd = getNewPwd();
+            const confirmPwd = getConfirmPwd();
+            const oldPwd = getOldPwd();
+
+            if (newPwd !== confirmPwd) {
+                infoMsg.text = "Concentre toi le sang, les mp correspondent pas 🥱";
+                return;
+            }
+            else if (!newPwd || !confirmPwd || !oldPwd || newPwd.trim() === ""
+            || confirmPwd.trim() === "" || oldPwd.trim() === ""){
+                infoMsg.text = "Vas y tu forces c est vide 😑";
+                return;
+            }
+            else{
+                console.log("Mot de passe valide :", newPwd);
+                    this.displayMenu();
+                }
+        });
     }
 
     private displayMainCat3() : void {
@@ -145,14 +245,13 @@ export class MyProfilUI
         rightPanel.isVertical = true;
         rightPanel.width = "370px";
         rightPanel.height = "100%";
-        // rightPanel.paddingTop = "20px";
+        rightPanel.spacing = 40;
         this.profileStack.addControl(rightPanel);
 
         const recSection3 = new Rectangle();
         recSection3.height = "50px";
         recSection3.thickness = 0;
-        // recSection3.paddingTop = "35px";
-        recSection3.background = "rgba(191, 30, 212, 1)";
+        recSection3.background = "rgba(124, 70, 131, 1)";
         rightPanel.addControl(recSection3);
 
         const titleSection3 = new TextBlock();
@@ -165,8 +264,7 @@ export class MyProfilUI
 
         // Bouton changer de mot de passe
         const changePwdBtn = Button.CreateSimpleButton("changePwd", "Changer le mot de passe");
-        changePwdBtn.height = "90px";
-        changePwdBtn.paddingTop = "40px";
+        changePwdBtn.height = "50px";
         changePwdBtn.width = "70%";
         changePwdBtn.color = "white";
         changePwdBtn.fontSize = 20;
@@ -176,16 +274,15 @@ export class MyProfilUI
         changePwdBtn.onPointerUpObservable.add(() => {
             console.log("Changer le mot de passe");
             this.changePwd = true;
-            this.displayMainInterface();
-            this.displayChangePwdInt();
+            this.mainInterfaceStruct();
+            this.changePwdInterface();
         });
 
         rightPanel.addControl(changePwdBtn);
 
-        // Bouton activer 2FA App
+        // // Bouton activer 2FA App
         const enable2FAAppBtn = Button.CreateSimpleButton("enable2FAApp", "Activer la 2FA (App)");
-        enable2FAAppBtn.height = "120px";
-        enable2FAAppBtn.paddingTop = "70px";
+        enable2FAAppBtn.height = "50px";
         enable2FAAppBtn.width = "70%";
         enable2FAAppBtn.color = "white";
         enable2FAAppBtn.fontSize = 20;
@@ -193,15 +290,16 @@ export class MyProfilUI
         enable2FAAppBtn.cornerRadius = 10;
 
         enable2FAAppBtn.onPointerUpObservable.add(() => {
-            console.log("Activer 2FA App");
+            this.changePwd = true;
+            this.mainInterfaceStruct();
+            this.enable2FaInterface();
         });
 
         rightPanel.addControl(enable2FAAppBtn);
 
-        // Bouton activer 2FA Email
+        // // Bouton activer 2FA Email
         const enable2FAEmailBtn = Button.CreateSimpleButton("enable2FAEmail", "Activer la 2FA (Email)");
-        enable2FAEmailBtn.height = "100px";
-        enable2FAEmailBtn.paddingTop = "60px";
+        enable2FAEmailBtn.height = "50px";
         enable2FAEmailBtn.width = "70%";
         enable2FAEmailBtn.color = "white";
         enable2FAEmailBtn.fontSize = 20;
@@ -219,14 +317,30 @@ export class MyProfilUI
         const centerPanel = new StackPanel();
         centerPanel.isVertical = true;
         centerPanel.background = "#8c00ffff";
+        centerPanel.paddingTop = 0;
+        centerPanel.spacing = 30;
         centerPanel.width = "300px";
         centerPanel.height = "100%";
         this.profileStack.addControl(centerPanel);
 
+        const recSection2 = new Rectangle();
+        recSection2.height = "50px";
+        recSection2.thickness = 0;
+        recSection2.background = "rgba(194, 212, 30, 1)";
+        centerPanel.addControl(recSection2);
+
+        const titleSection2 = new TextBlock();
+        titleSection2.text = "personnelles 👤​";
+        titleSection2.height = "100px";
+        titleSection2.paddingLeft = "5px";
+        titleSection2.fontSize = 25;
+        titleSection2.color = "black";
+        titleSection2.textHorizontalAlignment = Control.HORIZONTAL_ALIGNMENT_LEFT;
+        recSection2.addControl(titleSection2);
+
         const avatarContainer = new Rectangle("avatarContainer");
         avatarContainer.width = "250px";
         avatarContainer.height = "250px";
-        avatarContainer.paddingTop = "15px";
         avatarContainer.cornerRadius = 120;
         avatarContainer.thickness = 0;
         avatarContainer.background = "gray";
@@ -238,23 +352,6 @@ export class MyProfilUI
         avatar.width = 1;
         avatar.height = 1;
         avatarContainer.addControl(avatar);
-
-        // --- Rectangle pour contenir le bouton ---
-        const editButton = Button.CreateSimpleButton("editAvatar", "Modifier l'avatar");
-        editButton.width = "70%";
-        editButton.height = "70px";
-        editButton.color = "white";
-        editButton.paddingTop = "20px";
-        editButton.fontSize = 20;
-        editButton.background = "#ff6600"; // couleur du bouton
-        editButton.cornerRadius = 10;
-
-        // Action au clic
-        editButton.onPointerUpObservable.add(() => {
-            console.log("Modifier l'avatar cliqué !");
-        });
-
-        centerPanel.addControl(editButton);
     }
 
     private displayMainCat1(): void {
@@ -266,13 +363,14 @@ export class MyProfilUI
         this.profileStack.addControl(leftPanel);
 
         const recSection1 = new Rectangle();
-        recSection1.height = "40px";
+        recSection1.height = "50px";
         recSection1.thickness = 0;
         recSection1.background = "rgba(194, 212, 30, 1)";
         leftPanel.addControl(recSection1);
 
         const titleSection1 = new TextBlock();
-        titleSection1.text = "Informations personnelles 👤​";
+        titleSection1.text = "Informations";
+        titleSection1.paddingLeft = "180px";
         titleSection1.height = "100px";
         titleSection1.fontSize = 25;
         titleSection1.color = "black";
@@ -354,10 +452,10 @@ export class MyProfilUI
         leftPanel.addControl(loss);
     }
     
-    private displayMainInterface() : void {
+    private mainInterfaceStruct() : void {
         this.panel = new StackPanel();
         this.panel.width = "100%";
-        this.panel.height = "1024px"; 
+        this.panel.height = "1024px";
         this.panel.isVertical = true;
         this.panel.background = "rgba(0, 102, 255, 1)";
 
@@ -378,7 +476,6 @@ export class MyProfilUI
         titlePanel.addControl(horizontalLayout);
 
         if (this.changePwd){
-            console.log("entrree dans foncot");
             const backButton = Button.CreateSimpleButton("backBtn", "←");
             backButton.width = "200px";
             backButton.height = "100%";
@@ -389,9 +486,12 @@ export class MyProfilUI
             const btnLabel = backButton.children[0] as TextBlock;
             btnLabel.color = "white";
             btnLabel.fontSize = 100;          // taille du texte
-            // btnLabel.textVerticalAlignment = Control.VERTICAL_ALIGNMENT_BOTTOM; 
             btnLabel.paddingTop = "210px"; // pour éviter collé au bord 
             backButton.textBlock!.textHorizontalAlignment = Control.HORIZONTAL_ALIGNMENT_CENTER;
+            backButton.onPointerUpObservable.add(() => {
+                this.changePwd = false;
+                this.displayMenu();
+            });
             horizontalLayout.addControl(backButton);
         }
         
@@ -400,7 +500,7 @@ export class MyProfilUI
         if (this.changePwd)
             title.width = "600px";
         else
-            title.width = "950px";
+            title.width = "1000px";
         title.color = "white";
         title.fontSize = 45;
         // ALIGNE LE TEXTE EN BAS
@@ -410,6 +510,7 @@ export class MyProfilUI
 
 
         // --- SECTION 2 : Profil utilisateur ---
+        if (!this.changePwd){
         this.profilePanel = new Rectangle("this.profilePanel");
         this.profilePanel.width = "100%";
         this.profilePanel.height = "400px";
@@ -425,13 +526,12 @@ export class MyProfilUI
         this.profileStack.isVertical = false;
         this.profileStack.width = "100%";
         this.profileStack.height = "100%";
-        this.profileStack.spacing = 5;
+        this.profileStack.spacing = 0;
         this.profileStack.background = "#ffffffff";
         this.profilePanel.addControl(this.profileStack);
 
 
         // // --- SECTION 3 : Bouton Déconnexion ---
-        if (!this.changePwd){
             const logoutButton = Button.CreateSimpleButton("logout", "Se déconnecter");
             logoutButton.width = "100%";
             logoutButton.height = "50px";
@@ -450,7 +550,7 @@ export class MyProfilUI
 
     public displayMenu() : void
     {
-        this.displayMainInterface();
+        this.mainInterfaceStruct();
         this.displayMainCat1();
         this.displayMainCat2();
         this.displayMainCat3();
