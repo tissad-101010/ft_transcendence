@@ -122,6 +122,7 @@ services:
       - REFRESH_TOKEN_SECRET=${REFRESH_TOKEN_SECRET}
       - ACCESS_TOKEN_EXPIRATION=${ACCESS_TOKEN_EXPIRATION}
       - REFRESH_TOKEN_EXPIRATION=${REFRESH_TOKEN_EXPIRATION}
+      - INTERNAL_API_KEY=${INTERNAL_API_KEY}
     restart: unless-stopped
   #********************************************************************************#
 
@@ -242,6 +243,7 @@ services:
       - DB_PORT=${FRIENDS_SERVICE_DB_PORT}
       - DB_SAMPLE_NAME=${FRIENDS_SERVICE_DB_SAMPLE_NAME}
       - DATABASE_URL=${FRIENDS_SERVICE_DATABASE_URL}
+      - INTERNAL_API_KEY=${INTERNAL_API_KEY}
     restart: unless-stopped
 
 
