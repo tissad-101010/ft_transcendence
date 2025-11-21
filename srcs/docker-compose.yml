@@ -244,6 +244,7 @@ services:
       - DB_SAMPLE_NAME=${FRIENDS_SERVICE_DB_SAMPLE_NAME}
       - DATABASE_URL=${FRIENDS_SERVICE_DATABASE_URL}
       - USER_SERVICE_URL=http://service-users:4000
+      - INTERNAL_API_KEY=${INTERNAL_API_KEY}
     restart: unless-stopped
 
   #********************************************************************************#

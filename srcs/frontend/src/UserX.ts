@@ -79,16 +79,16 @@ export class UserX
         this.addFriend("Val");
     }
 
-    async loadFriendInvitations() : Promise<string>
+    async loadFriendInvitations() : Promise<{success: boolean, message: string}>
     {
         const result = await listInvitations("1"); // remplace 1 par l'id de l'utilisateur
         if (result.success)
         {
             this.friendInvitations = result.data;
-            return ("Invitations chargees");
+            return ({success: true, message: "Invitations loaded"});
         }
         else 
-            return (result.message || "Erreur");
+            return ({success: false, message: result.message || "Erreur"});
     }
 
     createTournament(a: string) : boolean

@@ -6,7 +6,7 @@
 /*   By: glions <glions@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/16 19:00:31 by tissad            #+#    #+#             */
-/*   Updated: 2025/11/21 14:37:07 by glions           ###   ########.fr       */
+/*   Updated: 2025/11/21 17:44:09 by glions           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,45 @@ import { FriendsService } from "../services/friends.service";
 import { FriendInvitation } from "../models/friends.model";
 
 import { UsersApi } from "../users.api"
+
+import axios from "axios";
+
+export const usersClient = axios.create({
+  baseURL: process.env.USER_SERVICE_URL,
+  timeout: 1500,
+  headers: { 'x-internal-key': process.env.INTERNAL_API_KEY }
+});
+
+export async function verifyToken(token: string) {
+  const res = await usersClient.post('http://service-users:4000/internal/verify-token', { token });
+  return res.data; // { userId }
+}
+
+export async function listInvitationsController(
+  request: FastifyRequest,
+  reply: FastifyReply
+)
+{
+  try {
+    // Validation basique du cookie
+    const user = await verifyToken(request.cookies["access_token"]!);
+    console.log("mon user -> ", user);
+    // Idéalement FriendsService est accessible via request.server.di ou fastify.decorate
+    const service = new FriendsService(request.server);
+    const { received, sent } = await service.listInvitations(user.id);
+    const datas = [
+      ...sent.filter(inv => inv.status === "PENDING").map(inv => inv.toUserId),
+      ...received.filter(inv => inv.status === "PENDING").map(inv => inv.toUserId),
+    ]
+    return reply.code(200).send({ success: true, datas });
+  } catch (err: unknown) {
+    // Log plus sûr côté serveur
+    console.error('listInvitationsController error:', err);
+
+    // Ne pas exposer err.message directement au client
+    return reply.code(500).send({ success: false, message: 'Internal server error' });
+  }
+}
 
 export async function sendInviteController(
   request: FastifyRequest<{ Params: { friendLogin: string } }>,
@@ -117,31 +156,6 @@ export async function removeFriendController(
   }
 }
 
-export async function listInvitationsController(
-  request: FastifyRequest,
-  reply: FastifyReply
-)
-{
-  try {
-    // Validation basique du cookie
-    console.log("Etat de la requete ->", request);
-
-    // Idéalement FriendsService est accessible via request.server.di ou fastify.decorate
-    const service = new FriendsService(request.server);
-    const { received, sent } = await service.listInvitations("1");
-    const datas = [
-      ...sent.filter(inv => inv.status === "PENDING").map(inv => inv.toUserId),
-      ...received.filter(inv => inv.status === "PENDING").map(inv => inv.toUserId),
-    ]
-    return reply.code(200).send({ success: true, datas });
-  } catch (err: unknown) {
-    // Log plus sûr côté serveur
-    console.error('listInvitationsController error:', err);
-
-    // Ne pas exposer err.message directement au client
-    return reply.code(500).send({ success: false, message: 'Internal server error' });
-  }
-}
 
 export async function listFriendsController(
   request: FastifyRequest,

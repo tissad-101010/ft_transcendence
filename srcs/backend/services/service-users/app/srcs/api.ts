@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   api.ts                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
+/*   By: glions <glions@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/23 15:58:35 by tissad            #+#    #+#             */
-/*   Updated: 2025/11/21 14:40:18 by tissad           ###   ########.fr       */
+/*   Updated: 2025/11/21 17:37:05 by glions           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,7 +27,7 @@ import { signoutRoutes } from './modules/signup/signout.routes';
 // import { oauth42Routes } from './routes/Oauth42.routes';
 
 // internal services routes 
-import { internalServicesRoutes }  from './internal-services-routes/internalServicesRoutes';
+import { internalVerifyTokenRoutes } from "./internal-services-routes/internal-routes/internalVerifyToken.routes";
  
 
 // import plugins
@@ -61,7 +61,8 @@ app.register(authRoutes, { prefix: '/user/auth' });
 app.register(oauthRoutes, { prefix: '/user/oauth' });
 app.register(userRoutes, { prefix: '/user' });
 app.register(signoutRoutes, { prefix: '/user/auth' });
-app.register(internalServicesRoutes, { prefix: '/internal' });
+
+app.register(internalVerifyTokenRoutes, { prefix: '/internal' });
 
 // app.register(TwoFactorAuth, { prefix: '/two-factor' });
 // app.register(githubRoutes, { prefix: '/auth' });

@@ -22,6 +22,7 @@ type AuthContextType = {
   login: (user: User) => void;
   logout: () => void;
   setPending2FA: (data: Pending2FA | null) => void;
+  loading: boolean;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -29,6 +30,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [pending2FA, setPending2FA] = useState<Pending2FA | null>(null);
+  const [loading, setLoading] = useState(true);
 
   const login = (userData: User) => {
     setUser(userData);

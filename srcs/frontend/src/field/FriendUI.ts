@@ -650,6 +650,8 @@ export class FriendUI
         this.sceneManager.getUserX.loadFriendInvitations()
             .then((response) => {
                 console.log(response);
+                console.log("DEDEDED");
+                console.log("Mes invitations : ", this.sceneManager.getUserX.getFriendInvitations);
             })
             .catch((err : any) => console.error(err));
 
