@@ -76,8 +76,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     <AuthContext.Provider
       value={{
         user,
-        isAuthenticated: !!user,VerifyTokenBody }>,
-  reply: FastifyReply
+        isAuthenticated: !!user,
         pending2FA,
         login,
         logout,
