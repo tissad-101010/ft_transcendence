@@ -6,7 +6,7 @@
 /*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/23 15:58:35 by tissad            #+#    #+#             */
-/*   Updated: 2025/11/21 12:31:46 by tissad           ###   ########.fr       */
+/*   Updated: 2025/11/21 14:40:18 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,8 +26,8 @@ import { signoutRoutes } from './modules/signup/signout.routes';
 // // import { googleRoutes } from './routes/OauthGoogle.routes';
 // import { oauth42Routes } from './routes/Oauth42.routes';
 
-
-import { internalServicesRoutes }  from './internal-services-routes/internal-services-routes';
+// internal services routes 
+import { internalServicesRoutes }  from './internal-services-routes/internalServicesRoutes';
  
 
 // import plugins
