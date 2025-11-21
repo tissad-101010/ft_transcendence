@@ -6,7 +6,7 @@
 /*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/20 12:26:37 by tissad            #+#    #+#             */
-/*   Updated: 2025/11/21 12:51:03 by tissad           ###   ########.fr       */
+/*   Updated: 2025/11/21 16:12:24 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,7 @@ export async function logoutUser() {
       method: "POST",
       credentials: "include", // indispensable pour les cookies
     };
-    const response = await authFetch("https://localhost:8443/api/user/auth/signout", requestOptions);
+    const response = await authFetch("https://localhost:8443/api/user/auth/logout", requestOptions);
 
 
     if (!response.ok) {
