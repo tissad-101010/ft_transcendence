@@ -26,7 +26,7 @@ function MainApp() {
       </div>
 
       {/* Overlay AuthPage */}
-      {!isAuthenticated && (
+      {/* {!isAuthenticated && (
         <div 
           style={{
             position: "absolute",
@@ -39,7 +39,7 @@ function MainApp() {
         >
           <AuthPage />
         </div>
-      )}
+      )} */}
     </div>
   );
 }

@@ -3,12 +3,13 @@
 /*                                                        :::      ::::::::   */
 /*   auth.services.ts                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: glions <glions@student.42.fr>              +#+  +:+       +#+        */
+/*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/27 11:44:27 by tissad            #+#    #+#             */
-/*   Updated: 2025/11/18 11:08:22 by glions           ###   ########.fr       */
+/*   Updated: 2025/11/19 12:36:43 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
+
 
 import { FastifyInstance } from 'fastify';
 import { UsersService } from '../users/users.services';
@@ -22,7 +23,12 @@ import { SignupUserDTO,
 import { CryptUtils } from '../../utils/crypt.utils';
 import { JwtUtils } from '../../utils/jwt.utils';
 
-
+interface responseRefreshTokens {
+    accessToken: string | null;
+    refreshToken: string | null;
+    refreshComplete: boolean;
+    message?: string;
+}
 
 /***********************************/
 /*       Auth Service Class        */
@@ -32,6 +38,9 @@ export class AuthService {
     private userService: UsersService;
     private redisClient: any;
     private prismaClient: any;
+    private refreshTimeout: number = 7 * 24 * 60 * 60; // 7 days in seconds
+    private accessTimeout: number = 15 * 60; // 15 minutes in seconds
+    
     constructor(app: FastifyInstance) {
         this.prismaClient = app.prisma;
         this.redisClient = app.redis;
@@ -127,11 +136,21 @@ export class AuthService {
         
         // store refresh token in redis cache
         await this.redisClient.set(
-            `refresh_token:${user.id}`,
-            refreshToken,
+            `refresh_token:${refreshToken}`,
+            user.id,
             'EX',
-            7 * 24 * 60 * 60 // 7 days expiration
+            60 * 60 * 24 * 7
         );
+
+        // store access token in redis cache (optional)
+        await this.redisClient.set(
+            `access_token:${user.id}`,
+            accessToken,
+            'EX',
+            this.accessTimeout
+        );
+        
+        console.log('[Signin authservice] User authenticated successfully, tokens generated');
         return {
             message: 'Authentication successful',
             signinComplete: true,
@@ -152,6 +171,7 @@ export class AuthService {
         const twoFactorMethods = await this.userService.getUserTwoFactorMethods(user.id);
         const isTwoFactorEnabled = twoFactorMethods.length > 0;
         return {
+            id: user.id,
             email: user.email,
             username: user.username,
             firstName: user.firstName,
@@ -167,4 +187,37 @@ export class AuthService {
     async getUserById(userId: string) { 
         return this.userService.getUserById(userId);
     }
+
+    async refreshTokens(userId: string): Promise<responseRefreshTokens> {
+        const user = await this.userService.getUserById(userId);
+        if (!user) {
+            return { accessToken: null,
+                    refreshToken: null,
+                    refreshComplete: false,
+                    message: 'User not found' 
+                };
+        }
+        // generate new tokens
+        const newAccessToken = JwtUtils.generateAccessToken({ id: user.id, email: user.email });    
+        const newRefreshToken = JwtUtils.generateRefreshToken({ id: user.id, email: user.email });
+        
+        // store refresh token in redis cache
+        await this.redisClient.set(
+            `refresh_token:${newRefreshToken}`,
+            user.id,
+            'EX',
+            60 * 60 * 24 * 7
+        );
+        await this.redisClient.set(
+            `access_token:${user.id}`,
+            newAccessToken,
+            'EX',
+            this.accessTimeout // 15 minutes expiration
+        );
+        return { accessToken: newAccessToken,
+                 refreshToken: newRefreshToken,
+                 refreshComplete: true,
+                 message: "refresh successful"
+        };
+    }   
 }

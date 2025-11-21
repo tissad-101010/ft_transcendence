@@ -6,7 +6,7 @@
 /*   By: glions <glions@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/16 19:00:31 by tissad            #+#    #+#             */
-/*   Updated: 2025/11/20 15:37:10 by glions           ###   ########.fr       */
+/*   Updated: 2025/11/21 09:35:21 by glions           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,20 +14,12 @@ import { FastifyReply, FastifyRequest } from "fastify";
 import { FriendsService } from "../services/friends.service";
 import { FriendInvitation } from "../models/friends.model";
 
-import { UsersApi } from "../../../../service-users/app/srcs/modules/users/users.api"
+import { UsersApi } from "../users.api"
 
 export async function sendInviteController(
-  request: FastifyRequest<{ Params: { friendId: string } }>,
+  request: FastifyRequest<{ Params: { friendLogin: string } }>,
   reply: FastifyReply
-) : Promise<
-    FastifyRequest<
-      {
-        success: boolean;
-        data?: FriendInvitation;
-        message?: string
-      }
-    >
-  >
+)
 {
   try {
     const service = new FriendsService(request.server);
@@ -66,15 +58,7 @@ export async function sendInviteController(
 export async function acceptInviteController(
   request: FastifyRequest<{ Params: { id: string } }>,
   reply: FastifyReply
-) : Promise<
-    FastifyRequest<
-      {
-        success: boolean;
-        data?: FriendInvitation;
-        message?: string
-      }
-    >
-  >
+)
 {
   try {
     const service = new FriendsService(request.server);
@@ -89,15 +73,7 @@ export async function acceptInviteController(
 export async function declineInviteController(
   request: FastifyRequest<{ Params: { id: string } }>,
   reply: FastifyReply
-) : Promise<
-    FastifyRequest<
-      {
-        success: boolean;
-        data?: FriendInvitation;
-        message?: string
-      }
-    >
-  > 
+)
 {
   try {
     const service = new FriendsService(request.server);
@@ -112,15 +88,7 @@ export async function declineInviteController(
 export async function blockUserController(
   request: FastifyRequest<{ Params: { id: string } }>,
   reply: FastifyReply
-) : Promise<
-    FastifyRequest<
-      {
-        success: boolean;
-        data?: FriendInvitation;
-        message?: string
-      }
-    >
-  > 
+)
 {
   try {
     const service = new FriendsService(request.server);
@@ -135,15 +103,7 @@ export async function blockUserController(
 export async function removeFriendController(
   request: FastifyRequest<{ Params: { id: string } }>,
   reply: FastifyReply
-) : Promise<
-    FastifyRequest<
-      {
-        success: boolean;
-        data?: FriendInvitation;
-        message?: string
-      }
-    >
-  > 
+)
 {
   try {
     const service = new FriendsService(request.server);
@@ -158,15 +118,7 @@ export async function removeFriendController(
 export async function listInvitationsController(
   request: FastifyRequest,
   reply: FastifyReply
-) : Promise<
-    FastifyRequest<
-      {
-        success: boolean;
-        data?: FriendInvitation;
-        message?: string
-      }
-    >
-  > 
+)
 {
   try {
     // Validation basique du cookie
@@ -193,19 +145,15 @@ export async function listInvitationsController(
 export async function listFriendsController(
   request: FastifyRequest,
   reply: FastifyReply
-) : Promise<
-    FastifyRequest<
-      {
-        success: boolean;
-        data?: FriendInvitation;
-        message?: string
-      }
-    >
-  > 
+)
 {
   try {
     const service = new FriendsService(request.server);
     const userId = request.cookies.userId;
+    if (!userId || typeof userId !== 'string') {
+      // Mauvaise requête si pas d'userId
+      return reply.code(400).send({ success: false, message: 'Missing or invalid userId cookie' });
+    }
     const { received, sent } = await service.listInvitations(userId);
     const friends = [
       ...sent.filter(inv => inv.status === "ACCEPTED").map(inv => inv.toUserId),

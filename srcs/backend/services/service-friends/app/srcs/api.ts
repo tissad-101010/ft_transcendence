@@ -6,7 +6,7 @@
 /*   By: glions <glions@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/23 15:58:35 by tissad            #+#    #+#             */
-/*   Updated: 2025/11/20 15:43:15 by glions           ###   ########.fr       */
+/*   Updated: 2025/11/21 09:36:28 by glions           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,7 +64,7 @@ const start = async () => {
       console.log('Headers de la requête :', req.headers);
     });
     
-    await app.listen({ port: 4000, host: '0.0.0.0' });
+    await app.listen({ port: 4003, host: '0.0.0.0' });
     console.log('🚀 Server is running');
 
   } catch (err) {
