@@ -122,6 +122,7 @@ services:
       - REFRESH_TOKEN_SECRET=${REFRESH_TOKEN_SECRET}
       - ACCESS_TOKEN_EXPIRATION=${ACCESS_TOKEN_EXPIRATION}
       - REFRESH_TOKEN_EXPIRATION=${REFRESH_TOKEN_EXPIRATION}
+      - INTERNAL_API_KEY=${INTERNAL_API_KEY}
     restart: unless-stopped
   #********************************************************************************#
 

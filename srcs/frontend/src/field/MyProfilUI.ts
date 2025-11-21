@@ -1,4 +1,3 @@
-ss
 // fuuction that logout user from the application
 import { logoutUser } from "../auth/controllers/signout.ts";
 

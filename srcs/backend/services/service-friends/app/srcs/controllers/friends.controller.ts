@@ -6,7 +6,7 @@
 /*   By: glions <glions@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/16 19:00:31 by tissad            #+#    #+#             */
-/*   Updated: 2025/11/21 12:58:06 by glions           ###   ########.fr       */
+/*   Updated: 2025/11/21 14:37:07 by glions           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -128,7 +128,7 @@ export async function listInvitationsController(
 
     // Idéalement FriendsService est accessible via request.server.di ou fastify.decorate
     const service = new FriendsService(request.server);
-    const { received, sent } = await service.listInvitations(userId);
+    const { received, sent } = await service.listInvitations("1");
     const datas = [
       ...sent.filter(inv => inv.status === "PENDING").map(inv => inv.toUserId),
       ...received.filter(inv => inv.status === "PENDING").map(inv => inv.toUserId),
