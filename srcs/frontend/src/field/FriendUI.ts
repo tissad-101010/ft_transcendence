@@ -618,6 +618,62 @@ export class FriendUI
     {
         this.displayHeader();
         this.displayAddFriend();
+        this.displayInvitations();
+    }
+
+    displayInvitations() : void
+    {
+        if (this.containerUI.view === null)
+            this.containerUI.view =  AdvancedDynamicTexture.CreateForMesh(
+                        this.sceneManager.getMesh("scoreBoard")[2],
+                        1024, 1024,
+                        true
+                    );
+        if (this.containerUI.viewPanel === null)
+        {
+            this.containerUI.viewPanel = new StackPanel("panelInvitation");
+            this.containerUI.viewPanel.isVertical = true;
+            this.containerUI.viewPanel.height = "100%";
+            this.containerUI.viewPanel.width = "100%";
+            this.containerUI.viewPanel.background = "lightblue";
+            this.containerUI.viewPanel.paddingTop = "150px";
+            this.containerUI.viewPanel.paddingBottom = "0px";
+            this.containerUI.viewPanel.paddingLeft = "0px";
+            this.containerUI.viewPanel.paddingRight = "0px";
+            this.containerUI.viewPanel.spacing = 10;
+            this.containerUI.view.addControl(this.containerUI.viewPanel);
+        }
+        else
+            this.containerUI.viewPanel.clearControls();
+
+
+
+        // const line = new StackPanel();
+        // line.isVertical = false;
+        // line.height = "100%";
+        // line.spacing = 10;
+
+        // const self = this;
+        // function createList(name: string)
+        // {
+        //     if (!self.containerUI.viewPanel)
+        //         return ;
+        //     const scrollViewer = new ScrollViewer();
+        //     scrollViewer.width = "450px";
+        //     scrollViewer.height = "100%";
+        //     scrollViewer.background = "transparent";
+        //     scrollViewer.horizontalAlignment = Control.HORIZONTAL_ALIGNMENT_CENTER;
+        //     scrollViewer.verticalAlignment = Control.VERTICAL_ALIGNMENT_CENTER;
+        //     scrollViewer.barColor = "white";
+        //     scrollViewer.thickness = 0;
+        //     self.containerUI.viewPanel.addControl(scrollViewer);
+
+        //     const listContainer = new StackPanel();
+        //     listContainer.width = "100%";
+        //     listContainer.isVertical = true;
+        //     listContainer.spacing = 20;
+        //     scrollViewer.addControl(listContainer);
+        // }
     }
 
     displayAddFriend() : void

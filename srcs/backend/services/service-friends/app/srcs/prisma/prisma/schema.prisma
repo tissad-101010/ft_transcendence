@@ -23,6 +23,8 @@ model FriendInvitation {
   id Int @id @default(autoincrement())
   fromUserId String
   toUserId String
+  fromUserUsername String
+  toUserUsername String
   status String @default("PENDING")
   createdAt DateTime @default(now())
 

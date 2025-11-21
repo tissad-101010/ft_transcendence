@@ -1,9 +1,6 @@
 import React from "react";
 import BabylonScene from "./BabylonScene.tsx";
 import AuthPage from "./auth/authPage.tsx";
-
-import ApiTester from "./testApiFriend.tsx";
-
 import { AuthProvider, useAuth } from "./auth/context.tsx";
 
 function MainApp() {

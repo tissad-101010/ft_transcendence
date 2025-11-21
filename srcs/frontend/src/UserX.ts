@@ -14,6 +14,8 @@ import { MatchFriendlyOnline } from './Match/MatchFriendlyOnLine.ts';
 
 import { Env } from './lockerRoom/scoreboardUI/menuCreate.ts';
 
+import { listInvitations } from './friends/api/friends.api.ts';
+
 interface User
 {
     login: string,
@@ -24,6 +26,12 @@ interface User
     wins: number,
     loss: number,
     avatar: string
+}
+
+interface FriendInvitation
+{
+    login: string;
+    status: "PENDING" | "ACCEPTED" | "DECLINED" | "BLOCKED";
 }
 
 /*
@@ -37,6 +45,8 @@ export class UserX
     private currentZone: ZoneName | null = null;
 
     private friends : Friend[] = [];
+    private friendInvitations : FriendInvitation[] = [];
+
     private sceneManager : SceneManager;
     private user: User | null = null;
 
@@ -66,6 +76,18 @@ export class UserX
         this.addFriend("Lolo");
         this.addFriend("Tissad");
         this.addFriend("Val");
+    }
+
+    async loadFriendInvitations() : Promise<string>
+    {
+        const result = await listInvitations("1"); // remplace 1 par l'id de l'utilisateur
+        if (result.success)
+        {
+            this.friendInvitations = result.data;
+            return ("Invitations chargees");
+        }
+        else 
+            return (result.message || "Erreur");
     }
 
     createTournament(a: string) : boolean
@@ -172,6 +194,11 @@ export class UserX
             les arrêter avant de mettre à NULL
         */
         this.tournament = null;
+    }
+
+    get getFriendInvitations() : FriendInvitation[]
+    {
+        return (this.friendInvitations);
     }
 
     get getMatch() : Match | null

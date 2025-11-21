@@ -6,7 +6,7 @@
 /*   By: glions <glions@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/16 19:00:31 by tissad            #+#    #+#             */
-/*   Updated: 2025/11/21 09:35:21 by glions           ###   ########.fr       */
+/*   Updated: 2025/11/21 10:16:49 by glions           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,6 +33,7 @@ export async function sendInviteController(
       return reply.code(400).send({ success: false, message: "Missing friendLogin parameter" });
 
     // Crée le client HTTP vers le service User
+    // Ici je dois appele la BDD User afin de trouver l'id correspondant au login envoye
     const userServiceUrl = process.env.USER_SERVICE_URL;
     if (!userServiceUrl)
       throw new Error("USER_SERVICE_URL environment variable is not defined");
@@ -43,6 +44,7 @@ export async function sendInviteController(
     if (!friendUser)
       return reply.status(404).send({success: false, message: "Friend not found"});
 
+    // Une fois le user recupere je peux envoye l'invitation
     // Crée l'invitation via le service Friends
     const friendsService = new FriendsService(request.server);
     const invite = await friendsService.sendInvitation(userId, friendUser.id);
@@ -130,9 +132,12 @@ export async function listInvitationsController(
 
     // Idéalement FriendsService est accessible via request.server.di ou fastify.decorate
     const service = new FriendsService(request.server);
-    const data = await service.listInvitations(userId);
-
-    return reply.code(200).send({ success: true, data });
+    const { received, sent } = await service.listInvitations(userId);
+    const datas = [
+      ...sent.filter(inv => inv.status === "PENDING").map(inv => inv.toUserId),
+      ...received.filter(inv => inv.status === "PENDING").map(inv => inv.toUserId),
+    ]
+    return reply.code(200).send({ success: true, datas });
   } catch (err: unknown) {
     // Log plus sûr côté serveur
     console.error('listInvitationsController error:', err);

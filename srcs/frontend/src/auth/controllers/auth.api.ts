@@ -1,17 +1,3 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   auth.api.ts                                        :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/11/18 19:09:22 by tissad            #+#    #+#             */
-/*   Updated: 2025/11/19 11:12:48 by tissad           ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
-
-import { authFetch } from '../authFetch';
-
 export async function registerUser(
   username: string,
   email: string,
@@ -78,15 +64,15 @@ export async function loginUser(
 
 export async function fetchUserProfile(): Promise<{ success: boolean; data?: any; message?: string }> {
     try {
-        const requestOptions: RequestInit = {
+        const response = await fetch("https://localhost:8443/api/user/profile", {
             method: "GET",
             headers: {
                 "Content-Type": "application/json",
                 Accept: "application/json",
             },
             credentials: "include", // envoie les cookies si backend les utilise
-        };
-        const response = await authFetch("https://localhost:8443/api/user/profile", requestOptions);
+        });
+        
         const data = await response.json(); 
         if (response.ok) {
             return { success: true, data: data};
