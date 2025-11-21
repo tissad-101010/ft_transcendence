@@ -19,13 +19,14 @@ import { listInvitations } from './friends/api/friends.api.ts';
 interface User
 {
     login: string,
+    username: string,
     id: number,
     email: string,
     phone: string,
     gamesPlayed: number,
     wins: number,
     loss: number,
-    avatar: string
+    avatarUrl: string
 }
 
 interface FriendInvitation

@@ -1,3 +1,8 @@
+ss
+// fuuction that logout user from the application
+import { logoutUser } from "../auth/controllers/signout.ts";
+
+
 import { 
     AbstractMesh,
     Vector3,
@@ -44,6 +49,7 @@ Chart.register(
     Legend,
     Filler
 );
+
 
 export class MyProfilUI
 {
@@ -479,10 +485,43 @@ export class MyProfilUI
         centerPanel.addControl(avatarContainer);
 
         // image de l’avatar
-        const avatar = new Image("avatarImg", "textures/avatar.png");
-        avatar.width = 1;
-        avatar.height = 1;
-        avatarContainer.addControl(avatar);
+        console.log("==========================================================User Avatar URL:", this.userX.getUser?.avatarUrl);
+        console.log("==========================================================User Login:", this.userX.getUser?.username);
+        
+        let path = this.userX.getUser?.avatarUrl && this.userX.getUser?.avatarUrl !== "" ? this.userX.getUser?.avatarUrl : "logoPink.png";
+        console.log("Avatar URL:", path);
+        
+        // Use a rounded Rectangle as a mask/container for the image (Image doesn't have cornerRadius)
+        const avatarCircle = new Rectangle("avatarCircle");
+        avatarCircle.width = 1;
+        avatarCircle.height = 1;
+        avatarCircle.cornerRadius = 40;
+        avatarCircle.thickness = 0;
+        avatarCircle.background = "transparent";
+        avatarContainer.addControl(avatarCircle);
+        
+        const avatar = new Image("avatarImg", path); // ← URL distante OK
+        avatar.width = "100%";
+        avatar.height = "100%";
+        avatar.stretch = Image.STRETCH_UNIFORM;
+        avatarCircle.addControl(avatar);
+
+        // --- Rectangle pour contenir le bouton ---
+        const editButton = Button.CreateSimpleButton("editAvatar", "Modifier l'avatar");
+        editButton.width = "70%";
+        editButton.height = "70px";
+        editButton.color = "white";
+        editButton.paddingTop = "20px";
+        editButton.fontSize = 20;
+        editButton.background = "#ff6600"; // couleur du bouton
+        editButton.cornerRadius = 10;
+
+        // Action au clic
+        editButton.onPointerUpObservable.add(() => {
+            console.log("Modifier l'avatar cliqué !");
+        });
+
+        centerPanel.addControl(editButton);
     }
 
     private displayMainCat1(): void {
@@ -510,8 +549,9 @@ export class MyProfilUI
 
 
         // LOGIN
+    
         const loginText = new TextBlock();
-        loginText.text = "Login: " + this.userX.getUser?.login;
+        loginText.text = "Login: " + this.userX.getUser?.username;
         loginText.height = "40px";
         loginText.fontSize = 19;
         loginText.paddingLeft = "5px";
@@ -661,8 +701,15 @@ export class MyProfilUI
             logoutButton.background = "rgba(255, 0, 0, 0.7)";
             logoutButton.cornerRadius = 10;
 
-            logoutButton.onPointerUpObservable.add(() => {
-                console.log("Déconnexion !");
+            logoutButton.onPointerUpObservable.add(async () => {
+                console.log("Déconnexion...");
+                const success = await logoutUser();
+                if (success) {
+
+                    console.log("Déconnecté avec succès");
+                } else {
+                    console.error("Échec de la déconnexion");
+                }
             });
 
             this.panel.addControl(logoutButton);
