@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   internal-services-routes.ts                        :+:      :+:    :+:   */
+/*   internalServicesRoutes.ts                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/21 12:20:39 by tissad            #+#    #+#             */
-/*   Updated: 2025/11/21 12:31:10 by tissad           ###   ########.fr       */
+/*   Updated: 2025/11/21 16:49:29 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,4 +21,5 @@ export  async function internalServicesRoutes(app: FastifyInstance) {
       return reply.status(401).send({ error: "Unauthorized internal access" });
     }
   });
+  
 }

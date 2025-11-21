@@ -2,6 +2,7 @@
 // fuuction that logout user from the application
 import { logoutUser } from "../auth/controllers/signout.ts";
 
+import { ZoneName } from "../config.ts";
 
 import { 
     AbstractMesh,
@@ -467,8 +468,12 @@ export class MyProfilUI
                 console.log("Déconnexion...");
                 const success = await logoutUser();
                 if (success) {
-
                     console.log("Déconnecté avec succès");
+                    this.dispose();
+                    this.sceneManager.moveCameraTo(ZoneName.START, () => {
+                        // A voir s'il y a des choses supplmentaires  faire aprs la dconnexion
+                        this.sceneManager.getSceneInteractor?.enableInteractions();
+                    });
                 } else {
                     console.error("Échec de la déconnexion");
                 }

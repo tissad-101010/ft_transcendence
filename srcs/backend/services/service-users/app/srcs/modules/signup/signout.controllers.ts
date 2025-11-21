@@ -6,7 +6,7 @@
 /*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/20 12:59:59 by tissad            #+#    #+#             */
-/*   Updated: 2025/11/20 15:35:52 by tissad           ###   ########.fr       */
+/*   Updated: 2025/11/21 18:00:03 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,7 +45,8 @@ export async function signoutController(
         // Clear cookies
         reply.clearCookie('access_token', { path: '/' });
         reply.clearCookie('refresh_token', { path: '/' });
-        return reply.code(200).redirect('https://localhost:8443').send({ message: 'Logged out successfully ✅' });
+        return reply.code(200).send({ message: 'Logout successful ✅' });
+        // reply.code(200).send({ message: 'Logout successful ✅' });
     } catch (error) {
         console.error('[Signout Controller] Error processing logout request:', error);
         return reply.code(500).send({ message: 'Internal server error ❌' });
