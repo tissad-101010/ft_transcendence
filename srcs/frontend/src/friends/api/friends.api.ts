@@ -6,14 +6,9 @@ export async function listInvitations(
 {
   try 
   {
-    const response = await fetch("https://localhost:8443/friends/invitations", {
+    const response = await fetch("https://localhost:8443/friend/invitations", {
       method: "GET",
-      headers: {
-        "Content-Type" : "application/json",
-        Accept: "application/json"
-      },
-      credentials: "include",
-      body: JSON.stringify({idUser})
+      credentials: "include"
     });
 
     const data = await response.json();

@@ -6,7 +6,7 @@
 /*   By: glions <glions@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/16 19:00:31 by tissad            #+#    #+#             */
-/*   Updated: 2025/11/21 10:16:49 by glions           ###   ########.fr       */
+/*   Updated: 2025/11/21 12:58:06 by glions           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -124,11 +124,7 @@ export async function listInvitationsController(
 {
   try {
     // Validation basique du cookie
-    const userId = request.cookies?.userId;
-    if (!userId || typeof userId !== 'string') {
-      // Mauvaise requête si pas d'userId
-      return reply.code(400).send({ success: false, message: 'Missing or invalid userId cookie' });
-    }
+    console.log("Etat de la requete ->", request);
 
     // Idéalement FriendsService est accessible via request.server.di ou fastify.decorate
     const service = new FriendsService(request.server);

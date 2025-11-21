@@ -647,6 +647,11 @@ export class FriendUI
             this.containerUI.viewPanel.clearControls();
 
 
+        this.sceneManager.getUserX.loadFriendInvitations()
+            .then((response) => {
+                console.log(response);
+            })
+            .catch((err : any) => console.error(err));
 
         // const line = new StackPanel();
         // line.isVertical = false;
