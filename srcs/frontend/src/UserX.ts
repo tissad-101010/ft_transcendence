@@ -57,11 +57,12 @@ export class UserX
 
     private simuEnAttendantBDD() : void
     {
-        // Initialiser un utilisateur de test par défaut
+        // Initialiser un utilisateur de test par défaut avec un ID unique
         // Cet utilisateur sera remplacé par l'utilisateur réel du contexte React
         // si l'utilisateur est connecté via BabylonScene.tsx
-        this.user = { login: "test", id: 1 };
-        console.log("🔧 UserX initialisé avec utilisateur de test:", this.user);
+        const uniqueId = Math.floor(Math.random() * 1000000) + 1; // Génère un ID aléatoire entre 1 et 1000000
+        this.user = { login: `test_user_${uniqueId}`, id: uniqueId };
+        console.log("🔧 UserX initialisé avec utilisateur de test unique:", this.user);
         
         this.addFriend("Lolo");
         this.addFriend("Tissad");
@@ -196,6 +197,22 @@ export class UserX
             console.log("✅ Match amical créé dans la base de données:", data.matchId);
             console.log("📋 Détails du match créé:", data.match);
             console.log("📊 Statut du match créé:", data.match?.status || "N/A");
+
+            // 🔧 Important : synchroniser l'ID utilisateur local avec celui utilisé côté backend
+            // Le service game peut créer / réutiliser un utilisateur avec un ID différent de this.user.id
+            // (via prisma.user.upsert). On récupère donc l'ID réel pour que les prochains appels (join)
+            // envoient le même playerId que celui stocké dans la DB (match.player1Id).
+            if (data.match && data.match.player1 && typeof data.match.player1.id === "number") {
+                const oldUser = { ...this.user };
+                this.user = {
+                    login: data.match.player1.login || this.user.login,
+                    id: data.match.player1.id,
+                };
+                console.log("🔄 Synchronisation de l'utilisateur créateur avec la DB du service game:", {
+                    oldUser,
+                    newUser: this.user,
+                });
+            }
             
             // Le match est créé et en attente d'un joueur
             // L'écran d'attente sera géré par l'interface
@@ -248,6 +265,42 @@ export class UserX
             console.log("✅ Match amical rejoint:", data.match);
             console.log("🌐 Match en ligne:", data.match?.isOnline || false);
 
+            // 🔧 Synchroniser l'utilisateur local avec celui retourné par le service game
+            // Cas 1: je suis le créateur (player1)
+            if (data.match?.player1 && typeof data.match.player1.id === "number") {
+                // Si mon ID actuel ne correspond pas à l'ID player1 de la DB, on le met à jour
+                if (this.user.id !== data.match.player1.id && this.user.login !== data.match.player1.login) {
+                    const oldUser = { ...this.user };
+                    this.user = {
+                        login: data.match.player1.login || this.user.login,
+                        id: data.match.player1.id,
+                    };
+                    console.log("🔄 Synchronisation de l'utilisateur (créateur) avec la DB du service game dans joinFriendlyMatch:", {
+                        oldUser,
+                        newUser: this.user,
+                    });
+                }
+            }
+            // Cas 2: je suis le second joueur (player2)
+            if (data.match?.player2 && typeof data.match.player2.id === "number") {
+                // Si je ne corresponds ni à player1Id ni à player2Id avec mon ID actuel,
+                // il y a de fortes chances que la DB ait créé un utilisateur de test (playerXXXX).
+                // Dans ce cas, on se synchronise sur player2.
+                const player1Id = data.match.player1Id;
+                const player2Id = data.match.player2Id;
+                if (this.user.id !== player1Id && this.user.id !== player2Id) {
+                    const oldUser = { ...this.user };
+                    this.user = {
+                        login: data.match.player2.login || this.user.login,
+                        id: data.match.player2.id,
+                    };
+                    console.log("🔄 Synchronisation de l'utilisateur (second joueur) avec la DB du service game dans joinFriendlyMatch:", {
+                        oldUser,
+                        newUser: this.user,
+                    });
+                }
+            }
+
             const match = new MatchFriendlyOnline(idMatch, r, this.sceneManager);
             const isOnline = data.match?.isOnline || false;
 
@@ -287,7 +340,24 @@ export class UserX
             // NOTE: 
             // - Pour les matchs EN LIGNE: player1 (créateur) → droite (p[1]), player2 → gauche (p[0]) - INVERSÉ
             // - Pour les matchs LOCAUX: player1 (créateur) → gauche (p[0]), player2 → droite (p[1]) - ORDRE NORMAL
-            if (player1Id === this.user.id) {
+            
+            // Cas spécial : si player2Id === player1Id pour un match en ligne, c'est que le créateur a rejoint son propre match
+            // Dans ce cas, si je ne suis pas le créateur, je dois être player2 (même si player2Id n'est pas encore mis à jour dans la réponse)
+            if (isOnline && player2Id === player1Id && player1Id !== this.user.id) {
+                // Le créateur a rejoint son propre match, mais je ne suis pas le créateur
+                // Je dois être player2 (même si player2Id n'est pas encore mis à jour dans la réponse)
+                console.log("🔄 Match en ligne: créateur a rejoint, je suis le second joueur (player2)");
+                const opponentId = player1Id || idOpp;
+                const opponentLogin = player1Login || loginOpp;
+                // Match EN LIGNE: player2 → gauche (p[0])
+                players = [
+                    {alias: this.user.login, id: this.user.id, ready: false, me: true},  // p[0] = moi (équipe 1, gauche)
+                    {alias: opponentLogin, id: opponentId, ready: false, me: false}   // p[1] = adversaire (équipe 2, droite)
+                ];
+                console.log("✅ Je suis player2 (second joueur, match EN LIGNE, équipe 1, gauche)", { 
+                    players: players.map(p => ({ id: p.id, alias: p.alias, me: p.me, position: players.indexOf(p) === 0 ? "gauche" : "droite" }))
+                });
+            } else if (player1Id === this.user.id) {
                 // Je suis player1 (créateur)
                 // L'adversaire est player2 (doit être défini si le match est en cours)
                 if (!player2Id) {
@@ -343,8 +413,8 @@ export class UserX
                         players: players.map(p => ({ id: p.id, alias: p.alias, me: p.me, position: players.indexOf(p) === 0 ? "gauche" : "droite" }))
                     });
                 }
-            } else if (player1Id && player2Id) {
-                // Les deux joueurs sont définis, mais je ne suis ni l'un ni l'autre (cas étrange)
+            } else if (player1Id && player2Id && player2Id !== player1Id) {
+                // Les deux joueurs sont définis et différents, mais je ne suis ni l'un ni l'autre (cas étrange)
                 // Cela ne devrait pas arriver, mais on utilise l'ordre par défaut
                 console.error("❌ ERREUR: Je ne suis ni player1 ni player2!", {
                     player1Id,
@@ -409,6 +479,25 @@ export class UserX
             }
             
             console.log("👥 Tableau players créé:", players.map(p => ({ id: p.id, alias: p.alias, me: p.me })));
+
+            // 🔧 Normalisation des IDs pour le jeu en ligne :
+            // On force des IDs "logiques" côté jeu:
+            // - players[0].id = 1  → paddle gauche
+            // - players[1].id = 2  → paddle droite
+            // Ainsi, myPlayerId sera 1 ou 2 selon la position dans le tableau,
+            // et sera différent sur les deux navigateurs.
+            players = players.map((p, idx) => ({
+                ...p,
+                id: idx === 0 ? 1 : 2,
+            }));
+            console.log("👥 Players après normalisation des IDs (1=gauche, 2=droite):",
+                players.map((p, idx) => ({
+                    id: p.id,
+                    alias: p.alias,
+                    me: p.me,
+                    position: idx === 0 ? "gauche" : "droite",
+                }))
+            );
 
             if (!match.init(players, isOnline))
                 return (false);
@@ -546,25 +635,24 @@ export class UserX
     {
         // Adapter la structure de l'utilisateur du contexte React vers UserX
         // Le contexte React utilise 'username' mais UserX attend 'login'
-        if (user) {
-            // Si l'utilisateur a un ID valide, l'utiliser, sinon garder l'ID existant ou utiliser 1 par défaut
-            const newId = (user.id !== undefined && user.id !== null && user.id > 0) 
-                ? user.id 
-                : (this.user?.id && this.user.id > 0 ? this.user.id : 1);
-            
+        if (user && user.id !== undefined && user.id !== null && user.id > 0) {
+            // Si l'utilisateur est authentifié et a un ID valide, l'utiliser
             this.user = {
-                login: user.username || user.login || this.user?.login || "test",
-                id: newId
+                login: user.username || user.login || "authenticated_user",
+                id: user.id
             };
-            console.log("✅ Utilisateur défini dans UserX:", this.user);
+            console.log("✅ Utilisateur authentifié défini dans UserX:", this.user);
             console.log("📋 Détails de l'utilisateur - ID:", this.user.id, "Login:", this.user.login, "ID source:", user.id);
         } else {
-            // Si user est null, garder l'utilisateur de test existant au lieu de le mettre à null
+            // Si user est null ou non authentifié, garder l'ID existant s'il existe
+            // Sinon, générer un ID unique pour l'utilisateur de test
             if (!this.user || this.user.id === 0) {
-                this.user = { login: "test", id: 1 };
-                console.log("⚠️ Utilisateur null reçu, utilisation de l'utilisateur de test par défaut");
+                const uniqueId = Math.floor(Math.random() * 1000000) + 1;
+                this.user = { login: `test_user_${uniqueId}`, id: uniqueId };
+                console.log("⚠️ Utilisateur non authentifié ou invalide reçu, création d'un utilisateur de test unique:", this.user);
             } else {
-                console.log("⚠️ Utilisateur null reçu, conservation de l'utilisateur existant:", this.user);
+                // Conserver l'utilisateur existant pour maintenir la cohérence des IDs
+                console.log("⚠️ Utilisateur non authentifié reçu, conservation de l'utilisateur existant:", this.user);
             }
         }
     }

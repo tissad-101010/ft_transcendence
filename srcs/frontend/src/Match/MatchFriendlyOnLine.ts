@@ -519,14 +519,19 @@ export class MatchFriendlyOnline extends MatchBase
     }
 
     private handleOnlineKeys(): void {
-        if (!this.game || !this.myPlayerId) {
-            console.warn("⚠️ handleOnlineKeys: game ou myPlayerId manquant", { game: !!this.game, myPlayerId: this.myPlayerId });
+        // Cette fonction n'est appelée que pour les matchs en ligne (vérification dans play())
+        if (!this.game || !this.isOnline || !this.myPlayerId) {
+            console.warn("⚠️ handleOnlineKeys: conditions non remplies", { 
+                game: !!this.game, 
+                isOnline: this.isOnline, 
+                myPlayerId: this.myPlayerId 
+            });
             return;
         }
 
-        // Trouver mon joueur par ID dans GameLogic pour déterminer sa team
-        // Cela garantit que le joueur avec le score à gauche (team 1) contrôle le paddle gauche,
-        // et celui avec le score à droite (team 2) contrôle le paddle droit
+        // Pour les matchs EN LIGNE uniquement : utiliser myPlayerId pour trouver MON joueur
+        // myPlayerId est unique pour chaque navigateur, donc cela garantit que chaque navigateur
+        // contrôle son propre joueur, indépendamment de myPlayerTeam
         const players = this.game.logic.getPlayers;
         const myPlayer = players.find(p => p.getId === this.myPlayerId);
         
@@ -546,12 +551,11 @@ export class MatchFriendlyOnline extends MatchBase
             return;
         }
         
-        // Déterminer la team du joueur local basée sur son ID dans GameLogic
-        // Team 1 = gauche (score gauche), Team 2 = droite (score droit)
         const myPlayerTeamFromGame = myPlayer.getTeam;
         
-        console.log("🎮 Contrôle du joueur par ID (team déterminée depuis GameLogic):", {
+        console.log("🎮 Contrôle du joueur par ID (match EN LIGNE uniquement):", {
             myPlayerId: this.myPlayerId,
+            myPlayerTeam: this.myPlayerTeam,
             myPlayerTeamFromGame,
             playerId: myPlayer.getId,
             position: myPlayerTeamFromGame === 1 ? "gauche (score gauche)" : "droite (score droit)"
@@ -568,14 +572,12 @@ export class MatchFriendlyOnline extends MatchBase
         }
         
         // Log pour déboguer (seulement si des touches sont pressées)
-        if (this.keys.size > 0 && (this.keys.has("ArrowUp") || this.keys.has("ArrowDown"))) {
-            console.log("🎮 Touches détectées:", { 
-                keys: Array.from(this.keys), 
-                hasArrowUp: this.keys.has("ArrowUp"),
-                hasArrowDown: this.keys.has("ArrowDown"),
-                playerId: myPlayer.getId,
-                team: myPlayer.getTeam,
-                myPlayerId: this.myPlayerId
+        if (this.keys.has("ArrowUp") || this.keys.has("ArrowDown")) {
+            console.log("⌨️ Touche pressée (match EN LIGNE):", {
+                key: this.keys.has("ArrowUp") ? "ArrowUp" : "ArrowDown",
+                myPlayerId: this.myPlayerId,
+                myPlayerTeam: myPlayerTeamFromGame,
+                position: myPlayerTeamFromGame === 1 ? "gauche" : "droite"
             });
         }
     }

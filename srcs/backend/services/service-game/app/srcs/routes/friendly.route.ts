@@ -188,8 +188,11 @@ export async function friendlyRoutes(fastify: FastifyInstance) {
       }
 
       fastify.log.info(`📋 Match ${matchId} trouvé: player1Id=${match.player1Id}, player2Id=${match.player2Id}, isOnline=${match.isOnline}, status=${match.status}`);
+      fastify.log.info(`🔍 Détails de la tentative de rejoindre: player2_id=${player2_id}, match.player1Id=${match.player1Id}, match.player2Id=${match.player2Id}`);
+      fastify.log.info(`🔍 Vérifications: player2_id === player1Id? ${player2_id === match.player1Id}, player2Id === null? ${match.player2Id === null}, player2Id === player1Id? ${match.player2Id === match.player1Id}`);
 
       if (match.status !== 'waiting') {
+        fastify.log.warn(`⚠️ Match ${matchId} n'est plus disponible (status=${match.status})`);
         return reply.code(400).send({
           success: false,
           message: 'Le match n\'est plus disponible',
@@ -333,13 +336,32 @@ export async function friendlyRoutes(fastify: FastifyInstance) {
       // (même si le statut est encore 'waiting', on ne peut avoir qu'un seul player2)
       // Exception : si player2Id === player1Id, c'est que le créateur a rejoint son propre match
       // dans une version antérieure, on permet à un autre joueur de remplacer
-      if (match.isOnline && match.player2Id !== null && match.player2Id !== match.player1Id) {
-        fastify.log.warn(`⚠️ Match ${matchId} en ligne: player2Id=${match.player2Id}, tentative de rejoindre avec player2_id=${player2_id}`);
-        fastify.log.warn(`⚠️ Détails: match.player1Id=${match.player1Id}, match.player2Id=${match.player2Id}, player2_id=${player2_id}, match.isOnline=${match.isOnline}`);
+      // Exception : si player2Id est null, le match est encore disponible
+      fastify.log.info(`🔍 Vérification complétude match ${matchId}: isOnline=${match.isOnline}, player2Id=${match.player2Id}, player1Id=${match.player1Id}, player2_id=${player2_id}, status=${match.status}`);
+
+      // Pour les matchs EN LIGNE :
+      // - Tant que le statut est 'waiting', on considère que le match est encore joignable
+      //   même si player2Id est déjà renseigné (cas où le créateur s'est connecté / déconnecté plusieurs fois).
+      // - On ne bloque vraiment qu'une fois que le match n'est plus en attente (status !== 'waiting'),
+      //   et qu'un player2 différent du créateur est déjà défini.
+      if (
+        match.isOnline &&
+        match.status !== 'waiting' &&
+        match.player2Id !== null &&
+        match.player2Id !== match.player1Id
+      ) {
+        fastify.log.warn(`⚠️ Match ${matchId} en ligne: tentative de rejoindre alors que le match n'est plus en attente`);
+        fastify.log.warn(`⚠️ Détails: match.player1Id=${match.player1Id}, match.player2Id=${match.player2Id}, player2_id=${player2_id}, status=${match.status}`);
         return reply.code(400).send({
           success: false,
           message: 'Ce match est déjà complet',
         });
+      }
+      fastify.log.info(`✅ Match ${matchId} disponible pour rejoindre (player2Id=${match.player2Id}, player1Id=${match.player1Id}, isOnline=${match.isOnline})`);
+      
+      // Pour les matchs en ligne, si player2Id est null, le match est disponible
+      if (match.isOnline && match.player2Id === null) {
+        fastify.log.info(`✅ Match ${matchId} en ligne disponible (player2Id est null), permettant à player2_id=${player2_id} de rejoindre`);
       }
 
       // Si player2Id === player1Id pour un match en ligne, on remplace par le nouveau joueur
