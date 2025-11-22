@@ -52,39 +52,50 @@ export class Chat3D {
         mainGrid.height = "100%";
         backgroundRect.addControl(mainGrid);
 
-        mainGrid.addRowDefinition(0.1);  // login
-        mainGrid.addRowDefinition(0.75); // messages
-        mainGrid.addRowDefinition(0.15); // saisie
+        mainGrid.addRowDefinition(0.12);  // login
+        mainGrid.addRowDefinition(0.68); // messages
+        mainGrid.addRowDefinition(0.10); // saisie
+        mainGrid.addRowDefinition(0.10); //options
 
         // ================= Ligne 0 : LOGIN =================
         const loginRect = new Rectangle();
-        loginRect.width = "100%";
+        loginRect.width = "800px";
         loginRect.height = "100%";
         loginRect.background = "#026379AA";
         loginRect.thickness = 0;
         mainGrid.addControl(loginRect, 0, 0);
 
-        const headerPanel = new StackPanel();
-        headerPanel.isVertical = false;
-        headerPanel.width = "80%";
-        headerPanel.background = "#0e95caff";
-        headerPanel.verticalAlignment = Control.VERTICAL_ALIGNMENT_CENTER;
-        headerPanel.horizontalAlignment = Control.HORIZONTAL_ALIGNMENT_LEFT;
-        headerPanel.paddingLeft = "150px";
-        loginRect.addControl(headerPanel);
+       const headerGrid = new Grid();
+        headerGrid.width = "40%";
+        headerGrid.height = "100%";
+        headerGrid.background = "red";
+        loginRect.addControl(headerGrid);
 
+        headerGrid.addColumnDefinition(0.70);
+        headerGrid.addColumnDefinition(0.10);
+
+        // TEXTE
         this.loginText = new TextBlock();
         this.loginText.text = friend.getLogin;
         this.loginText.color = "white";
         this.loginText.fontSize = 40;
-        headerPanel.addControl(this.loginText);
+        this.loginText.paddingLeft = "30px";
+        this.loginText.textHorizontalAlignment = Control.HORIZONTAL_ALIGNMENT_LEFT;
+        this.loginText.verticalAlignment = Control.VERTICAL_ALIGNMENT_CENTER;
+        headerGrid.addControl(this.loginText, 0, 0);
 
+        // ICONE ONLINE
         this.onlineIcon = new Ellipse();
-        this.onlineIcon.width = "50px";
-        this.onlineIcon.height = "40px";
+        this.onlineIcon.width = "26px";
+        this.onlineIcon.height = "26px";
         this.onlineIcon.background = friend.getOnline ? "#53d6d0ff" : "#ca0e4fff";
-        this.onlineIcon.thickness = 3;
-        headerPanel.addControl(this.onlineIcon);
+        this.onlineIcon.thickness = 2;
+        this.onlineIcon.horizontalAlignment = Control.HORIZONTAL_ALIGNMENT_LEFT;
+        this.onlineIcon.verticalAlignment = Control.VERTICAL_ALIGNMENT_CENTER;
+        // this.onlineIcon.paddingLeft = "10px";
+        headerGrid.addControl(this.onlineIcon, 0, 1);
+
+
 
         // ================= Ligne 1 : MESSAGES =================
         const msgContainer = new Rectangle();
@@ -111,14 +122,14 @@ export class Chat3D {
         });
 
         // StackPanel pour les messages
-        this.chatContainer = new StackPanel();
+        this.chatContainer = new StackPanel("chatcontainer");
         this.chatContainer.width = "100%";
         this.chatContainer.isVertical = true;
         this.chatContainer.spacing = 8;
         this.scrollViewer.addControl(this.chatContainer);
 
         // ================= Ligne 2 : SAISIE =================
-        const inputGrid = new Grid();
+        const inputGrid = new Grid("inputgrid");
         inputGrid.width = "100%";
         inputGrid.height = "100%";
         mainGrid.addControl(inputGrid, 2, 0);
@@ -161,6 +172,61 @@ export class Chat3D {
         });
 
         this.displayHistory();
+
+        //================= Ligne 3 : OPTIONS =================
+        const optionsGrid = new Grid("gridOpt");
+        optionsGrid.width = "100%";
+        optionsGrid.height = "100%";
+        optionsGrid.background = "#1f1f1fAA";
+
+        optionsGrid.addColumnDefinition(0.33);
+        optionsGrid.addColumnDefinition(0.33);
+        optionsGrid.addColumnDefinition(0.34);
+
+        mainGrid.addControl(optionsGrid, 3, 0);
+
+        // ---- Bouton Inviter ----
+        const inviteBtn = Button.CreateSimpleButton("inviteBtn", "Inviter");
+        inviteBtn.width = "90%";
+        inviteBtn.height = "70%";
+        inviteBtn.color = "white";
+        inviteBtn.background = "#3a8dde";
+        inviteBtn.fontSize = 22;
+        inviteBtn.cornerRadius = 10;
+        optionsGrid.addControl(inviteBtn, 0, 0);
+
+        inviteBtn.onPointerUpObservable.add(() => {
+            console.log("Inviter clic");
+        });
+
+        // ---- Bouton Bloquer ----
+        const blockBtn = Button.CreateSimpleButton("blockBtn", "Bloquer");
+        blockBtn.width = "90%";
+        blockBtn.height = "70%";
+        blockBtn.color = "white";
+        blockBtn.background = "#c0392b";
+        blockBtn.fontSize = 22;
+        blockBtn.cornerRadius = 10;
+        optionsGrid.addControl(blockBtn, 0, 1);
+
+        blockBtn.onPointerUpObservable.add(() => {
+            console.log("Bloquer clic");
+        });
+
+        // ---- Bouton Profil ----
+        const profileBtn = Button.CreateSimpleButton("profileBtn", "Profil");
+        profileBtn.width = "90%";
+        profileBtn.height = "70%";
+        profileBtn.color = "white";
+        profileBtn.background = "#27ae60";
+        profileBtn.fontSize = 22;
+        profileBtn.cornerRadius = 10;
+        optionsGrid.addControl(profileBtn, 0, 2);
+
+        profileBtn.onPointerUpObservable.add(() => {
+            console.log("Profil clic");
+        });
+
     }
 
     smoothScrollTo(

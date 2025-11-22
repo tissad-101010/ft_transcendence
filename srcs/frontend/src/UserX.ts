@@ -228,4 +228,8 @@ export class UserX
         this.user = user;
         console.log("user vaut mtn", this.user);
     }
+    clearUser() : void
+    {
+        this.user = null;
+    }
 }
