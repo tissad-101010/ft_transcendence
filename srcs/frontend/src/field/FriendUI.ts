@@ -756,22 +756,27 @@ export class FriendUI
 
         const self = this;
         button.onPointerClickObservable.add(() => {
-            const val = self.sceneManager.getUserX.addFriend(login);
-            if (!msgInfo)
-            {
-                msgInfo = new TextBlock();
-                msgInfo.text = "";
-                msgInfo.fontSize = 50;
-                msgInfo.color = "black";
-                msgInfo.fontFamily = "Arial";
-                msgInfo.height = "100px";
-                msgInfo.width = "100%";
-                this.containerUI.menuPanel.addControl(msgInfo);
-            }
-            if (!val)
-                msgInfo.text = "Invitation envoyee";
-            else if (val === 1)
-                msgInfo.text = login + " est deja votre amis";
+            this.sceneManager.getUserX.sendFriendInvite(login)
+            .then((res) => {
+                if (!msgInfo)
+                {
+                    msgInfo = new TextBlock();
+                    msgInfo.text = "";
+                    msgInfo.fontSize = 50;
+                    msgInfo.color = "black";
+                    msgInfo.fontFamily = "Arial";
+                    msgInfo.height = "100px";
+                    msgInfo.width = "100%";
+                    this.containerUI.menuPanel.addControl(msgInfo);
+                }
+                if (res.success)
+                    msgInfo.text = "Invitation envoyée";
+                else
+                    msgInfo.text = res.message || "error";
+            })
+            .catch ((err) => {
+                console.error("Problème lors de l'appel à sendFriendInvite", err);
+            });
         });
 
         const textButton = new TextBlock();

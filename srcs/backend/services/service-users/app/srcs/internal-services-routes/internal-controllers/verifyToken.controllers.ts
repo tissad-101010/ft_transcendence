@@ -6,7 +6,7 @@
 /*   By: glions <glions@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/21 14:29:49 by tissad            #+#    #+#             */
-/*   Updated: 2025/11/21 17:41:56 by glions           ###   ########.fr       */
+/*   Updated: 2025/11/22 20:23:48 by glions           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,6 @@ export async function verifyTokenController(
   reply: FastifyReply
 ) {
   const { token } = req.body;
-
   try {
     const result = await internalVerifyTokenService(token);
     return reply.send({success:true, data: result});

@@ -6,7 +6,7 @@
 /*   By: glions <glions@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/23 15:58:35 by tissad            #+#    #+#             */
-/*   Updated: 2025/11/21 17:37:05 by glions           ###   ########.fr       */
+/*   Updated: 2025/11/22 20:23:11 by glions           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,6 +20,7 @@ import {  authRoutes,
         } from './modules/auth/auth.routes';
 import { oauthRoutes } from './modules/oauth/routes/oauth.routes';
 import { signoutRoutes } from './modules/signup/signout.routes';
+
 // internal services routes responsible for internal communications between services
 // import { TwoFactorAuth } from './routes/TwoFactorAuth.routes';
 // import { githubRoutes } from './routes/OauthGithub.routes';
@@ -28,6 +29,7 @@ import { signoutRoutes } from './modules/signup/signout.routes';
 
 // internal services routes 
 import { internalVerifyTokenRoutes } from "./internal-services-routes/internal-routes/internalVerifyToken.routes";
+import { internalSelectUserRoutes } from './internal-services-routes/internal-routes/internalSelectUser.routes';
  
 
 // import plugins
@@ -47,14 +49,10 @@ app.register(fastifyCookie, {
   secret: process.env.COOKIE_SECRET || 'supersecret', // optionnel (pour signer les cookies)
 });
 
-
 // Register plugins (database, redis, etc.)
 // app.register(dbPlugin);
 app.register(redisPlugin);
 app.register(prismaPlugin);
-
-
-
 
 // Register routes
 app.register(authRoutes, { prefix: '/user/auth' });
@@ -62,16 +60,14 @@ app.register(oauthRoutes, { prefix: '/user/oauth' });
 app.register(userRoutes, { prefix: '/user' });
 app.register(signoutRoutes, { prefix: '/user/auth' });
 
+// Register internals routes
 app.register(internalVerifyTokenRoutes, { prefix: '/internal' });
+app.register(internalSelectUserRoutes, { prefix: '/internalUser'});
 
 // app.register(TwoFactorAuth, { prefix: '/two-factor' });
 // app.register(githubRoutes, { prefix: '/auth' });
 // app.register(googleRoutes, { prefix: '/auth' });
 // app.register(oauth42Routes, { prefix: '/auth' });
-
-
-
-
 
 // Start the Fastify server
 const start = async () => {

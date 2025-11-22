@@ -6,7 +6,7 @@
 /*   By: glions <glions@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/27 11:51:29 by tissad            #+#    #+#             */
-/*   Updated: 2025/11/21 09:43:53 by glions           ###   ########.fr       */
+/*   Updated: 2025/11/22 20:32:56 by glions           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 
 import { create } from "domain";
 import { OAuthProvider, OAuthProviderType } from "../../types/user.types";
+import { DataBaseConnectionError, UserNotFoundError } from "../../errors/users.error";
 /***********************************/
 /*       Users Service Class       */
 /***********************************/
@@ -44,10 +45,28 @@ export class UsersService {
     }
 
     async getUserByUsername(username: string) {
-      console.log("====================>username ", username);
-        return this.prismaClient.user.findUnique({
-            where: { username },
+      try
+      {
+        // CALL BDD
+        const user = this.prismaClient.user.findUnique({
+          where: { username },
         });
+        // USER NOT FOUND
+        if (!user)
+          throw new UserNotFoundError();
+        // SUCCESS
+        return user;
+      } catch (error: any)
+      {
+        // DATABASE ERROR
+        if (error.code === "P1001" || error.code === "P1002")
+          throw new DataBaseConnectionError();
+        // USER NOT FOUND (NOT NECESSARY)
+        if (error instanceof UserNotFoundError)
+          throw error;
+        // OTHER ERROR
+        throw new Error("Unknown database error");
+      }
     }
     
     // find user by OAuth provider and provider ID

@@ -14,7 +14,7 @@ import { MatchFriendlyOnline } from './Match/MatchFriendlyOnLine.ts';
 
 import { Env } from './lockerRoom/scoreboardUI/menuCreate.ts';
 
-import { listInvitations } from './friends/api/friends.api.ts';
+import { listInvitations, sendFriendInvitation } from './friends/api/friends.api.ts';
 
 interface User
 {
@@ -55,6 +55,20 @@ export class UserX
     {
         this.sceneManager = sceneManager;
         this.simuEnAttendantBDD();
+    }
+
+
+    async sendFriendInvite(
+        username: string
+    ) : Promise<{success: boolean, data?: any, message?: string}>
+    {
+        const res = await sendFriendInvitation(username);
+        if (res.success)
+        {
+            this.friendInvitations.push(res.data);
+            return ({success: true, message: "Invitation envoyée"});
+        }
+        return ({success: false, message: res.message || "Erreur"});
     }
 
     /* Juste garder le parametre login une fois le backend ajoute*/

@@ -6,7 +6,7 @@
 /*   By: glions <glions@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/16 19:00:31 by tissad            #+#    #+#             */
-/*   Updated: 2025/11/21 17:44:09 by glions           ###   ########.fr       */
+/*   Updated: 2025/11/22 21:51:42 by glions           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,15 @@ import { FriendInvitation } from "../models/friends.model";
 import { UsersApi } from "../users.api"
 
 import axios from "axios";
+import { DataBaseConnectionError, InvitationAlreadyExistsError, RemoteServiceUserUnavailableError, RemoteUserNotFoundError } from "../errors/friends.error";
+
+type UserInfo = {
+    id: string;
+    username: string;
+    lastLogin: Date;
+    avatarUrl: string;
+    createdAt: string;
+}
 
 export const usersClient = axios.create({
   baseURL: process.env.USER_SERVICE_URL,
@@ -24,9 +33,37 @@ export const usersClient = axios.create({
   headers: { 'x-internal-key': process.env.INTERNAL_API_KEY }
 });
 
+const serviceUsersURL = 'http://service-users:4000'; 
+
+function sendErrorToken(reply: FastifyReply)
+{
+  return (reply.code(401).send({success: false, message: "Et beh t'as rien à faire là mon con !"}));
+}
+
 export async function verifyToken(token: string) {
-  const res = await usersClient.post('http://service-users:4000/internal/verify-token', { token });
-  return res.data; // { userId }
+  const res = await usersClient.post(`${serviceUsersURL}/internal/verify-token`, { token });
+  return (res.data);
+}
+
+export async function getOtherByUsername(username: string)
+{
+  // CALL USER SERVICE
+  const res = await usersClient.post(`${serviceUsersURL}/intervalUser/user?username=${username}`);
+  const data = res.data;
+  // ERRORS
+  if (!data.success)
+  {
+    // USER NOT FOUND
+    if (res.status === 404)
+      throw new RemoteUserNotFoundError(username);
+    // SERVICE USER ERROR
+    if (res.status === 503)
+      throw new RemoteServiceUserUnavailableError();
+    // OTHER ERROR
+    return (null);
+  }
+  // SUCCESS
+  return (data.data);
 }
 
 export async function listInvitationsController(
@@ -35,64 +72,67 @@ export async function listInvitationsController(
 )
 {
   try {
-    // Validation basique du cookie
+    // CHECK TOKEN //
     const user = await verifyToken(request.cookies["access_token"]!);
-    console.log("mon user -> ", user);
-    // Idéalement FriendsService est accessible via request.server.di ou fastify.decorate
+    if (!user)
+     return (sendErrorToken(reply));
+    // CALL BDD //
     const service = new FriendsService(request.server);
     const { received, sent } = await service.listInvitations(user.id);
+    // SORT RESULTS //
     const datas = [
       ...sent.filter(inv => inv.status === "PENDING").map(inv => inv.toUserId),
       ...received.filter(inv => inv.status === "PENDING").map(inv => inv.toUserId),
     ]
+    // SUCCESS //
     return reply.code(200).send({ success: true, datas });
   } catch (err: unknown) {
-    // Log plus sûr côté serveur
-    console.error('listInvitationsController error:', err);
-
-    // Ne pas exposer err.message directement au client
+    // ERROR //
+    console.error('/!\\ LIST INVITATION CONTROLLER ERROR /!\\', err);
     return reply.code(500).send({ success: false, message: 'Internal server error' });
   }
 }
 
 export async function sendInviteController(
-  request: FastifyRequest<{ Params: { friendLogin: string } }>,
+  request: FastifyRequest<{ Params: { friendUsername: string } }>,
   reply: FastifyReply
 )
 {
   try {
+    // CHECK TOCKEN //
+    const user = await verifyToken(request.cookies["access_token"]!);
+    if (!user)
+      return (sendErrorToken(reply));
+    // CALL BDD USERS //
+    const other : UserInfo = await getOtherByUsername(request.params.friendUsername);
+    // CALL BDD //
     const service = new FriendsService(request.server);
-    const userId = request.cookies.userId; // ou extraire depuis JWT
-    if (!userId || typeof userId !== 'string') {
-      // Mauvaise requête si pas d'userId
-      return reply.code(400).send({ success: false, message: 'Missing or invalid userId cookie' });
-    }
-    const friendLogin = request.params.friendLogin;
-    if (!friendLogin)
-      return reply.code(400).send({ success: false, message: "Missing friendLogin parameter" });
-
-    // Crée le client HTTP vers le service User
-    // Ici je dois appele la BDD User afin de trouver l'id correspondant au login envoye
-    const userServiceUrl = process.env.USER_SERVICE_URL;
-    if (!userServiceUrl)
-      throw new Error("USER_SERVICE_URL environment variable is not defined");
-
-    const userApi = new UsersApi(userServiceUrl);
-
-    const friendUser = await userApi.getUserByLogin(friendLogin);
-    if (!friendUser)
-      return reply.status(404).send({success: false, message: "Friend not found"});
-
-    // Une fois le user recupere je peux envoye l'invitation
-    // Crée l'invitation via le service Friends
-    const friendsService = new FriendsService(request.server);
-    const invite = await friendsService.sendInvitation(userId, friendUser.id);
-    
-    return reply.send({ success: true, data: invite });
-  } catch (err: any) 
+    const data    = await service.sendInvitation(
+                      user.id,
+                      user.username,
+                      other.id,
+                      other.username
+                    );
+    // SUCCESS
+    return (reply.code(200).send({success: true, data: data}));
+  // ERRORS
+  } catch (err: unknown)
   {
-    console.error(err);
-    return reply.status(400).send({ success: false, message: err.message });
+    console.error('/!\\ SEND INVITE CONTROLLER ERROR /!\\', err);
+    // SERVICE USER -> USER NOT FOUND
+    if (err instanceof RemoteUserNotFoundError)
+      return (reply.code(404).send({success: false, message: err.message}));
+    // SERVICE USER -> UNAVAILABLE
+    if (err instanceof RemoteServiceUserUnavailableError)
+      return (reply.code(503).send({success: false, message: "User service unavailable"}));
+    // DATABASE ERROR
+    if (err instanceof DataBaseConnectionError)
+      return (reply.code(503).send({success: false, message:"Database temporarily unavailable"}));
+    // INVITATION ALREADY EXISTS ERROR
+    if (err instanceof InvitationAlreadyExistsError)
+      return (reply.code(409).send({sucess: false, message: "Invitation already exists"}));
+    // OTHER ERROR
+    return reply.code(500).send({success: false, message: 'Internal server error'});
   }
 }
 

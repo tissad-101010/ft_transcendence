@@ -6,36 +6,55 @@
 /*   By: glions <glions@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/16 18:54:11 by tissad            #+#    #+#             */
-/*   Updated: 2025/11/20 16:44:41 by glions           ###   ########.fr       */
+/*   Updated: 2025/11/22 21:00:18 by glions           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-// friends.services.ts
+// IMPORT FASTIFY
 import { FastifyInstance } from "fastify";
 import { FriendInvitation, prisma } from "../models/friends.model";
+
+// IMPORT AXIOS
 import axios from "axios";
 
+// IMPORT FRIENDS.ERROR
+import { DataBaseConnectionError, InvitationAlreadyExistsError } from "../errors/friends.error";
+
+// CLASS FRIENDSSERVICE
 export class FriendsService {
+  // PROPS
   private prismaClient: typeof prisma;
-
-
+  // CONSTRUCTOR
   constructor(app: FastifyInstance) {
     this.prismaClient = app.prisma;
   }
-
+  // ASYNC METHODS
   async sendInvitation(
-    fromUserId: string,
-    toUserId: string
+    fromUserId        : string,
+    fromUserUsername  : string,
+    toUserId          : string,
+    toUserUsername    : string,
   ) : Promise<FriendInvitation> 
   {
-    const existing = await this.prismaClient.friendInvitation.findUnique({
-      where: { fromUserId_toUserId: { fromUserId, toUserId } },
-    });
-    if (existing) throw new Error("Invitation already exists");
-
-    return this.prismaClient.friendInvitation.create({
-      data: { fromUserId, toUserId, status: "PENDING" },
-    });
+    try
+    {
+      // ALREADY ON BDD ?
+      const existing = await this.prismaClient.friendInvitation.findUnique({
+        where: { fromUserId_toUserId: { fromUserId, toUserId } },
+      });
+      if (existing) throw new InvitationAlreadyExistsError();
+      // CALL BDD
+      return this.prismaClient.friendInvitation.create({
+        data: { fromUserId, toUserId, fromUserUsername, toUserUsername, status: "PENDING" },
+      });
+    } catch (err: any)
+    {
+      // DATABASE ERROR
+      if (err.code === "P1001" || err.code === "P1002")
+        throw new DataBaseConnectionError();
+      // OTHER ERROR
+      throw err;
+    }
   }
 
   async acceptInvitation(
@@ -90,4 +109,5 @@ export class FriendsService {
     });
     return { received, sent };
   }
+  
 }

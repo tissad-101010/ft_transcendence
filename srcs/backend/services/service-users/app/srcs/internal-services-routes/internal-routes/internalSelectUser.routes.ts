@@ -1,26 +1,19 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   friends.model.ts                                   :+:      :+:    :+:   */
+/*   internalSelectUser.routes.ts                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: glions <glions@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/07/25 11:32:05 by tissad            #+#    #+#             */
-/*   Updated: 2025/11/22 01:00:56 by glions           ###   ########.fr       */
+/*   Created: 2025/11/22 01:44:54 by glions            #+#    #+#             */
+/*   Updated: 2025/11/22 20:21:21 by glions           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+import { FastifyInstance } from "fastify";
+import { internalSelectUserController } from "../internal-controllers/internalSelectUser.controllers";
 
-import { PrismaClient } from "@prisma/client";
-
-export const prisma = new PrismaClient();
-
-export type FriendInvitation = {
-    id: number;
-    fromUserId: string;
-    fromUserUsername: string;
-    toUserId: string;
-    toUserUsername: string;
-    status: "PENDING" | "ACCEPTED" | "DECLINED" | "BLOCKED";
-    createdAt: Date;
+export async function internalSelectUserRoutes(app: FastifyInstance)
+{
+    app.get('/user', internalSelectUserController);
 };
