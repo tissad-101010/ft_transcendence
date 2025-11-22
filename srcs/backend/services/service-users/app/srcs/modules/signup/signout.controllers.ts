@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   signout.controllers.ts                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
+/*   By: issad <issad@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/20 12:59:59 by tissad            #+#    #+#             */
-/*   Updated: 2025/11/21 18:00:03 by tissad           ###   ########.fr       */
+/*   Updated: 2025/11/22 11:50:16 by issad            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,7 +28,7 @@ export async function signoutController(
 ) {
     console.log('[Signout Controller] Received logout request');
     const signoutService = new SignoutService(request.server);
-    const cookies = JwtUtils.esxtractCookiesFromRequest(request);
+    const cookies = JwtUtils.extractCookiesFromRequest(request);
     const refresh_Token = JwtUtils.extractTokenFromCookies(cookies, 'refresh_token');
     const user = JwtUtils.extractUserFromRefreshToken(refresh_Token);
     if (!user) {

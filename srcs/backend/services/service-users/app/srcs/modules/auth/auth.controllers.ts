@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   auth.controllers.ts                                :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
+/*   By: issad <issad@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/27 11:44:30 by tissad            #+#    #+#             */
-/*   Updated: 2025/11/19 11:07:09 by tissad           ###   ########.fr       */
+/*   Updated: 2025/11/22 11:50:16 by issad            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -162,7 +162,7 @@ export async function getProfileController(
     console.log('[Profile Controller] Received profile request');
     const redisClient = request.server.redis;
     const authService = new AuthService(request.server);
-    const cookies = JwtUtils.esxtractCookiesFromRequest(request);
+    const cookies = JwtUtils.extractCookiesFromRequest(request);
     const access_token = JwtUtils.extractTokenFromCookies(cookies, 'access_token');
     // check if access token is valid in redis cache
     if (access_token) {
@@ -219,7 +219,7 @@ export async function refreshTokenController(
     const redisClient = request.server.redis;
     console.log('[Refresh Token Controller] Received refresh token request');
     const authService = new AuthService(request.server);
-    const incomingCookies = JwtUtils.esxtractCookiesFromRequest(request);
+    const incomingCookies = JwtUtils.extractCookiesFromRequest(request);
     const incomingRefreshToken = JwtUtils.extractTokenFromCookies(incomingCookies, 'refresh_token');
     const incomingUserId = JwtUtils.extractUserFromRefreshToken(incomingRefreshToken)?.userId;
     if (!incomingRefreshToken || !incomingUserId) {

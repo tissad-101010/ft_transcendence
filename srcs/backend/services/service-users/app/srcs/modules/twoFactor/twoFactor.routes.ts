@@ -3,29 +3,28 @@
 /*                                                        :::      ::::::::   */
 /*   twoFactor.routes.ts                                :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: glions <glions@student.42.fr>              +#+  +:+       +#+        */
+/*   By: issad <issad@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/16 18:55:45 by tissad            #+#    #+#             */
-/*   Updated: 2025/11/14 15:58:05 by glions           ###   ########.fr       */
+/*   Updated: 2025/11/22 19:45:27 by issad            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 import { FastifyInstance } from "fastify";
 import { TwoFactorAuthController } from "./twoFactor.controllers";
-import { TwoFactorAuthService } from "./twoFactor.services";
 
 export  async function TwoFactorAuth(fastify: FastifyInstance) {
 
-  const twoFactorAuthController = new TwoFactorAuthController(fastify.prisma);
+  const twoFactorAuthController = new TwoFactorAuthController(fastify);
 
 
   // Define routes
   // need route to enable 2fa with email otp verification first
-  // fastify.post("/email-enable", twoFactorAuthController.enableEmailOtpForTfa);
-  // Generate OTP email
-  fastify.post("/email-sendOtp", twoFactorAuthController.SendOtpByEmail);
+  fastify.post("/email-sendOtp", twoFactorAuthController.sendOtpByEmailForTfaController);
+  fastify.post("/email-enable", twoFactorAuthController.enableEmailOtpForTfaController);
+
+  // fastify.post("/email-sendOtp", twoFactorAuthController.sendOtpByEmail);
   // Verify OTP email
-  // fastify.post("/email-verify", twoFactorAuthController.verifyOtpByEmail);
   //need routes to disable email otp verification
   // fastify.post("/email-disable", twoFactorAuthController.disableEmailOtpForTfa);
 

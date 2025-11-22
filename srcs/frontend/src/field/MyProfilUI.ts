@@ -1,6 +1,8 @@
-import { useAuth } from "../auth/context.ts";
-// fuuction that logout user from the application
+// function that logout user from the application
 import { logoutUser } from "../auth/controllers/signout.ts";
+import {    sendEmailOtp,
+            enable2faEmail
+        } from "../auth/controllers/twoFactor.api.ts";
 
 import { ZoneName } from "../config.ts";
 
@@ -57,14 +59,30 @@ Chart.register(
     Filler
 );
 
+// =============================================================
+//  PALETTE SOMBRE
+// =============================================================
+const BG_DARK = "#1a1a1a";
+const TEXT_BRIGHT = "#ffffff";
+
+
+const BTN_NORMAL = "#f5989d";
+
+
+const BTN_ACTIVE = "#2c4f53";
+
+const BTN_BACK = "#1b1b1b";
+
+
+
+
 export class MyProfilUI
 {
     private sceneManager: SceneManager;
     private container: AdvancedDynamicTexture;
     private userX: UserX; 
     
-    //INTERFACE UI
-    private profilePanel! :  Rectangle; //! dit que sera initialisee avant usage
+    private profilePanel! :  Rectangle;
     private panel! : StackPanel;
     private profileStack! : StackPanel;
     private flag : boolean = false;
@@ -85,12 +103,15 @@ export class MyProfilUI
         this.displayMenu();
     }
 
+    // =============================================================
+    //  2FA MAIL
+    // =============================================================
     private enable2FaMailInterface(){
         
         const panel2fa = new StackPanel("panel2faApp");
         panel2fa.width = "100%";
         panel2fa.height = "100%";
-        panel2fa.background = "red";
+        panel2fa.background = BG_DARK;
         panel2fa.isVertical = true;
         panel2fa.paddingTop = "10px";
         panel2fa.paddingLeft = "20px";
@@ -101,33 +122,33 @@ export class MyProfilUI
         const stackElements1 = new StackPanel("stackElements1");
         stackElements1.paddingTop = 15;
         stackElements1.height = "30%";
-        stackElements1.background = "blue";
+        stackElements1.background = "#222";
         stackElements1.spacing = 10;
         stackElements1.isVertical = true;
         panel2fa.addControl(stackElements1);
 
-        //Message d indication
         const { textBlock: infoMsg } = createMsgInfo({
             parent: stackElements1,
-            text: "Veuillez saisir le code que vous venez de recevoir par email",
+            text: "Veuillez saisir le code reçu par email",
             height: "50px",
             fontSize: 30,
-            color: "white"
+            color: TEXT_BRIGHT
         });
+        infoMsg.shadowBlur = 4;
+        infoMsg.shadowColor = "#000";
 
         const qrImgRec = new Rectangle("mailRec");
         qrImgRec.width = "200px";
         qrImgRec.height = "200px";
         qrImgRec.thickness = 0;
-        qrImgRec.background = "gray";
+        qrImgRec.background = "#333";
         stackElements1.addControl(qrImgRec);
 
-        const qrImg = new Image("mailImg", "mail.png");
-        qrImg.width = 1;
-        qrImg.height = 1;
-        qrImgRec.addControl(qrImg);
+        // const qrImg = new Image("mailImg", "mail.png");
+        // qrImg.width = 1;
+        // qrImg.height = 1;
+        // qrImgRec.addControl(qrImg);
 
-        //LES ENFANTS NE DOIVENT PAS USE DE WIDTH EN %
         const stackElements2 = new StackPanel("stackElements2");
         stackElements2.height = "70px";
         stackElements2.width = "50%";
@@ -137,13 +158,12 @@ export class MyProfilUI
 
         const input = createInputField2fa(stackElements2);
 
-        //Message d erreur qui s affiche si erreur
-        const { rect: recMsg, textBlock: infoMsg1 } = createMsgInfo({
+        const { textBlock: infoMsg1 } = createMsgInfo({
             parent: panel2fa,
             text: "",
             height: "50px",
             fontSize: 20,
-            color: "white"
+            color: TEXT_BRIGHT
         });
 
         const confirmButtonMail = createButton({
@@ -152,33 +172,29 @@ export class MyProfilUI
             width: "100px",
             height: "100%",
             fontSize: 20,
-            color: "white",
-            background: "#0066FF",
-            onClick: () => {
-                console.log("code verification confirme");
+            color: TEXT_BRIGHT,
+            background: BTN_ACTIVE,
+            onClick: async () => {
                 const code = input.text?.trim();
-                if (!code) {
-                    infoMsg1.text = "Le champ ne peut pas être vide !";
-                    return;
-                }
-                if (code.length !== 6) {
-                    infoMsg1.text = "Le code doit contenir exactement 6 caractères !";
-                    return;
-                }
-                this.flag = false;
+                if (!code) return infoMsg1.text = "Le champ est vide !";
+                if (code.length !== 6) return infoMsg1.text = "Code invalide !";
+                await enable2faEmail(code);
+                this.flag = true;
                 this.enable2faMail = true;
-                console.log("Code valide :", code);
                 this.displayMenu();
             }
         });
         stackElements2.addControl(confirmButtonMail);
     }
 
+    // =============================================================
+    //  2FA APP
+    // =============================================================
     private enable2FaAppInterface(){
         const panel2fa = new StackPanel("panel2faApp");
         panel2fa.width = "100%";
         panel2fa.height = "100%";
-        panel2fa.background = "red";
+        panel2fa.background = BG_DARK;
         panel2fa.isVertical = true;
         panel2fa.paddingTop = "10px";
         panel2fa.paddingLeft = "20px";
@@ -188,25 +204,24 @@ export class MyProfilUI
 
         const stackElements1 = new StackPanel("stackElements1");
         stackElements1.height = "30%";
-        stackElements1.background = "blue";
+        stackElements1.background = "#222";
         stackElements1.spacing = 10;
         stackElements1.isVertical = true;
         panel2fa.addControl(stackElements1);
 
-        //Message indication
         const { textBlock: infoMsg } = createMsgInfo({
             parent: stackElements1,
-            text: "Veuillez saisir le code QR dans le champ ci-dessous",
+            text: "Scannez le QR Code puis entrez le code",
             height: "50px",
             fontSize: 30,
-            color: "white"
+            color: TEXT_BRIGHT
         });
 
         const qrImgRec = new Rectangle("qrImgRec");
         qrImgRec.width = "200px";
         qrImgRec.height = "200px";
         qrImgRec.thickness = 0;
-        qrImgRec.background = "gray";
+        qrImgRec.background = "#333";
         stackElements1.addControl(qrImgRec);
 
         const qrImg = new Image("qrImgImg", "qrImg.png");
@@ -214,7 +229,6 @@ export class MyProfilUI
         qrImg.height = 1;
         qrImgRec.addControl(qrImg);
 
-        //LES ENFANTS NE DOIVENT PAS USE DE WIDTH EN %
         const stackElements2 = new StackPanel("stackElements2");
         stackElements2.height = "70px";
         stackElements2.width = "50%";
@@ -224,49 +238,42 @@ export class MyProfilUI
 
         const input = createInputField2fa(stackElements2);
 
-        //Message d erreur qui s affiche si erreur
-        const { rect: recMsg, textBlock: infoMsg1 } = createMsgInfo({
+        const { textBlock: infoMsg1 } = createMsgInfo({
             parent: panel2fa,
             text: "",
             height: "50px",
             fontSize: 20,
-            color: "white"
+            color: TEXT_BRIGHT
         });
 
-        //CONFIRMATION DU BOUTON 2FA APP INTERFACE APRES RECU DU CODE DE VALIDATION
         const confirmButton = createButton({
             id: "enable2faConfirm",
             txt: "✔",
             width: "100px",
             height: "100%",
             fontSize: 20,
-            color: "white",
-            background: "#0066FF",
+            color: TEXT_BRIGHT,
+            background: BTN_ACTIVE,
             onClick: () => {
-                console.log("code verification confirme");
                 const code = input.text?.trim();
-                if (!code) {
-                    infoMsg1.text = "Le champ ne peut pas être vide !";
-                    return;
-                }
-                if (code.length !== 6) {
-                    infoMsg1.text = "Le code doit contenir exactement 6 caractères !";
-                    return;
-                }
+                if (!code) return infoMsg1.text = "Le champ est vide !";
+                if (code.length !== 6) return infoMsg1.text = "Code invalide !";
                 this.flag = false;
                 this.enable2faApp = true;
-                console.log("Code valide :", code);
                 this.displayMenu();
             }
         });
         stackElements2.addControl(confirmButton);
     }
 
+    // =============================================================
+    //  CHANGE PASSWORD
+    // =============================================================
     private changePwdInterface() : void {
         const panelPwd = new StackPanel("panelPwd");
         panelPwd.width = "100%";
         panelPwd.height = "100%";
-        panelPwd.background = "red";
+        panelPwd.background = BG_DARK;
         panelPwd.isVertical = true;
         panelPwd.paddingTop = "60px";
         panelPwd.paddingLeft = "20px";
@@ -274,50 +281,45 @@ export class MyProfilUI
         panelPwd.spacing = 20;
         this.panel.addControl(panelPwd);
 
-        //Message info qui s affiche si une erreur est detecte
-        const { rect: recMsg, textBlock: infoMsg } = createMsgInfo({
+        const { textBlock: infoMsg } = createMsgInfo({
             parent: panelPwd,
             text: "",
             height: "50px",
             fontSize: 26,
-            color: "white"
+            color: TEXT_BRIGHT
         });
-        
+
         const getOldPwd = createInputFieldPwd("Ancien mot de passe", panelPwd);
         const getNewPwd = createInputFieldPwd("Nouveau mot de passe", panelPwd);
         const getConfirmPwd = createInputFieldPwd("Confirmation", panelPwd);
 
-        //VALIDATION CLIC BOUTON CHANGEMENT DE MOT DE PASSE
         const changePwdBtn = createButton({
             id: "changePwd",
             txt: "✔",
             width: "40%",
             height: "60px",
             fontSize: 20,
-            background: "#0066FF",
-            color: "white",
+            background: BTN_ACTIVE,
+            color: TEXT_BRIGHT,
             cornerRadius: 10,
             onClick: () => {
-                //action au clic du bouton
-                this.flag = false;
                 const newPwd = getNewPwd();
                 const confirmPwd = getConfirmPwd();
                 const oldPwd = getOldPwd();
-                if (!newPwd?.trim() || !confirmPwd?.trim() || !oldPwd?.trim()) {
-                    infoMsg.text = "Vas y tu forces c est vide 😑";
-                    return;
-                }
-                if (newPwd !== confirmPwd) {
-                    infoMsg.text = "Concentre toi le sang, les mp correspondent pas 🥱";
-                    return;
-                }
-                console.log("Mot de passe valide :", newPwd);
+                if (!newPwd || !confirmPwd || !oldPwd)
+                    return infoMsg.text = "Champs vides";
+                if (newPwd !== confirmPwd)
+                    return infoMsg.text = "Les mots de passe ne correspondent pas";
+                this.flag = false;
                 this.displayMenu();
             }
         });
         panelPwd.addControl(changePwdBtn);
     }
 
+    // =============================================================
+    //  CAT 3 (SECURITY)
+    // =============================================================
     private displayMainCat3() : void {
         const rightPanel = new StackPanel();
         rightPanel.isVertical = true;
@@ -326,28 +328,26 @@ export class MyProfilUI
         rightPanel.spacing = 40;
         this.profileStack.addControl(rightPanel);
 
-        const title = createSectionTitle({
+        createSectionTitle({
             parent: rightPanel,
-            text: "Securite & Authentification 🔒",
+            text: "Sécurité & Auth 🔒",
             height: "50px",
             fontSize: 25,
-            color: "black",
-            background: "rgba(124, 70, 131, 1)",
+            color: TEXT_BRIGHT,
+            background: "#2d2d2d",
             textHorizontalAlignment: Control.HORIZONTAL_ALIGNMENT_LEFT
         });
 
-        // BOUTON CHANGER DE MOT DE PASSE
         const changePwdBtn = createButton({
             id: "changePwd",
             width: "70%",
             height: "50px",
             txt: "Changer mot de passe",
-            background: "blue",
+            background: BTN_NORMAL,
             fontSize: 20,
-            color: "white",
+            color: TEXT_BRIGHT,
             cornerRadius: 10,
             onClick: () =>{
-                //Action au clic du bouton(tu rajoutes tes fonctions mais n enleve rien d ici)
                 this.flag = true;
                 this.mainInterfaceStruct();
                 this.changePwdInterface();
@@ -355,15 +355,14 @@ export class MyProfilUI
         });
         rightPanel.addControl(changePwdBtn);
 
-        //BUTTON 2FA APPLICATION
         const enable2faBtn = create2faButton({
             id: "enable2FAApp",
             stateVar: () => this.enable2faApp,
             setStateVar: (val) => this.enable2faApp = val,
             activeText: "Activer 2FA 📱",
-            inactiveText: "Desactiver 2FA 📱",
-            activeColor: "#009944",
-            inactiveColor: "#c200c2ff",
+            inactiveText: "Désactiver 2FA 📱",
+            activeColor: BTN_ACTIVE,
+            inactiveColor: BTN_NORMAL,
             onActivate: () => {
                 this.flag = true;
                 this.mainInterfaceStruct();
@@ -372,17 +371,16 @@ export class MyProfilUI
         });
         rightPanel.addControl(enable2faBtn);
 
-        //BUTTON 2FA MAIL
         const enable2faMailBtn = create2faButton({
             id: "enable2FAMail",
             stateVar: () => this.enable2faMail,
             setStateVar: (val) => this.enable2faMail = val,
             activeText: "Activer 2FA ✉️",
-            inactiveText: "Desactiver 2FA ✉️",
-            activeColor: "#009944",
-            inactiveColor: "#df0000ff",
-            onActivate: () => {
-                //Action au clic du bouton(tu rajoutes tes fonctions mais n enleve rien d ici)
+            inactiveText: "Désactiver 2FA ✉️",
+            activeColor: BTN_ACTIVE,
+            inactiveColor: BTN_NORMAL,
+            onActivate: async () => {
+                await sendEmailOtp();
                 this.flag = true;
                 this.mainInterfaceStruct();
                 this.enable2FaMailInterface();
@@ -391,23 +389,26 @@ export class MyProfilUI
         rightPanel.addControl(enable2faMailBtn);
     }
 
+    // =============================================================
+    //  CAT 2 (CENTER)
+    // =============================================================
     private displayMainCat2() : void {
         const centerPanel = new StackPanel();
         centerPanel.isVertical = true;
-        centerPanel.background = "#8c00ffff";
+        centerPanel.background = "#242424";
         centerPanel.paddingTop = 0;
         centerPanel.spacing = 30;
         centerPanel.width = "300px";
         centerPanel.height = "100%";
         this.profileStack.addControl(centerPanel);
 
-        const title = createSectionTitle({
+        createSectionTitle({
             parent: centerPanel,
-            text: "personnelles 👤",
+            text: "Personnelles 👤",
             height: "50px",
             fontSize: 25,
-            color: "black",
-            background: "rgba(225, 0, 255, 1)",
+            color: TEXT_BRIGHT,
+            background: "#333",
             paddingLeft: "5px",
             textHorizontalAlignment: Control.HORIZONTAL_ALIGNMENT_LEFT
         });
@@ -417,18 +418,12 @@ export class MyProfilUI
         avatarContainer.height = "250px";
         avatarContainer.cornerRadius = 120;
         avatarContainer.thickness = 0;
-        avatarContainer.background = "gray";
-
+        avatarContainer.background = "#000";
         centerPanel.addControl(avatarContainer);
 
-        // image de l’avatar
-        console.log("==========================================================User Avatar URL:", this.userX.getUser?.avatarUrl);
-        console.log("==========================================================User Login:", this.userX.getUser?.username);
+        let path = this.userX.getUser?.avatarUrl && this.userX.getUser?.avatarUrl !== "" ?
+            this.userX.getUser?.avatarUrl : "logoPink.png";
         
-        let path = this.userX.getUser?.avatarUrl && this.userX.getUser?.avatarUrl !== "" ? this.userX.getUser?.avatarUrl : "logoPink.png";
-        console.log("Avatar URL:", path);
-        
-        // Use a rounded Rectangle as a mask/container for the image (Image doesn't have cornerRadius)
         const avatarCircle = new Rectangle("avatarCircle");
         avatarCircle.width = 1;
         avatarCircle.height = 1;
@@ -437,49 +432,54 @@ export class MyProfilUI
         avatarCircle.background = "transparent";
         avatarContainer.addControl(avatarCircle);
         
-        const avatar = new Image("avatarImg", path); // ← URL distante OK
+        const avatar = new Image("avatarImg", path);
         avatar.width = "100%";
         avatar.height = "100%";
         avatar.stretch = Image.STRETCH_UNIFORM;
         avatarCircle.addControl(avatar);
     }
 
+    // =============================================================
+    //  CAT 1 (LEFT)
+    // =============================================================
     private displayMainCat1(): void {
         const leftPanel = new StackPanel();
         leftPanel.isVertical = true;
-        leftPanel.background = "#ff8800ff";
+        leftPanel.background = "#2b2b2b";
         leftPanel.width = "320px";
         leftPanel.height = "100%";
         this.profileStack.addControl(leftPanel);
 
-        const title = createSectionTitle({
+        createSectionTitle({
             parent: leftPanel,
             text: "Informations",
             height: "50px",
             fontSize: 25,
-            color: "black",
-            background: "rgba(225, 0, 255, 1)",
+            color: TEXT_BRIGHT,
+            background: "#333",
             paddingLeft: "180px",
             textHorizontalAlignment: Control.HORIZONTAL_ALIGNMENT_LEFT
         });
 
-        // Sous categories 1 : Informations personnelles + Statistiques
         const loginText = new TextBlock();
         loginText.text = "Login: " + this.userX.getUser?.username;
         loginText.height = "40px";
         loginText.fontSize = 19;
         loginText.paddingLeft = "5px";
-        loginText.color = "black";
+        loginText.color = TEXT_BRIGHT;
+        loginText.shadowColor = "#000";
+        loginText.shadowBlur = 5;
         loginText.textHorizontalAlignment = Control.HORIZONTAL_ALIGNMENT_LEFT;
         leftPanel.addControl(loginText);
 
-        // EMAIL
         const mailText = new TextBlock();
         mailText.text = "Email: " + this.userX.getUser?.email;
         mailText.height = "25px";
         mailText.paddingLeft = "5px";
         mailText.fontSize = 19;
-        mailText.color = "black";
+        mailText.color = TEXT_BRIGHT;
+        mailText.shadowColor = "#000";
+        mailText.shadowBlur = 4;
         mailText.textHorizontalAlignment = Control.HORIZONTAL_ALIGNMENT_LEFT;
         leftPanel.addControl(mailText);
 
@@ -487,61 +487,70 @@ export class MyProfilUI
         recSection2.height = "80px";
         recSection2.thickness = 0;
         recSection2.paddingTop = "35px";
-        recSection2.background = "rgba(194, 212, 30, 1)";
+        recSection2.background = "#444";
         leftPanel.addControl(recSection2);
 
         const titleSection2 = new TextBlock();
         titleSection2.text = "Statistiques 📊";
         titleSection2.height = "100px";
         titleSection2.fontSize = 25;
-        titleSection2.color = "black";
+        titleSection2.color = TEXT_BRIGHT;
+        titleSection2.shadowColor = "#000";
+        titleSection2.shadowBlur = 4;
         titleSection2.textHorizontalAlignment = Control.HORIZONTAL_ALIGNMENT_LEFT;
         recSection2.addControl(titleSection2);
 
-        //GAME (A MODIFIER PAR GRAPHIQUES)
         const gamePlayed = new TextBlock();
-        gamePlayed.text = "​🕹️​ Total: " + this.userX.getUser?.gamesPlayed;
+        gamePlayed.text = "🕹️ Total: " + this.userX.getUser?.gamesPlayed;
         gamePlayed.height = "40px";
         gamePlayed.paddingLeft = "5px";
         gamePlayed.fontSize = 19;
-        gamePlayed.color = "black";
+        gamePlayed.color = TEXT_BRIGHT;
+        gamePlayed.shadowColor = "#000";
+        gamePlayed.shadowBlur = 4;
         gamePlayed.textHorizontalAlignment = Control.HORIZONTAL_ALIGNMENT_LEFT;
         leftPanel.addControl(gamePlayed);
 
         const win = new TextBlock();
-        win.text = "​​🏅 Victoires​: " + this.userX.getUser?.wins;
+        win.text = "🏅 Victoires: " + this.userX.getUser?.wins;
         win.height = "25px";
         win.fontSize = 19;
         win.paddingLeft = "5px";
-        win.color = "black";
+        win.color = TEXT_BRIGHT;
+        win.shadowColor = "#000";
+        win.shadowBlur = 4;
         win.textHorizontalAlignment = Control.HORIZONTAL_ALIGNMENT_LEFT;
         leftPanel.addControl(win);
 
         const loss = new TextBlock();
-        loss.text = "​💩​ Defaites: " + this.userX.getUser?.loss;
+        loss.text = "💩 Défaites: " + this.userX.getUser?.loss;
         loss.height = "40px";
         loss.fontSize = 19;
         loss.paddingLeft = "5px";
-        loss.color = "black";
+        loss.color = TEXT_BRIGHT;
+        loss.shadowColor = "#000";
+        loss.shadowBlur = 4;
         loss.textHorizontalAlignment = Control.HORIZONTAL_ALIGNMENT_LEFT;
         leftPanel.addControl(loss);
     }
-    
+
+    // =============================================================
+    //  MAIN LAYOUT
+    // =============================================================
     private mainInterfaceStruct() : void {
         this.panel = new StackPanel();
         this.panel.width = "100%";
         this.panel.height = "1024px";
         this.panel.isVertical = true;
         this.panel.spacing = 0;
-        this.panel.background = "rgba(0, 102, 255, 1)";
+        this.panel.background = BG_DARK;
         this.container.addControl(this.panel);
 
-        // --- SECTION 1 : Titre ---
         const titlePanel = new Rectangle("titlepanel");
         titlePanel.width = "100%";
         titlePanel.height = "300px";
         titlePanel.thickness = 0;
-        titlePanel.background = "rgba(255, 217, 0, 1)";
+        titlePanel.background = "#111";
         this.panel.addControl(titlePanel);
 
         const horizontalLayout = new StackPanel();
@@ -558,14 +567,13 @@ export class MyProfilUI
                 txt: "←",
                 paddingLeft: "10px",
                 paddingTop: "210px",
-                background: "green",
+                background: BTN_BACK,
                 fontSize: 100,
-                color: "white",
+                color: TEXT_BRIGHT,
                 cornerRadius: 0,
                 textHorizontalAlignment: Control.HORIZONTAL_ALIGNMENT_CENTER,
                 textVerticalAlignment: Control.VERTICAL_ALIGNMENT_CENTER,
                 onClick: () =>{
-                    //Action au clic du bouton
                     this.flag = false;
                     this.displayMenu();
                 }
@@ -575,108 +583,61 @@ export class MyProfilUI
         
         const title = new TextBlock("tiltetextblock");
         title.text = "Mon profil";
-        if (this.flag)
-            title.width = "600px";
-        else
-            title.width = "1000px";
-        title.color = "white";
+        title.width = this.flag ? "600px" : "1000px";
+        title.color = TEXT_BRIGHT;
         title.fontSize = 45;
-        // ALIGNE LE TEXTE EN BAS
+        title.shadowBlur = 8;
+        title.shadowColor = "#000";
         title.textHorizontalAlignment = Control.HORIZONTAL_ALIGNMENT_CENTER;
         title.textVerticalAlignment = Control.VERTICAL_ALIGNMENT_BOTTOM;
         horizontalLayout.addControl(title);
 
 
-        // --- SECTION 2 : Profil utilisateur ---
         if (!this.flag){
             this.profilePanel = new Rectangle("this.profilePanel");
             this.profilePanel.width = "100%";
             this.profilePanel.height = "400px";
             this.profilePanel.thickness = 0;
-            this.profilePanel.background = "white"; 
+            this.profilePanel.background = "#1f1f1f"; 
             this.profilePanel.paddingTop = "20px";
             this.profilePanel.paddingLeft = "20px";
             this.profilePanel.paddingRight = "20px";
             this.panel.addControl(this.profilePanel);
 
-        // // layout horizontal : avatar + infos
-        // this.profileStack = new StackPanel();
-        // this.profileStack.isVertical = false;
-        // this.profileStack.width = "100%";
-        // this.profileStack.height = "100%";
-        // this.profileStack.spacing = 5;
-        // this.profileStack.background = "#ffffffff";
-        // this.profilePanel.addControl(this.profileStack);
-
-
-        // // // --- SECTION 3 : Bouton Déconnexion ---
-        // if (!this.changePwd){
-        //     const logoutButton = Button.CreateSimpleButton("logout", "Se déconnecter");
-        //     logoutButton.width = "100%";
-        //     logoutButton.height = "50px";
-        //     logoutButton.color = "white";
-        //     logoutButton.fontSize = 30;
-        //     logoutButton.background = "rgba(255, 0, 0, 0.7)";
-        //     logoutButton.cornerRadius = 10;
-
-        //     logoutButton.onPointerUpObservable.add(async () => {
-        //         console.log("Déconnexion...");
-        //         const success = await logoutUser();
-        //         if (success) {
-        //             console.log("Déconnecté avec succès");
-        //             this.dispose();
-        //             this.sceneManager.moveCameraTo(ZoneName.START, () => {
-        //                 // A voir s'il y a des choses supplmentaires  faire aprs la dconnexion
-        //                 this.sceneManager.getSceneInteractor?.enableInteractions();
-        //             });
-        //         } else {
-        //             console.error("Échec de la déconnexion");
-            // layout horizontal : avatar + infos
             this.profileStack = new StackPanel();
             this.profileStack.isVertical = false;
             this.profileStack.width = "100%";
             this.profileStack.height = "100%";
             this.profileStack.spacing = 0;
-            this.profileStack.background = "#ffffffff";
+            this.profileStack.background = "#1f1f1f";
             this.profilePanel.addControl(this.profileStack);
-        // --- SECTION 3 : Bouton Déconnexion ---
-        const logoutBtn = createButton({
-            id: "logout",
-            width: "100%",
-            height: "50px",
-            txt: "Se deconnecter",
-            background: "rgba(255, 0, 0, 0.7)",
-            fontSize: 30,
-            color: "white",
-            cornerRadius: 0,
-            onClick: async () =>{
-                //Action au clic du bouton
-                console.log("Déconnexion !");
-                try {
-                    const success = await logoutUser();
-                    if (success) {
-                        console.log("Déconnecté avec succès");
-                        // move camera to start zone after logout
-                        // Reset complet des interactions
-                        this.sceneManager.getSceneInteractor?.reset();
-                        // Clear component UI
-                        this.dispose();
-                        // Clear user data
-                        this.userX.clearUser();
-                        // Move camera to start zone
-                        this.sceneManager.moveCameraTo(ZoneName.START, () => {
-                            // enable interactions after moving camera
-                            this.sceneManager.getSceneInteractor?.enableInteractions();
-                        });
-                    } else {
-                        console.error("Échec de la déconnexion");
+
+            const logoutBtn = createButton({
+                id: "logout",
+                width: "100%",
+                height: "50px",
+                txt: "Se déconnecter",
+                background: BTN_NORMAL,
+                fontSize: 30,
+                color: TEXT_BRIGHT,
+                cornerRadius: 0,
+                onClick: async () =>{
+                    try {
+                        const success = await logoutUser();
+                        if (success) {
+                            this.sceneManager.getSceneInteractor?.reset();
+                            this.dispose();
+                            this.userX.clearUser();
+                            this.sceneManager.moveCameraTo(ZoneName.START, () => {
+                                this.sceneManager.getSceneInteractor?.enableInteractions();
+                            });
+                        }
+                    } catch (err) {
+                        console.error("Erreur :", err);
                     }
-                } catch (err) {
-                    console.error("Erreur lors de la déconnexion:", err);
                 }
-            }
-        });
-        this.panel.addControl(logoutBtn);
+            });
+            this.panel.addControl(logoutBtn);
         }
     }
 

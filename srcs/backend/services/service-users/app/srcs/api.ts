@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   api.ts                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
+/*   By: issad <issad@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/23 15:58:35 by tissad            #+#    #+#             */
-/*   Updated: 2025/11/21 14:40:18 by tissad           ###   ########.fr       */
+/*   Updated: 2025/11/22 12:35:46 by issad            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,8 +20,8 @@ import {  authRoutes,
         } from './modules/auth/auth.routes';
 import { oauthRoutes } from './modules/oauth/routes/oauth.routes';
 import { signoutRoutes } from './modules/signup/signout.routes';
+import { TwoFactorAuth } from './modules/twoFactor/twoFactor.routes';
 // internal services routes responsible for internal communications between services
-// import { TwoFactorAuth } from './routes/TwoFactorAuth.routes';
 // import { githubRoutes } from './routes/OauthGithub.routes';
 // // import { googleRoutes } from './routes/OauthGoogle.routes';
 // import { oauth42Routes } from './routes/Oauth42.routes';
@@ -61,9 +61,9 @@ app.register(authRoutes, { prefix: '/user/auth' });
 app.register(oauthRoutes, { prefix: '/user/oauth' });
 app.register(userRoutes, { prefix: '/user' });
 app.register(signoutRoutes, { prefix: '/user/auth' });
+app.register(TwoFactorAuth, { prefix: '/user/2fa' });
 app.register(internalServicesRoutes, { prefix: '/internal' });
 
-// app.register(TwoFactorAuth, { prefix: '/two-factor' });
 // app.register(githubRoutes, { prefix: '/auth' });
 // app.register(googleRoutes, { prefix: '/auth' });
 // app.register(oauth42Routes, { prefix: '/auth' });

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   twoFactor.controllers.ts                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
+/*   By: issad <issad@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/27 11:48:33 by tissad            #+#    #+#             */
-/*   Updated: 2025/11/19 11:18:14 by tissad           ###   ########.fr       */
+/*   Updated: 2025/11/22 19:54:23 by issad            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,7 +25,7 @@
 
 
 const userId = 1; // temporary user id for testing
-
+import { FastifyInstance } from "fastify";
 import { FastifyReply, FastifyRequest } from "fastify";
 import { send } from "process";
 
@@ -40,60 +40,49 @@ import {  OtpEmailRequest,
 export class TwoFactorAuthController {
   private twoFactorAuthService: TwoFactorAuthService;
 
-  constructor(prismaClient: any) {
-    this.twoFactorAuthService = new TwoFactorAuthService(prismaClient);
+  constructor(server: FastifyInstance) {
+    this.twoFactorAuthService = new TwoFactorAuthService(server);
   }
   // function that : 
       // extract coockies from the header
       // extarct Jwt token from cookies 
       // verify Jwt token and get user id and email
-  static extactUserFromRequest = (req: FastifyRequest): { userId: number; email: string } | null => {
-    try {
-      const cookies = req.cookies;
-      const token = cookies?.jwt;
-      if (!token) {
-        console.error("❌ [2fa.controller.ts] No JWT token found in cookies");
-        return null;
-      }
-      const payload = JwtUtils.verifyAccessToken(token);
-      if (!payload) {
-        console.error("❌ [2fa.controller.ts] Invalid JWT token");
-        return null;
-      }
-      const { userId, email } = payload as { userId: number; email: string };
-      return { userId, email };
-    } catch (error) {
-      console.error("❌ [2fa.controller.ts] Error extracting user from request:", error);
-      return null;
-    }
-  };
-  
-  // enable TFA for user
-  enableOtpEmailTfa = async (
+  // static extactUserFromRequest = (req: FastifyRequest): { userId: number; email: string } | null => {
+  //   try {
+  //     const cookies = req.cookies;
+  //     const token = cookies?.jwt;
+  //     if (!token) {
+  //       console.error("❌ [2fa.controller.ts] No JWT token found in cookies");
+  //       return null;
+  //     }
+  //     const payload = JwtUtils.verifyAccessToken(token);
+  //     if (!payload) {
+  //       console.error("❌ [2fa.controller.ts] Invalid JWT token");
+  //       return null;
+  //     }
+  //     const { userId, email } = payload as { userId: number; email: string };
+  //     return { userId, email };
+  //   } catch (error) {
+  //     console.error("❌ [2fa.controller.ts] Error extracting user from request:", error);
+  //     return null;
+  //   }
+  // };
+    // Send OTP via Email
+  sendOtpByEmailForTfaController = async (
     req: FastifyRequest,
     reply: FastifyReply
   ) => {
-    // accessToken user id and email extraction from request
-    const user = TwoFactorAuthController.extactUserFromRequest(req);
-    if (!user) {
+    const cookies = JwtUtils.extractCookiesFromRequest(req);
+    const accessToken = JwtUtils.extractTokenFromCookies(cookies, 'access_token');
+    const user = JwtUtils.extractUserFromAccessToken(accessToken);
+    if (accessToken === null || user === null) {
       console.error("❌ [2fa.controller.ts] User not found");
       return reply.status(401).send({ message: "Unauthorized ❌" });
     }
     const userId  = user.userId;
     const email   = user.email;
-    const type = TwoFactorType.EMAIL;
     console.log("[2fa.controller.ts] Enabling TFA for user ID:", userId, "email:", email);
-    //send otp to email
-    this.SendOtpByEmail(req, reply);
-  };
-  
-  // Send OTP via Email
-  SendOtpByEmail = async (
-    req: FastifyRequest,
-    reply: FastifyReply
-  ) => {
     // Tmp Token user id and email extraction from request
-    const email = (req.body as OtpEmailRequest).email;
     const mailSent = await this.twoFactorAuthService.sendOtpByEmail(email);
     
     // If mail sending failed, return error response
@@ -107,8 +96,42 @@ export class TwoFactorAuthController {
     }
   };
   
+  // verify otp and enable email otp for tfa
+  enableEmailOtpForTfaController = async (
+    req: FastifyRequest<{ Body: VerifyOtpEmailRequest }>,
+    reply: FastifyReply
+  ) => {
+    // accessToken user id and email extraction from request
+    const cookies = JwtUtils.extractCookiesFromRequest(req);
+    const accessToken = JwtUtils.extractTokenFromCookies(cookies, 'access_token');
+    const user = JwtUtils.extractUserFromAccessToken(accessToken);
+    if (accessToken === null || user === null) {
+      console.error("❌ [2fa.controller.ts] User not found");
+      return reply.status(401).send({ message: "Unauthorized ❌" });
+    }
+    const userId  = user.userId;
+    const email   = user.email;
+    const type = TwoFactorType.EMAIL;
+    console.log("[2fa.controller.ts] Verifying OTP and enabling TFA for user ID:", userId, "email:", email);
+    // verify otp
+    const { otp } = req.body;
+    const isValid = await this.twoFactorAuthService.verifyOtpEmail(email, otp);
+    if (!isValid) {
+      console.error("❌ [2fa.controller.ts] OTP verification failed for email:", email);
+      return reply.status(400).send({ message: "Invalid or expired OTP ❌" });
+    } else {
+      // enable email otp for tfa
+      await this.twoFactorAuthService.enableTwoFactorAuth(Number(userId), type);
+      console.log("✅ [2fa.controller.ts] TFA enabled successfully for user ID:", userId);
+      return reply.send({ message: "Two-factor authentication enabled successfully ✅" });
+    }
+  };
+  
+  
+
+  
   // Verify OTP
-  verifyOtpEmail = async (
+  verifyOtpEmailController = async (
     req: FastifyRequest<{ Body: VerifyOtpEmailRequest }>,
     reply: FastifyReply
   ) => {

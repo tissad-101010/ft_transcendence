@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   jwt.utils.ts                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
+/*   By: issad <issad@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/27 14:02:23 by tissad            #+#    #+#             */
-/*   Updated: 2025/11/19 11:19:45 by tissad           ###   ########.fr       */
+/*   Updated: 2025/11/22 11:50:16 by issad            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -109,7 +109,7 @@ export class JwtUtils {
         reply.clearCookie('temp_token');
     }
     
-    static esxtractCookiesFromRequest(req: any): Record<string, string> {   
+    static extractCookiesFromRequest(req: any): Record<string, string> {   
         return req.cookies || {};
     }
     
