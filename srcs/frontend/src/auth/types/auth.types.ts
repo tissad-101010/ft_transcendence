@@ -31,8 +31,16 @@ export interface SignUpData {
 
 // ─── Two Factor ──────────────────────────────────────────────
 
-// Les méthodes supportées par ton backend
-export type TwoFactorMethod = 'TOTP' | 'EMAIL' | 'SMS';
+export type TwoFactorMethodType = "EMAIL" | "TOTP";
+
+export interface TwoFactorMethod {
+  id: string;
+  type: TwoFactorMethodType;
+  enabled: boolean;
+  createdAt: string;
+  userId: string;
+}
+
 
 // Représente les données nécessaires à la vérification du code 2FA
 export interface TwoFactorVerifyData {

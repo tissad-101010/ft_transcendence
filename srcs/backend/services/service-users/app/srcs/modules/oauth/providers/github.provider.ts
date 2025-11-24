@@ -6,7 +6,7 @@
 /*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/27 12:12:13 by tissad            #+#    #+#             */
-/*   Updated: 2025/11/19 14:00:13 by tissad           ###   ########.fr       */
+/*   Updated: 2025/11/24 17:44:07 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -116,7 +116,16 @@ export class GitHubOAuthProvider {
       try {
           await this.userService.linkOAuthProviderToUser(user.id, DB_provider);
           console.log("[google.service] Successfully linked Google OAuth provider to user:", user.id);
-          return user;
+          const twoFactorMethods = await this.userService.getUserTwoFactorMethods(user.id);
+          const isTwoFactorEnabled = twoFactorMethods.length > 0;
+          return ({
+              username: user.username,
+              email: user.email,
+              id: user.id,
+              avatarUrl: user.avatarUrl,
+              isTwoFactorEnabled : isTwoFactorEnabled,
+              twoFactorMethods: twoFactorMethods,
+          });
       } catch (error) {
           console.log("[google.service] Error linking OAuth provider to user:", error);
           return null;

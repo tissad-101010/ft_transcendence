@@ -44,6 +44,7 @@ const AuthPage: React.FC = () => {
             <TwoFactor
               methodsEnabled={pending2FA?.methods || []}
               onSuccess={() => {}}
+
             />
           </motion.div>
         )}

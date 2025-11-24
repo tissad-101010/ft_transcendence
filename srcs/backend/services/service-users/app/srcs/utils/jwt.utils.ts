@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   jwt.utils.ts                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: issad <issad@student.42.fr>                +#+  +:+       +#+        */
+/*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/27 14:02:23 by tissad            #+#    #+#             */
-/*   Updated: 2025/11/22 11:50:16 by issad            ###   ########.fr       */
+/*   Updated: 2025/11/24 15:23:40 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -88,6 +88,10 @@ export class JwtUtils {
             httpOnly: true,
             secure: true,
             sameSite: 'none',
+            // secure: process.env.NODE_ENV === 'production',
+            // sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'none',
+            path : '/',
+            maxAge: 10 * 60, // 10 minutes
         });
     }
     
@@ -104,6 +108,9 @@ export class JwtUtils {
         return this.verifyToken(token, process.env.REFRESH_TOKEN_SECRET!);
     }
 
+    static verifyTempToken(token: string): JwtPayload | null {
+        return this.verifyToken(token, process.env.TEMP_TOKEN_SECRET!);
+    }
     
     static clearTempTokenCookie(reply: any) {
         reply.clearCookie('temp_token');
@@ -138,7 +145,7 @@ export class JwtUtils {
           return null;
         }
     };
-        static extractUserFromRefreshToken(refresh_token: string | null): { userId: string; email: string } | null {
+    static extractUserFromRefreshToken(refresh_token: string | null): { userId: string; email: string } | null {
         try {
           if (!refresh_token) {
             console.error("❌ [jwt.utils.ts] No JWT token found in cookies");
@@ -157,6 +164,27 @@ export class JwtUtils {
         } catch (error) {
           console.error("❌ [jwt.utils.ts] Error extracting user from request:", error);
           return null;
+        }
+    };
+    static extractUserFromTempToken(temp_token: string | null): { userId: string; email: string } | null {
+        try {
+            if (!temp_token) {
+                console.error("❌ [jwt.utils.ts] No JWT token found in cookies");
+                return null;
+            }
+            const payload = JwtUtils.verifyTempToken(temp_token);
+            console.log("✅ [jwt.utils.ts] Extracted user from request:", payload);
+            if (!payload) {
+                console.error("❌ [jwt.utils.ts] Invalid JWT token");
+                return null;
+            }
+            const userId = payload.id;
+            const email = payload.email;
+            console.log("✅ [jwt.utils.ts] Extracted userId and email:", userId, email);
+            return { userId, email };
+        } catch (error) {
+            console.error("❌ [jwt.utils.ts] Error extracting user from request:", error);
+            return null;
         }
     };
 }

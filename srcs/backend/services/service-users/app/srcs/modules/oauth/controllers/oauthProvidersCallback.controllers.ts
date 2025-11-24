@@ -6,7 +6,7 @@
 /*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/18 15:31:26 by tissad            #+#    #+#             */
-/*   Updated: 2025/11/19 17:26:37 by tissad           ###   ########.fr       */
+/*   Updated: 2025/11/24 17:35:40 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -94,7 +94,10 @@ export async function githubOAuthControllerCallback(
                 console.log("User has 2FA enabled, redirecting to 2FA page");
                 const temp_token = JwtUtils.generateTwoFactorTempToken({ id: user.id, email: user.email });
                 JwtUtils.setTempTokenCookie(reply, temp_token);
-                 return reply.redirect(`https://localhost:8443`);
+                reply.send({
+                    message: "GitHub OAuth successful t2fa required",
+                });
+                return reply.redirect(`https://localhost:8443`);
             }
             // Successful authentication
             console.log("GitHub OAuth successful for user ID:", user.id);
@@ -119,7 +122,10 @@ export async function githubOAuthControllerCallback(
                 'EX',
                 60 * 15// 15 minutes
             );
-             return reply.redirect(`https://localhost:8443`);
+            reply.send({
+                message: "GitHub OAuth successful",
+            });
+            return reply.redirect(`https://localhost:8443`);
         }
     }
     catch (error) {

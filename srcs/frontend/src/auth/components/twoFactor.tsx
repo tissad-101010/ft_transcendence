@@ -1,33 +1,57 @@
-// src/auth/components/TwoFactor.tsx
 import React, { useState } from "react";
 import {
   sendEmailOtp,
   verifyEmailOtp,
   verifyTotp,
 } from "../controllers/twoFactor.api";
-import { TwoFactorMethod  } from "../types/auth.types";
+import { TwoFactorMethod } from "../types/auth.types";
+
+import { useAuth } from "../context";
+
+import { fetchUserProfile } from "../controllers/auth.api";
 
 interface TwoFactorProps {
-  methodsEnabled: TwoFactorMethod [];
+  methodsEnabled: TwoFactorMethod[]; 
   onSuccess: () => void;
 }
 
 const TwoFactor: React.FC<TwoFactorProps> = ({ methodsEnabled, onSuccess }) => {
-  const [selectedMethod, setSelectedMethod] = useState<TwoFactorMethod  | null>(null);
+  const [selectedMethod, setSelectedMethod] = useState<TwoFactorMethod | null>(null);
   const [code, setCode] = useState("");
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
+  const { login, setPending2FA } = useAuth();
+  const [errorMessage, setErrorMessage] = useState("");
+  const { resetPending2FA } = useAuth();
 
-  const handleSelectMethod = async (method: TwoFactorMethod ) => {
+
+  const handleLogin = async () => {
+    try {
+        // Pas de 2FA → on récupère le profile et on login direct
+        const profile = await fetchUserProfile();
+        if (profile.success && profile.data) {
+          login(profile.data);  // <-- passe l'objet user dans le context
+      } else {
+        setError( "Login failed");
+      }
+    } catch (err) {
+      console.error(err);
+      setError("Network error during login");
+    }
+  };
+
+  const handleSelectMethod = async (method: TwoFactorMethod) => {
     setSelectedMethod(method);
     setError("");
     setMessage("");
 
-    if (method === "EMAIL") {
+    if (method.type === "EMAIL") {
       const ok = await sendEmailOtp();
       if (ok) setMessage("A verification code was sent to your email.");
       else setError("Failed to send verification email.");
-    } else if (method === "TOTP") {
+    }
+
+    if (method.type === "TOTP") {
       setMessage("Enter the code from your authenticator app.");
     }
   };
@@ -39,42 +63,50 @@ const TwoFactor: React.FC<TwoFactorProps> = ({ methodsEnabled, onSuccess }) => {
     }
 
     let success = false;
-    if (selectedMethod === "EMAIL") {
+
+    if (selectedMethod.type === "EMAIL") {
       success = await verifyEmailOtp(code);
-    } else if (selectedMethod === "TOTP") {
+    }
+
+    if (selectedMethod.type === "TOTP") {
       success = await verifyTotp(code);
     }
 
     if (success) {
       setMessage("✅ 2FA verification successful!");
+      await handleLogin();
       onSuccess();
     } else {
       setError("Invalid code. Please try again.");
     }
   };
 
+
   return (
     <div className="authPage-window">
-      <img
-        src="/logoWhite.png"
-        alt="Logo"
-        style={{ width: 80, height: 80, marginBottom: 20 }}
-      />
+      <img src="/logoWhite.png" alt="Logo" style={{ width: 80, height: 80, marginBottom: 20 }} />
       <h1>Two-Factor Authentication</h1>
 
       {!selectedMethod ? (
         <>
-          <p style={{ marginBottom: 20 }}>Select a verification method:</p>
-          {methodsEnabled.map((method) => (
-            <button
-              key={method}
-              className="authPage-button"
-              style={{ width: "60%" }}
-              onClick={() => handleSelectMethod(method)}
-            >
-              {method === "EMAIL" ? "Email" : "Authenticator App"}
-            </button>
-          ))}
+          <p>Select a verification method:</p>
+
+          {methodsEnabled
+            .filter((m) => m.enabled)
+            .map((method) => (
+              <button
+                key={method.id}
+                className="authPage-button"
+                style={{ width: "60%" }}
+                onClick={() => handleSelectMethod(method)}
+              >
+                {method.type === "EMAIL" ? "Email" : "Authenticator App"}
+              </button>
+            ))}
+          {/* back  */}
+          <button className="guest-button" onClick={() => resetPending2FA()}>
+            ← Back
+          </button>
         </>
       ) : (
         <>
@@ -96,10 +128,7 @@ const TwoFactor: React.FC<TwoFactorProps> = ({ methodsEnabled, onSuccess }) => {
             Verify Code
           </button>
 
-          <button
-            className="guest-button"
-            onClick={() => setSelectedMethod(null)}
-          >
+          <button className="guest-button" onClick={() => setSelectedMethod(null)}>
             ← Back
           </button>
         </>

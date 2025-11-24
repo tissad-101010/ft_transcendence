@@ -1,6 +1,6 @@
 // function that logout user from the application
 import { logoutUser } from "../auth/controllers/signout.ts";
-import {    sendEmailOtp,
+import {    sendEnableEmailOtp,
             enable2faEmail
         } from "../auth/controllers/twoFactor.api.ts";
 
@@ -380,7 +380,7 @@ export class MyProfilUI
             activeColor: BTN_ACTIVE,
             inactiveColor: BTN_NORMAL,
             onActivate: async () => {
-                await sendEmailOtp();
+                await sendEnableEmailOtp();
                 this.flag = true;
                 this.mainInterfaceStruct();
                 this.enable2FaMailInterface();

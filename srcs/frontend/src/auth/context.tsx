@@ -22,6 +22,7 @@ type AuthContextType = {
   login: (user: User) => void;
   logout: () => void;
   setPending2FA: (data: Pending2FA | null) => void;
+  resetPending2FA: () => void;
   loading: boolean;
 };
 
@@ -40,6 +41,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const logout = () => {
     setUser(null);
     setPending2FA(null);
+  };
+  const resetPending2FA = () => {
+    setPending2FA({ required: false, methods: [] });
   };
 
   useEffect(() => {
@@ -82,6 +86,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         logout,
         setPending2FA,
         loading,
+        resetPending2FA,
       }}
     >
       {!loading && children}

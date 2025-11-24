@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   twoFactor.services.ts                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: issad <issad@student.42.fr>                +#+  +:+       +#+        */
+/*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/27 11:48:41 by tissad            #+#    #+#             */
-/*   Updated: 2025/11/22 19:57:02 by issad            ###   ########.fr       */
+/*   Updated: 2025/11/24 11:14:41 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,7 +39,7 @@ export class TwoFactorAuthService {
     return (Math.floor(100000 + Math.random() * 900000).toString());
   }
   // update user to enable tfa
-  async enableTwoFactorAuth(userId: number, methodStr:string ): Promise<boolean> {
+  async enableTwoFactorAuth(userId: string, methodStr:string ): Promise<boolean> {
     const method = methodStr as TwoFactorType;
     const methods = await this.usersService.getUserTwoFactorMethods(userId);
     if (methods.find((m) => m.type === method)) {
@@ -58,7 +58,7 @@ export class TwoFactorAuthService {
   }
 
   // get user enabled tfa methods
-  async getEnabledTfaMethodsForUser(userId: number): Promise<TwoFactorType[]> {
+  async getEnabledTfaMethodsForUser(userId: string): Promise<TwoFactorType[]> {
     const methods = await this.usersService.getUserTwoFactorMethods(userId);
     return methods.map((m) => m.type);
   }
@@ -80,7 +80,9 @@ export class TwoFactorAuthService {
       // store otp in redis with expiration time of 5 minutes
       try
       {
-        this.redisClient.set(`otp:${email}`, otp, "EX", 300); // expire in 300 seconds (5 minutes)
+        const storedInRedis = await this.redisClient.set(`otp:${email}`, otp, "EX", 300) 
+        console.log("✅ [2fa.service.ts] OTP stored in Redis response:", storedInRedis);
+        console.log("✅ [2fa.service.ts] Storing OTP in Redis for email:", email);
         console.log("✅ [2fa.service.ts] OTP stored in Redis for email:", email);
         return (true);
       } catch (error)
@@ -106,6 +108,8 @@ export class TwoFactorAuthService {
     // OTP does not match
     if (storedOtp.trim() !== String(otp).trim()) {
       console.log("❌ [2fa.service.ts] OTP mismatch for email:", email);
+      console.log("[2fa.service.ts] Provided OTP:", otp);
+      console.log("[2fa.service.ts] Stored OTP:", storedOtp);
       return (false);
     }
     
@@ -118,7 +122,7 @@ export class TwoFactorAuthService {
   
 
   // generate TFA secret and QR code and store  in db
-  async generateTotpSecretAndQrCode(userId: number): Promise<{qrCodeUrl: string }> {
+  async generateTotpSecretAndQrCode(userId: string): Promise<{qrCodeUrl: string }> {
     const secret = speakeasy.generateSecret({ length: 20, name: `ft_transcendence_user_${userId}` });
     console.log("✅ [2fa.service.ts] TFA secret generated for user ID:", userId);
     // store tfa secret in redis with expiration time of 10 minutes
@@ -145,7 +149,7 @@ export class TwoFactorAuthService {
   }
 
   // Verify TFA token
-  async verifyTotpTocken(userId: number, token: string): Promise<boolean> {
+  async verifyTotpTocken(userId: string, token: string): Promise<boolean> {
     // retrieve tfa secret from vault
     // for demo purpose, we will retrieve the secret from redis
     const client = await this.redisClient;

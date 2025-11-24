@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   signout.controllers.ts                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: issad <issad@student.42.fr>                +#+  +:+       +#+        */
+/*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/20 12:59:59 by tissad            #+#    #+#             */
-/*   Updated: 2025/11/22 11:50:16 by issad            ###   ########.fr       */
+/*   Updated: 2025/11/24 17:49:43 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,6 +45,7 @@ export async function signoutController(
         // Clear cookies
         reply.clearCookie('access_token', { path: '/' });
         reply.clearCookie('refresh_token', { path: '/' });
+        reply.clearCookie('temp_token', { path: '/' });
         return reply.code(200).send({ message: 'Logout successful ✅' });
         // reply.code(200).send({ message: 'Logout successful ✅' });
     } catch (error) {

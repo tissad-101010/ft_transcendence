@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   api.ts                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: issad <issad@student.42.fr>                +#+  +:+       +#+        */
+/*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/23 15:58:35 by tissad            #+#    #+#             */
-/*   Updated: 2025/11/22 12:35:46 by issad            ###   ########.fr       */
+/*   Updated: 2025/11/24 17:49:29 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,7 @@ import {  authRoutes,
           userRoutes
         } from './modules/auth/auth.routes';
 import { oauthRoutes } from './modules/oauth/routes/oauth.routes';
-import { signoutRoutes } from './modules/signup/signout.routes';
+import { signoutRoutes } from './modules/signout/signout.routes';
 import { TwoFactorAuth } from './modules/twoFactor/twoFactor.routes';
 // internal services routes responsible for internal communications between services
 // import { githubRoutes } from './routes/OauthGithub.routes';
