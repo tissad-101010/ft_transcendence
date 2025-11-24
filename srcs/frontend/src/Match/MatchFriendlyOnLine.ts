@@ -27,6 +27,9 @@ export class MatchFriendlyOnline extends MatchBase
     private myPlayerTeam: number | null = null; // Team de mon joueur (1 = gauche/score gauche, 2 = droite/score droit)
     private playersConnected: Set<number> = new Set();
     private matchStarted: boolean = false;
+    private isFirstConnector: boolean | null = null; // true si ce navigateur est le premier à se connecter au match
+    private dbIdToGameId: Map<number, number> = new Map(); // mapping DB user id -> game-local id (1/2)
+    private myGamePlayerId: number | null = null; // 1 or 2 used when sending player_move
 
     constructor(id : number, rules : MatchRules, sceneManager: SceneManager)
     {
@@ -160,6 +163,30 @@ export class MatchFriendlyOnline extends MatchBase
         // Mode 0 = local (même clavier), Mode 1 = remote (websockets)
         const gameMode = isOnline ? 1 : 0;
 
+        // Build a game-local participants array (ids 1 = left, 2 = right) for GameLogic
+        // while preserving original DB ids in this.participants for websocket join.
+        const gameParticipants = this.participants.map((p, idx) => {
+            const gameId = idx === 0 ? 1 : 2;
+            // register mapping from DB id -> game id
+            if (p.id !== null && p.id !== undefined) {
+                this.dbIdToGameId.set(p.id, gameId);
+            }
+            return {
+                alias: p.alias,
+                id: gameId,
+                ready: p.ready,
+                me: p.me,
+            } as any as import('../Match.ts').MatchParticipant;
+        });
+
+        // Determine myGamePlayerId from DB myPlayerId if available
+        if (this.myPlayerId && this.dbIdToGameId.has(this.myPlayerId)) {
+            this.myGamePlayerId = this.dbIdToGameId.get(this.myPlayerId) || null;
+        } else if (this.myPlayerTeam) {
+            // fallback: infer from team
+            this.myGamePlayerId = this.myPlayerTeam === 1 ? 1 : 2;
+        }
+
         this.game = {
             logic: new GameLogic(
                 {
@@ -169,7 +196,7 @@ export class MatchFriendlyOnline extends MatchBase
                     countDownGoalTime: parseInt(this.rules.timeBefore),
                     allowPause: false
                 },
-                [this.participants[0], this.participants[1]],
+                [gameParticipants[0], gameParticipants[1]],
                 gameMode
             ),
             interface: new Game3D(this.sceneManager)
@@ -349,6 +376,31 @@ export class MatchFriendlyOnline extends MatchBase
                             console.log(`✅ remotePlayerId défini: ${this.remotePlayerId}`);
                         }
                     });
+                    // Déterminer si ce client est le premier connecteur: si aucun userId n'existait avant
+                    // Le serveur renvoie les userIds déjà présents *avant* notre connexion.
+                    this.isFirstConnector = (message.userIds.length === 0);
+                    if (this.isFirstConnector) {
+                        // Premier connecteur -> côté GAUCHE (player 1)
+                        this.myPlayerId = 1;
+                        this.myPlayerTeam = 1;
+                        this.remotePlayerId = 2;
+                        // mettre à jour participants.me pour refléter la position
+                        if (this.participants && this.participants.length === 2) {
+                            this.participants[0].me = true;
+                            this.participants[1].me = false;
+                        }
+                        console.log('✨ Ce navigateur est le PREMIER connecteur -> affecté à GAUCHE (player 1)');
+                    } else {
+                        // Pas le premier -> côté DROITE (player 2)
+                        this.myPlayerId = 2;
+                        this.myPlayerTeam = 2;
+                        this.remotePlayerId = 1;
+                        if (this.participants && this.participants.length === 2) {
+                            this.participants[0].me = false;
+                            this.participants[1].me = true;
+                        }
+                        console.log('✨ Ce navigateur est le SECOND connecteur -> affecté à DROITE (player 2)');
+                    }
                     console.log(`👥 Joueurs connectés après réception: ${this.playersConnected.size}/2`);
                     // Pour les matchs en ligne, attendre le message 'game_start' du serveur
                     // Ne pas démarrer le match ici, le serveur le fera quand les deux joueurs seront prêts
@@ -362,6 +414,35 @@ export class MatchFriendlyOnline extends MatchBase
                     if (this.remotePlayerId === null && message.userId !== this.myPlayerId) {
                         this.remotePlayerId = message.userId;
                         console.log(`✅ remotePlayerId défini: ${this.remotePlayerId}`);
+                    }
+                    // Si on n'avait pas déterminé si on était le premier (par exemple connexion rapide),
+                    // utiliser la taille actuelle pour décider: si avant de recevoir ce join nous avions 0, alors
+                    // le premier était l'autre et nous sommes second; sinon si nous étions seuls, nous sommes premier.
+                    if (this.isFirstConnector === null) {
+                        // Si playersConnected.size === 2 après l'ajout, on est le second (car l'autre est déjà connecté)
+                        if (this.playersConnected.size === 2) {
+                            // si playersConnected contenait l'autre avant, we are second
+                            this.isFirstConnector = false;
+                            this.myPlayerId = 2;
+                            this.myPlayerTeam = 2;
+                            this.remotePlayerId = 1;
+                            if (this.participants && this.participants.length === 2) {
+                                this.participants[0].me = false;
+                                this.participants[1].me = true;
+                            }
+                            console.log('✨ Détection tardive: assigné SECOND connecteur -> DROITE (player 2)');
+                        } else {
+                            // Sinon, on reste premier
+                            this.isFirstConnector = true;
+                            this.myPlayerId = 1;
+                            this.myPlayerTeam = 1;
+                            this.remotePlayerId = 2;
+                            if (this.participants && this.participants.length === 2) {
+                                this.participants[0].me = true;
+                                this.participants[1].me = false;
+                            }
+                            console.log('✨ Détection tardive: assigné PREMIER connecteur -> GAUCHE (player 1)');
+                        }
                     }
                     console.log(`👥 Joueurs connectés: ${this.playersConnected.size}/2`);
                     // Pour les matchs en ligne, attendre le message 'game_start' du serveur
@@ -404,7 +485,7 @@ export class MatchFriendlyOnline extends MatchBase
                 // Appliquer le mouvement du joueur distant
                 // Utiliser l'ID du joueur pour garantir que le bon paddle bouge
                 console.log("📥 Mouvement reçu du joueur distant:", { playerId: message.playerId, remotePlayerId: this.remotePlayerId, myPlayerId: this.myPlayerId, direction: message.direction });
-                if (message.playerId !== this.myPlayerId && this.game) {
+                if (this.game) {
                     const players = this.game.logic.getPlayers;
                     // Trouver le joueur distant par ID plutôt que par team
                     // Cela garantit que le mouvement est appliqué au bon joueur même si myPlayerTeam est incorrect
@@ -432,7 +513,7 @@ export class MatchFriendlyOnline extends MatchBase
                         });
                     }
                 } else {
-                    console.log("ℹ️ Mouvement ignoré (pas pour ce joueur ou game non défini):", { 
+                    console.log("ℹ️ Mouvement ignoré (game non défini):", { 
                         messagePlayerId: message.playerId, 
                         myPlayerId: this.myPlayerId,
                         gameExists: !!this.game 
@@ -445,8 +526,8 @@ export class MatchFriendlyOnline extends MatchBase
     }
 
     private sendPlayerMove(direction: 'up' | 'down'): void {
-        if (!this.websocket || !this.myPlayerId) {
-            console.warn("⚠️ sendPlayerMove: websocket ou myPlayerId manquant", { websocket: !!this.websocket, myPlayerId: this.myPlayerId });
+        if (!this.websocket || !this.myGamePlayerId) {
+            console.warn("⚠️ sendPlayerMove: websocket ou myGamePlayerId manquant", { websocket: !!this.websocket, myGamePlayerId: this.myGamePlayerId, myPlayerId: this.myPlayerId });
             return;
         }
 
@@ -454,7 +535,7 @@ export class MatchFriendlyOnline extends MatchBase
             const message = {
                 type: 'player_move',
                 gameId: this.id,
-                playerId: this.myPlayerId,
+                playerId: this.myGamePlayerId, // send game-local id (1 or 2)
                 direction: direction,
             };
             this.websocket.send(JSON.stringify(message));
@@ -529,11 +610,9 @@ export class MatchFriendlyOnline extends MatchBase
             return;
         }
 
-        // Pour les matchs EN LIGNE uniquement : utiliser myPlayerId pour trouver MON joueur
-        // myPlayerId est unique pour chaque navigateur, donc cela garantit que chaque navigateur
-        // contrôle son propre joueur, indépendamment de myPlayerTeam
+        // Pour les matchs EN LIGNE uniquement : utiliser myGamePlayerId (1/2) pour trouver MON joueur
         const players = this.game.logic.getPlayers;
-        const myPlayer = players.find(p => p.getId === this.myPlayerId);
+        const myPlayer = players.find(p => p.getId === this.myGamePlayerId);
         
         if (!myPlayer) {
             console.warn("⚠️ Mon joueur non trouvé dans handleOnlineKeys par ID:", { 
@@ -553,13 +632,14 @@ export class MatchFriendlyOnline extends MatchBase
         
         const myPlayerTeamFromGame = myPlayer.getTeam;
         
-        console.log("🎮 Contrôle du joueur par ID (match EN LIGNE uniquement):", {
-            myPlayerId: this.myPlayerId,
-            myPlayerTeam: this.myPlayerTeam,
-            myPlayerTeamFromGame,
-            playerId: myPlayer.getId,
-            position: myPlayerTeamFromGame === 1 ? "gauche (score gauche)" : "droite (score droit)"
-        });
+            console.log("🎮 Contrôle du joueur par ID (match EN LIGNE uniquement):", {
+                myPlayerId: this.myPlayerId,
+                myGamePlayerId: this.myGamePlayerId,
+                myPlayerTeam: this.myPlayerTeam,
+                myPlayerTeamFromGame,
+                playerId: myPlayer.getId,
+                position: myPlayerTeamFromGame === 1 ? "gauche (score gauche)" : "droite (score droit)"
+            });
 
         // Pour les matchs en ligne, tous les joueurs utilisent les flèches haut/bas
         // Gérer les touches pour mon joueur uniquement

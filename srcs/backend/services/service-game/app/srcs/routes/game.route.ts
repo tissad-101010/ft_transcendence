@@ -8,8 +8,10 @@ export async function testGameRoutes(server: FastifyInstance)
     server.get('/test-route', testGameController)
 }
 
-// rp store active sockets by user id for quick lookups
-const activeConnections = new Map<number, any>(); // rp keep a map of user id to websocket
+// rp store active sockets by user id for quick lookups (support multiple sockets per user)
+const activeConnections = new Map<number, Set<any>>(); // rp map user id -> set of websocket(s)
+// map socket -> userId to identify which user a socket belongs to
+const socketToUserId = new Map<any, number>();
 const gameRooms = new Map<number, Set<any>>(); // rp keep a map of game id to set of sockets
 
 function broadcastToGame(gameId: number, message: any) { // rp send a payload to every socket in a game room
@@ -72,7 +74,13 @@ async function handleJoinGame(fastify: FastifyInstance, ws: any, message: any) {
   } // rp end room creation
 
   gameRooms.get(gameId)!.add(ws); // rp place player socket inside room set
-  activeConnections.set(userId, ws); // rp map the user id to this websocket
+  // rp map userId -> set of sockets
+  if (!activeConnections.has(userId)) {
+    activeConnections.set(userId, new Set());
+  }
+  activeConnections.get(userId)!.add(ws);
+  // rp map socket -> userId for reverse lookup
+  socketToUserId.set(ws, userId);
 
   const roomSize = gameRooms.get(gameId)!.size; // rp get current room size
   console.log(`✅ Joueur ${userId} a rejoint la partie ${gameId} (room size: ${roomSize})`); // rp keep server log for monitoring
@@ -80,15 +88,11 @@ async function handleJoinGame(fastify: FastifyInstance, ws: any, message: any) {
   // Envoyer au nouveau joueur la liste des joueurs déjà connectés
   const room = gameRooms.get(gameId)!;
   const connectedUserIds: number[] = [];
+  // rp iterate sockets in the room and map back to their userId(s)
   room.forEach((socket: any) => {
-    // Trouver l'userId associé à ce socket
-    for (const [uid, socketRef] of activeConnections.entries()) {
-      if (socketRef === socket) {
-        if (uid !== userId) { // Ne pas inclure le joueur qui vient de rejoindre
-          connectedUserIds.push(uid);
-        }
-        break;
-      }
+    const uid = socketToUserId.get(socket);
+    if (uid !== undefined && uid !== userId) { // exclude the joining socket's userId for this message
+      connectedUserIds.push(uid);
     }
   });
   
@@ -244,12 +248,18 @@ export function setupWebSocketRoute(fastify: FastifyInstance) { // rp register w
     socket.on('close', () => { // rp react when socket closes
       fastify.log.info('🔌 Connexion WebSocket fermée'); // rp log disconnection
 
-      for (const [userId, wsConnection] of activeConnections.entries()) { // rp iterate active connections
-        if (wsConnection === socket) { // rp find entry for closing socket
-          activeConnections.delete(userId); // rp remove mapping so user is marked offline
-          break; // rp stop loop once removed
-        } // rp end comparison
-      } // rp end active connections loop
+        // rp lookup the userId for this socket and remove only this socket from the user's set
+        const uid = socketToUserId.get(socket);
+        if (uid !== undefined) {
+          const set = activeConnections.get(uid);
+          if (set) {
+            set.delete(socket);
+            if (set.size === 0) {
+              activeConnections.delete(uid);
+            }
+          }
+          socketToUserId.delete(socket);
+        }
 
       for (const [gameId, room] of gameRooms.entries()) { // rp iterate each game room
         room.delete(socket); // rp remove socket from the room set

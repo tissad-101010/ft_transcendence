@@ -335,162 +335,37 @@ export class UserX
                 "player2Id === myUserId": player2Id === this.user.id
             });
             
-            // IMPORTANT: Utiliser strictement player1Id et player2Id de l'API pour déterminer qui est qui
-            // Ne pas utiliser idOpp ou loginOpp car ils peuvent être incorrects
-            // NOTE: 
-            // - Pour les matchs EN LIGNE: player1 (créateur) → droite (p[1]), player2 → gauche (p[0]) - INVERSÉ
-            // - Pour les matchs LOCAUX: player1 (créateur) → gauche (p[0]), player2 → droite (p[1]) - ORDRE NORMAL
-            
-            // Cas spécial : si player2Id === player1Id pour un match en ligne, c'est que le créateur a rejoint son propre match
-            // Dans ce cas, si je ne suis pas le créateur, je dois être player2 (même si player2Id n'est pas encore mis à jour dans la réponse)
-            if (isOnline && player2Id === player1Id && player1Id !== this.user.id) {
-                // Le créateur a rejoint son propre match, mais je ne suis pas le créateur
-                // Je dois être player2 (même si player2Id n'est pas encore mis à jour dans la réponse)
-                console.log("🔄 Match en ligne: créateur a rejoint, je suis le second joueur (player2)");
-                const opponentId = player1Id || idOpp;
-                const opponentLogin = player1Login || loginOpp;
-                // Match EN LIGNE: player2 → gauche (p[0])
-                players = [
-                    {alias: this.user.login, id: this.user.id, ready: false, me: true},  // p[0] = moi (équipe 1, gauche)
-                    {alias: opponentLogin, id: opponentId, ready: false, me: false}   // p[1] = adversaire (équipe 2, droite)
-                ];
-                console.log("✅ Je suis player2 (second joueur, match EN LIGNE, équipe 1, gauche)", { 
-                    players: players.map(p => ({ id: p.id, alias: p.alias, me: p.me, position: players.indexOf(p) === 0 ? "gauche" : "droite" }))
-                });
-            } else if (player1Id === this.user.id) {
-                // Je suis player1 (créateur)
-                // L'adversaire est player2 (doit être défini si le match est en cours)
-                if (!player2Id) {
-                    console.warn("⚠️ Je suis player1 mais player2Id n'est pas défini, utilisation de idOpp comme fallback");
-                }
-                const opponentId = player2Id || idOpp;
-                const opponentLogin = player2Login || loginOpp;
-                
-                if (isOnline) {
-                    // Match EN LIGNE: player1 → droite (p[1])
-                    players = [
-                        {alias: opponentLogin, id: opponentId, ready: false, me: false},                      // p[0] = adversaire (équipe 1, gauche)
-                        {alias: player1Login || this.user.login, id: this.user.id, ready: false, me: true}   // p[1] = moi (équipe 2, droite)
-                    ];
-                    console.log("✅ Je suis player1 (créateur, match EN LIGNE, équipe 2, droite)", { 
-                        players: players.map(p => ({ id: p.id, alias: p.alias, me: p.me, position: players.indexOf(p) === 0 ? "gauche" : "droite" }))
-                    });
-                } else {
-                    // Match LOCAL: player1 → gauche (p[0])
-                    players = [
-                        {alias: player1Login || this.user.login, id: this.user.id, ready: false, me: true},  // p[0] = moi (équipe 1, gauche)
-                        {alias: opponentLogin, id: opponentId, ready: false, me: false}                      // p[1] = adversaire (équipe 2, droite)
-                    ];
-                    console.log("✅ Je suis player1 (créateur, match LOCAL, équipe 1, gauche)", { 
-                        players: players.map(p => ({ id: p.id, alias: p.alias, me: p.me, position: players.indexOf(p) === 0 ? "gauche" : "droite" }))
-                    });
-                }
-            } else if (player2Id === this.user.id) {
-                // Je suis player2 (second joueur)
-                // L'adversaire est player1 (doit être défini)
-                if (!player1Id) {
-                    console.error("❌ Je suis player2 mais player1Id n'est pas défini!");
-                }
-                const opponentId = player1Id || idOpp;
-                const opponentLogin = player1Login || loginOpp;
-                
-                if (isOnline) {
-                    // Match EN LIGNE: player2 → gauche (p[0])
-                    players = [
-                        {alias: player2Login || this.user.login, id: this.user.id, ready: false, me: true},  // p[0] = moi (équipe 1, gauche)
-                        {alias: opponentLogin, id: opponentId, ready: false, me: false}                      // p[1] = adversaire (équipe 2, droite)
-                    ];
-                    console.log("✅ Je suis player2 (second joueur, match EN LIGNE, équipe 1, gauche)", { 
-                        players: players.map(p => ({ id: p.id, alias: p.alias, me: p.me, position: players.indexOf(p) === 0 ? "gauche" : "droite" }))
-                    });
-                } else {
-                    // Match LOCAL: player2 → droite (p[1])
-                    players = [
-                        {alias: opponentLogin, id: opponentId, ready: false, me: false},                      // p[0] = adversaire (équipe 1, gauche)
-                        {alias: player2Login || this.user.login, id: this.user.id, ready: false, me: true}   // p[1] = moi (équipe 2, droite)
-                    ];
-                    console.log("✅ Je suis player2 (second joueur, match LOCAL, équipe 2, droite)", { 
-                        players: players.map(p => ({ id: p.id, alias: p.alias, me: p.me, position: players.indexOf(p) === 0 ? "gauche" : "droite" }))
-                    });
-                }
-            } else if (player1Id && player2Id && player2Id !== player1Id) {
-                // Les deux joueurs sont définis et différents, mais je ne suis ni l'un ni l'autre (cas étrange)
-                // Cela ne devrait pas arriver, mais on utilise l'ordre par défaut
-                console.error("❌ ERREUR: Je ne suis ni player1 ni player2!", {
-                    player1Id,
-                    player2Id,
-                    myUserId: this.user.id
-                });
-                // Utiliser l'ordre par défaut basé sur les IDs reçus
-                players = [
-                    {alias: player1Login || loginOpp, id: player1Id, ready: false, me: false},  // p[0] = player1 (équipe 1, gauche)
-                    {alias: player2Login || this.user.login, id: player2Id, ready: false, me: false}  // p[1] = player2 (équipe 2, droite)
-                ];
-                console.warn("⚠️ Cas étrange : je ne suis ni player1 ni player2, utilisation de l'ordre par défaut");
+            // Simplification: mapping déterministe et uniforme
+            // Premier joueur (player1) → gauche (p[0])
+            // Second joueur (player2) → droite (p[1])
+            // Ce comportement s'applique aussi pour les matchs en ligne : premier arrivé = gauche, second = droite.
+            players = [
+                { alias: player1Login || loginOpp || "Player1", id: player1Id || idOpp || null, ready: false, me: false },
+                { alias: player2Login || loginOpp || "Player2", id: player2Id || idOpp || null, ready: false, me: false }
+            ];
+
+            // Marquer "me" selon l'ID utilisateur
+            if (player1Id && player1Id === this.user.id) {
+                players[0].me = true;
+                console.log("✅ Utilisateur local est player1 → GAUCHE");
+            } else if (player2Id && player2Id === this.user.id) {
+                players[1].me = true;
+                console.log("✅ Utilisateur local est player2 → DROITE");
             } else {
-                // Fallback : si player2Id n'est pas encore défini (match en attente)
-                if (player1Id === this.user.id) {
-                    // Je suis le créateur (player1)
-                    if (isOnline) {
-                        // Match EN LIGNE: player1 → droite (p[1])
-                        players = [
-                            {alias: loginOpp, id: idOpp, ready: false, me: false},                                  // p[0] = adversaire (équipe 1, gauche)
-                            {alias: player1Login || this.user.login, id: this.user.id, ready: false, me: true}   // p[1] = moi (équipe 2, droite)
-                        ];
-                        console.log("✅ Je suis player1 (match en attente, EN LIGNE), équipe 2 (droite)", { 
-                            players: players.map(p => ({ id: p.id, alias: p.alias, me: p.me, position: players.indexOf(p) === 0 ? "gauche" : "droite" }))
-                        });
-                    } else {
-                        // Match LOCAL: player1 → gauche (p[0])
-                        players = [
-                            {alias: player1Login || this.user.login, id: this.user.id, ready: false, me: true},  // p[0] = moi (équipe 1, gauche)
-                            {alias: loginOpp, id: idOpp, ready: false, me: false}                                  // p[1] = adversaire (équipe 2, droite)
-                        ];
-                        console.log("✅ Je suis player1 (match en attente, LOCAL), équipe 1 (gauche)", { 
-                            players: players.map(p => ({ id: p.id, alias: p.alias, me: p.me, position: players.indexOf(p) === 0 ? "gauche" : "droite" }))
-                        });
-                    }
+                // cas où player2Id peut être absent (match en attente) : si je suis créateur, je suis player1
+                if (!player2Id && player1Id === this.user.id) {
+                    players[0].me = true;
+                    console.log("⚠️ player2 absent mais utilisateur local est créateur → traité comme player1 (GAUCHE)");
                 } else {
-                    // Sinon, je dois être player2 (même si pas encore défini dans la DB)
-                    // Mais si player1Id n'est pas défini non plus, c'est un problème
-                    if (!player1Id) {
-                        console.error("❌ ERREUR: player1Id n'est pas défini et je ne suis pas player1!");
-                    }
-                    if (isOnline) {
-                        // Match EN LIGNE: player2 → gauche (p[0])
-                        players = [
-                            {alias: this.user.login, id: this.user.id, ready: false, me: true},                  // p[0] = moi (équipe 1, gauche)
-                            {alias: player1Login || loginOpp, id: player1Id || idOpp, ready: false, me: false}   // p[1] = adversaire (équipe 2, droite)
-                        ];
-                        console.log("✅ Je serai player2 (match en attente, EN LIGNE), équipe 1 (gauche)", { 
-                            players: players.map(p => ({ id: p.id, alias: p.alias, me: p.me, position: players.indexOf(p) === 0 ? "gauche" : "droite" }))
-                        });
-                    } else {
-                        // Match LOCAL: player2 → droite (p[1])
-                        players = [
-                            {alias: player1Login || loginOpp, id: player1Id || idOpp, ready: false, me: false},  // p[0] = adversaire (équipe 1, gauche)
-                            {alias: this.user.login, id: this.user.id, ready: false, me: true}                    // p[1] = moi (équipe 2, droite)
-                        ];
-                        console.log("✅ Je serai player2 (match en attente, LOCAL), équipe 2 (droite)", { 
-                            players: players.map(p => ({ id: p.id, alias: p.alias, me: p.me, position: players.indexOf(p) === 0 ? "gauche" : "droite" }))
-                        });
-                    }
+                    console.log("ℹ️ Utilisateur local n'est pas encore assigné player1/player2 (spectateur ou attente)");
                 }
             }
-            
+
             console.log("👥 Tableau players créé:", players.map(p => ({ id: p.id, alias: p.alias, me: p.me })));
 
-            // 🔧 Normalisation des IDs pour le jeu en ligne :
-            // On force des IDs "logiques" côté jeu:
-            // - players[0].id = 1  → paddle gauche
-            // - players[1].id = 2  → paddle droite
-            // Ainsi, myPlayerId sera 1 ou 2 selon la position dans le tableau,
-            // et sera différent sur les deux navigateurs.
-            players = players.map((p, idx) => ({
-                ...p,
-                id: idx === 0 ? 1 : 2,
-            }));
-            console.log("👥 Players après normalisation des IDs (1=gauche, 2=droite):",
+            // Conserver les IDs tels que fournis par le serveur (DB IDs).
+            // Ne pas écraser `id` ici : le mapping jeu (1=gauche, 2=droite) sera fait côté `MatchFriendlyOnLine`.
+            console.log("👥 Players prêts (IDs DB conservés):",
                 players.map((p, idx) => ({
                     id: p.id,
                     alias: p.alias,
@@ -655,10 +530,5 @@ export class UserX
                 console.log("⚠️ Utilisateur non authentifié reçu, conservation de l'utilisateur existant:", this.user);
             }
         }
-    }
-    
-    public get getUser() : User | null
-    {
-        return (this.user);
     }
 }
