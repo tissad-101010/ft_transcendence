@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   twoFactor.controllers.ts                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
+/*   By: issad <issad@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/27 11:48:33 by tissad            #+#    #+#             */
-/*   Updated: 2025/11/24 18:13:56 by tissad           ###   ########.fr       */
+/*   Updated: 2025/11/24 23:21:00 by issad            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,6 +34,7 @@ import { TwoFactorAuthService } from "./twoFactor.services";
 import {  OtpEmailRequest,
           VerifyOtpEmailRequest,
        } from "../../types/otp.type";
+import { AuthenticatedUserDTO } from "../../types/user.types";
 
 export class TwoFactorAuthController {
   private twoFactorAuthService: TwoFactorAuthService;
@@ -80,7 +81,12 @@ export class TwoFactorAuthController {
     const cookies = JwtUtils.extractCookiesFromRequest(req);
     const accessToken = JwtUtils.extractTokenFromCookies(cookies, 'access_token');
     const user = JwtUtils.extractUserFromAccessToken(accessToken);
-    if (accessToken === null || user === null) {
+    if (accessToken === null)
+      {
+      console.error("❌ [2fa.controller.ts] User not found");
+      return reply.status(401).send({ message: "Unauthorized ❌" });
+    }
+    if ( user === null) {
       console.error("❌ [2fa.controller.ts] User not found");
       return reply.status(401).send({ message: "Unauthorized ❌" });
     }
@@ -106,7 +112,7 @@ export class TwoFactorAuthController {
   };
   
   
-  sednOtpByEmailForTfaController = async (
+  sendOtpByEmailForTfaController = async (
     req: FastifyRequest<{ Body: OtpEmailRequest }>,
     reply: FastifyReply
   ) => {
@@ -146,7 +152,11 @@ export class TwoFactorAuthController {
     const tempToken = JwtUtils.extractTokenFromCookies(cookies, 'temp_token');
     console.log("[2fa.controller.ts] Temp token extracted from cookies:", tempToken);
     const user = JwtUtils.extractUserFromTempToken(tempToken);
-    if (tempToken === null || user === null) {
+    if (tempToken === null) {
+      console.error("❌ [2fa.controller.ts] Temp token not found");
+      return reply.status(401).send({ message: "Unauthorized ❌" });
+    }
+    if (user === null) {
       console.error("❌ [2fa.controller.ts] User not found");
       return reply.status(401).send({ message: "Unauthorized ❌" });
     }
@@ -166,8 +176,12 @@ export class TwoFactorAuthController {
     else {
       console.log("✅ [2fa.controller.ts] OTP verified successfully for email:", email);
       
-      const accessToken = JwtUtils.generateAccessToken(user);
-      const refreshToken = JwtUtils.generateRefreshToken(user);
+      const loginResponse: AuthenticatedUserDTO = {
+          id: userId,
+          email: email,
+      };
+      const accessToken = JwtUtils.generateAccessToken(loginResponse);
+      const refreshToken = JwtUtils.generateRefreshToken(loginResponse);
       // store refresh token in redis cache
         // store refresh token in redis cache
         await this.redisClient.set(

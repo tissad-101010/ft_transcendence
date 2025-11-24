@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   twoFactor.routes.ts                                :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
+/*   By: issad <issad@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/16 18:55:45 by tissad            #+#    #+#             */
-/*   Updated: 2025/11/24 16:21:41 by tissad           ###   ########.fr       */
+/*   Updated: 2025/11/24 23:17:57 by issad            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,7 @@ export  async function TwoFactorAuth(fastify: FastifyInstance) {
   // need route to enable 2fa with email otp verification first
   fastify.post("/email-enable-sendOtp", twoFactorAuthController.sendOtpByEmailForEnableTfaController);
   fastify.post("/email-enable", twoFactorAuthController.enableEmailOtpForTfaController);
-  fastify.post("/email-sendOtp", twoFactorAuthController.sednOtpByEmailForTfaController);
+  fastify.post("/email-sendOtp", twoFactorAuthController.sendOtpByEmailForTfaController);
   fastify.post("/email-verifyOtp", twoFactorAuthController.verifyEmailOtpForTfaController);
 
   // Verify OTP email
