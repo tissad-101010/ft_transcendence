@@ -6,7 +6,7 @@
 /*   By: glions <glions@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/27 11:51:29 by tissad            #+#    #+#             */
-/*   Updated: 2025/11/22 20:32:56 by glions           ###   ########.fr       */
+/*   Updated: 2025/11/24 17:25:24 by glions           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,10 +32,26 @@ export class UsersService {
         });
     }
         
-    async getUserById(userId: string) {
-        return this.prismaClient.user.findUnique({
-            where: { id: userId },
+    async getUserById(id: string) {
+      try
+      {
+        // CALL BDD
+        const user = await this.prismaClient.user.findUnique({
+          where: { id },
         });
+        // SUCCESS
+        return user;
+      } catch (error: any)
+      {
+        // DATABASE ERROR
+        if (error.code === "P1001" || error.code === "P1002")
+          throw new DataBaseConnectionError();
+        // USER NOT FOUND (NOT NECESSARY)
+        if (error instanceof UserNotFoundError)
+          throw error;
+        // OTHER ERROR
+        throw new Error("Unknown database error");
+      }
     }
     
     async getUserByEmail(email: string) { 
@@ -48,12 +64,9 @@ export class UsersService {
       try
       {
         // CALL BDD
-        const user = this.prismaClient.user.findUnique({
+        const user = await this.prismaClient.user.findUnique({
           where: { username },
         });
-        // USER NOT FOUND
-        if (!user)
-          throw new UserNotFoundError();
         // SUCCESS
         return user;
       } catch (error: any)

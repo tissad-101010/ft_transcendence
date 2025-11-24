@@ -6,7 +6,7 @@
 /*   By: glions <glions@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/16 18:54:11 by tissad            #+#    #+#             */
-/*   Updated: 2025/11/22 21:00:18 by glions           ###   ########.fr       */
+/*   Updated: 2025/11/24 16:49:50 by glions           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,6 +38,10 @@ export class FriendsService {
   {
     try
     {
+      console.log(">> FROMUSERID = " + fromUserId);
+      console.log(">> FROMUSERUSERNAME = " + fromUserUsername);
+      console.log(">> TOUSERID = " + toUserId);
+      console.log(">> TOUSERUSERNAME = " + toUserUsername);
       // ALREADY ON BDD ?
       const existing = await this.prismaClient.friendInvitation.findUnique({
         where: { fromUserId_toUserId: { fromUserId, toUserId } },

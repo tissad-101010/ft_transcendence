@@ -769,6 +769,7 @@ export class FriendUI
                     msgInfo.width = "100%";
                     this.containerUI.menuPanel.addControl(msgInfo);
                 }
+                console.log(res);
                 if (res.success)
                     msgInfo.text = "Invitation envoyée";
                 else

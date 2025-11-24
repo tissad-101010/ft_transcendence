@@ -6,7 +6,7 @@
 /*   By: glions <glions@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/16 19:00:31 by tissad            #+#    #+#             */
-/*   Updated: 2025/11/22 21:51:42 by glions           ###   ########.fr       */
+/*   Updated: 2025/11/24 17:31:13 by glions           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,10 +45,31 @@ export async function verifyToken(token: string) {
   return (res.data);
 }
 
-export async function getOtherByUsername(username: string)
+export async function getUserById(id: string)
 {
   // CALL USER SERVICE
-  const res = await usersClient.post(`${serviceUsersURL}/intervalUser/user?username=${username}`);
+  const res = await usersClient.get(`${serviceUsersURL}/internalUser/user?id=${id}`);
+  const data = res.data;
+  // ERRORS
+  if (!data.success)
+  {
+    // USER NOT FOUND
+    if (res.status === 404)
+      throw new RemoteUserNotFoundError(id);
+    // SERVICE USER ERROR
+    if (res.status === 503)
+      throw new RemoteServiceUserUnavailableError();
+    // OTHER ERROR
+    return (null);
+  }
+  // SUCCESS
+  return (data.data);
+}
+
+export async function getUserByUsername(username: string)
+{
+  // CALL USER SERVICE
+  const res = await usersClient.get(`${serviceUsersURL}/internalUser/user?username=${username}`);
   const data = res.data;
   // ERRORS
   if (!data.success)
@@ -82,7 +103,7 @@ export async function listInvitationsController(
     // SORT RESULTS //
     const datas = [
       ...sent.filter(inv => inv.status === "PENDING").map(inv => inv.toUserId),
-      ...received.filter(inv => inv.status === "PENDING").map(inv => inv.toUserId),
+      ...received.filter(inv => inv.status === "PENDING").map(inv => inv.toUserId)
     ]
     // SUCCESS //
     return reply.code(200).send({ success: true, datas });
@@ -94,18 +115,27 @@ export async function listInvitationsController(
 }
 
 export async function sendInviteController(
-  request: FastifyRequest<{ Params: { friendUsername: string } }>,
+  request: FastifyRequest<{ Body: { friendUsername: string } }>,
   reply: FastifyReply
 )
 {
   try {
     // CHECK TOCKEN //
-    const user = await verifyToken(request.cookies["access_token"]!);
-    if (!user)
+    const token = await verifyToken(request.cookies["access_token"]!);
+    if (!token)
       return (sendErrorToken(reply));
+    console.log(">>>>>>> USER", token);
     // CALL BDD USERS //
-    const other : UserInfo = await getOtherByUsername(request.params.friendUsername);
+    const user: UserInfo = await getUserById(token.data.id);
+    if (!user)
+      return (reply.code(404).send({success:false, message: "You are not on BDD wtf"}));
+    const { friendUsername } = request.body;
+    if (!friendUsername)
+      return (reply.code(400).send({sucess: false, message: "friendUsername is required"}));
+    const other : UserInfo = await getUserByUsername(friendUsername);
     // CALL BDD //
+    if (!other)
+      return (reply.code(404).send({success: false, message: `${friendUsername} not exists on BDD`}));
     const service = new FriendsService(request.server);
     const data    = await service.sendInvitation(
                       user.id,
@@ -116,12 +146,14 @@ export async function sendInviteController(
     // SUCCESS
     return (reply.code(200).send({success: true, data: data}));
   // ERRORS
-  } catch (err: unknown)
+  } catch (err: any)
   {
     console.error('/!\\ SEND INVITE CONTROLLER ERROR /!\\', err);
     // SERVICE USER -> USER NOT FOUND
     if (err instanceof RemoteUserNotFoundError)
       return (reply.code(404).send({success: false, message: err.message}));
+    if (axios.isAxiosError(err) && err.response?.status === 404)
+      return (reply.code(404).send({success: false, message: `User not found`}));
     // SERVICE USER -> UNAVAILABLE
     if (err instanceof RemoteServiceUserUnavailableError)
       return (reply.code(503).send({success: false, message: "User service unavailable"}));
@@ -130,7 +162,7 @@ export async function sendInviteController(
       return (reply.code(503).send({success: false, message:"Database temporarily unavailable"}));
     // INVITATION ALREADY EXISTS ERROR
     if (err instanceof InvitationAlreadyExistsError)
-      return (reply.code(409).send({sucess: false, message: "Invitation already exists"}));
+      return (reply.code(409).send({success: false, message: "Invitation already exists"}));
     // OTHER ERROR
     return reply.code(500).send({success: false, message: 'Internal server error'});
   }

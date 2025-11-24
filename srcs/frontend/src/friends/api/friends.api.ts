@@ -43,10 +43,10 @@ export async function sendFriendInvitation(
       headers: {
         "Content-Type": "application/json"
       },
-      body: JSON.stringify({username})
+      body: JSON.stringify({friendUsername: username})
     });
     const response = await call.json();
-    if (response.ok)
+    if (response.success)
       return ({success: true, data: response.data});
     else
       return ({success: false, message: response.message || "Server error"});

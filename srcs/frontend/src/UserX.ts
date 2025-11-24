@@ -65,7 +65,7 @@ export class UserX
         const res = await sendFriendInvitation(username);
         if (res.success)
         {
-            this.friendInvitations.push(res.data);
+            // this.friendInvitations.push(res.data);
             return ({success: true, message: "Invitation envoyée"});
         }
         return ({success: false, message: res.message || "Erreur"});
