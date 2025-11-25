@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   twoFactor.controllers.ts                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
+/*   By: issad <issad@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/27 11:48:33 by tissad            #+#    #+#             */
-/*   Updated: 2025/11/25 18:05:55 by tissad           ###   ########.fr       */
+/*   Updated: 2025/11/25 21:19:46 by issad            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -254,7 +254,7 @@ export class TwoFactorAuthController {
 
   // setup TFA for user with google authenticator app
   
-  sendQrCodecontroller = async (
+  sendQrCodeController = async (
     req: FastifyRequest,
     reply: FastifyReply
   ) => {
@@ -294,7 +294,7 @@ export class TwoFactorAuthController {
     console.log("[2fa.controller.ts] TOTP code received for enabling TFA:", code);
     // verify TOTP code before enabling TFA
     const userId  = user.userId;
-    const isValid = await this.twoFactorAuthService.verifyTotpTocken(userId, code);
+    const isValid = await this.twoFactorAuthService.verifyTotpToken(userId, code);
     if (!isValid) {
       console.error("❌ [2fa.controller.ts] TOTP verification failed for user ID:", userId);
       return reply.status(400).send({ message: "Invalid TOTP code ❌" });
@@ -311,26 +311,62 @@ export class TwoFactorAuthController {
     }
   }; 
         
-  
-
-
-  
-  // verify TFA token for user
-  verifyTotpAuth = async (
+  // disable TFA with TOTP
+  disableTwoFactorTotpController = async (
     req: FastifyRequest,
     reply: FastifyReply
   ) => {
-  const { userId, token } = req.body as { userId: string; token: string };
-    try {
-      const isValid = await this.twoFactorAuthService.verifyTotpTocken(userId, token);
-      if (!isValid) {
-        return reply.status(400).send({ message: "Invalid TFA token ❌" });
-      } else {
-        return reply.send({ message: "TFA token verified successfully ✅" });
-      }
-    } catch (error: any) {
-      console.error("❌ [2fa.controller.ts] Error verifying TFA token for user ID:", userId, error);
-      return reply.status(500).send({ message: "Error verifying two-factor authentication token ❌" });
+    // accessToken user id and email extraction from request
+    const cookies = JwtUtils.extractCookiesFromRequest(req);
+    const accessToken = JwtUtils.extractTokenFromCookies(cookies, 'access_token');
+    const user = JwtUtils.extractUserFromAccessToken(accessToken);
+    if (accessToken === null || user === null) {
+      console.error("❌ [2fa.controller.ts] User not found");
+      return reply.status(401).send({ message: "Unauthorized ❌" });
     }
+    const userId  = user.userId;
+    const type = TwoFactorType.TOTP;
+    console.log("[2fa.controller.ts] Disabling TFA TOTP for user ID:", userId); 
+    try {
+      await this.twoFactorAuthService.disableTwoFactorAuth(userId, type);
+      console.log("✅ [2fa.controller.ts] TFA TOTP disabled successfully for user ID:", userId);
+      return reply.send({ message: "Two-factor authentication TOTP disabled successfully ✅" });
+    }
+    catch (error: any) {
+      console.error("❌ [2fa.controller.ts] Error disabling TFA TOTP for user ID:", userId, error);
+      return reply.status(500).send({ message: "Error disabling two-factor authentication TOTP ❌" });
+    }
+  };
+  
+  // verify TFA token for user
+  verifyTwoFactorTotpController = async (
+    req: FastifyRequest,
+    reply: FastifyReply
+  ) => {
+    const cookies = JwtUtils.extractCookiesFromRequest(req);
+    const tempToken = JwtUtils.extractTokenFromCookies(cookies, 'temp_token');
+    const user = JwtUtils.extractUserFromTempToken(tempToken);
+    if (tempToken === null)
+    {
+      console.error("❌ [2fa.controller.ts] Temp token not found");
+      return reply.status(401).send({ message: "Unauthorized ❌" });
+    }
+    if ( user === null) {
+      console.error("❌ [2fa.controller.ts] User not found");
+      return reply.status(401).send({ message: "Unauthorized ❌" });
+    }
+    const userId  = user.userId;
+    const { code } = req.body as { code: string };
+    try {
+        const isValid = await this.twoFactorAuthService.verifyTotpToken(userId, code);
+        if (!isValid) {
+          return reply.status(400).send({ message: "Invalid TFA token ❌" });
+        } else {
+          return reply.send({ message: "TFA token verified successfully ✅" });
+        }
+      } catch (error: any) {
+        console.error("❌ [2fa.controller.ts] Error verifying TFA token for user ID:", userId, error);
+        return reply.status(500).send({ message: "Error verifying two-factor authentication token ❌" });
+      }
   };
 }

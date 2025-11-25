@@ -4,7 +4,8 @@ import {    sendEnableEmailOtp,
             enable2faEmail,
             disable2faEmail,
             getTotpSecret,
-            enableTotp
+            enableTotp,
+            disableTotp
         } from "../auth/controllers/twoFactor.api.ts";
 
 import { ZoneName } from "../config.ts";
@@ -259,7 +260,7 @@ export class MyProfilUI
             fontSize: 20,
             color: TEXT_BRIGHT,
             background: BTN_ACTIVE,
-            onClick: () =>async () => {
+            onClick: async () => {
                 const code = input.text?.trim();
                 console.log("Code entered for TOTP enabling:", code);
                 if (!code) return infoMsg1.text = "Le champ est vide !";
@@ -363,7 +364,7 @@ export class MyProfilUI
         });
         rightPanel.addControl(changePwdBtn);
 
-
+        // change this with 2fa user methods request/!\
         this.enable2faApp = !!this.userX.getUser?.twoFactorMethods?.some(
             (method) => method.type === "TOTP" && method.enabled
         );
@@ -383,6 +384,7 @@ export class MyProfilUI
                         console.log("TOTP Secret fetched:", data.qrCodeUrl);
                         // Here you would typically generate a QR code from data.qrCodeUrl
                         // and display it in the UI for the user to scan.
+                        this.enable2faApp = true;
                         this.flag = true;
                         this.mainInterfaceStruct();
                         this.enable2FaAppInterface(data.qrCodeUrl);
@@ -391,12 +393,12 @@ export class MyProfilUI
                     }
                 });
             },
-            // onDeactivate: () => {
-            //     console.log("Disabling 2FA app...");
-            //     this.flag = true;
-            //     this.mainInterfaceStruct();
-            //     this.enable2FaAppInterface();
-            // }
+            onDeactivate: () => {
+                console.log("Disabling 2FA app...");
+                disableTotp();
+                this.enable2faApp = false;
+                this.flag = false;
+            }
         });
         rightPanel.addControl(enable2faBtn);
 
@@ -418,16 +420,17 @@ export class MyProfilUI
             onActivate: async () => {
                 await sendEnableEmailOtp();
                 this.flag = true;
-                // this.enable2faMail = true;
+                this.enable2faMail = true;
                 this.mainInterfaceStruct();
                 this.enable2FaMailInterface();
+
                 
             },
             onDeactivate: async () => {
                 console.log("Disabling 2FA email...");
                 await disable2faEmail();
                 this.flag = false;
-                // this.enable2faMail = false;
+                this.enable2faMail = false;
             }   
         });
         rightPanel.addControl(enable2faMailBtn);

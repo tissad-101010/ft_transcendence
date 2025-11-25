@@ -6,7 +6,7 @@
 /*   By: issad <issad@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/27 11:44:30 by tissad            #+#    #+#             */
-/*   Updated: 2025/11/22 11:50:16 by issad            ###   ########.fr       */
+/*   Updated: 2025/11/24 23:40:54 by issad            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,6 +25,7 @@ import { CredentialUtils } from '../../utils/credential.utils';
 import { AuthService } from './auth.services';
 import { CryptUtils } from '../../utils/crypt.utils';
 import { JwtUtils } from '../../utils/jwt.utils';
+import { TwoFactorType } from '../../prisma/prisma/generated/client/browser';
 
 
 /***********************************/
@@ -139,7 +140,7 @@ export async function signinController(
         JwtUtils.setAccessTokenCookie(reply, loginResponse.accessToken!);
         
         console.log('[Signin Controller] JWT cookies set successfully');
-        console.log('[Signin Controller] reponseData:', responseData);
+        console.log('[Signin Controller] responseData:', responseData);
         return reply.code(200).send(responseData);
 
         
@@ -220,6 +221,24 @@ export async function refreshTokenController(
     console.log('[Refresh Token Controller] Received refresh token request');
     const authService = new AuthService(request.server);
     const incomingCookies = JwtUtils.extractCookiesFromRequest(request);
+    // const incomingTempToken = JwtUtils.extractTokenFromCookies(incomingCookies, 'temp_token');
+    // if (incomingTempToken) {
+    //     const user = JwtUtils.extractUserFromTempToken(incomingTempToken);
+    //     if (user) {
+    //         console.error(`[Refresh Token Controller] Temp token belongs to user ID: ${user.userId}`);
+    //         //test for refreshing tokens using temp token when user connect with oauth and 2fa is enabled
+    //         return reply.send( { signinComplete: true,
+    //           message?: "Tokens refreshed successfully",
+    //           twoFactorRequired: true
+    //           methodsEnabled?:
+    //           accessToken?: string;
+    //           refreshToken?: string;
+    //           tempToken?: string;);
+    //     } else {
+    //         console.error('[Refresh Token Controller] Invalid temp token provided');
+    //     }
+    //     return reply.code(401).send({ message: 'Unauthorized ❌' }); 
+    // }
     const incomingRefreshToken = JwtUtils.extractTokenFromCookies(incomingCookies, 'refresh_token');
     const incomingUserId = JwtUtils.extractUserFromRefreshToken(incomingRefreshToken)?.userId;
     if (!incomingRefreshToken || !incomingUserId) {

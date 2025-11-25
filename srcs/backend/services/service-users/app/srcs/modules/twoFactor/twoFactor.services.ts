@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   twoFactor.services.ts                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
+/*   By: issad <issad@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/27 11:48:41 by tissad            #+#    #+#             */
-/*   Updated: 2025/11/25 17:10:41 by tissad           ###   ########.fr       */
+/*   Updated: 2025/11/25 22:11:22 by issad            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -151,13 +151,13 @@ export class TwoFactorAuthService {
     // store the secret in hashicorp vault
     // you should configure vault and implement the logic to store and retrieve secrets securely.
     // generate QR code from secret 
-    const otpauthUrl = speakeasy.otpauthURL({
+    const TotpAuthUrl = speakeasy.otpauthURL({
       secret: secret.base32,
       label: `ft_transcendence_user_${userId}`, 
       issuer: "ft_transcendence",
       encoding: "base32",
     });
-    const qrCodeUrl = await QRCode.toDataURL(otpauthUrl);
+    const qrCodeUrl = await QRCode.toDataURL(TotpAuthUrl);
     console.log("✅ [2fa.service.ts] QR code generated for user ID:", userId);
     
     // store qr code data url in redis
@@ -167,12 +167,12 @@ export class TwoFactorAuthService {
   }
 
   // Verify TFA token
-  async verifyTotpTocken(userId: string, token: string): Promise<boolean> {
+  async verifyTotpToken(userId: string, token: string): Promise<boolean> {
     // retrieve tfa secret from vault
     // for demo purpose, we will retrieve the secret from redis
-    const client = await this.redisClient;
     try {
-      const tfaSecret = await client.get(`tfa_secret:${userId}`);
+      console.log(`[2fa.service.ts] Verifying TFA token for user ID: ${userId}`);
+      const tfaSecret = await this.redisClient.get(`tfa_secret:${userId}`);
       if (!tfaSecret) {
         console.log("❌ [2fa.service.ts] No TFA secret found for user ID:", userId);
         return false;
@@ -183,10 +183,12 @@ export class TwoFactorAuthService {
         token,
         window: 1, // allow 30 seconds before or after
       });
+      console.log(`[2fa.service.ts] TFA token verification result for user ID ${userId}:`, verified);
       if (verified) {
         console.log("✅ [2fa.service.ts] TFA token verified for user ID:", userId);
       } else {
         console.log("❌ [2fa.service.ts] TFA token verification failed for user ID:", userId);
+        await this.redisClient.del(`tfa_secret:${userId}`);
       }
       return verified;
   
