@@ -483,8 +483,15 @@ export class MatchFriendlyOnline extends MatchBase
                 break;
             case 'player_move':
                 // Appliquer le mouvement du joueur distant
-                // Utiliser l'ID du joueur pour garantir que le bon paddle bouge
+                // Ignorer les échos renvoyés par le serveur pour le client originel
                 console.log("📥 Mouvement reçu du joueur distant:", { playerId: message.playerId, remotePlayerId: this.remotePlayerId, myPlayerId: this.myPlayerId, direction: message.direction });
+                // Si le message concerne notre propre joueur de jeu (myGamePlayerId),
+                // il s'agit probablement d'un echo envoyé par le serveur : l'update
+                // a déjà été appliquée localement dans handleOnlineKeys -> on l'ignore.
+                if (this.myGamePlayerId && message.playerId === this.myGamePlayerId) {
+                    console.log('ℹ️ Ignoré: message player_move echo pour le joueur local', message.playerId);
+                    break;
+                }
                 if (this.game) {
                     const players = this.game.logic.getPlayers;
                     // Trouver le joueur distant par ID plutôt que par team
