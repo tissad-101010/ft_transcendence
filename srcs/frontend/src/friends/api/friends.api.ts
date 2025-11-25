@@ -9,9 +9,7 @@ type ReponseFetch = {
   status: number;
 }
 
-export async function listInvitations(
-  idUser: string
-) : Promise<{success:boolean; message?: string; data?: any}>
+export async function listInvitations() : Promise<{success:boolean; message?: string; data?: any}>
 {
   try 
   {

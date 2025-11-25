@@ -14,13 +14,11 @@ import {
   Filler
 } from 'chart.js';
 
-import { UserX } from "../UserX.ts";
 import { Friend } from "../Friend.ts";
 import { SceneManager } from "../scene/SceneManager.ts";
 
 import { IMatch } from "../Friend.ts";
 import { StandsInteraction } from "./StandsInteraction.ts";
-import { text } from "stream/consumers";
 
 Chart.register(LineController, LineElement, PointElement, LinearScale, CategoryScale, Title, Tooltip, Legend, Filler);
 
@@ -649,8 +647,6 @@ export class FriendUI
 
         this.sceneManager.getUserX.loadFriendInvitations()
             .then((response) => {
-                console.log(response);
-                console.log("DEDEDED");
                 console.log("Mes invitations : ", this.sceneManager.getUserX.getFriendInvitations);
             })
             .catch((err : any) => console.error(err));

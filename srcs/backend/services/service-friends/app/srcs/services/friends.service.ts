@@ -6,19 +6,44 @@
 /*   By: glions <glions@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/16 18:54:11 by tissad            #+#    #+#             */
-/*   Updated: 2025/11/24 16:49:50 by glions           ###   ########.fr       */
+/*   Updated: 2025/11/25 12:40:35 by glions           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 // IMPORT FASTIFY
 import { FastifyInstance } from "fastify";
-import { FriendInvitation, prisma } from "../models/friends.model";
+import { prisma } from "../models/friends.model";
+
+import { FriendInvitation, UserInfo } from "../types/friends.type";
 
 // IMPORT AXIOS
 import axios from "axios";
 
 // IMPORT FRIENDS.ERROR
-import { DataBaseConnectionError, InvitationAlreadyExistsError } from "../errors/friends.error";
+import {
+  DataBaseConnectionError,
+  InvitationError,
+  AuthError,
+  UserNotFoundError,
+  RemoteServiceUnavailableError
+} from "../errors/friends.error";
+
+import { getUserById, getUserByUsername } from "../controllers/remote/clients/remoteGetUser.controller";
+
+
+async function safePrisma<T>(fn: () => Promise<T>) : Promise<T>
+{
+  try
+  {
+    return await fn();
+  } catch (err: any)
+  {
+    if (err.code === "P1001" || err.code === "P1002")
+      throw new DataBaseConnectionError();
+    throw err;
+  }
+}
+
 
 // CLASS FRIENDSSERVICE
 export class FriendsService {
@@ -28,29 +53,27 @@ export class FriendsService {
   constructor(app: FastifyInstance) {
     this.prismaClient = app.prisma;
   }
+
   // ASYNC METHODS
-  async sendInvitation(
-    fromUserId        : string,
-    fromUserUsername  : string,
-    toUserId          : string,
-    toUserUsername    : string,
-  ) : Promise<FriendInvitation> 
+  async listInvitations(
+    userId: string
+  ) : Promise<{
+    received: FriendInvitation[],
+    sent: FriendInvitation[]
+  }> 
   {
+    
     try
     {
-      console.log(">> FROMUSERID = " + fromUserId);
-      console.log(">> FROMUSERUSERNAME = " + fromUserUsername);
-      console.log(">> TOUSERID = " + toUserId);
-      console.log(">> TOUSERUSERNAME = " + toUserUsername);
-      // ALREADY ON BDD ?
-      const existing = await this.prismaClient.friendInvitation.findUnique({
-        where: { fromUserId_toUserId: { fromUserId, toUserId } },
+      // CALLS BDD
+      const received = await this.prismaClient.friendInvitation.findMany({
+        where: { toUserId: userId, status: "PENDING" },
       });
-      if (existing) throw new InvitationAlreadyExistsError();
-      // CALL BDD
-      return this.prismaClient.friendInvitation.create({
-        data: { fromUserId, toUserId, fromUserUsername, toUserUsername, status: "PENDING" },
+      const sent = await this.prismaClient.friendInvitation.findMany({
+        where: { fromUserId: userId, status: "PENDING" },
       });
+      // SUCCESS
+      return { received, sent };
     } catch (err: any)
     {
       // DATABASE ERROR
@@ -59,6 +82,45 @@ export class FriendsService {
       // OTHER ERROR
       throw err;
     }
+  }
+
+  async sendInvitation(
+    fromUserId        : string,
+    toUserUsername    : string,
+  ) : Promise<FriendInvitation> 
+  {
+    // GET "FROM USER" FROM BDD
+    const user = await getUserById(fromUserId);
+    if (!user) throw new UserNotFoundError(fromUserId);
+    // INVITE HIMSELF ?
+    if (user.username === toUserUsername) throw new InvitationError("Tu ne peux pas t'inviter toi-même");
+    // SEARCH "TO USER" FROM BDD
+    const other : UserInfo = await getUserByUsername(toUserUsername);
+    if (!other) throw new UserNotFoundError(toUserUsername);
+    // INVITATION ALREADY ON BDD ?
+    const existing = await safePrisma(() => 
+      this.prismaClient.friend.findFirst({
+        where: {
+          OR: [
+            { fromUserId, toUserId: other.id },
+            { fromUserId: other.id, toUserId: fromUserId }
+          ]
+        }
+      })
+    );
+    if (existing) throw new InvitationError("Invitation déjà existante");
+    // ADD INVITATION ON BDD
+    return (await safePrisma(() => 
+      this.prismaClient.friendInvitation.create({
+        data: {
+          fromUserId,
+          toUserId: other.id,
+          fromUserUsername: user.username,
+          toUserUsername,
+          status: "PENDING" 
+        },
+      })
+    ));
   }
 
   async acceptInvitation(
@@ -97,21 +159,4 @@ export class FriendsService {
   {
     return this.prismaClient.friendInvitation.delete({ where: { id } });
   }
-
-  async listInvitations(
-    userId: string
-  ) : Promise<{
-    received: FriendInvitation[],
-    sent: FriendInvitation[]
-  }> 
-  {
-    const received = await this.prismaClient.friendInvitation.findMany({
-      where: { toUserId: userId, status: "PENDING" },
-    });
-    const sent = await this.prismaClient.friendInvitation.findMany({
-      where: { fromUserId: userId, status: "PENDING" },
-    });
-    return { received, sent };
-  }
-  
 }

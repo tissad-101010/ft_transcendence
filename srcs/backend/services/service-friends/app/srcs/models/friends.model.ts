@@ -6,7 +6,7 @@
 /*   By: glions <glions@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/25 11:32:05 by tissad            #+#    #+#             */
-/*   Updated: 2025/11/22 01:00:56 by glions           ###   ########.fr       */
+/*   Updated: 2025/11/25 09:37:13 by glions           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,12 +15,3 @@ import { PrismaClient } from "@prisma/client";
 
 export const prisma = new PrismaClient();
 
-export type FriendInvitation = {
-    id: number;
-    fromUserId: string;
-    fromUserUsername: string;
-    toUserId: string;
-    toUserUsername: string;
-    status: "PENDING" | "ACCEPTED" | "DECLINED" | "BLOCKED";
-    createdAt: Date;
-};

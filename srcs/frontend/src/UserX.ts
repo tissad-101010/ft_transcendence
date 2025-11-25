@@ -54,7 +54,6 @@ export class UserX
     constructor(sceneManager : SceneManager)
     {
         this.sceneManager = sceneManager;
-        this.simuEnAttendantBDD();
     }
 
 
@@ -86,20 +85,13 @@ export class UserX
         return (0);
     }
 
-    private simuEnAttendantBDD() : void
-    {
-        this.addFriend("Lolo");
-        this.addFriend("Tissad");
-        this.addFriend("Val");
-    }
-
     async loadFriendInvitations() : Promise<{success: boolean, message: string}>
     {
-        const result = await listInvitations("1"); // remplace 1 par l'id de l'utilisateur
+        const result = await listInvitations();
         if (result.success)
         {
             this.friendInvitations = result.data;
-            return ({success: true, message: "Invitations loaded"});
+            return ({success: true, message: "Invitations chargees"});
         }
         else 
             return ({success: false, message: result.message || "Erreur"});
