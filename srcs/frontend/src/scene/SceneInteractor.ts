@@ -5,7 +5,8 @@ import {
   AbstractMesh,
   PointerEventTypes,
   HighlightLayer,
-  PointerInfo
+  PointerInfo,
+  Mesh
 } from '@babylonjs/core';
 import "@babylonjs/loaders";
 import { SceneManager } from './SceneManager.ts';
@@ -28,6 +29,7 @@ export class SceneInteractor {
     private currSpecificInteraction: SpecificInteraction | null = null;
     private interactionsEnabled: boolean = true;
     private fieldTest: boolean = false;
+    private zone? : ZoneName; //optionnelle
 
     /**************************************************
      *                  CONSTRUCTOR                   *
@@ -41,6 +43,8 @@ export class SceneInteractor {
             ZoneName.LOCKER_ROOM,
             ZoneName.STANDS,
         ];
+        // if (zone)
+        //     this.zone = zone;
     }
 
 
@@ -48,6 +52,7 @@ export class SceneInteractor {
      *               PRIVATE METHODS                 *
      **************************************************/
      private handlePointer(pointerInfo: PointerInfo, isClick: boolean) : void {
+        // console.log("entree dans handlePointeur de sceneinteractr");
         if (!this.interactionsEnabled)
         {
             return;
@@ -57,11 +62,8 @@ export class SceneInteractor {
             return;
         }   
         const pickRes = this.scene.pick(this.scene.pointerX, this.scene.pointerY);
-        const pickedMesh = pickRes?.pickedMesh;
-
-        // console.log(pickedMesh.name);
+        const  pickedMesh = pickRes?.pickedMesh as Mesh | undefined;
         
-        //Je veux pouvoir survoler juste l echelle etd
         //Pour tous les survols global
         if (!isClick && pickedMesh && this.interactiveMainMeshes.includes(pickedMesh.name) && !this.sceneManager.getSpecificMesh) {
             // highlight zone principale au survol
@@ -80,7 +82,9 @@ export class SceneInteractor {
         }
     }
 
+
     public handleMainZoneClick(pickedMesh: AbstractMesh, isClick: boolean) : void {
+        // console.log("entree dans handlemainzoneclick de sceneinteractr");
         if (this.currSpecificInteraction) {
             this.currSpecificInteraction.dispose();
             this.currSpecificInteraction = null;
@@ -128,6 +132,35 @@ export class SceneInteractor {
     /**************************************************
      *                PUBLIC METHODS                  *
      **************************************************/
+
+
+    public dispose(): void {
+        // 1️⃣ Supprimer l'interaction spécifique en cours
+        if (this.currSpecificInteraction) {
+            this.currSpecificInteraction.dispose();
+            this.currSpecificInteraction = null;
+        }
+
+        // 2️⃣ Nettoyer le highlight
+        if (this.highlightLayer) {
+            this.highlightLayer.removeAllMeshes();
+            this.highlightLayer.dispose(); // supprime le highligh tLayer
+        }
+
+        // 3️⃣ Remettre les meshes principaux pickables
+        this.interactiveMainMeshes.forEach(meshName => {
+            const mesh = this.scene.getMeshByName(meshName);
+            if (mesh) this.meshPickable(mesh);
+        });
+
+        // 4️⃣ Désactiver les interactions
+        this.disableInteractions();
+
+        // 5️⃣ Optionnel : enlever les observables si tu veux vraiment tout couper
+        // this.scene.onPointerObservable.clear();
+    }
+
+
     public enableInteractionScene(): void {
         this.scene.onPointerObservable.add((pointerInfo: PointerInfo) => {
             const isClick = pointerInfo.type === PointerEventTypes.POINTERPICK;

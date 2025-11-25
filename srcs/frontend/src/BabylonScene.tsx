@@ -31,6 +31,17 @@ const BabylonScene = () => {
     }
   }, [isAuthenticated, user]);
 
+  useEffect(() => {
+      const handlePop = (event: PopStateEvent) => {
+          if (managerRef.current) {
+              managerRef.current.backToPreviousCameraPosition();
+          }
+      };
+
+      window.addEventListener("popstate", handlePop);
+      return () => window.removeEventListener("popstate", handlePop);
+  }, []);
+
   return (
     <canvas
       ref={canvasRef}

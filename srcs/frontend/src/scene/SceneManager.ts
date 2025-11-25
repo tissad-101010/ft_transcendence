@@ -46,6 +46,17 @@ const poolMeshNames = [
     ...meshNamesByZone.pool.lounge,
     ...meshNamesByZone.pool.buttonsPool,
 ];
+
+//NE PAS TOUCHER!
+const meshNamesZones = ["stands", "furniture", "chair03"];
+
+interface CameraState {
+  position: Vector3;
+  rotation: Vector3;
+  zone?: ZoneName;
+}
+
+
 export class SceneManager {
     /**************************************************
      *           PRIVATE ATTRIBUTES                   *
@@ -60,6 +71,7 @@ export class SceneManager {
     private loadedMeshes: {[zone: string]: AbstractMesh[]} = {};
     private meshMap: Record<string, AbstractMesh> = {};
     private _specificMesh : boolean = false;
+    
 
 private players: Player[] = [
     { id: 1, login: "RetroKid" },
@@ -107,8 +119,12 @@ private players: Player[] = [
     private _loungeMeshes: AbstractMesh[] = [];
     // private lightInteractor : LightInteractor;
     private lightInteractor! : LightInteractor;
-
+    private cameraHistory: CameraState[] = [];
     private userX: UserX;
+    // private currentZone: ZoneName | null = null;
+    // private previousZone: ZoneName | null = null;
+    // private backNavigation : boolean = false;
+    private isReturning: boolean = false;
 
     /**************************************************
     *                 CONSTRUCTOR                     *
@@ -134,10 +150,10 @@ private players: Player[] = [
         this.freeCamera.attachControl(canvas, true);
 
         // Bloque deplacements clavier
-        // this.freeCamera.keysUp = [];
-        // this.freeCamera.keysDown = [];
-        // this.freeCamera.keysLeft = [];
-        // this.freeCamera.keysRight = [];
+        this.freeCamera.keysUp = [];
+        this.freeCamera.keysDown = [];
+        this.freeCamera.keysLeft = [];
+        this.freeCamera.keysRight = [];
         //Bloque zoom molette
         this.freeCamera.inputs.attached.mousewheel?.detachControl();
         this.scene.activeCamera = this.freeCamera;
@@ -147,6 +163,7 @@ private players: Player[] = [
     /**************************************************
      *               PRIVATE METHODS                  *
      **************************************************/
+
     private onResize = () => {
         this.engine.resize();
     }
@@ -299,15 +316,88 @@ private players: Player[] = [
         const mouseInput = new FreeCameraMouseInput();
         this.freeCamera.inputs.add(mouseInput);
     }
+private resetInteractions(): void {
+    // Si tu as un SceneInteractor
+    if (this.sceneInteractor) {
+        this.sceneInteractor.disableInteractions(); // désactive tout
+        this.sceneInteractor.enableInteractionScene();  // réactive pour la nouvelle caméra
+    }
+    
+    // Optionnel : réattacher la caméra au canvas
+    this.freeCamera.detachControl();
+    this.freeCamera.attachControl(this.canvas, true);
+    
+    // Si tu limites la rotation
+    if (this.limitCameraRotation) this.enableRotationOnly();
+}
+
 
     /**************************************************
      *                PUBLIC METHODS                  *
      **************************************************/
+
+    public backToPreviousCameraPosition() {
+        if (this.cameraHistory.length < 2) return; // pas assez d’historique
+
+        // 🔹 Indique qu’on revient en arrière
+        this.isReturning = true;
+
+        // Supprimer la zone actuelle
+        this.cameraHistory.pop();
+
+        // Récupérer la zone précédente
+        const lastState = this.cameraHistory[this.cameraHistory.length - 1];
+        if (!lastState?.zone) return;
+
+        const beforeZone = lastState.zone;
+
+        const pickedMesh = this.getAllZoneMeshes()
+            .find(mesh => mesh.name === beforeZone);
+
+        if (!pickedMesh) {
+            console.warn("Pas de mesh trouvé pour la zone", beforeZone);
+            return;
+        }
+
+        // Créer SceneInteractor si pas encore existant
+        if (!this.sceneInteractor) {
+            this.sceneInteractor = new SceneInteractor(this.scene, this.freeCamera, this);
+            this.sceneInteractor.enableInteractionScene();
+        }
+
+        // Simuler le click pour revenir à la zone
+        this.sceneInteractor.handleMainZoneClick(pickedMesh, false);
+    }
+
+
+
     public moveCameraTo(
         zoneName: ZoneName,
         onArrived?: () => void
     ) 
     {
+            // 🔹 Vérifie si le zoneName est valide avant de sauvegarder
+        const validZoneNames = this.getAllZoneMeshes().map(mesh => mesh.name);
+        if (validZoneNames.includes(zoneName)) {
+        console.log(this.cameraHistory);
+            if (!this.isReturning){
+                this.cameraHistory.push({
+                    position: this.freeCamera.position.clone(),
+                    rotation: this.freeCamera.rotation.clone(),
+                    zone: zoneName
+                });
+                // Limite du tableau
+                const MAX_HISTORY = 50;
+                if (this.cameraHistory.length > MAX_HISTORY) this.cameraHistory.shift();
+            }
+            
+                // **Ajouter une entrée dans l’historique navigateur**
+            window.history.pushState({ zone: zoneName }, "", window.location.pathname);
+        }
+
+
+
+
         //  if (zoneName === ZoneName.POOL || zoneName === ZoneName.SCREEN_TV ||
         //     zoneName === ZoneName.SCOREBOARD || zoneName.includes(ZoneName.TSHIRT))
         //     this.limitCameraRotation = false;
@@ -371,6 +461,7 @@ private players: Player[] = [
             if (typeof onArrived === "function")
                 console.log("Bien arrive 2");
         }
+        this.isReturning = false;
     }
 
     public async setupEnvironment(): Promise<void> {
@@ -462,6 +553,34 @@ private players: Player[] = [
     {
         return (this.lightInteractor);
     }
+
+    // public getCurrentZone(): ZoneName | null {
+    //     return this.currentZone;
+    // }
+
+    // public getPreviousZone(): ZoneName | null {
+    //     return this.previousZone;
+    // }
+
+    // public getBackNavigation() : boolean{
+    //     return this.backNavigation;
+    // }
+
+
+    public getAllZoneMeshes(): AbstractMesh[] {
+        // Récupère toutes les valeurs de l'enum ZoneName (chaînes)
+        const zoneNamesAsStrings: string[] = ["stands", "border", "furniture", "buttonPoolExit0"];
+        // const zoneNamesAsStrings: string[] = ["stands", "border", "furniture", "buttonPoolExit0"];
+        // const zoneNamesAsStrings: string[] = Object.values(ZoneName);
+        // console.log("voici les zones name dans mon ")
+        // Convertit chaque nom en AbstractMesh via le meshMap
+        const meshes: AbstractMesh[] = zoneNamesAsStrings
+            .map(name => this.meshMap[name])
+            .filter((m): m is AbstractMesh => m !== undefined); // filtre les undefined
+
+        return meshes;
+    }
+
     // /**************************************************
     //  *                    SETTERS                     *
     //  **************************************************/
@@ -500,4 +619,12 @@ private players: Player[] = [
         this.userX.setUser = user;
     }
 
+    public setCurrentZone(zone: ZoneName) {
+        this.previousZone = this.currentZone;
+        this.currentZone = zone;
+    }
+
+    public setBackNavigation(back : boolean){
+        this.backNavigation = back;
+    }
 }
