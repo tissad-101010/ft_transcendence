@@ -6,7 +6,7 @@
 /*   By: glions <glions@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/16 18:54:11 by tissad            #+#    #+#             */
-/*   Updated: 2025/11/25 12:40:35 by glions           ###   ########.fr       */
+/*   Updated: 2025/11/25 15:09:24 by glions           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -99,7 +99,7 @@ export class FriendsService {
     if (!other) throw new UserNotFoundError(toUserUsername);
     // INVITATION ALREADY ON BDD ?
     const existing = await safePrisma(() => 
-      this.prismaClient.friend.findFirst({
+      this.prismaClient.friendInvitation.findFirst({
         where: {
           OR: [
             { fromUserId, toUserId: other.id },

@@ -34,21 +34,38 @@ export async function getUserById(id: string)
 
 export async function getUserByUsername(username: string)
 {
-  // CALL USER SERVICE
-  const res = await usersClient.get(`${serviceUsersURL}/internalUser/user?username=${username}`);
-  const data = res.data;
-  // ERRORS
-  if (!data.success)
+  try
   {
-    // USER NOT FOUND
-    if (res.status === 404)
-      throw new UserNotFoundError(username);
-    // SERVICE USER ERROR
-    if (res.status === 503)
-      throw new RemoteServiceUnavailableError();
+    // CALL USER SERVICE
+    const res = await usersClient.get(`${serviceUsersURL}/internalUser/user?username=${username}`);
+    const data = res.data;
+    // ERRORS
+    if (!data.success)
+    {
+      // USER NOT FOUND
+      if (res.status === 404)
+      {
+        console.error(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>JE RECUPERE BIEN CETTE ERREUR")
+        throw new UserNotFoundError(username);
+      }
+      // SERVICE USER ERROR
+      if (res.status === 503)
+        throw new RemoteServiceUnavailableError();
+      return (null);
+        // SUCCESS
+    }
+      return (data.data);
+  } catch (err: any)
+  {
+    if (err.response)
+    {
+      const status = err.response.status;
+      if (status === 404)
+        throw new UserNotFoundError(username);
+      if (status === 503)
+        throw new RemoteServiceUnavailableError();
+    }
     // OTHER ERROR
-    return (null);
+    throw err;
   }
-  // SUCCESS
-  return (data.data);
 }
