@@ -6,13 +6,11 @@
 /*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/27 11:51:29 by tissad            #+#    #+#             */
-/*   Updated: 2025/11/24 11:02:32 by tissad           ###   ########.fr       */
+/*   Updated: 2025/11/25 14:40:38 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 
-
-import { create } from "domain";
 import { OAuthProvider, OAuthProviderType } from "../../types/user.types";
 /***********************************/
 /*       Users Service Class       */
@@ -161,5 +159,14 @@ export class UsersService {
         },
       });
       return userWith2FA?.twoFactorMethods || [];
+    }
+    // remove 2FA method from user
+    async removeUserTwoFactorMethod(userId: string, method: string) {
+      return this.prismaClient.twoFactorMethod.deleteMany({
+        where: {
+          userId,
+          type: method,
+        },
+      });
     }
 }

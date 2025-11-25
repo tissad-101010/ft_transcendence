@@ -1,7 +1,10 @@
 // function that logout user from the application
 import { logoutUser } from "../auth/controllers/signout.ts";
 import {    sendEnableEmailOtp,
-            enable2faEmail
+            enable2faEmail,
+            disable2faEmail,
+            getTotpSecret,
+            enableTotp
         } from "../auth/controllers/twoFactor.api.ts";
 
 import { ZoneName } from "../config.ts";
@@ -46,6 +49,8 @@ import {
 } from "./utilsUI.ts";
 import { SceneManager } from "../scene/SceneManager.ts";
 import { UserX } from "../UserX.ts";
+import { use } from "react";
+import { get } from "http";
 
 Chart.register(
     LineController,
@@ -190,7 +195,7 @@ export class MyProfilUI
     // =============================================================
     //  2FA APP
     // =============================================================
-    private enable2FaAppInterface(){
+    private enable2FaAppInterface(qrCodeUrl?: any){
         const panel2fa = new StackPanel("panel2faApp");
         panel2fa.width = "100%";
         panel2fa.height = "100%";
@@ -223,8 +228,8 @@ export class MyProfilUI
         qrImgRec.thickness = 0;
         qrImgRec.background = "#333";
         stackElements1.addControl(qrImgRec);
-
-        const qrImg = new Image("qrImgImg", "qrImg.png");
+        console.log("QR Code URL:", qrCodeUrl.qrCodeUrl);
+        const qrImg = new Image("qrImgImg", qrCodeUrl.qrCodeUrl);
         qrImg.width = 1;
         qrImg.height = 1;
         qrImgRec.addControl(qrImg);
@@ -254,12 +259,15 @@ export class MyProfilUI
             fontSize: 20,
             color: TEXT_BRIGHT,
             background: BTN_ACTIVE,
-            onClick: () => {
+            onClick: () =>async () => {
                 const code = input.text?.trim();
+                console.log("Code entered for TOTP enabling:", code);
                 if (!code) return infoMsg1.text = "Le champ est vide !";
                 if (code.length !== 6) return infoMsg1.text = "Code invalide !";
-                this.flag = false;
-                this.enable2faApp = true;
+                const res = await enableTotp(code);
+                if (!res) return infoMsg1.text = "Échec de l'activation de 2FA App !";
+                this.flag = true;
+                // this.enable2faApp = true;
                 this.displayMenu();
             }
         });
@@ -355,6 +363,12 @@ export class MyProfilUI
         });
         rightPanel.addControl(changePwdBtn);
 
+
+        this.enable2faApp = !!this.userX.getUser?.twoFactorMethods?.some(
+            (method) => method.type === "TOTP" && method.enabled
+        );
+        console.log("App 2FA enabled state:", this.enable2faApp);
+
         const enable2faBtn = create2faButton({
             id: "enable2FAApp",
             stateVar: () => this.enable2faApp,
@@ -364,12 +378,34 @@ export class MyProfilUI
             activeColor: BTN_ACTIVE,
             inactiveColor: BTN_NORMAL,
             onActivate: () => {
-                this.flag = true;
-                this.mainInterfaceStruct();
-                this.enable2FaAppInterface();
-            }
+                getTotpSecret().then((data) => {
+                    if (data) {
+                        console.log("TOTP Secret fetched:", data.qrCodeUrl);
+                        // Here you would typically generate a QR code from data.qrCodeUrl
+                        // and display it in the UI for the user to scan.
+                        this.flag = true;
+                        this.mainInterfaceStruct();
+                        this.enable2FaAppInterface(data.qrCodeUrl);
+                    } else {
+                        console.error("Failed to fetch TOTP secret.");
+                    }
+                });
+            },
+            // onDeactivate: () => {
+            //     console.log("Disabling 2FA app...");
+            //     this.flag = true;
+            //     this.mainInterfaceStruct();
+            //     this.enable2FaAppInterface();
+            // }
         });
         rightPanel.addControl(enable2faBtn);
+
+        // initialize email 2FA state from user methods
+        const email2faEnabled = !!this.userX.getUser?.twoFactorMethods?.some(
+            (method) => method.type === "EMAIL" && method.enabled
+        );
+        this.enable2faMail = email2faEnabled;
+        console.log("Email 2FA enabled state:", this.enable2faMail);
 
         const enable2faMailBtn = create2faButton({
             id: "enable2FAMail",
@@ -382,9 +418,17 @@ export class MyProfilUI
             onActivate: async () => {
                 await sendEnableEmailOtp();
                 this.flag = true;
+                // this.enable2faMail = true;
                 this.mainInterfaceStruct();
                 this.enable2FaMailInterface();
-            }
+                
+            },
+            onDeactivate: async () => {
+                console.log("Disabling 2FA email...");
+                await disable2faEmail();
+                this.flag = false;
+                // this.enable2faMail = false;
+            }   
         });
         rightPanel.addControl(enable2faMailBtn);
     }

@@ -101,6 +101,7 @@ export function create2faButton(options: {
     height?: string,
     cornerRadius?: number,
     onActivate?: () => void
+    onDeactivate?: () => void,
 }) {
     const btn = Button.CreateSimpleButton(options.id, "");
     btn.height = options.height ?? "50px";
@@ -126,6 +127,7 @@ export function create2faButton(options: {
         if (options.stateVar()) {
             options.setStateVar(false);
             updateButton();
+            if (options.onDeactivate) options.onDeactivate();
         } else {
             if (options.onActivate) options.onActivate();
         }

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   twoFactor.routes.ts                                :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: issad <issad@student.42.fr>                +#+  +:+       +#+        */
+/*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/16 18:55:45 by tissad            #+#    #+#             */
-/*   Updated: 2025/11/24 23:17:57 by issad            ###   ########.fr       */
+/*   Updated: 2025/11/25 18:00:38 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,17 +24,18 @@ export  async function TwoFactorAuth(fastify: FastifyInstance) {
   fastify.post("/email-enable", twoFactorAuthController.enableEmailOtpForTfaController);
   fastify.post("/email-sendOtp", twoFactorAuthController.sendOtpByEmailForTfaController);
   fastify.post("/email-verifyOtp", twoFactorAuthController.verifyEmailOtpForTfaController);
+  fastify.post("/email-disable", twoFactorAuthController.disableEmailOtpForTfaController);
+  fastify.get("/totp-secret", twoFactorAuthController.sendQrCodecontroller);  
+  fastify.post("/totp-enable", twoFactorAuthController.enableTwoFactorTotpController);
+  fastify.post("/totp-verify", twoFactorAuthController.verifyTwoFactorTotpController);
 
   // Verify OTP email
   //need routes to disable email otp verification
-  // fastify.post("/email-disable", twoFactorAuthController.disableEmailOtpForTfa);
 
   
   // google auth routes
   // enable googe auth tfa
-  // fastify.post("/authenticator-enable", twoFactorAuthController.enableTwoFactorAuth);
   // // send qr code
-  // fastify.get("/authenticator-sendQrcode", twoFactorAuthController.sendQrCode);  
   // // disable google auth tfa
   // fastify.post("/authenticator-disable", twoFactorAuthController.disableTwoFactorAuth);
   // verify google auth tfa

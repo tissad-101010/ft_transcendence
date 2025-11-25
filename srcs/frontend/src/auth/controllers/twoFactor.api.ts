@@ -6,7 +6,7 @@
 /*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/22 12:58:29 by issad             #+#    #+#             */
-/*   Updated: 2025/11/24 16:37:15 by tissad           ###   ########.fr       */
+/*   Updated: 2025/11/25 17:57:48 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,7 @@
 
 
 import { authFetch } from '../authFetch';
+import { fetchUserProfile } from './auth.api';
 // src/auth/controllers/twoFactor.api.ts
 const BASE_URL = "https://localhost:8443/api/user/2fa";
 
@@ -44,7 +45,11 @@ export async function enable2faEmail(otp:string): Promise<boolean> {
       body: JSON.stringify({ code: otp }),
       headers: { "Content-Type": "application/json" },
     };
-    const res = await authFetch(`${BASE_URL}/email-enable`, requestOptions); 
+    const res = await authFetch(`${BASE_URL}/email-enable`, requestOptions);
+    if (res.ok) {
+      // Met à jour le profil utilisateur après l'activation
+      await fetchUserProfile();
+    }
     return res.ok;
   }
   catch (err) {
@@ -52,6 +57,31 @@ export async function enable2faEmail(otp:string): Promise<boolean> {
     return false;
   }
 }
+
+
+// disable 2fa mail
+export async function disable2faEmail(): Promise<boolean> {
+  try { 
+    const requestOptions: RequestInit = {
+      method: "POST",
+      credentials: "include",
+      body: JSON.stringify({ code: "" }),
+      headers: { "Content-Type": "application/json" },
+    };
+    const res = await authFetch(`${BASE_URL}/email-disable`, requestOptions);
+    if (res.ok) {
+      // Met à jour le profil utilisateur après la désactivation
+      await fetchUserProfile();
+    }
+    return res.ok;
+  }
+  catch (err) {
+    console.error("Error disabling 2FA email:", err);
+    return false;
+  }
+}
+
+
 
 // send otp email
 export async function sendEmailOtp(): Promise<boolean> {
@@ -87,12 +117,56 @@ export async function verifyEmailOtp(code: string): Promise<boolean> {
   } 
 }
 
+
+// get totp secret
+export async function getTotpSecret(): Promise<{ qrCodeUrl: string, message:string} | null> {
+  try {
+    const requestOptions: RequestInit = {
+      method: "GET",
+      credentials: "include",
+    };
+    const res = await authFetch(`${BASE_URL}/totp-secret`, requestOptions);
+    if (!res.ok) {
+      console.error("Failed to get TOTP secret:", res.statusText);
+      return null;
+    }
+    const data = await res.json();
+    console.log("TOTP Secret data:", data);
+    return { qrCodeUrl:data.qrCodeUrl , message: data.message };
+  } catch (err) {
+    console.error("Error getting TOTP secret:", err);
+    return null;
+  }
+}
+
+// enable totp
+export async function enableTotp(code:string): Promise<boolean> {
+  try {
+    const requestOptions: RequestInit = {
+      method: "POST",
+      credentials: "include",
+      body: JSON.stringify({ code }),
+      headers: { "Content-Type": "application/json" },
+    };
+    const res = await authFetch(`${BASE_URL}/totp-enable`, requestOptions);
+    if (res.ok) {
+      // Met à jour le profil utilisateur après l'activation
+      await fetchUserProfile();
+    }
+    return res.ok;
+  } catch (err) {
+    console.error("Error enabling TOTP:", err);
+    return false;
+  }
+}
+
+
 /**
  * Vérifie un code TOTP (Google Authenticator, etc.)
  */
 export async function verifyTotp(code: string): Promise<boolean> {
   try {
-    const res = await fetch(`${BASE_URL}/verifyTotp`, {
+    const res = await fetch(`${BASE_URL}/totp-verify`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       credentials: "include",

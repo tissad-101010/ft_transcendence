@@ -6,7 +6,7 @@
 /*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/27 11:48:41 by tissad            #+#    #+#             */
-/*   Updated: 2025/11/24 11:14:41 by tissad           ###   ########.fr       */
+/*   Updated: 2025/11/25 17:10:41 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,7 +47,9 @@ export class TwoFactorAuthService {
       return true; // already enabled
     }
     try {
-      await this.usersService.addUserTwoFactorMethod(userId, method);      
+      await this.usersService.addUserTwoFactorMethod(userId, method);    
+      //delete user profile from redis tfa session if exists
+      await this.redisClient.del(`user_profile:${userId}`);  
       console.log("✅ [2fa.service.ts] TFA enabled for user ID:", userId);
       return true;
     }
@@ -120,6 +122,22 @@ export class TwoFactorAuthService {
   }
 
   
+
+  // Disable TFA method for user
+  async disableTwoFactorAuth(userId: string, methodStr:string ): Promise<boolean> {
+    const method = methodStr as TwoFactorType;
+    try {
+      await this.usersService.removeUserTwoFactorMethod(userId, method);      
+      //delete user profile from redis tfa session if exists
+      await this.redisClient.del(`user_profile:${userId}`);
+      console.log("✅ [2fa.service.ts] TFA disabled for user ID:", userId);
+      return true;
+    } catch (error) {
+      console.error("❌ [2fa.service.ts] Error disabling TFA for user ID:", userId, error);
+      return false;
+    }
+  }
+
 
   // generate TFA secret and QR code and store  in db
   async generateTotpSecretAndQrCode(userId: string): Promise<{qrCodeUrl: string }> {
