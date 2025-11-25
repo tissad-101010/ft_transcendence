@@ -6,7 +6,7 @@
 /*   By: glions <glions@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/16 18:54:11 by tissad            #+#    #+#             */
-/*   Updated: 2025/11/25 15:09:24 by glions           ###   ########.fr       */
+/*   Updated: 2025/11/25 16:29:34 by glions           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,31 +62,25 @@ export class FriendsService {
     sent: FriendInvitation[]
   }> 
   {
-    
-    try
-    {
-      // CALLS BDD
-      const received = await this.prismaClient.friendInvitation.findMany({
+    const received : FriendInvitation[] = await safePrisma(() =>
+      this.prismaClient.friendInvitation.findMany({
         where: { toUserId: userId, status: "PENDING" },
-      });
-      const sent = await this.prismaClient.friendInvitation.findMany({
+        select: { toUserUsername: true, fromUserUsername: true, status: true, createdAt: true}
+      })
+    );
+    const sent : FriendInvitation[] = await safePrisma(() =>
+      this.prismaClient.friendInvitation.findMany({
         where: { fromUserId: userId, status: "PENDING" },
-      });
-      // SUCCESS
-      return { received, sent };
-    } catch (err: any)
-    {
-      // DATABASE ERROR
-      if (err.code === "P1001" || err.code === "P1002")
-        throw new DataBaseConnectionError();
-      // OTHER ERROR
-      throw err;
-    }
+        select: { toUserUsername: true, fromUserUsername: true, status: true, createdAt: true}
+      })
+    );
+    // SUCCESS
+    return { received, sent };
   }
 
   async sendInvitation(
     fromUserId        : string,
-    toUserUsername    : string,
+    toUserUsername    : string
   ) : Promise<FriendInvitation> 
   {
     // GET "FROM USER" FROM BDD

@@ -1,5 +1,5 @@
 import { AbstractMesh, Vector3, Matrix } from "@babylonjs/core";
-import { AdvancedDynamicTexture, ScrollViewer, StackPanel, TextBlock, Control, Rectangle, InputText } from "@babylonjs/gui";
+import { AdvancedDynamicTexture, ScrollViewer, StackPanel, TextBlock, Control, Rectangle, InputText, Button } from "@babylonjs/gui";
 
 import {
   Chart,
@@ -11,7 +11,7 @@ import {
   Title,
   Tooltip,
   Legend,
-  Filler
+  Filler,
 } from 'chart.js';
 
 import { Friend } from "../Friend.ts";
@@ -616,7 +616,12 @@ export class FriendUI
     {
         this.displayHeader();
         this.displayAddFriend();
-        this.displayInvitations();
+        this.sceneManager.getUserX.loadFriendInvitations()
+            .then((response) => {
+                console.log("Mes invitations : ", this.sceneManager.getUserX.getFriendInvitations);
+                this.displayInvitations();
+            })
+            .catch((err : any) => console.error(err));
     }
 
     displayInvitations() : void
@@ -644,39 +649,118 @@ export class FriendUI
         else
             this.containerUI.viewPanel.clearControls();
 
+        const line = new StackPanel();
+        line.isVertical = false;
+        line.height = "100%";
+        line.spacing = 10;
+        this.containerUI.viewPanel.addControl(line);
 
-        this.sceneManager.getUserX.loadFriendInvitations()
-            .then((response) => {
-                console.log("Mes invitations : ", this.sceneManager.getUserX.getFriendInvitations);
+        const self = this;
+        function createList(name: string)
+        {
+            if (!self.containerUI.viewPanel)
+                return ;
+
+            const scrollViewer = new ScrollViewer();
+            scrollViewer.width = "450px";
+            scrollViewer.height = "100%";
+            scrollViewer.background = "transparent";
+            scrollViewer.horizontalAlignment = Control.HORIZONTAL_ALIGNMENT_CENTER;
+            scrollViewer.verticalAlignment = Control.VERTICAL_ALIGNMENT_CENTER;
+            scrollViewer.barColor = "white";
+            scrollViewer.thickness = 0;
+            line.addControl(scrollViewer);
+
+            const listContainer = new StackPanel();
+            listContainer.width = "100%";
+            listContainer.isVertical = true;
+            listContainer.spacing = 20;
+            scrollViewer.addControl(listContainer);
+
+            let datas;
+            if (name === "sent")
+                datas = self.sceneManager.getUserX.getFriendInvitations.sent;
+            else if (name === "received")
+                datas = self.sceneManager.getUserX.getFriendInvitations.received;
+
+            if (datas && datas?.length === 0)
+            {
+                const empty = new TextBlock();
+                empty.text = "Aucune invitations";
+                empty.color = "black";
+                empty.fontSize = 40;
+                empty.fontFamily = "Arial";
+                empty.width = "200px";
+                empty.height = "100%";
+                listContainer.addControl(empty);
+            }
+            datas?.forEach((v) => {
+                const lineInvit = new StackPanel();
+                lineInvit.isVertical = false;
+                lineInvit.height = "200px";
+                lineInvit.width = "400px";
+                listContainer.addControl(lineInvit);
+
+                const invitText = new TextBlock();
+                if (name === "sent")
+                    invitText.text = v.toUserUsername;
+                else
+                    invitText.text = v.fromUserUsername;
+                invitText.color = "black";
+                invitText.fontSize = 40;
+                invitText.fontFamily = "Arial";
+                invitText.width = "200px";
+                invitText.height = "100%";
+                lineInvit.addControl(invitText);
+
+                if (name === "sent")
+                {
+                    const button = Button.CreateSimpleButton("cancel", "Annuler");
+                    button.width = "150px";
+                    button.height = "100px";
+                    button.color = "red";
+                    button.cornerRadius = 10;
+                    button.horizontalAlignment = Control.HORIZONTAL_ALIGNMENT_LEFT;
+                    button.verticalAlignment = Control.VERTICAL_ALIGNMENT_TOP;
+                    lineInvit.addControl(button);
+
+                    button.onPointerClickObservable.add(() => {
+                        console.log("Clique clique");
+                    });
+                }
+                else if (name === "received")
+                {
+                    const button = Button.CreateSimpleButton("cancel", "Accepter");
+                    button.width = "75px";
+                    button.height = "50px";
+                    button.color = "green";
+                    button.cornerRadius = 10;
+                    button.horizontalAlignment = Control.HORIZONTAL_ALIGNMENT_LEFT;
+                    button.verticalAlignment = Control.VERTICAL_ALIGNMENT_TOP;
+                    lineInvit.addControl(button);
+
+                    button.onPointerClickObservable.add(() => {
+                        console.log("Clique clique");
+                    });
+
+                    const button2 = Button.CreateSimpleButton("cancel", "Refuser");
+                    button2.width = "75px";
+                    button2.height = "50px";
+                    button2.color = "red";
+                    button2.cornerRadius = 10;
+                    button2.horizontalAlignment = Control.HORIZONTAL_ALIGNMENT_LEFT;
+                    button2.verticalAlignment = Control.VERTICAL_ALIGNMENT_TOP;
+                    lineInvit.addControl(button2);
+
+                    button2.onPointerClickObservable.add(() => {
+                        console.log("Clique2 clique2");
+                    });
+                }
             })
-            .catch((err : any) => console.error(err));
+        };
 
-        // const line = new StackPanel();
-        // line.isVertical = false;
-        // line.height = "100%";
-        // line.spacing = 10;
-
-        // const self = this;
-        // function createList(name: string)
-        // {
-        //     if (!self.containerUI.viewPanel)
-        //         return ;
-        //     const scrollViewer = new ScrollViewer();
-        //     scrollViewer.width = "450px";
-        //     scrollViewer.height = "100%";
-        //     scrollViewer.background = "transparent";
-        //     scrollViewer.horizontalAlignment = Control.HORIZONTAL_ALIGNMENT_CENTER;
-        //     scrollViewer.verticalAlignment = Control.VERTICAL_ALIGNMENT_CENTER;
-        //     scrollViewer.barColor = "white";
-        //     scrollViewer.thickness = 0;
-        //     self.containerUI.viewPanel.addControl(scrollViewer);
-
-        //     const listContainer = new StackPanel();
-        //     listContainer.width = "100%";
-        //     listContainer.isVertical = true;
-        //     listContainer.spacing = 20;
-        //     scrollViewer.addControl(listContainer);
-        // }
+        createList("sent");
+        createList("received");
     }
 
     displayAddFriend() : void

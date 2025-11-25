@@ -29,9 +29,17 @@ interface User
     avatarUrl: string
 }
 
+interface Invitations
+{
+    sent: FriendInvitation[];
+    received: FriendInvitation[];
+}
+
 interface FriendInvitation
 {
-    login: string;
+    fromUserUsername: string;
+    toUserUsername: string;
+    createdAt: Date;    
     status: "PENDING" | "ACCEPTED" | "DECLINED" | "BLOCKED";
 }
 
@@ -46,7 +54,7 @@ export class UserX
     private currentZone: ZoneName | null = null;
 
     private friends : Friend[] = [];
-    private friendInvitations : FriendInvitation[] = [];
+    private friendInvitations : Invitations = {sent: [],received: []};
 
     private sceneManager : SceneManager;
     private user: User | null = null;
@@ -90,7 +98,7 @@ export class UserX
         const result = await listInvitations();
         if (result.success)
         {
-            this.friendInvitations = result.data;
+            this.friendInvitations = result.data.data;
             return ({success: true, message: "Invitations chargees"});
         }
         else 
@@ -203,7 +211,7 @@ export class UserX
         this.tournament = null;
     }
 
-    get getFriendInvitations() : FriendInvitation[]
+    get getFriendInvitations() : Invitations
     {
         return (this.friendInvitations);
     }

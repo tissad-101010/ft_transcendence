@@ -6,7 +6,7 @@
 /*   By: glions <glions@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/16 19:00:31 by tissad            #+#    #+#             */
-/*   Updated: 2025/11/25 12:55:08 by glions           ###   ########.fr       */
+/*   Updated: 2025/11/25 16:33:28 by glions           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,23 +45,22 @@ export async function listInvitationsController(
 {
   try {
     // CHECK TOKEN //
-    const token = await verifyToken(request.cookies["access_token"]!);
-    if (!token)
-     return (sendErrorToken(reply));
-    // CALL F //
-    const service = new FriendsService(request.server);
-    const { received, sent } = await service.listInvitations(token.id);
+    const token               = await verifyToken(request.cookies["access_token"]!);
+    if (!token) throw new AuthError();
+    // CALL SERVICE //
+    const service             = new FriendsService(request.server);
+    const { received, sent }  = await service.listInvitations(token.data.id);
     // SORT RESULTS //
-    const data = [
-      ...sent.filter(inv => inv.status === "PENDING").map(inv => inv.toUserUsername),
-      ...received.filter(inv => inv.status === "PENDING").map(inv => inv.fromUserUsername)
-    ]
+    const data = {
+      sent: sent,
+      received: received
+    }
     // SUCCESS //
     return reply.code(200).send({ success: true, data });
   } catch (err: unknown) {
     // ERRORS //
     console.error('/!\\ LIST INVITATION CONTROLLER ERROR /!\\', err);
-    return reply.code(500).send({ success: false, message: 'Internal server error' });
+    return (handleError(reply, err));
   }
 }
 
