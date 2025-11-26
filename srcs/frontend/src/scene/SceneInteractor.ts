@@ -15,6 +15,7 @@ import { ZoneName } from "../config.ts";
 import { LockerInteraction } from '../lockerRoom/LockerInteraction.ts';
 import { PoolInteraction } from '../pool/PoolInteraction.ts';
 import { StandsInteraction } from '../field/StandsInteraction.ts';
+import { addCameraMove } from '../CameraHistory.ts';
 
 
 export class SceneInteractor {
@@ -86,8 +87,12 @@ export class SceneInteractor {
     public handleMainZoneClick(pickedMesh: AbstractMesh, isClick: boolean) : void {
         // console.log("entree dans handlemainzoneclick de sceneinteractr");
         if (this.currSpecificInteraction) {
+            console.log("----> currspecific est existant");
             this.currSpecificInteraction.dispose();
             this.currSpecificInteraction = null;
+        }
+        else{
+            console.log("----> currspecific est PAS existant");
         }
         this.highlightLayer.removeAllMeshes();
         if (this.lastHoveredMesh && this.lastHoveredMesh !== pickedMesh)
@@ -99,7 +104,8 @@ export class SceneInteractor {
         const zoneName = pickedMesh.name as ZoneName;
         if (Object.values(ZoneName).includes(zoneName)) {
             this.disableInteractions(); //desactiver clic/survol avant le mouvement
-            this.sceneManager.moveCameraTo(zoneName, () => {
+            addCameraMove(this.sceneManager, zoneName, () => {
+                console.log("addmove: ajout stands creation instance")
                 this.enableInteractions(); //reactiver clic/survol
                 switch (zoneName) {
                     case ZoneName.POOL:

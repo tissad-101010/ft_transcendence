@@ -376,31 +376,6 @@ private resetInteractions(): void {
         onArrived?: () => void
     ) 
     {
-            // 🔹 Vérifie si le zoneName est valide avant de sauvegarder
-        const validZoneNames = this.getAllZoneMeshes().map(mesh => mesh.name);
-        if (validZoneNames.includes(zoneName)) {
-        console.log(this.cameraHistory);
-            if (!this.isReturning){
-                this.cameraHistory.push({
-                    position: this.freeCamera.position.clone(),
-                    rotation: this.freeCamera.rotation.clone(),
-                    zone: zoneName
-                });
-                // Limite du tableau
-                const MAX_HISTORY = 50;
-                if (this.cameraHistory.length > MAX_HISTORY) this.cameraHistory.shift();
-            }
-            
-                // **Ajouter une entrée dans l’historique navigateur**
-            window.history.pushState({ zone: zoneName }, "", window.location.pathname);
-        }
-
-
-
-
-        //  if (zoneName === ZoneName.POOL || zoneName === ZoneName.SCREEN_TV ||
-        //     zoneName === ZoneName.SCOREBOARD || zoneName.includes(ZoneName.TSHIRT))
-        //     this.limitCameraRotation = false;
         const config = CAMERA_CONFIGS[zoneName];
         if (!config) return;
 
