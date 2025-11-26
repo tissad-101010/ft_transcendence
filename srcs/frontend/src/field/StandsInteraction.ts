@@ -106,7 +106,7 @@ export class StandsInteraction implements SpecificInteraction {
                 this.sceneManager,
                 this.sceneManager.getUserX
             );
-    });
+    }, this.sceneInteractor);
 }
 
 
@@ -135,7 +135,7 @@ export class StandsInteraction implements SpecificInteraction {
             }
             else
                 this.friendUI.update(null);
-        });
+        }, this.sceneInteractor);
     }
 
 
@@ -251,7 +251,7 @@ export class StandsInteraction implements SpecificInteraction {
                                 this.clicArbitrator = false;
                             }
                             this.sceneInteractor.enableInteractions();
-                        });
+                        }, this.sceneInteractor);
                 }
             }
         } else {

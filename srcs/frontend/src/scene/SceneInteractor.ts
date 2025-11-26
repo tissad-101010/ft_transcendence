@@ -83,6 +83,13 @@ export class SceneInteractor {
         }
     }
 
+    public disposeCurrInteraction() : void {
+        if (this.currSpecificInteraction) {
+            console.log("----> currspecific est existant");
+            this.currSpecificInteraction.dispose();
+            this.currSpecificInteraction = null;
+        }
+    }
 
     public handleMainZoneClick(pickedMesh: AbstractMesh, isClick: boolean) : void {
         // console.log("entree dans handlemainzoneclick de sceneinteractr");
@@ -131,7 +138,8 @@ export class SceneInteractor {
                     default:
                         this.currSpecificInteraction = null;
                 }
-            });
+            }, this);
+            
         }
     }
 
