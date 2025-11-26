@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   auth.controllers.ts                                :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
+/*   By: issad <issad@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/27 11:44:30 by tissad            #+#    #+#             */
-/*   Updated: 2025/11/26 19:43:01 by tissad           ###   ########.fr       */
+/*   Updated: 2025/11/26 22:11:50 by issad            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -350,7 +350,7 @@ export async function uploadAvatarController(
             return reply.code(400).send({ message: 'No avatar file provided', uploadComplete: false });
         }
         // save file to uploads/avatars directory
-        const uploadDir = path.join(process.cwd(), 'uploads', 'avatars');
+        const uploadDir = '/usr/share/nginx/html/uploads/avatars';
         console.log('[Upload Avatar Controller] Upload directory:', uploadDir);
         await fs.mkdir(uploadDir, { recursive: true });
         // new unique file name to avoid conflicts
