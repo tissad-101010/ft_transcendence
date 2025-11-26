@@ -27,6 +27,7 @@ model FriendInvitation {
   toUserUsername String
   status String @default("PENDING")
   createdAt DateTime @default(now())
+  responsedAt DateTime?
 
   @@unique([fromUserId, toUserId])
 }

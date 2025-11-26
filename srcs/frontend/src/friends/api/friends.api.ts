@@ -1,3 +1,4 @@
+import { FriendInvitation } from "../FriendInvitation";
 
 
 export interface PromiseUpdateResponse
@@ -6,15 +7,29 @@ export interface PromiseUpdateResponse
     message: string;
 }
 
-export enum paramUpdate
+
+interface infoFriend
+{
+  avatarUrl: string;
+  lastLogin: Date;
+}
+
+export interface PromiseGetInfoFriendResponse
+{
+  success: boolean;
+  message?: string;
+  data?: infoFriend;
+}
+
+export enum statusInvitation
 {
     ACCEPTED,
     DECLINED,
-    BLOCKED
+    BLOCKED,
+    PENDING
 }
 
-const friendsServiceUrl = "https://localhost:8443";
-
+const serviceUrl = "https://localhost:8443";
 
 type ReponseFetch = {
   sucess: boolean;
@@ -23,30 +38,53 @@ type ReponseFetch = {
   status: number;
 }
 
-export async function updateInvitation(param: paramUpdate) : Promise<PromiseUpdateResponse>
+export async function getInfoFriend(username: string): Promise<PromiseGetInfoFriendResponse>
+{
+  try
+  {
+    const call = await fetch(`${serviceUrl}/api/infoFriend?username=${username}`, {
+      method: "GET",
+      credentials: "include"
+    });
+    const response = await call.json();
+    if (response.success)
+      return ({success: true, data: response.data});
+    else
+      return ({success: false, message: response.message || "Server error"});
+  } catch (err: any)
+  {
+    console.error("Error get info user", err);
+    return ({success: false, message: "An error occurred during getInfoFriend"});
+  }
+}
+
+export async function updateInvitation(param: statusInvitation, invitation: FriendInvitation) : Promise<PromiseUpdateResponse>
 {
   try
   {
     let mode: string = "";
     switch (param)
     {
-      case paramUpdate.ACCEPTED:
+      case statusInvitation.ACCEPTED:
         mode = "/accept";
         break;
-      case paramUpdate.BLOCKED:
+      case statusInvitation.BLOCKED:
         mode = "/blocked";
         break;
-      case paramUpdate.DECLINED:
+      case statusInvitation.DECLINED:
         mode = "/decline";
         break;
     }
-    const call = await fetch(`${friendsServiceUrl}/invite${mode}`, {
+    const call = await fetch(`${serviceUrl}/invite${mode}`, {
       method: "POST",
       credentials: "include",
       headers: {
         "Content-Type": "application/json"
       },
-      body: JSON.stringify({??????????})
+      body: JSON.stringify({
+        user1: invitation.getUsernames[0],
+        user2: invitation.getUsernames[1]
+      })
     });
     const response = await call.json();
     if (response.success)
@@ -64,7 +102,7 @@ export async function listInvitations() : Promise<{success:boolean; message?: st
 {
   try 
   {
-    const response = await fetch(`${friendsServiceUrl}/friend/invitations`, {
+    const response = await fetch(`${serviceUrl}/friend/invitations`, {
       method: "GET",
       credentials: "include"
     });
@@ -86,7 +124,7 @@ export async function sendFriendInvitation(
 {
   try 
   {
-    const call : any = await fetch(`${friendsServiceUrl}/friend/invite`, {
+    const call : any = await fetch(`${serviceUrl}/friend/invite`, {
       method: "POST",
       credentials: "include",
       headers: {

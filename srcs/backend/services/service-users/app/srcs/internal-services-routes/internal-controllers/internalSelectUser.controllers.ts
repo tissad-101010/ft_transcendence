@@ -6,7 +6,7 @@
 /*   By: glions <glions@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/22 01:25:24 by glions            #+#    #+#             */
-/*   Updated: 2025/11/26 11:46:11 by glions           ###   ########.fr       */
+/*   Updated: 2025/11/26 17:02:23 by glions           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,16 +40,16 @@ async function byUsername(name: string, service: UsersService, reply: FastifyRep
             lastLogin: response.lastLogin,
             avatarUrl: response.avatarUrl,
             createdAt: response.createdAt
-        };  
-        // SUCCESS
+        };
+        // SUCCESS //
         return (reply.code(200).send({success: true, data: data}));
     } catch (error: unknown)
     {
         console.error('/!\\ INTERNAL SELECT USER USERNAME ERROR /!\\', error);
-        // USER NOT FOUND
+        // USER NOT FOUND //
         if (error instanceof UserNotFoundError)
             return (reply.code(404).send({success: false, message: error.message}));
-        // DATABASE ERROR
+        // DATABASE ERROR //
         if (error instanceof DataBaseConnectionError)
             return (reply.code(503).send({success: false, message: "Database temporarily unavailable"}));
         // OTHER ERROR //

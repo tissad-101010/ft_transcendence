@@ -6,7 +6,7 @@
 /*   By: glions <glions@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/27 11:51:29 by tissad            #+#    #+#             */
-/*   Updated: 2025/11/24 17:25:24 by glions           ###   ########.fr       */
+/*   Updated: 2025/11/26 17:00:49 by glions           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,21 @@
 import { create } from "domain";
 import { OAuthProvider, OAuthProviderType } from "../../types/user.types";
 import { DataBaseConnectionError, UserNotFoundError } from "../../errors/users.error";
+
+
+async function safePrisma<T>(fn: () => Promise<T>) : Promise<T>
+{
+  try
+  {
+    return await fn();
+  } catch (err: any)
+  {
+    if (err.code === "P1001" || err.code === "P1002")
+      throw new DataBaseConnectionError();
+    throw err;
+  }
+}
+
 /***********************************/
 /*       Users Service Class       */
 /***********************************/
@@ -193,5 +208,24 @@ export class UsersService {
         },
       });
       return userWith2FA?.twoFactorMethods || [];
+    }
+
+    /**********************************************************/
+    /*                       INFO FRIEND                      */
+    /**********************************************************/
+    
+    async getInfoFriendService(
+      username: string
+    ): Promise<{lastLogin: Date, avatarUrl: string}>
+    {
+      return (await safePrisma(() =>
+        this.prismaClient.user.findUnique({
+          where: { username: username },
+          select: {
+            lastLogin: true,
+            avatarUrl: true
+          }
+        })
+      ));
     }
 }

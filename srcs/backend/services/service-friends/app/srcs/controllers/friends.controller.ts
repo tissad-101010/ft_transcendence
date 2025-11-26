@@ -6,7 +6,7 @@
 /*   By: glions <glions@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/16 19:00:31 by tissad            #+#    #+#             */
-/*   Updated: 2025/11/26 12:53:35 by glions           ###   ########.fr       */
+/*   Updated: 2025/11/26 18:35:04 by glions           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,7 @@ import { FriendsService } from "../services/friends.service";
 // MODELS
 import {
   UserInfo,
-  FriendInvitation
+  invitationFriend
 } from "../types/friends.type";
 
 // GET USER FROM USER-SERVICE
@@ -91,7 +91,7 @@ export async function sendInviteController(
 }
 
 export async function acceptInviteController(
-  request: FastifyRequest<{ Params: { user1: string, user2: string } }>,
+  request: FastifyRequest<{ Body: { user1: string, user2: string } }>,
   reply: FastifyReply
 )
 {

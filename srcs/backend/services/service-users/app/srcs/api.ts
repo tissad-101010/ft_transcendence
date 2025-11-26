@@ -6,7 +6,7 @@
 /*   By: glions <glions@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/23 15:58:35 by tissad            #+#    #+#             */
-/*   Updated: 2025/11/22 20:23:11 by glions           ###   ########.fr       */
+/*   Updated: 2025/11/26 17:05:23 by glions           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,6 +35,7 @@ import { internalSelectUserRoutes } from './internal-services-routes/internal-ro
 // import plugins
 import redisPlugin from './plugins/redis.plugin';
 import { prismaPlugin } from './plugins/prisma.plugin';
+import { infoFriendRoute } from './modules/users/users.routes';
 
 
 
@@ -63,6 +64,8 @@ app.register(signoutRoutes, { prefix: '/user/auth' });
 // Register internals routes
 app.register(internalVerifyTokenRoutes, { prefix: '/internal' });
 app.register(internalSelectUserRoutes, { prefix: '/internalUser'});
+
+app.register(infoFriendRoute, { prefix: '/infoFriend'});
 
 // app.register(TwoFactorAuth, { prefix: '/two-factor' });
 // app.register(githubRoutes, { prefix: '/auth' });

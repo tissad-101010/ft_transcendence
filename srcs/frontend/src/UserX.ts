@@ -9,12 +9,15 @@ import { Match, MatchRules } from "./Match.ts";
 
 import { SceneManager } from './scene/SceneManager.ts';
 
-import { Friend } from './Friend.ts';
 import { MatchFriendlyOnline } from './Match/MatchFriendlyOnLine.ts';
 
 import { Env } from './lockerRoom/scoreboardUI/menuCreate.ts';
 
 import { listInvitations, sendFriendInvitation } from './friends/api/friends.api.ts';
+
+import { FriendManager } from './friends/FriendsManager.ts';
+import { Friend } from './friends/Friend.ts';
+import { FriendInvitation } from './friends/FriendInvitation.ts';
 
 interface User
 {
@@ -29,20 +32,6 @@ interface User
     avatarUrl: string
 }
 
-interface Invitations
-{
-    sent: FriendInvitation[];
-    received: FriendInvitation[];
-}
-
-interface FriendInvitation
-{
-    fromUserUsername: string;
-    toUserUsername: string;
-    createdAt: Date;    
-    status: "PENDING" | "ACCEPTED" | "DECLINED" | "BLOCKED";
-}
-
 /*
     Classe permettant de gérer les actions de l'utilisateur, lieu où seront stockées les données
 */
@@ -53,56 +42,23 @@ export class UserX
     private tournament: Tournament | null = null;
     private currentZone: ZoneName | null = null;
 
-    private friends : Friend[] = [];
-    private friendInvitations : Invitations = {sent: [],received: []};
-
     private sceneManager : SceneManager;
     private user: User | null = null;
+
+    private friendManager: FriendManager;
 
     constructor(sceneManager : SceneManager)
     {
         this.sceneManager = sceneManager;
+        this.friendManager = new FriendManager(this);
     }
 
 
     async sendFriendInvite(
         username: string
-    ) : Promise<{success: boolean, data?: any, message?: string}>
+    ) : Promise<boolean>
     {
-        const res = await sendFriendInvitation(username);
-        if (res.success)
-        {
-            // this.friendInvitations.push(res.data);
-            return ({success: true, message: "Invitation envoyée"});
-        }
-        return ({success: false, message: res.message || "Erreur"});
-    }
-
-    /* Juste garder le parametre login une fois le backend ajoute*/
-    public addFriend(
-        login: string,
-    ) : number
-    {
-        const test = this.friends.find((f) => f.getLogin === login)
-        if (test !== undefined)
-        {
-            console.log("Amis deja ajoute -> " + login);
-            return (1);
-        }
-        this.friends.push(new Friend(1, login, true));
-        return (0);
-    }
-
-    async loadFriendInvitations() : Promise<{success: boolean, message: string}>
-    {
-        const result = await listInvitations();
-        if (result.success)
-        {
-            this.friendInvitations = result.data.data;
-            return ({success: true, message: "Invitations chargees"});
-        }
-        else 
-            return ({success: false, message: result.message || "Erreur"});
+        return (this.friendManager.sendInvitation());
     }
 
     createTournament(a: string) : boolean
@@ -191,17 +147,6 @@ export class UserX
         return (true);
     }
 
-    
-    deleteFriend(
-        f: Friend
-    ) : void
-    {
-        this.friends.splice(this.friends.findIndex(
-            (e) => e.getId === f.getId),
-            1
-        );
-    }
-
     deleteTournament() : void
     {
         /*
@@ -209,11 +154,6 @@ export class UserX
             les arrêter avant de mettre à NULL
         */
         this.tournament = null;
-    }
-
-    get getFriendInvitations() : Invitations
-    {
-        return (this.friendInvitations);
     }
 
     get getMatch() : Match | null
@@ -228,7 +168,7 @@ export class UserX
 
     get getFriends() : Friend[]
     {
-        return (this.friends);
+        return (this.friendManager.getFriends);
     }
 
     get getCurrentZone() : ZoneName | null
@@ -267,6 +207,7 @@ export class UserX
     )
     {
         this.user = user;
+        this.friendManager.loadData();
         console.log("user vaut mtn", this.user);
     }
 }
