@@ -6,7 +6,7 @@
 /*   By: glions <glions@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/16 18:54:11 by tissad            #+#    #+#             */
-/*   Updated: 2025/11/25 16:29:34 by glions           ###   ########.fr       */
+/*   Updated: 2025/11/26 12:56:36 by glions           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -118,13 +118,21 @@ export class FriendsService {
   }
 
   async acceptInvitation(
-    id: number
+    user1: string,
+    user2: string
   ) : Promise<FriendInvitation> 
   {
-    return this.prismaClient.friendInvitation.update({
-      where: { id },
-      data: { status: "ACCEPTED" },
-    });
+    return (await safePrisma(() =>
+      this.prismaClient.friendInvitation.update({
+        where: {  
+          OR: [
+            { fromUserUsername: user1, toUserUsername: user2 },
+            { fromUserUsername: user2, toUserUsername: user1 },
+          ]
+        },
+        data: { status: "ACCEPTED" },
+      })
+    ));
   }
 
   async declineInvitation(

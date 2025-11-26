@@ -6,7 +6,7 @@
 /*   By: glions <glions@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/16 19:00:31 by tissad            #+#    #+#             */
-/*   Updated: 2025/11/25 16:33:28 by glions           ###   ########.fr       */
+/*   Updated: 2025/11/26 12:53:35 by glions           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -91,17 +91,26 @@ export async function sendInviteController(
 }
 
 export async function acceptInviteController(
-  request: FastifyRequest<{ Params: { id: string } }>,
+  request: FastifyRequest<{ Params: { user1: string, user2: string } }>,
   reply: FastifyReply
 )
 {
   try {
+    // CHECK TOCKEN //
+    const token = await verifyToken(request.cookies["access_token"]!);
+    if (!token) throw new AuthError();
+    // VERIF PARAMS
+    const {user1, user2} = request.body;
+    if (!user1 || !user2) 
+      return (reply.code(400).send({success: false, message: "Paramètres invalides"}))
     const service = new FriendsService(request.server);
-    const updated = await service.acceptInvitation(Number(request.params.id));
-    return reply.send({ success: true, data: updated });
-  } catch (err: any) {
-    console.error(err);
-    return reply.status(400).send({ success: false, message: err.message });
+    const response = await service.acceptInvitation(user1, user2);
+    // SUCCESS
+    return (reply.code(200).send({success: true, message: "Invitation acceptee"}));
+  } catch (err: any)
+  {
+    console.error("/!\\ ACCEPT INVITE CONTROLLER ERROR /!\\");
+    return (handleError(reply, err));
   }
 }
 

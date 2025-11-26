@@ -1,4 +1,18 @@
 
+
+export interface PromiseUpdateResponse
+{
+    success: boolean;
+    message: string;
+}
+
+export enum paramUpdate
+{
+    ACCEPTED,
+    DECLINED,
+    BLOCKED
+}
+
 const friendsServiceUrl = "https://localhost:8443";
 
 
@@ -7,6 +21,43 @@ type ReponseFetch = {
   message?: string;
   data?: any;
   status: number;
+}
+
+export async function updateInvitation(param: paramUpdate) : Promise<PromiseUpdateResponse>
+{
+  try
+  {
+    let mode: string = "";
+    switch (param)
+    {
+      case paramUpdate.ACCEPTED:
+        mode = "/accept";
+        break;
+      case paramUpdate.BLOCKED:
+        mode = "/blocked";
+        break;
+      case paramUpdate.DECLINED:
+        mode = "/decline";
+        break;
+    }
+    const call = await fetch(`${friendsServiceUrl}/invite${mode}`, {
+      method: "POST",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({??????????})
+    });
+    const response = await call.json();
+    if (response.success)
+      return ({success: true, message: "Demande prise en compte"});
+    else
+      return ({success: false, message: response.message || "Server error"});
+  } catch (err: any)
+  {
+    console.error('Error update friend invitation', err);
+    return ({success: false, message: 'Network or unexpected error'});
+  }
 }
 
 export async function listInvitations() : Promise<{success:boolean; message?: string; data?: any}>

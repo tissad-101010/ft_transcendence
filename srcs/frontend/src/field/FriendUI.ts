@@ -725,6 +725,7 @@ export class FriendUI
                     lineInvit.addControl(button);
 
                     button.onPointerClickObservable.add(() => {
+                        
                         console.log("Clique clique");
                     });
                 }
