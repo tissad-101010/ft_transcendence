@@ -1,11 +1,13 @@
 // function that logout user from the application
 import { logoutUser } from "../auth/controllers/signout.ts";
+import { changePassword } from "../auth/controllers/auth.api.ts";
 import {    sendEnableEmailOtp,
             enable2faEmail,
             disable2faEmail,
             getTotpSecret,
             enableTotp,
-            disableTotp
+            disableTotp,
+            getTwoFactorMethods
         } from "../auth/controllers/twoFactor.api.ts";
 
 import { ZoneName } from "../config.ts";
@@ -266,8 +268,8 @@ export class MyProfilUI
                 if (!code) return infoMsg1.text = "Le champ est vide !";
                 if (code.length !== 6) return infoMsg1.text = "Code invalide !";
                 const res = await enableTotp(code);
-                if (!res) return infoMsg1.text = "Échec de l'activation de 2FA App !";
                 this.flag = true;
+                if (!res) return infoMsg1.text = "Échec de l'activation de 2FA App !";
                 // this.enable2faApp = true;
                 this.displayMenu();
             }
@@ -287,7 +289,7 @@ export class MyProfilUI
         panelPwd.paddingTop = "60px";
         panelPwd.paddingLeft = "20px";
         panelPwd.paddingRight = "20px";
-        panelPwd.spacing = 20;
+        panelPwd.spacing = 10;
         this.panel.addControl(panelPwd);
 
         const { textBlock: infoMsg } = createMsgInfo({
@@ -297,11 +299,17 @@ export class MyProfilUI
             fontSize: 26,
             color: TEXT_BRIGHT
         });
+        const { textBlock: title } = createMsgInfo({
+            parent: panelPwd,
+            text: "Changer le mot de passe 🔒" ,
+            height: "50px",
+            fontSize: 20,
+            color: TEXT_BRIGHT,
 
+        });
         const getOldPwd = createInputFieldPwd("Ancien mot de passe", panelPwd);
         const getNewPwd = createInputFieldPwd("Nouveau mot de passe", panelPwd);
         const getConfirmPwd = createInputFieldPwd("Confirmation", panelPwd);
-
         const changePwdBtn = createButton({
             id: "changePwd",
             txt: "✔",
@@ -319,8 +327,18 @@ export class MyProfilUI
                     return infoMsg.text = "Champs vides";
                 if (newPwd !== confirmPwd)
                     return infoMsg.text = "Les mots de passe ne correspondent pas";
-                this.flag = false;
+                changePassword(oldPwd, newPwd).then((res) => {
+                    if (res.success) {
+                        title.text = "Mot de passe changé avec succès ! ✅";
+                        infoMsg.text = "";
+                    } else {
+                        title.text = "Échec du changement de mot de passe ❌";
+                        infoMsg.text = res.message || "Erreur inconnue";
+                    }
+                });
+                this.flag = true;
                 this.displayMenu();
+
             }
         });
         panelPwd.addControl(changePwdBtn);
@@ -329,7 +347,7 @@ export class MyProfilUI
     // =============================================================
     //  CAT 3 (SECURITY)
     // =============================================================
-    private displayMainCat3() : void {
+    private async displayMainCat3() : Promise<void> {
         const rightPanel = new StackPanel();
         rightPanel.isVertical = true;
         rightPanel.width = "370px";
@@ -365,9 +383,27 @@ export class MyProfilUI
         rightPanel.addControl(changePwdBtn);
 
         // change this with 2fa user methods request/!\
-        this.enable2faApp = !!this.userX.getUser?.twoFactorMethods?.some(
-            (method) => method.type === "TOTP" && method.enabled
-        );
+         //get 2fa methods from request
+        const methods = await getTwoFactorMethods();
+        console.log("User 2FA methods:", methods);
+        if (!methods){
+            console.error("No 2FA methods found for user.");
+            this.enable2faApp = false;
+            this.enable2faMail = false;
+        }else{
+            for (const method of methods) {
+                if (method.type === "TOTP" && method.enabled) {
+                    console.log("TOTP 2FA is enabled for user.");
+                    this.enable2faApp = true;
+                }
+                if (method.type === "EMAIL" && method.enabled) {     
+                    console.log("Email 2FA is enabled for user."); 
+                    this.enable2faMail = true;
+                }
+            }  
+        }
+
+
         console.log("App 2FA enabled state:", this.enable2faApp);
 
         const enable2faBtn = create2faButton({
@@ -388,6 +424,7 @@ export class MyProfilUI
                         this.flag = true;
                         this.mainInterfaceStruct();
                         this.enable2FaAppInterface(data.qrCodeUrl);
+                        
                     } else {
                         console.error("Failed to fetch TOTP secret.");
                     }
@@ -403,11 +440,9 @@ export class MyProfilUI
         rightPanel.addControl(enable2faBtn);
 
         // initialize email 2FA state from user methods
-        const email2faEnabled = !!this.userX.getUser?.twoFactorMethods?.some(
-            (method) => method.type === "EMAIL" && method.enabled
-        );
-        this.enable2faMail = email2faEnabled;
-        console.log("Email 2FA enabled state:", this.enable2faMail);
+        if (!this.userX.getUser) return;
+      
+    
 
         const enable2faMailBtn = create2faButton({
             id: "enable2FAMail",
@@ -423,8 +458,6 @@ export class MyProfilUI
                 this.enable2faMail = true;
                 this.mainInterfaceStruct();
                 this.enable2FaMailInterface();
-
-                
             },
             onDeactivate: async () => {
                 console.log("Disabling 2FA email...");

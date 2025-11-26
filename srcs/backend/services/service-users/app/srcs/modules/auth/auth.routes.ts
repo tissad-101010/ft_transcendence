@@ -6,7 +6,7 @@
 /*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/27 12:12:38 by tissad            #+#    #+#             */
-/*   Updated: 2025/11/18 19:28:22 by tissad           ###   ########.fr       */
+/*   Updated: 2025/11/26 12:12:49 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,8 @@ import {  FastifyInstance } from 'fastify';
 import {    signupController,
             signinController,
             getProfileController,
-            refreshTokenController
+            refreshTokenController,
+            changePasswordController
         } from './auth.controllers';
 import {    SignupUserDTO,
             LoginUserDTO,
@@ -38,4 +39,6 @@ export async function userRoutes(server: FastifyInstance)
 {
     // Define user-related routes here
     server.get('/profile', getProfileController);//pre-handler to verify token is valid aythentication middleware is called before the controller
+    // change password
+    server.post('/change-password', changePasswordController);
 }

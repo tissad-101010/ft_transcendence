@@ -6,7 +6,7 @@
 /*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/27 11:51:29 by tissad            #+#    #+#             */
-/*   Updated: 2025/11/25 14:40:38 by tissad           ###   ########.fr       */
+/*   Updated: 2025/11/26 12:08:46 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -169,4 +169,14 @@ export class UsersService {
         },
       });
     }
+
+  /**********************************************************/
+  /*               update user password method              */
+  /**********************************************************/
+  async updateUserPassword(userId: string, newHashedPassword: string) {
+    return this.prismaClient.user.update({
+      where: { id: userId },
+      data: { passwordHash: newHashedPassword },
+    });
+  }
 }

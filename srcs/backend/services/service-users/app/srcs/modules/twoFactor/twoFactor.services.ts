@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   twoFactor.services.ts                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: issad <issad@student.42.fr>                +#+  +:+       +#+        */
+/*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/27 11:48:41 by tissad            #+#    #+#             */
-/*   Updated: 2025/11/25 22:11:22 by issad            ###   ########.fr       */
+/*   Updated: 2025/11/26 11:05:51 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,10 @@ import QRCode from "qrcode";
 import { UsersService } from "../users/users.services";
 import { TwoFactorType } from "../../prisma/prisma/generated/client/enums";
 
-
+interface twoFactorMethods {
+  type: TwoFactorType;
+  enabled: boolean;
+}
 
 export class TwoFactorAuthService {
   private redisClient:any;
@@ -196,6 +199,12 @@ export class TwoFactorAuthService {
       console.error("❌ [2fa.service.ts] Error verifying TFA token for user ID:", userId, error);
       return false;
     }
+  }
+  
+  // get 2FA status
+  async getTwoFactorAuthMethods(userId: string): Promise<twoFactorMethods[]> {
+    const methods = await this.usersService.getUserTwoFactorMethods(userId);
+    return methods.map((m) => ({ type: m.type, enabled: true }) );
   }
 }
 

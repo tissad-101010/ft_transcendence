@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   twoFactor.controllers.ts                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: issad <issad@student.42.fr>                +#+  +:+       +#+        */
+/*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/27 11:48:33 by tissad            #+#    #+#             */
-/*   Updated: 2025/11/25 21:19:46 by issad            ###   ########.fr       */
+/*   Updated: 2025/11/26 11:51:55 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -362,11 +362,34 @@ export class TwoFactorAuthController {
         if (!isValid) {
           return reply.status(400).send({ message: "Invalid TFA token ❌" });
         } else {
-          return reply.send({ message: "TFA token verified successfully ✅" });
+          return reply.code(200).send({ success:true,  message: "TFA token verified successfully ✅" });
         }
       } catch (error: any) {
         console.error("❌ [2fa.controller.ts] Error verifying TFA token for user ID:", userId, error);
         return reply.status(500).send({ message: "Error verifying two-factor authentication token ❌" });
       }
+  };
+  getTwoFactorAuthMethodsController = async (
+    req: FastifyRequest,
+    reply: FastifyReply
+  ) => {
+    // accessToken user id and email extraction from request
+    const cookies = JwtUtils.extractCookiesFromRequest(req);
+    const accessToken = JwtUtils.extractTokenFromCookies(cookies, 'access_token');
+    const user = JwtUtils.extractUserFromAccessToken(accessToken);
+    if (accessToken === null || user === null) {
+      console.error("❌ [2fa.controller.ts] User not found");
+      return reply.status(401).send({ message: "Unauthorized ❌" });
+    }
+    const userId  = user.userId;
+    console.log("[2fa.controller.ts] Getting TFA methods for user ID:", userId);
+    try {
+      const methods = await this.twoFactorAuthService.getTwoFactorAuthMethods(userId);
+      console.log("✅ [2fa.controller.ts] TFA methods retrieved successfully for user ID:", userId);
+      return reply.send({ methods });
+    } catch (error: any) {
+      console.error("❌ [2fa.controller.ts] Error getting TFA methods for user ID:", userId, error);
+      return reply.status(500).send({ message: "Error getting two-factor authentication methods ❌" });
+    }
   };
 }

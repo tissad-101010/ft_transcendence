@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   twoFactor.api.ts                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: issad <issad@student.42.fr>                +#+  +:+       +#+        */
+/*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/22 12:58:29 by issad             #+#    #+#             */
-/*   Updated: 2025/11/25 21:21:09 by issad            ###   ########.fr       */
+/*   Updated: 2025/11/26 12:13:42 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -198,3 +198,29 @@ export async function verifyTotp(code: string): Promise<boolean> {
     return false;
   }
 }
+
+// get 2fa methods
+interface TwoFactorMethod {
+  type: string;
+  enabled: boolean;
+}
+
+export async function getTwoFactorMethods(): Promise<TwoFactorMethod[] | null> {
+  try {
+    const requestOptions: RequestInit = {
+      method: "GET",
+      credentials: "include",
+    };
+    const res = await authFetch(`${BASE_URL}/methods`, requestOptions);
+    if (!res.ok) {
+      console.error("Failed to get 2FA methods:", res.statusText);
+      return null;
+    }
+    const data = await res.json();
+    return data.methods as TwoFactorMethod[];
+  } catch (err) {
+    console.error("Error getting 2FA methods:", err);
+    return null;
+  } 
+}
+

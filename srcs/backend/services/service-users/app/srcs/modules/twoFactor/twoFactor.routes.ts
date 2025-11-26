@@ -53,4 +53,9 @@ export  async function TwoFactorAuth(fastify: FastifyInstance) {
   fastify.post("/totp-verify", twoFactorAuthController.verifyTwoFactorTotpController);
   // Disable TFA by TOTP
   fastify.post("/totp-disable", twoFactorAuthController.disableTwoFactorTotpController);
+  /******************************************************************************/
+  // get 2FA status
+  fastify.get("/methods", twoFactorAuthController.getTwoFactorAuthMethodsController);
+
+
 }

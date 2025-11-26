@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   auth.controllers.ts                                :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: issad <issad@student.42.fr>                +#+  +:+       +#+        */
+/*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/27 11:44:30 by tissad            #+#    #+#             */
-/*   Updated: 2025/11/24 23:40:54 by issad            ###   ########.fr       */
+/*   Updated: 2025/11/26 12:44:16 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -279,5 +279,42 @@ export async function refreshTokenController(
             message: 'Internal server error during token refresh',
             refreshComplete: false,
         });
-    }   
+    }
+}
+// change password controller
+export async function changePasswordController(
+    request: FastifyRequest,
+    reply: FastifyReply
+) {
+    console.log('[Change Password Controller] Received change password request');
+    const authService = new AuthService(request.server);
+    const cookies = JwtUtils.extractCookiesFromRequest(request);
+    const access_token = JwtUtils.extractTokenFromCookies(cookies, 'access_token');
+    const user = JwtUtils.extractUserFromAccessToken(access_token);
+    if (!user) {
+        console.error('[Change Password Controller] Unauthorized: No valid user found in request');
+        return reply.code(401).send({ message: 'Unauthorized ❌' });
+    }
+    const { currentPassword, newPassword } = request.body as { currentPassword: string; newPassword: string };
+    if (!currentPassword || !newPassword) {
+        console.error('[Change Password Controller] Bad Request: Missing current or new password');
+        return reply.code(400).send({ message: 'Bad Request: Missing current or new password',
+            passwordChangeComplete: false
+         });
+    }
+    try {
+        const changeResult = await authService.changeUserPassword(user.userId, currentPassword, newPassword);
+        if (!changeResult.passwordChangeComplete) {
+            console.error('[Change Password Controller] Password change failed:', changeResult.message);
+            return reply.code(400).send(changeResult);
+        }
+        console.log('[Change Password Controller] Password changed successfully for user ID:', user.userId);
+        return reply.code(200).send(changeResult);
+    } catch (error) {
+        console.error('[Change Password Controller] Error during password change:', error);
+        return reply.code(500).send({
+            message: 'Internal server error during password change',
+            passwordChangeComplete: false,
+        });
+    }
 }
