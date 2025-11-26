@@ -361,6 +361,19 @@ export class UserX
                 }
             }
 
+            // 🔧 S'assurer que les alias reflètent bien "moi" et "l'adversaire"
+            // On force l'alias du joueur local à this.user.login
+            // et l'alias de l'adversaire à loginOpp quand il est disponible.
+            const mePlayer = players.find((p) => p.me);
+            const oppPlayer = players.find((p) => !p.me);
+
+            if (mePlayer) {
+                mePlayer.alias = this.user.login;
+            }
+            if (oppPlayer && loginOpp) {
+                oppPlayer.alias = loginOpp;
+            }
+
             console.log("👥 Tableau players créé:", players.map(p => ({ id: p.id, alias: p.alias, me: p.me })));
 
             // Conserver les IDs tels que fournis par le serveur (DB IDs).
