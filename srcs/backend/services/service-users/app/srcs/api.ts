@@ -6,7 +6,7 @@
 /*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/23 15:58:35 by tissad            #+#    #+#             */
-/*   Updated: 2025/11/26 17:35:34 by tissad           ###   ########.fr       */
+/*   Updated: 2025/11/26 19:35:52 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,6 +63,11 @@ app.register(fastifyMultipart, {
   attachFieldsToBody: true,
 });
 
+// Serve static files from the "uploads" directory
+app.register(fastifyStatic, {
+  root: path.join(process.cwd(), 'uploads'),
+  prefix: '/uploads/',
+});
 
 
 // Register routes

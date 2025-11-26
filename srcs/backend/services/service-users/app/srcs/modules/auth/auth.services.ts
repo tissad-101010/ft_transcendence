@@ -6,7 +6,7 @@
 /*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/27 11:44:27 by tissad            #+#    #+#             */
-/*   Updated: 2025/11/26 16:59:19 by tissad           ###   ########.fr       */
+/*   Updated: 2025/11/26 19:21:02 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -251,6 +251,9 @@ export class AuthService {
     // upload user avatar
     async uploadUserAvatar(userId: string, avatarUrl:string): Promise<{uploadComplete: boolean, message: string}> {
           // @fastify/multipart
+          
+        // delete cache or old avatar if exists
+        await this.redisClient.del(`user_profile:${userId}`); 
         const updateResult = await this.userService.uploadUserAvatar(userId, avatarUrl);
         if (!updateResult) {
             console.log("[AuthService] Failed to update avatar for user:", userId);

@@ -6,7 +6,7 @@
 /*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/27 11:44:30 by tissad            #+#    #+#             */
-/*   Updated: 2025/11/26 19:00:06 by tissad           ###   ########.fr       */
+/*   Updated: 2025/11/26 19:43:01 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -363,10 +363,14 @@ export async function uploadAvatarController(
         await fs.writeFile(filePath, buffer);
         console.log('[Upload Avatar Controller] File saved successfully');
         
-        // save avatarUrl dans la DB
+  
+
+        // enregistrer dans un volume partage pour que nginx puisse y acceder 
         console.log('[Upload Avatar Controller] basename:', path.basename(filePath));
-        const avatarUrl = `$https://localhost:8443/uploads/avatars/${path.basename(filePath)}`;
+        const avatarUrl = `uploads/avatars/${path.basename(filePath)}`;
         console.log('[Upload Avatar Controller] avatarUrl:', avatarUrl);
+        
+        // update user avatar in database
         const result = await authService.uploadUserAvatar(user.userId, avatarUrl);
         return reply.code(200).send(result);
 
