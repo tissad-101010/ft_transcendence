@@ -6,7 +6,7 @@
 /*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/27 11:51:29 by tissad            #+#    #+#             */
-/*   Updated: 2025/11/26 12:08:46 by tissad           ###   ########.fr       */
+/*   Updated: 2025/11/26 16:59:55 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -178,5 +178,17 @@ export class UsersService {
       where: { id: userId },
       data: { passwordHash: newHashedPassword },
     });
+  }
+  async uploadUserAvatar(userId: string, avatarUrl:string): Promise<boolean> {
+    try {
+      await this.prismaClient.user.update({
+        where: { id: userId },
+        data: { avatarUrl },
+      });
+      return true;
+    } catch (error) {
+      console.error("❌ [users.services.ts] Error updating avatar for user ID:", userId, error);
+      return false;
+    }
   }
 }

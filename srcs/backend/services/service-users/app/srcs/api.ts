@@ -6,14 +6,16 @@
 /*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/23 15:58:35 by tissad            #+#    #+#             */
-/*   Updated: 2025/11/24 17:49:29 by tissad           ###   ########.fr       */
+/*   Updated: 2025/11/26 17:35:34 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 import Fastify from 'fastify';
+import fastifyMultipart from '@fastify/multipart';
 import cors from '@fastify/cors';
 import fastifyCookie from '@fastify/cookie';
-
+import path from "path";
+import fastifyStatic from "@fastify/static";
 // import routes
 import {  authRoutes,
           userRoutes
@@ -53,6 +55,13 @@ app.register(fastifyCookie, {
 app.register(redisPlugin);
 app.register(prismaPlugin);
 
+app.register(fastifyMultipart, {
+  limits: {
+    fileSize: 10 * 1024 * 1024, // 10 MB
+    files: 1, // Maximum number of files
+  },
+  attachFieldsToBody: true,
+});
 
 
 
@@ -68,8 +77,7 @@ app.register(internalServicesRoutes, { prefix: '/internal' });
 // app.register(googleRoutes, { prefix: '/auth' });
 // app.register(oauth42Routes, { prefix: '/auth' });
 
-
-
+// Serve static files from the "uploads" directory
 
 
 // Start the Fastify server

@@ -291,21 +291,21 @@ export class MyProfilUI
         panelPwd.paddingRight = "20px";
         panelPwd.spacing = 10;
         this.panel.addControl(panelPwd);
+        const { textBlock: title } = createMsgInfo({
+            parent: panelPwd,
+            text: "Changer le mot de passe 🔒" ,
+            height: "50px",
+            fontSize: 25,
+            color: TEXT_BRIGHT,
+
+        });
 
         const { textBlock: infoMsg } = createMsgInfo({
             parent: panelPwd,
             text: "",
             height: "50px",
-            fontSize: 26,
-            color: TEXT_BRIGHT
-        });
-        const { textBlock: title } = createMsgInfo({
-            parent: panelPwd,
-            text: "Changer le mot de passe 🔒" ,
-            height: "50px",
             fontSize: 20,
             color: TEXT_BRIGHT,
-
         });
         const getOldPwd = createInputFieldPwd("Ancien mot de passe", panelPwd);
         const getNewPwd = createInputFieldPwd("Nouveau mot de passe", panelPwd);
@@ -323,26 +323,115 @@ export class MyProfilUI
                 const newPwd = getNewPwd();
                 const confirmPwd = getConfirmPwd();
                 const oldPwd = getOldPwd();
-                if (!newPwd || !confirmPwd || !oldPwd)
-                    return infoMsg.text = "Champs vides";
-                if (newPwd !== confirmPwd)
-                    return infoMsg.text = "Les mots de passe ne correspondent pas";
+
+                if (!newPwd || !confirmPwd || !oldPwd) {
+                    infoMsg.text = "Champs vides";
+                    return;
+                }
+
+                if (newPwd !== confirmPwd) {
+                    infoMsg.text = "Les mots de passe ne correspondent pas";
+                    return;
+                }
+
                 changePassword(oldPwd, newPwd).then((res) => {
+
                     if (res.success) {
-                        title.text = "Mot de passe changé avec succès ! ✅";
-                        infoMsg.text = "";
+                        // title.text = "Mot de passe changé avec succès ! ✅";
+                        infoMsg.text = "Mot de passe changé avec succès ! ✅";
                     } else {
-                        title.text = "Échec du changement de mot de passe ❌";
+                        // title.text = "Échec du changement de mot de passe ❌";
                         infoMsg.text = res.message || "Erreur inconnue";
                     }
                 });
-                this.flag = true;
-                this.displayMenu();
-
             }
         });
         panelPwd.addControl(changePwdBtn);
     }
+
+    // change avatar interface
+    // private changeAvatarInterface() : void {
+    //     // set panelAvatar
+    //     const panelAvatar = new StackPanel("panelAvatar");
+    //     panelAvatar.width = "100%";
+    //     panelAvatar.height = "100%";
+    //     panelAvatar.background = BG_DARK;
+    //     panelAvatar.isVertical = true;
+    //     panelAvatar.paddingTop = "60px";
+    //     panelAvatar.paddingLeft = "20px";
+    //     panelAvatar.paddingRight = "20px";
+    //     panelAvatar.spacing = 10;
+    //     this.panel.addControl(panelAvatar);
+    //     const { textBlock: title } = createMsgInfo({
+    //         parent: panelAvatar,
+    //         text: "Changer l'avatar 🖼️",
+    //         height: "50px",
+    //         fontSize: 25,
+    //         color: TEXT_BRIGHT,
+    //     });
+    //             const avatarContainer = new Rectangle("avatarContainer");
+    //     avatarContainer.width = "200px";
+    //     avatarContainer.height = "200px";
+    //     avatarContainer.cornerRadius = 120;
+    //     avatarContainer.thickness = 0;
+    //     avatarContainer.background = "#000";
+    //     avatarContainer.horizontalAlignment = Control.HORIZONTAL_ALIGNMENT_CENTER;
+    //     avatarContainer.verticalAlignment = Control.VERTICAL_ALIGNMENT_TOP;
+    //     panelAvatar.addControl(avatarContainer);
+
+    //     let path = this.userX.getUser?.avatarUrl && this.userX.getUser?.avatarUrl !== "" ?
+    //         this.userX.getUser?.avatarUrl : "logoPink.png";
+        
+    //     const avatarCircle = new Rectangle("avatarCircle");
+    //     avatarCircle.width = 1;
+    //     avatarCircle.height = 1;
+    //     avatarCircle.cornerRadius = 30;
+    //     avatarCircle.thickness = 0;
+    //     avatarCircle.background = "transparent";
+    //     avatarContainer.addControl(avatarCircle);
+    //     avatarCircle.horizontalAlignment = Control.HORIZONTAL_ALIGNMENT_CENTER;
+    //     avatarCircle.verticalAlignment = Control.VERTICAL_ALIGNMENT_TOP;
+    //     const avatar = new Image("avatarImg", path);
+    //     avatar.width = "100%";
+    //     avatar.height = "100%";
+    //     avatar.stretch = Image.STRETCH_UNIFORM;
+    //     avatarCircle.addControl(avatar);
+
+    //     const changeAvatarBtn = createButton({
+    //         id: "changeAvatarBtn",
+    //         width: "150px",
+    //         height: "80px",
+    //         txt: "Changer avatar",
+    //         background: BTN_NORMAL,
+    //         fontSize: 20,
+    //         color: TEXT_BRIGHT,
+    //         cornerRadius: 10,
+    //         onClick: () => {
+    //             const input = document.createElement("input");
+    //             input.type = "file";
+    //             input.accept = "image/*";
+
+    //             input.onchange = (e) => {
+    //                 const file = (e.target as HTMLInputElement).files?.[0];
+    //                 if (!file) return;
+
+    //                 const reader = new FileReader();
+    //                 reader.onload = () => {
+    //                     avatar.source = reader.result as string;
+    //                 };
+    //                 reader.readAsDataURL(file);
+    //             };
+
+    //             input.click();
+    //             this.flag = true;
+    //         }
+    //     });
+
+    //     changeAvatarBtn.verticalAlignment = Control.VERTICAL_ALIGNMENT_BOTTOM;
+    //     changeAvatarBtn.paddingBottom = "25px";
+
+    //    panelAvatar.addControl(changeAvatarBtn);
+    // }
 
     // =============================================================
     //  CAT 3 (SECURITY)
@@ -420,7 +509,6 @@ export class MyProfilUI
                         console.log("TOTP Secret fetched:", data.qrCodeUrl);
                         // Here you would typically generate a QR code from data.qrCodeUrl
                         // and display it in the UI for the user to scan.
-                        this.enable2faApp = true;
                         this.flag = true;
                         this.mainInterfaceStruct();
                         this.enable2FaAppInterface(data.qrCodeUrl);
@@ -433,7 +521,6 @@ export class MyProfilUI
             onDeactivate: () => {
                 console.log("Disabling 2FA app...");
                 disableTotp();
-                this.enable2faApp = false;
                 this.flag = false;
             }
         });
@@ -455,7 +542,6 @@ export class MyProfilUI
             onActivate: async () => {
                 await sendEnableEmailOtp();
                 this.flag = true;
-                this.enable2faMail = true;
                 this.mainInterfaceStruct();
                 this.enable2FaMailInterface();
             },
@@ -463,7 +549,7 @@ export class MyProfilUI
                 console.log("Disabling 2FA email...");
                 await disable2faEmail();
                 this.flag = false;
-                this.enable2faMail = false;
+
             }   
         });
         rightPanel.addControl(enable2faMailBtn);
@@ -494,11 +580,13 @@ export class MyProfilUI
         });
 
         const avatarContainer = new Rectangle("avatarContainer");
-        avatarContainer.width = "250px";
-        avatarContainer.height = "250px";
+        avatarContainer.width = "200px";
+        avatarContainer.height = "200px";
         avatarContainer.cornerRadius = 120;
         avatarContainer.thickness = 0;
         avatarContainer.background = "#000";
+        avatarContainer.horizontalAlignment = Control.HORIZONTAL_ALIGNMENT_CENTER;
+        avatarContainer.verticalAlignment = Control.VERTICAL_ALIGNMENT_TOP;
         centerPanel.addControl(avatarContainer);
 
         let path = this.userX.getUser?.avatarUrl && this.userX.getUser?.avatarUrl !== "" ?
@@ -507,16 +595,70 @@ export class MyProfilUI
         const avatarCircle = new Rectangle("avatarCircle");
         avatarCircle.width = 1;
         avatarCircle.height = 1;
-        avatarCircle.cornerRadius = 40;
+        avatarCircle.cornerRadius = 30;
         avatarCircle.thickness = 0;
         avatarCircle.background = "transparent";
         avatarContainer.addControl(avatarCircle);
-        
+        avatarCircle.horizontalAlignment = Control.HORIZONTAL_ALIGNMENT_CENTER;
+        avatarCircle.verticalAlignment = Control.VERTICAL_ALIGNMENT_TOP;
         const avatar = new Image("avatarImg", path);
         avatar.width = "100%";
         avatar.height = "100%";
         avatar.stretch = Image.STRETCH_UNIFORM;
         avatarCircle.addControl(avatar);
+
+        const changeAvatarBtn = createButton({
+            id: "changeAvatarBtn",
+            width: "150px",
+            height: "80px",
+            txt: "Changer avatar",
+            background: BTN_NORMAL,
+            fontSize: 20,
+            color: TEXT_BRIGHT,
+            cornerRadius: 10,
+            onClick:async () => {
+                const input = document.createElement("input");
+                input.type = "file";
+                input.accept = "image/*";
+
+                input.onchange = async (e) =>  {
+                    const file = (e.target as HTMLInputElement).files?.[0];
+                    if (!file) return;
+
+                    const reader = new FileReader();
+                    reader.onload = () => {
+                        avatar.source = reader.result as string;
+                    };
+                    reader.readAsDataURL(file);
+                    
+                    if (!file) return;
+    
+                    const formData = new FormData();
+                    formData.append("avatar", file);  // OBLIGATOIRE : "avatar"
+    
+                    const res = await fetch("https://localhost:8443/api/user/upload-avatar", {
+                        method: "POST",
+                        body: formData,
+                        credentials: "include"
+                    });
+    
+                    const data = await res.json();
+                    console.log("uploaded:", data);
+                };
+
+                input.click();
+                
+
+                this.flag = true;
+            }
+
+        });
+
+        // placer en bas du container
+        changeAvatarBtn.verticalAlignment = Control.VERTICAL_ALIGNMENT_BOTTOM;
+        changeAvatarBtn.paddingBottom = "25px";
+
+       centerPanel.addControl(changeAvatarBtn);
     }
 
     // =============================================================

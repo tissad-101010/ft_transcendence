@@ -6,13 +6,17 @@
 /*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/27 11:44:30 by tissad            #+#    #+#             */
-/*   Updated: 2025/11/26 12:44:16 by tissad           ###   ########.fr       */
+/*   Updated: 2025/11/26 19:00:06 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 // this file receives the request from the frontend and call userservice 
 // to handle the request response
 
+import path from "path";
+import multipart from "@fastify/multipart";
+import { pipeline } from "stream/promises";
+const pump = pipeline;
 import { FastifyReply, FastifyRequest } from 'fastify';
 
 import { SignupUserDTO,
@@ -318,3 +322,63 @@ export async function changePasswordController(
         });
     }
 }
+import { promises as fs } from "fs";
+// import multipart 
+
+// upload avatar controller
+export async function uploadAvatarController(
+    request: FastifyRequest,
+    reply: FastifyReply
+) {
+    console.log('[Upload Avatar Controller] START');
+    const authService = new AuthService(request.server);
+    // Vérification JWT
+    const cookies = JwtUtils.extractCookiesFromRequest(request);
+    const access_token = JwtUtils.extractTokenFromCookies(cookies, 'access_token');
+    const user = JwtUtils.extractUserFromAccessToken(access_token);
+
+    if (!user) {
+        return reply.code(401).send({ message: 'Unauthorized ❌' });
+    }
+
+    try {
+        const data = await request.body as any;
+        const file = data.avatar;
+        console.log('[Upload Avatar Controller] File received:', file);
+        console.log('[Upload Avatar Controller] File name:', file.filename);
+        if (!file) {
+            return reply.code(400).send({ message: 'No avatar file provided', uploadComplete: false });
+        }
+        // save file to uploads/avatars directory
+        const uploadDir = path.join(process.cwd(), 'uploads', 'avatars');
+        console.log('[Upload Avatar Controller] Upload directory:', uploadDir);
+        await fs.mkdir(uploadDir, { recursive: true });
+        // new unique file name to avoid conflicts
+        const ext = file.filename.split('.').pop();
+        const filePath = path.join(uploadDir, `avatar_${Date.now()}.${ext}`);
+        console.log('[Upload Avatar Controller] Saving file to:', filePath);
+        // Convertir le fichier en buffer et l’écrire
+        const buffer = await file.toBuffer();
+        console.log('[Upload Avatar Controller] File buffer size:', buffer.length);
+        await fs.writeFile(filePath, buffer);
+        console.log('[Upload Avatar Controller] File saved successfully');
+        
+        // save avatarUrl dans la DB
+        console.log('[Upload Avatar Controller] basename:', path.basename(filePath));
+        const avatarUrl = `$https://localhost:8443/uploads/avatars/${path.basename(filePath)}`;
+        console.log('[Upload Avatar Controller] avatarUrl:', avatarUrl);
+        const result = await authService.uploadUserAvatar(user.userId, avatarUrl);
+        return reply.code(200).send(result);
+
+    } catch (error) {
+        console.error("[Upload Avatar Controller] ERROR:", error);
+
+        return reply.code(500).send({
+            message: "Internal server error during avatar upload",
+            uploadComplete: false,
+        });
+    }
+}
+
+
+/* ************************************************************************** */
