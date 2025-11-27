@@ -6,7 +6,7 @@
 /*   By: glions <glions@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/16 18:54:11 by tissad            #+#    #+#             */
-/*   Updated: 2025/11/26 17:39:42 by glions           ###   ########.fr       */
+/*   Updated: 2025/11/27 17:52:18 by glions           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,24 +58,22 @@ export class FriendsService {
   async listInvitations(
     userId: string
   ) : Promise<{
-    received: invitationFriend[],
-    sent: invitationFriend[]
+    result: invitationFriend[]
   }> 
   {
-    const received : invitationFriend[] = await safePrisma(() =>
+    const result : invitationFriend[] = await safePrisma(() =>
       this.prismaClient.friendInvitation.findMany({
-        where: { toUserId: userId},
-        select: { toUserUsername: true, fromUserUsername: true, status: true, createdAt: true, responsedAt: true}
-      })
-    );
-    const sent : invitationFriend[] = await safePrisma(() =>
-      this.prismaClient.friendInvitation.findMany({
-        where: { fromUserId: userId},
-        select: { toUserUsername: true, fromUserUsername: true, status: true, createdAt: true, responsedAt: true}
+        where: { 
+          OR: [
+            { toUserId: userId },
+            { fromUserId: userId }
+          ]
+        },
+        select: { toUserUsername: true, fromUserUsername: true, status: true, createdAt: true, responsedAt: true }
       })
     );
     // SUCCESS
-    return { received, sent };
+    return { result };
   }
 
   async sendInvitation(

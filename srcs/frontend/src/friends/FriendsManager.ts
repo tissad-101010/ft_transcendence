@@ -2,7 +2,7 @@
 import { FriendInvitation } from "./FriendInvitation";
 import { Friend } from "./Friend";
 
-import { listInvitations, statusInvitation, PromiseUpdateResponse, getInfoFriend } from "./api/friends.api";
+import { listInvitations, statusInvitation, PromiseUpdateResponse, getInfoFriend, sendFriendInvitation } from "./api/friends.api";
 import { UserX } from "../UserX";
 
 type invitationFriend = {
@@ -30,9 +30,19 @@ export class FriendManager
     }
 
     // PUBLIC METHODS
-    public async sendInvitation() : Promise<boolean> 
+    public async sendInvitation(username: string) : Promise<{success: boolean, message?: string, data?: any}> 
     {
+        const response = await sendFriendInvitation(username);
+        if (response.success)
+            return ({success: true, data: response.data});
+        else
+            return ({success: false, message: response.message});
+    }
 
+    public async deleteFriend(friend: Friend) : Promise<boolean>
+    {
+        // CALL API FOR DELETE FRIEND ON BDD
+        // UPDATE TAB WITHOUT FRIEND DELETED
         return (true);
     }
 
@@ -66,7 +76,8 @@ export class FriendManager
         if (call.success)
         {
             // SUCCESS //
-            const data : invitationFriend[] = call.data;
+            const data : invitationFriend[] = call.data.data;
+            console.log(">>> DATA -> ", data);
             for (const d of data)
             {
                 let username;

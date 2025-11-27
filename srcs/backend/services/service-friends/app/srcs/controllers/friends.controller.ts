@@ -6,7 +6,7 @@
 /*   By: glions <glions@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/16 19:00:31 by tissad            #+#    #+#             */
-/*   Updated: 2025/11/26 18:35:04 by glions           ###   ########.fr       */
+/*   Updated: 2025/11/27 17:53:11 by glions           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,14 +49,9 @@ export async function listInvitationsController(
     if (!token) throw new AuthError();
     // CALL SERVICE //
     const service             = new FriendsService(request.server);
-    const { received, sent }  = await service.listInvitations(token.data.id);
-    // SORT RESULTS //
-    const data = {
-      sent: sent,
-      received: received
-    }
+    const { result }  = await service.listInvitations(token.data.id);
     // SUCCESS //
-    return reply.code(200).send({ success: true, data });
+    return reply.code(200).send({ success: true, data: result });
   } catch (err: unknown) {
     // ERRORS //
     console.error('/!\\ LIST INVITATION CONTROLLER ERROR /!\\', err);
@@ -75,6 +70,7 @@ export async function sendInviteController(
     if (!token) throw new AuthError();
     // CALL SERVICE USER //
     const { friendUsername }  = request.body;
+    
     if (!friendUsername)
       return (reply.code(400).send({sucess: false, message: "Paramètre username manquant"}));
     // CALL SERVICE
@@ -156,30 +152,5 @@ export async function removeFriendController(
   } catch (err: any) {
     console.error(err);
     return reply.status(400).send({ success: false, message: err.message });
-  }
-}
-
-
-export async function listFriendsController(
-  request: FastifyRequest,
-  reply: FastifyReply
-)
-{
-  try {
-    const service = new FriendsService(request.server);
-    const userId = request.cookies.userId;
-    if (!userId || typeof userId !== 'string') {
-      // Mauvaise requête si pas d'userId
-      return reply.code(400).send({ success: false, message: 'Missing or invalid userId cookie' });
-    }
-    const { received, sent } = await service.listInvitations(userId);
-    const friends = [
-      ...sent.filter(inv => inv.status === "ACCEPTED").map(inv => inv.toUserId),
-      ...received.filter(inv => inv.status === "ACCEPTED").map(inv => inv.fromUserId)
-    ];
-    return reply.send({ success: true, data: friends });
-  } catch (err: any) {
-    console.error(err);
-    return reply.status(500).send({ success: false, message: err.message });
   }
 }

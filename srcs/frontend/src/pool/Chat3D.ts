@@ -1,8 +1,10 @@
 import { Scene, AbstractMesh, StandardMaterial } from "@babylonjs/core";
 import { AdvancedDynamicTexture, ScrollViewer, StackPanel, TextBlock, Control, Rectangle, Grid, Ellipse, Button, InputTextArea, Line } from "@babylonjs/gui";
 
-import { Friend } from "../Friend.ts";
 import { UserX } from "../UserX.ts";
+import { FriendManager } from "../friends/FriendsManager.ts";
+import { Friend } from "../friends/Friend.ts";
+import { Message } from "../friends/Friend.ts";
 
 export class Chat3D {
     private advancedTexture: AdvancedDynamicTexture;
@@ -19,7 +21,6 @@ export class Chat3D {
     private friend: Friend;
     private lastDate: Date | null;
     private userX: UserX;
-
 
     constructor(
         scene: Scene,
@@ -74,7 +75,7 @@ export class Chat3D {
         loginRect.addControl(headerPanel);
 
         this.loginText = new TextBlock();
-        this.loginText.text = friend.getLogin;
+        this.loginText.text = friend.getUsername;
         this.loginText.color = "white";
         this.loginText.fontSize = 40;
         headerPanel.addControl(this.loginText);
@@ -152,7 +153,7 @@ export class Chat3D {
             if (message.length === 0) return;
 
             // Utiliser la méthode de la classe pour ajouter le message
-            this.addMessage(this.userX.getUser.id, message, new Date());
+            this.addMessage(this.userX.getUser.username, message, new Date());
 
             // AJOUTER LE MESSAGE DANS LE TABLEAU MESSAGES PRESENT DANS FRIEND ET DANS LA BDD
             
@@ -214,20 +215,34 @@ export class Chat3D {
 
     displayHistory() : void
     {
-        const msgs = this.friend.loadMessages();
-        if (msgs.length === 0)
-            return ;
-
-        msgs.forEach((msg) => {
-            this.addMessage(msg.sender, msg.content, msg.date);
-        });
+        // LANCER L'ANIMATION DE CHARGEMENT
+        // this.startLoading();
+        // LOAD MESSAGES
+        this.friend.loadMessages()
+            .then((res) => {
+                if (res.success)
+                {
+                    // ARRETER L'ANIMATION DE CHARGEMENT
+                    // MESSAGES LOADED
+                    this.friend.getMessages.forEach((msg : Message) => {
+                        this.addMessage(msg.sender, msg.content, msg.date);
+                    })
+                }   
+                else
+                {
+                    // ERROR (L'AFFICHER QUELQUE PART)
+                    // const error = new TextBlock();
+                    // error.text = res.message;
+                    // ...
+                }
+            });
     }
 
     updateChat(
         friend: Friend
     ) : void
     {
-        this.loginText.text = friend.getLogin;
+        this.loginText.text = friend.getUsername;
         this.onlineIcon.background = friend.getOnline ? "#128354ff" : "#e58ab8ff";
         this.chatContainer.clearControls();
         this.friend = friend;
@@ -266,7 +281,7 @@ export class Chat3D {
     
     // ================= Méthode pour ajouter un message =================
     addMessage = (
-        sender: number,
+        sender: string,
         text: string,
         date: Date
     ) => {
@@ -283,9 +298,9 @@ export class Chat3D {
         msgRect.height = estHeight + "px";
         msgRect.cornerRadius = 10;
         msgRect.thickness = 0;
-        msgRect.background = sender !== this.friend.getId ? "rgba(104, 174, 179, 1)" : "#d397a6ff";
+        msgRect.background = sender !== this.friend.getUsername ? "rgba(104, 174, 179, 1)" : "#d397a6ff";
         msgRect.horizontalAlignment =
-            sender !== this.friend.getId
+            sender !== this.friend.getUsername
                 ? Control.HORIZONTAL_ALIGNMENT_RIGHT
                 : Control.HORIZONTAL_ALIGNMENT_LEFT;
 

@@ -56,9 +56,19 @@ export class UserX
 
     async sendFriendInvite(
         username: string
-    ) : Promise<boolean>
+    ) : Promise<{success: boolean, message?: string, data?: any}>
     {
-        return (this.friendManager.sendInvitation());
+        return (await this.friendManager.sendInvitation(username));
+    }
+
+    async deleteFriend(friend: Friend) : Promise<boolean>
+    {
+        return (await this.friendManager.deleteFriend(friend))
+    }
+
+    async loadFriendsInvitations() : Promise<{success: boolean, message?: string, data?: any}>
+    {
+        
     }
 
     createTournament(a: string) : boolean

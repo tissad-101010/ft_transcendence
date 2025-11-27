@@ -31,13 +31,6 @@ export enum statusInvitation
 
 const serviceUrl = "https://localhost:8443";
 
-type ReponseFetch = {
-  sucess: boolean;
-  message?: string;
-  data?: any;
-  status: number;
-}
-
 export async function getInfoFriend(username: string): Promise<PromiseGetInfoFriendResponse>
 {
   try
@@ -124,6 +117,7 @@ export async function sendFriendInvitation(
 {
   try 
   {
+    console.log("API Username = " + username );
     const call : any = await fetch(`${serviceUrl}/friend/invite`, {
       method: "POST",
       credentials: "include",

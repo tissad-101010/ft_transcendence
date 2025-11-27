@@ -23,7 +23,7 @@ export class FriendInvitation
     // PUBLIC METHODS
     async accept() : Promise<PromiseUpdateResponse>
     {
-        const response: PromiseUpdateResponse = await updateInvitation(statusInvitation.ACCEPTED);
+        const response: PromiseUpdateResponse = await updateInvitation(statusInvitation.ACCEPTED, this);
         if (response.success)
             this.status = statusInvitation.ACCEPTED;
         return (response);

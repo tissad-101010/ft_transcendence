@@ -17,7 +17,8 @@ import { getCurrentGroup, setCurrentGroup, getTotalGroups, displayFriendsWithEmp
 
 import { Chat3D } from './Chat3D.ts';
 import { UserX } from '../UserX.ts';
-import { Friend } from '../Friend.ts';
+import { Friend } from '../friends/Friend.ts';
+import { FriendManager } from '../friends/FriendsManager.ts';
 
 export class PoolInteraction implements SpecificInteraction {
     /**************************************************
@@ -94,7 +95,7 @@ export class PoolInteraction implements SpecificInteraction {
        
     public resetState(buttonMeshes: AbstractMesh[]): void {
         setCurrentGroup(ZoneName.LOUNGE, 0, this.userX.getFriends, this.scene);
-        this.sceneManager.getLounge.forEach(mesh => {
+        this.sceneManager.getLounge.forEach((mesh : AbstractMesh) => {
             const mat = mesh.material as PBRMaterial;
             if (!mat) return;
 
@@ -184,7 +185,7 @@ export class PoolInteraction implements SpecificInteraction {
             });
         }
 
-        this.sceneManager.getLounge.forEach(mesh => {
+        this.sceneManager.getLounge.forEach((mesh : AbstractMesh) => {
             const mat = mesh.material as PBRMaterial;
             if (!mat) return;
 
