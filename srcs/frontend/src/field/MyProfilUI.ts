@@ -615,20 +615,5 @@ export class MyProfilUI
             this.container.dispose();
     }
     
-    public hide(): void {
-        if (this.container) {
-            this.container.rootContainer.isVisible = false;  // masque toute l'interface
-            this.container.rootContainer._children.forEach(c => c.isVisible = false); // facultatif
-        }
-    }
-
-    public show(): void {
-        console.log("entree ici");
-        if (this.container) {
-            this.container.rootContainer.isVisible = true;   // réaffiche toute l'interface
-            this.container.rootContainer._children.forEach(c => c.isVisible = true); // facultatif
-        }
-    }
-
 }
 

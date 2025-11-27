@@ -4,88 +4,104 @@ import { ZoneName } from "./config";
 
 export interface CameraHistoryEntry {
   zone: ZoneName;
-  actionOnClick?: () => void;       // ce qui se passe sur un clic normal
-  actionOnPopState?: () => void;    // ce qui se passe sur back/forward
+  callback: () => void; // ce qui se passe quand on arrive sur la zone
 }
 
 export const cameraHistory: CameraHistoryEntry[] = [];
 export let currentIndex = -1;
-export const mainZones: ZoneName[] = [
+
+// Liste des zones autorisées dans l'historique
+const mainZones: ZoneName[] = [
   ZoneName.STANDS,
-  ZoneName.POOL,
   ZoneName.LOCKER_ROOM,
   ZoneName.START,
 ];
 
 /**
- * Ajoute un mouvement de caméra au clic normal
+ * Déplace la caméra sur une zone principale et enregistre le mouvement
  */
 export function addCameraMove(
   manager: SceneManager,
   zone: ZoneName,
-  actionOnClick?: () => void,
-  actionOnPopState?: () => void
+  callback: () => void
 ) {
+  if (!mainZones.includes(zone)) {
+    console.log(`🚫 Zone ignorée, non autorisée pour l'historique : ${zone}`);
+    return;
+  }
+
   const interactor = manager.getSceneInteractor;
   if (!interactor) return;
 
-  // Supprime l'ancienne instance si c'est une mainZone
-  if (mainZones.includes(zone)) interactor.disposeCurrInteraction();
+  interactor.disposeCurrInteraction();
 
-  // Supprime le doublon dans l'historique
   const existingIndex = cameraHistory.findIndex(e => e.zone === zone);
-  if (existingIndex !== -1 && mainZones.includes(zone)) {
+  if (existingIndex !== -1) {
     cameraHistory.splice(existingIndex, 1);
     if (existingIndex <= currentIndex) currentIndex--;
   }
 
-  // Supprime le futur si on navigue au milieu de l’historique
   cameraHistory.splice(currentIndex + 1);
-
-  // Ajoute le mouvement dans l’historique
-  cameraHistory.push({ zone, actionOnClick, actionOnPopState });
+  cameraHistory.push({ zone, callback });
   currentIndex++;
 
-  // Déplace la caméra
-  manager.moveCameraTo(zone, () => actionOnClick?.());
-
-  // Ajoute un état dans le navigateur
+  manager.moveCameraTo(zone);
+  callback();
   window.history.pushState({ cameraState: zone }, "");
+
+  console.log("📷 Historique caméras :", cameraHistory.map(e => e.zone));
 }
 
 /**
- * Clic navigateur back
+ * BACK navigateur
  */
 export function back(manager: SceneManager) {
-    if (currentIndex <= 0) return;
-    currentIndex--;
-    const entry = cameraHistory[currentIndex];
-    const interactor = manager.getSceneInteractor;
-    if (!interactor) return;
+  if (currentIndex <= 0) {
+    alert("⛔ Vous êtes déjà au début de l'historique !");
+    return;
+  }
 
-    if (mainZones.includes(entry.zone)) interactor.disposeCurrInteraction();
-    manager.moveCameraTo(entry.zone);
-    interactor.recreateZone(entry.zone);
+  const entry = cameraHistory[currentIndex - 1];
 
-    if (typeof entry.actionOnPopState === "function") {
-        entry.actionOnPopState();
-    }
+  if (!mainZones.includes(entry.zone)) {
+    alert("🚫 Impossible de naviguer vers une zone secondaire !");
+    return;
+  }
+
+  currentIndex--;
+  const interactor = manager.getSceneInteractor;
+  if (!interactor) return;
+
+  interactor.disposeCurrInteraction();
+  manager.moveCameraTo(entry.zone);
+  entry.callback();
+
+  console.log("⬅️ BACK vers zone :", entry.zone);
 }
 
+/**
+ * FORWARD navigateur
+ */
 export function forward(manager: SceneManager) {
-    if (currentIndex >= cameraHistory.length - 1) return;
-    currentIndex++;
-    const entry = cameraHistory[currentIndex];
-    const interactor = manager.getSceneInteractor;
-    if (!interactor) return;
+  if (currentIndex >= cameraHistory.length - 1) {
+    alert("⛔ Vous êtes déjà à la fin de l'historique !");
+    return;
+  }
 
-    if (mainZones.includes(entry.zone)) interactor.disposeCurrInteraction();
-    manager.moveCameraTo(entry.zone);
-    interactor.recreateZone(entry.zone);
+  const entry = cameraHistory[currentIndex + 1];
 
-    if (typeof entry.actionOnPopState === "function") {
-        entry.actionOnPopState();
-    }
+  if (!mainZones.includes(entry.zone)) {
+    alert("🚫 Impossible de naviguer vers une zone secondaire !");
+    return;
+  }
+
+  currentIndex++;
+  const interactor = manager.getSceneInteractor;
+  if (!interactor) return;
+
+  interactor.disposeCurrInteraction();
+  manager.moveCameraTo(entry.zone);
+  entry.callback();
+
+  console.log("➡️ FORWARD vers zone :", entry.zone);
 }
-
-

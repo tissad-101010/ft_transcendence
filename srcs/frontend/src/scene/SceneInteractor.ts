@@ -85,52 +85,49 @@ export class SceneInteractor {
 
 
     public recreateZone(zone: ZoneName) {
-        console.log("-------->RECREATION DE LA ZONE");
         if (this.currSpecificInteraction) {
-        // this.disposeCurrInteraction(); // supprime l'ancienne instance
             switch(zone) {
-            //     case ZoneName.POOL:
-            //         this.currSpecificInteraction = new PoolInteraction(this.scene, this.sceneManager, this);
-            //         break;
-                case ZoneName.STANDS:
-                    this.currSpecificInteraction.show();
+                case ZoneName.POOL:
+                    this.currSpecificInteraction = new PoolInteraction(this.scene, this.sceneManager, this);
+                    //Ajout start une fois dans la piscine
+                    if (!this.interactiveMainMeshes.includes(ZoneName.START)) {
+                        this.interactiveMainMeshes.push(ZoneName.START);
+                    }
                     break;
-            //     case ZoneName.LOCKER_ROOM:
-            //         this.currSpecificInteraction = new LockerInteraction(this.scene, this.sceneManager, this);
-            //         break;
-            //     default:
-            //         this.currSpecificInteraction = null;
+                case ZoneName.STANDS:
+                    this.currSpecificInteraction = new StandsInteraction(this.scene, this.sceneManager, this);
+                    break;
+                case ZoneName.LOCKER_ROOM:
+                    this.currSpecificInteraction = new LockerInteraction(this.scene, this.sceneManager, this);
+                    break;
+                case ZoneName.START:
+                    if (this.currSpecificInteraction instanceof PoolInteraction) {
+                        this.currSpecificInteraction.resetState(this.sceneManager.getLounge);
+                    }
+                    this.currSpecificInteraction = null;
+                    this.removeInteractiveMesh(ZoneName.START);
+                    break;
+                default:
+                    this.currSpecificInteraction = null;
             }
         }
     }
 
-    public disposeCurrInteraction(zone: ZoneName): void {
+    public disposeCurrInteraction(): void {
         if (!this.currSpecificInteraction) return;
-
-        console.log("----> CURRSPECIFIC INTERACTION EXISTE, ON LA CACHE");
-
-        switch (zone) {
-            case ZoneName.STANDS:
-                if ('hide' in this.currSpecificInteraction && typeof this.currSpecificInteraction.hide === 'function') {
-                    this.currSpecificInteraction.hide();
-                }
-                break;
-
-            // Tu peux ajouter d'autres zones ici si besoin
-            // case ZoneName.POOL:
-            // case ZoneName.LOCKER_ROOM:
-        }
+            this.currSpecificInteraction.dispose();
+            this.currSpecificInteraction = null;
     }
 
     public handleMainZoneClick(pickedMesh: AbstractMesh, isClick: boolean) : void {
         // console.log("entree dans handlemainzoneclick de sceneinteractr");
         if (this.currSpecificInteraction) {
-            console.log("----> currspecific est existant");
+            console.log("SceneInteractor: Entree dans handleMainZoneClick, curr existe");
             this.currSpecificInteraction.dispose();
             this.currSpecificInteraction = null;
         }
         else{
-            console.log("----> currspecific est PAS existant");
+            console.log("SceneInteractor: Entree dans handleMainZoneClick, curr n'existe pas");
         }
         this.highlightLayer.removeAllMeshes();
         if (this.lastHoveredMesh && this.lastHoveredMesh !== pickedMesh)
@@ -143,7 +140,7 @@ export class SceneInteractor {
         if (Object.values(ZoneName).includes(zoneName)) {
             this.disableInteractions(); //desactiver clic/survol avant le mouvement
             addCameraMove(this.sceneManager, zoneName, () => {
-                console.log("addmove: ajout stands creation instance")
+                console.log("SceneInteractor: Addmove Creation instance: ", zoneName);
                 this.enableInteractions(); //reactiver clic/survol
                 switch (zoneName) {
                     case ZoneName.POOL:

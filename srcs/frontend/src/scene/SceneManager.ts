@@ -488,20 +488,6 @@ private resetInteractions(): void {
         return (this.lightInteractor);
     }
 
-    public getAllZoneMeshes(): AbstractMesh[] {
-        // Récupère toutes les valeurs de l'enum ZoneName (chaînes)
-        const zoneNamesAsStrings: string[] = ["stands", "border", "furniture", "buttonPoolExit0"];
-        // const zoneNamesAsStrings: string[] = ["stands", "border", "furniture", "buttonPoolExit0"];
-        // const zoneNamesAsStrings: string[] = Object.values(ZoneName);
-        // console.log("voici les zones name dans mon ")
-        // Convertit chaque nom en AbstractMesh via le meshMap
-        const meshes: AbstractMesh[] = zoneNamesAsStrings
-            .map(name => this.meshMap[name])
-            .filter((m): m is AbstractMesh => m !== undefined); // filtre les undefined
-
-        return meshes;
-    }
-
     // /**************************************************
     //  *                    SETTERS                     *
     //  **************************************************/

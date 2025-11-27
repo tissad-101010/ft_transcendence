@@ -41,7 +41,7 @@ export class ScoreboardHandler {
     private page: Rectangle | null;
     private interval: Interval;
     private originalMaterial: Material | null = null;
-    private scoreboardMesh : AbstractMesh;
+    private scoreboardMesh : AbstractMesh | null = null;
     private playMatch: boolean = false;
 
     /**************************************************
@@ -95,6 +95,7 @@ export class ScoreboardHandler {
      **************************************************/
     public selectMenu(mesh: AbstractMesh)
     {
+        console.log("---------------> entree dans selectne");
         this.scoreboardMesh = mesh;
         if (!this.originalMaterial) {
             this.originalMaterial = mesh.material;
@@ -165,7 +166,6 @@ export class ScoreboardHandler {
 
     public handle(pickedMesh : AbstractMesh, scoreMeshes: AbstractMesh[]) : void{
         if (!pickedMesh) return;
-        console.log("Etat de clicScoreboard", this.clicScoreboard);
         if (pickedMesh === scoreMeshes[0] && this.clicScoreboard === false){
             this.sceneInteractor.disableInteractions();
             this.sceneManager.moveCameraTo(ZoneName.SCOREBOARD, () => {

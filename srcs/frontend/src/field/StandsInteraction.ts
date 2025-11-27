@@ -1,7 +1,6 @@
 import { SceneInteractor } from './scene/SceneInteractor.ts';
 import { SceneManager } from './scene/SceneManager.ts';
 import { SpecificInteraction } from './scene/SpecificInteraction.ts';
-import { addCameraMove, back, forward } from "../CameraHistory.ts";
 import { 
 PointerInfo, 
 Scene,
@@ -95,9 +94,7 @@ export class StandsInteraction implements SpecificInteraction {
     // }
     private handleMyProfile(): void {
     this.sceneInteractor.disableInteractions();
-        console.log("ok lolo");
-    addCameraMove(this.sceneManager, ZoneName.ARBITRATOR, () => {
-        console.log("addmove: creatiom interface myprofile dans stands");
+    this.sceneManager.moveCameraTo(ZoneName.ARBITRATOR, () => {
         this.clicArbitrator = true;
         this.sceneInteractor.enableInteractions();
 
@@ -106,7 +103,7 @@ export class StandsInteraction implements SpecificInteraction {
                 this.sceneManager,
                 this.sceneManager.getUserX
             );
-    }, this.sceneInteractor);
+    });
 }
 
 
@@ -117,8 +114,7 @@ export class StandsInteraction implements SpecificInteraction {
     {
         this.sceneInteractor.getHighlightLayer().removeAllMeshes();
         this.sceneInteractor.disableInteractions();
-        addCameraMove(this.sceneManager, ZoneName.SEAT, () => {
-        console.log("addmove: creatiom interface friendsprofil dans stands");
+        this.sceneManager.moveCameraTo(ZoneName.SEAT, () => {
             this.clicSeat = true;
             displayFriendsWithEmpty(this.scene, this.sceneManager.getUserX.getFriends, this.sceneManager.getChair);
             this.updateButtons(buttonMeshes);
@@ -227,8 +223,7 @@ export class StandsInteraction implements SpecificInteraction {
                 }
                 else if (pickedMesh === buttonMeshes[2] || (pickedMesh === buttonMeshes[3] && this.clicArbitrator)){
                     this.sceneInteractor.disableInteractions();
-                    addCameraMove(this.sceneManager, ZoneName.STANDS, () => {
-                        console.log("addmove pour clean interface stands");
+                    this.sceneManager.moveCameraTo(ZoneName.STANDS, () => {
                         if (pickedMesh === buttonMeshes[2]){
                             this.clicSeat = false;
                             this.test = false;
@@ -317,33 +312,5 @@ export class StandsInteraction implements SpecificInteraction {
         });
         this.sceneInteractor.enableInteractions();
         console.log("StandsInteraction: nettoyage terminé.");
-    }
-
-    public hide() : void{
-        if (this.friendUI) {
-            this.friendUI.hide();
-            // Optionnel : tu peux aussi null si tu veux la recréer plus tard
-            // this.friendUI = null;
-        }
-
-        if (this.myProfilUI) {
-            console.log("JE CACHE MYPROFIL")
-            this.myProfilUI.hide();
-            // this.myProfilUI = null;
-        }
-    }
-
-    public show() : void {
-        if (this.friendUI) {
-            this.friendUI.hide();
-            // Optionnel : tu peux aussi null si tu veux la recréer plus tard
-            // this.friendUI = null;
-        }
-
-        if (this.myProfilUI) {
-            console.log("je show myprofil");
-            this.myProfilUI.show();
-            // this.myProfilUI = null;
-        }
     }
 }
