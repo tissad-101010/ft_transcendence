@@ -6,7 +6,7 @@
 /*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/27 15:15:50 by tissad            #+#    #+#             */
-/*   Updated: 2025/11/27 15:53:10 by tissad           ###   ########.fr       */
+/*   Updated: 2025/11/27 18:49:18 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,13 +21,20 @@ const bucket = storage.bucket("pong-avatars");
 export async function uploadAvatar(buffer: Buffer, dest: string, mimetype: string) {
   const file = bucket.file(dest);
 
+//   await file.save(buffer, {
+//     resumable: false,
+//     //public: true,
+//     contentType: mimetype,
+//   });
+
+//   return dest;
+
   await file.save(buffer, {
     resumable: false,
-    //public: true,
     contentType: mimetype,
   });
 
-  return dest;
+  return `https://storage.googleapis.com/pong-avatars/${dest}`;
 }
 
 export async function generateSignedUrl(filename: string, expiresInSeconds = 3600) {

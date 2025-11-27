@@ -6,7 +6,7 @@
 /*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/27 11:44:30 by tissad            #+#    #+#             */
-/*   Updated: 2025/11/27 16:06:06 by tissad           ###   ########.fr       */
+/*   Updated: 2025/11/27 18:50:29 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -363,12 +363,12 @@ export async function uploadAvatarController(
         // upload to GCP Storage
         /****************************************************** */
         const filePath = await uploadAvatar(buffer, newFileName, file.mimetype);
-        const signedUrl = await generateSignedUrl(newFileName, 24 * 3600); // URL valide 24h
+        // const signedUrl = await generateSignedUrl(newFileName, 24 * 3600); // URL valide 24h
         //****************************************************** */
         console.log('[Upload Avatar Controller] File saved successfully:', filePath);
         console.log('[Upload Avatar Controller] basename:', path.basename(filePath));
-        console.log('[Upload Avatar Controller] signedUrl:', signedUrl);
-        const avatarUrl = signedUrl
+        // console.log('[Upload Avatar Controller] signedUrl:', signedUrl);
+        const avatarUrl = filePath; // use direct GCP URL
         console.log('[Upload Avatar Controller] avatarUrl:', avatarUrl);
         
         // update user avatar in database
