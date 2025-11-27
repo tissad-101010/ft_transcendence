@@ -125,6 +125,7 @@ services:
       - TEMP_TOKEN_EXPIRATION=${TEMP_TOKEN_EXPIRATION}
       - TEMP_TOKEN_SECRET=${TEMP_TOKEN_SECRET}
       - INTERNAL_API_KEY=${INTERNAL_API_KEY}
+      - GCP_STORAGE_KEY_PATH=${GCP_STORAGE_KEY_PATH}
     restart: unless-stopped
   #********************************************************************************#
 

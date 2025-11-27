@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   auth.controllers.ts                                :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: issad <issad@student.42.fr>                +#+  +:+       +#+        */
+/*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/27 11:44:30 by tissad            #+#    #+#             */
-/*   Updated: 2025/11/26 22:11:50 by issad            ###   ########.fr       */
+/*   Updated: 2025/11/27 16:06:06 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -323,7 +323,10 @@ export async function changePasswordController(
     }
 }
 import { promises as fs } from "fs";
-// import multipart 
+import { uploadAvatar,
+            generateSignedUrl,
+ } from "../../utils/storage.utils";
+
 
 // upload avatar controller
 export async function uploadAvatarController(
@@ -349,25 +352,23 @@ export async function uploadAvatarController(
         if (!file) {
             return reply.code(400).send({ message: 'No avatar file provided', uploadComplete: false });
         }
-        // save file to uploads/avatars directory
-        const uploadDir = '/usr/share/nginx/html/uploads/avatars';
-        console.log('[Upload Avatar Controller] Upload directory:', uploadDir);
-        await fs.mkdir(uploadDir, { recursive: true });
         // new unique file name to avoid conflicts
-        const ext = file.filename.split('.').pop();
-        const filePath = path.join(uploadDir, `avatar_${Date.now()}.${ext}`);
-        console.log('[Upload Avatar Controller] Saving file to:', filePath);
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+        const fileExtension = path.extname(file.filename);
+        const newFileName = `avatar-${user.userId}-${uniqueSuffix}${fileExtension}`;
+        console.log('[Upload Avatar Controller] New file name:', newFileName);
         // Convertir le fichier en buffer et l’écrire
         const buffer = await file.toBuffer();
         console.log('[Upload Avatar Controller] File buffer size:', buffer.length);
-        await fs.writeFile(filePath, buffer);
-        console.log('[Upload Avatar Controller] File saved successfully');
-        
-  
-
-        // enregistrer dans un volume partage pour que nginx puisse y acceder 
+        // upload to GCP Storage
+        /****************************************************** */
+        const filePath = await uploadAvatar(buffer, newFileName, file.mimetype);
+        const signedUrl = await generateSignedUrl(newFileName, 24 * 3600); // URL valide 24h
+        //****************************************************** */
+        console.log('[Upload Avatar Controller] File saved successfully:', filePath);
         console.log('[Upload Avatar Controller] basename:', path.basename(filePath));
-        const avatarUrl = `uploads/avatars/${path.basename(filePath)}`;
+        console.log('[Upload Avatar Controller] signedUrl:', signedUrl);
+        const avatarUrl = signedUrl
         console.log('[Upload Avatar Controller] avatarUrl:', avatarUrl);
         
         // update user avatar in database

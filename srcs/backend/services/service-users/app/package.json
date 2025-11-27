@@ -24,6 +24,7 @@
     "@fastify/postgres": "^6.0.2",
     "@fastify/secure-session": "^8.2.0",
     "@fastify/static": "^8.3.0",
+    "@google-cloud/storage": "^7.17.3",
     "@prisma/client": "^6.18.0",
     "@types/pg": "^8.15.5",
     "@types/qrcode": "^1.5.5",
