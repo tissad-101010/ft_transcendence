@@ -866,4 +866,17 @@ export class FriendUI
         else
             this.displayNewFriend();
     }
+
+    public hide(): void {
+        // if (this.containerUI.header) this.containerUI.header.isVisible = false;
+        // if (this.containerUI.menu) this.containerUI.menu.isVisible = false;
+        // if (this.containerUI.view) this.containerUI.view.isVisible = false;
+    }
+
+    /** Affiche tous les panels et UI */
+    public show(): void {
+        // if (this.containerUI.header) this.containerUI.header.isVisible = true;
+        // if (this.containerUI.menu) this.containerUI.menu.isVisible = true;
+        // if (this.containerUI.view) this.containerUI.view.isVisible = true;
+    }
 };

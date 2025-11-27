@@ -121,10 +121,6 @@ private players: Player[] = [
     private lightInteractor! : LightInteractor;
     private cameraHistory: CameraState[] = [];
     private userX: UserX;
-    // private currentZone: ZoneName | null = null;
-    // private previousZone: ZoneName | null = null;
-    // private backNavigation : boolean = false;
-    private isReturning: boolean = false;
 
     /**************************************************
     *                 CONSTRUCTOR                     *
@@ -335,42 +331,6 @@ private resetInteractions(): void {
     /**************************************************
      *                PUBLIC METHODS                  *
      **************************************************/
-
-    public backToPreviousCameraPosition() {
-        if (this.cameraHistory.length < 2) return; // pas assez d’historique
-
-        // 🔹 Indique qu’on revient en arrière
-        this.isReturning = true;
-
-        // Supprimer la zone actuelle
-        this.cameraHistory.pop();
-
-        // Récupérer la zone précédente
-        const lastState = this.cameraHistory[this.cameraHistory.length - 1];
-        if (!lastState?.zone) return;
-
-        const beforeZone = lastState.zone;
-
-        const pickedMesh = this.getAllZoneMeshes()
-            .find(mesh => mesh.name === beforeZone);
-
-        if (!pickedMesh) {
-            console.warn("Pas de mesh trouvé pour la zone", beforeZone);
-            return;
-        }
-
-        // Créer SceneInteractor si pas encore existant
-        if (!this.sceneInteractor) {
-            this.sceneInteractor = new SceneInteractor(this.scene, this.freeCamera, this);
-            this.sceneInteractor.enableInteractionScene();
-        }
-
-        // Simuler le click pour revenir à la zone
-        this.sceneInteractor.handleMainZoneClick(pickedMesh, false);
-    }
-
-
-
     public moveCameraTo(
         zoneName: ZoneName,
         onArrived?: () => void
@@ -436,7 +396,6 @@ private resetInteractions(): void {
             if (typeof onArrived === "function")
                 console.log("Bien arrive 2");
         }
-        this.isReturning = false;
     }
 
     public async setupEnvironment(): Promise<void> {
@@ -529,19 +488,6 @@ private resetInteractions(): void {
         return (this.lightInteractor);
     }
 
-    // public getCurrentZone(): ZoneName | null {
-    //     return this.currentZone;
-    // }
-
-    // public getPreviousZone(): ZoneName | null {
-    //     return this.previousZone;
-    // }
-
-    // public getBackNavigation() : boolean{
-    //     return this.backNavigation;
-    // }
-
-
     public getAllZoneMeshes(): AbstractMesh[] {
         // Récupère toutes les valeurs de l'enum ZoneName (chaînes)
         const zoneNamesAsStrings: string[] = ["stands", "border", "furniture", "buttonPoolExit0"];
@@ -592,14 +538,5 @@ private resetInteractions(): void {
     public set setUser(user: any)
     {
         this.userX.setUser = user;
-    }
-
-    public setCurrentZone(zone: ZoneName) {
-        this.previousZone = this.currentZone;
-        this.currentZone = zone;
-    }
-
-    public setBackNavigation(back : boolean){
-        this.backNavigation = back;
     }
 }

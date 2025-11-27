@@ -318,4 +318,32 @@ export class StandsInteraction implements SpecificInteraction {
         this.sceneInteractor.enableInteractions();
         console.log("StandsInteraction: nettoyage terminé.");
     }
+
+    public hide() : void{
+        if (this.friendUI) {
+            this.friendUI.hide();
+            // Optionnel : tu peux aussi null si tu veux la recréer plus tard
+            // this.friendUI = null;
+        }
+
+        if (this.myProfilUI) {
+            console.log("JE CACHE MYPROFIL")
+            this.myProfilUI.hide();
+            // this.myProfilUI = null;
+        }
+    }
+
+    public show() : void {
+        if (this.friendUI) {
+            this.friendUI.hide();
+            // Optionnel : tu peux aussi null si tu veux la recréer plus tard
+            // this.friendUI = null;
+        }
+
+        if (this.myProfilUI) {
+            console.log("je show myprofil");
+            this.myProfilUI.show();
+            // this.myProfilUI = null;
+        }
+    }
 }

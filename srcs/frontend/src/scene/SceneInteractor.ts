@@ -83,11 +83,42 @@ export class SceneInteractor {
         }
     }
 
-    public disposeCurrInteraction() : void {
+
+    public recreateZone(zone: ZoneName) {
+        console.log("-------->RECREATION DE LA ZONE");
         if (this.currSpecificInteraction) {
-            console.log("----> currspecific est existant");
-            this.currSpecificInteraction.dispose();
-            this.currSpecificInteraction = null;
+        // this.disposeCurrInteraction(); // supprime l'ancienne instance
+            switch(zone) {
+            //     case ZoneName.POOL:
+            //         this.currSpecificInteraction = new PoolInteraction(this.scene, this.sceneManager, this);
+            //         break;
+                case ZoneName.STANDS:
+                    this.currSpecificInteraction.show();
+                    break;
+            //     case ZoneName.LOCKER_ROOM:
+            //         this.currSpecificInteraction = new LockerInteraction(this.scene, this.sceneManager, this);
+            //         break;
+            //     default:
+            //         this.currSpecificInteraction = null;
+            }
+        }
+    }
+
+    public disposeCurrInteraction(zone: ZoneName): void {
+        if (!this.currSpecificInteraction) return;
+
+        console.log("----> CURRSPECIFIC INTERACTION EXISTE, ON LA CACHE");
+
+        switch (zone) {
+            case ZoneName.STANDS:
+                if ('hide' in this.currSpecificInteraction && typeof this.currSpecificInteraction.hide === 'function') {
+                    this.currSpecificInteraction.hide();
+                }
+                break;
+
+            // Tu peux ajouter d'autres zones ici si besoin
+            // case ZoneName.POOL:
+            // case ZoneName.LOCKER_ROOM:
         }
     }
 
@@ -138,7 +169,7 @@ export class SceneInteractor {
                     default:
                         this.currSpecificInteraction = null;
                 }
-            }, this);
+            });
             
         }
     }
@@ -146,35 +177,6 @@ export class SceneInteractor {
     /**************************************************
      *                PUBLIC METHODS                  *
      **************************************************/
-
-
-    public dispose(): void {
-        // 1️⃣ Supprimer l'interaction spécifique en cours
-        if (this.currSpecificInteraction) {
-            this.currSpecificInteraction.dispose();
-            this.currSpecificInteraction = null;
-        }
-
-        // 2️⃣ Nettoyer le highlight
-        if (this.highlightLayer) {
-            this.highlightLayer.removeAllMeshes();
-            this.highlightLayer.dispose(); // supprime le highligh tLayer
-        }
-
-        // 3️⃣ Remettre les meshes principaux pickables
-        this.interactiveMainMeshes.forEach(meshName => {
-            const mesh = this.scene.getMeshByName(meshName);
-            if (mesh) this.meshPickable(mesh);
-        });
-
-        // 4️⃣ Désactiver les interactions
-        this.disableInteractions();
-
-        // 5️⃣ Optionnel : enlever les observables si tu veux vraiment tout couper
-        // this.scene.onPointerObservable.clear();
-    }
-
-
     public enableInteractionScene(): void {
         this.scene.onPointerObservable.add((pointerInfo: PointerInfo) => {
             const isClick = pointerInfo.type === PointerEventTypes.POINTERPICK;

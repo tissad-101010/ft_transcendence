@@ -1,68 +1,91 @@
-import { SceneManager } from "./scene/SceneManager.ts";
-import { SceneInteractor } from "./scene/SceneInteractor.ts";
-import { ZoneName } from "./config.ts";
+import { SceneManager } from "./scene/SceneManager";
+import { SceneInteractor } from "./scene/SceneInteractor";
+import { ZoneName } from "./config";
 
-export const cameraHistory: { zone: ZoneName; action?: () => void }[] = [];
-export let currentIndex = -1;
-
-const zoneMeshMain = [ZoneName.STANDS, ZoneName.POOL, ZoneName.LOCKER_ROOM, ZoneName.START];
-
-export function setCurrentIndex(index: number) {
-  currentIndex = index;
+export interface CameraHistoryEntry {
+  zone: ZoneName;
+  actionOnClick?: () => void;       // ce qui se passe sur un clic normal
+  actionOnPopState?: () => void;    // ce qui se passe sur back/forward
 }
+
+export const cameraHistory: CameraHistoryEntry[] = [];
+export let currentIndex = -1;
+export const mainZones: ZoneName[] = [
+  ZoneName.STANDS,
+  ZoneName.POOL,
+  ZoneName.LOCKER_ROOM,
+  ZoneName.START,
+];
+
+/**
+ * Ajoute un mouvement de caméra au clic normal
+ */
 export function addCameraMove(
-  sceneManager: SceneManager,
+  manager: SceneManager,
   zone: ZoneName,
-  action?: () => void,
-  interactor?: SceneInteractor // permet de faire cleanup
+  actionOnClick?: () => void,
+  actionOnPopState?: () => void
 ) {
-  // Vérifier si la zone existe déjà dans l'historiquea
-  const existingIndex = cameraHistory.findIndex(item => item.zone === zone);
+  const interactor = manager.getSceneInteractor;
+  if (!interactor) return;
 
-  console.log("Camera history zones:", cameraHistory.map(item => item.zone));
-    console.log("Nouvelle zone:", zone);
+  // Supprime l'ancienne instance si c'est une mainZone
+  if (mainZones.includes(zone)) interactor.disposeCurrInteraction();
 
-  if (existingIndex !== -1 && zoneMeshMain.includes(zone)) {
-    console.log("IL EXISTE DEJA L INSTANCE DONC JE DOIS DISPOSE");
-    // Appeler le cleanup via la méthode publique du SceneInteractor
-    interactor?.disposeCurrInteraction();
-
-    // Supprimer l'ancienne entrée
+  // Supprime le doublon dans l'historique
+  const existingIndex = cameraHistory.findIndex(e => e.zone === zone);
+  if (existingIndex !== -1 && mainZones.includes(zone)) {
     cameraHistory.splice(existingIndex, 1);
-
-    // Ajuster currentIndex si nécessaire
     if (existingIndex <= currentIndex) currentIndex--;
   }
 
-  // Couper le futur si on est au milieu de l’historique
+  // Supprime le futur si on navigue au milieu de l’historique
   cameraHistory.splice(currentIndex + 1);
 
-  // Ajouter le nouveau mouvement
-  cameraHistory.push({ zone, action });
+  // Ajoute le mouvement dans l’historique
+  cameraHistory.push({ zone, actionOnClick, actionOnPopState });
   currentIndex++;
 
-  // Déplacer la caméra et exécuter l’action
-  sceneManager.moveCameraTo(zone, () => {
-    action?.();
-  });
+  // Déplace la caméra
+  manager.moveCameraTo(zone, () => actionOnClick?.());
 
-  // Ajouter un état dans l'historique navigateur
+  // Ajoute un état dans le navigateur
   window.history.pushState({ cameraState: zone }, "");
 }
 
-// --- BACK/FORWARD ---
-export function back(sceneManager: SceneManager) {
-  if (currentIndex > 0) {
+/**
+ * Clic navigateur back
+ */
+export function back(manager: SceneManager) {
+    if (currentIndex <= 0) return;
     currentIndex--;
-    const move = cameraHistory[currentIndex];
-    sceneManager.moveCameraTo(move.zone, () => move.action?.());
-  }
+    const entry = cameraHistory[currentIndex];
+    const interactor = manager.getSceneInteractor;
+    if (!interactor) return;
+
+    if (mainZones.includes(entry.zone)) interactor.disposeCurrInteraction();
+    manager.moveCameraTo(entry.zone);
+    interactor.recreateZone(entry.zone);
+
+    if (typeof entry.actionOnPopState === "function") {
+        entry.actionOnPopState();
+    }
 }
 
-export function forward(sceneManager: SceneManager) {
-  if (currentIndex < cameraHistory.length - 1) {
+export function forward(manager: SceneManager) {
+    if (currentIndex >= cameraHistory.length - 1) return;
     currentIndex++;
-    const move = cameraHistory[currentIndex];
-    sceneManager.moveCameraTo(move.zone, () => move.action?.());
-  }
+    const entry = cameraHistory[currentIndex];
+    const interactor = manager.getSceneInteractor;
+    if (!interactor) return;
+
+    if (mainZones.includes(entry.zone)) interactor.disposeCurrInteraction();
+    manager.moveCameraTo(entry.zone);
+    interactor.recreateZone(entry.zone);
+
+    if (typeof entry.actionOnPopState === "function") {
+        entry.actionOnPopState();
+    }
 }
+
+
