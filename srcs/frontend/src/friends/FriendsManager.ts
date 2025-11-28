@@ -2,7 +2,13 @@
 import { FriendInvitation } from "./FriendInvitation";
 import { Friend } from "./Friend";
 
-import { listInvitations, statusInvitation, PromiseUpdateResponse, getInfoFriend, sendFriendInvitation } from "./api/friends.api";
+import {
+    listInvitations,
+    StatusInvitation,
+    PromiseUpdateResponse,
+    getInfoFriend,
+    sendFriendInvitation
+} from "./api/friends.api";
 import { UserX } from "../UserX";
 
 type invitationFriend = {
@@ -13,18 +19,24 @@ type invitationFriend = {
     responsedAt: Date;
 };
 
+export interface FriendInvitationsI
+{
+    sent: FriendInvitation[];
+    received: FriendInvitation[];
+};
+
 export class FriendManager
 {
     // PROPS
     private userX: UserX;
-    private invitations : FriendInvitation[];
+    private invitations : FriendInvitationsI;
     private friends: Friend[];
     private blockeds: string[];
 
     constructor(userX: UserX)
     {
         this.userX = userX;
-        this.invitations = [];
+        this.invitations = {sent: [], received: []};
         this.friends = [];
         this.blockeds = [];
     }
@@ -46,22 +58,26 @@ export class FriendManager
         return (true);
     }
 
-    public async updateInvitation(invitation: FriendInvitation, param: statusInvitation) : Promise<PromiseUpdateResponse>
+    public async updateInvitation(invitation: FriendInvitation, param: StatusInvitation) : Promise<PromiseUpdateResponse>
     {
-        let response : PromiseUpdateResponse;
+        let response : PromiseUpdateResponse = {success: false, message: "Parametre invalide"};
         switch (param)
         {
-            case statusInvitation.ACCEPTED:
+            case StatusInvitation.ACCEPTED:
                 response = await invitation.accept();
                 break;
-            case statusInvitation.BLOCKED:
-                console.log("Pas encore fait");
+            case StatusInvitation.BLOCKED:
+                response = {success: false, message: "Pas encore fait"};
                 break;
-            case statusInvitation.DECLINED:
-                console.log("Pas encore fait");
+            case StatusInvitation.DECLINED:
+                response = {success: false, message: "Pas encore fait"};
+                break;
+            case StatusInvitation.CANCELED:
+                response = {success: false, message: "Pas encore fait"};
                 break;
         }
-        return ({success: false, message: "Parametre invalide"});
+
+        return (response);
     }
 
     public async loadData() : Promise<{success: boolean, message: string}>
@@ -69,7 +85,7 @@ export class FriendManager
         if (!this.userX.getUser)
             return ({success: false, message: "Vous n'etes pas connecte"});
         this.friends = [];
-        this.invitations = [];
+        this.invitations = {sent: [], received: []};
         this.blockeds = [];
         // CALL API TO GET ALL INVITATIONS
         const call = await listInvitations();
@@ -77,7 +93,6 @@ export class FriendManager
         {
             // SUCCESS //
             const data : invitationFriend[] = call.data.data;
-            console.log(">>> DATA -> ", data);
             for (const d of data)
             {
                 let username;
@@ -105,18 +120,28 @@ export class FriendManager
                 // USER BLOCKED //
                 else if (d.status === "BLOCKED")
                     this.blockeds.push(username);
+                // INVITATION PENDING //
                 else if (d.status === "PENDING")
-                    this.invitations.push(new FriendInvitation(
-                        [ d.fromUserUsername, d.toUserUsername ],
-                        d.createdAt,
-                        statusInvitation.PENDING
-                    ));
+                    if (username === d.toUserUsername)
+                        this.invitations.sent.push(new FriendInvitation(
+                            [ d.fromUserUsername, d.toUserUsername ],
+                            d.createdAt,
+                            StatusInvitation.PENDING
+                        ));
+                    else
+                       this.invitations.received.push(new FriendInvitation(
+                            [ d.fromUserUsername, d.toUserUsername ],
+                            d.createdAt,
+                            StatusInvitation.PENDING
+                        )); 
             }
+            console.log("VALEURS APRES LOADDATA : ", this.friends, this.blockeds, this.invitations);
+            // SUCCESS //
             return ({success: true, message: "Amis, invitations, bloques bien charges"});
         }
         else
         {
-            // ERROR
+            // ERROR //
             console.error(call.message);
             return ({success: false, message: call.message || "erreur inconnue"});
         }
@@ -129,6 +154,16 @@ export class FriendManager
     get getFriends() : Friend[]
     {
         return (this.friends);
+    }
+
+    get getInvitations() : FriendInvitationsI
+    {
+        return (this.invitations);
+    }
+
+    get getBlockeds() : string[]
+    {
+        return (this.blockeds);
     }
     
 

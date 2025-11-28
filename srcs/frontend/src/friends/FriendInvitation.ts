@@ -1,18 +1,16 @@
-
-
 import { PromiseUpdateResponse } from "./api/friends.api";
 
 import { updateInvitation } from "./api/friends.api";
-import { statusInvitation } from "./api/friends.api";
+import { StatusInvitation } from "./api/friends.api";
 
 export class FriendInvitation
 {
 
     private createdAt: Date;
-    private status: statusInvitation;
+    private status: StatusInvitation;
     private usernames : string[]; // 0: from 1: to
 
-    constructor(usernames: string[], createdAt: Date, status: statusInvitation)
+    constructor(usernames: string[], createdAt: Date, status: StatusInvitation)
     {
         this.usernames = usernames;
         this.createdAt = createdAt;
@@ -23,9 +21,9 @@ export class FriendInvitation
     // PUBLIC METHODS
     async accept() : Promise<PromiseUpdateResponse>
     {
-        const response: PromiseUpdateResponse = await updateInvitation(statusInvitation.ACCEPTED, this);
+        const response: PromiseUpdateResponse = await updateInvitation(StatusInvitation.ACCEPTED, this);
         if (response.success)
-            this.status = statusInvitation.ACCEPTED;
+            this.status = StatusInvitation.ACCEPTED;
         return (response);
     }
 

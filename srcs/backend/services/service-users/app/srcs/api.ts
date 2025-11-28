@@ -6,7 +6,7 @@
 /*   By: glions <glions@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/23 15:58:35 by tissad            #+#    #+#             */
-/*   Updated: 2025/11/26 17:05:23 by glions           ###   ########.fr       */
+/*   Updated: 2025/11/28 17:07:14 by glions           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,7 +65,7 @@ app.register(signoutRoutes, { prefix: '/user/auth' });
 app.register(internalVerifyTokenRoutes, { prefix: '/internal' });
 app.register(internalSelectUserRoutes, { prefix: '/internalUser'});
 
-app.register(infoFriendRoute, { prefix: '/infoFriend'});
+app.register(infoFriendRoute);
 
 // app.register(TwoFactorAuth, { prefix: '/two-factor' });
 // app.register(githubRoutes, { prefix: '/auth' });

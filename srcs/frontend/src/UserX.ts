@@ -2,22 +2,28 @@ import {
   Scene,
 } from '@babylonjs/core';
 
-import { ZoneName } from "./config.ts";
-import { TournamentParticipant, Tournament } from "./Tournament.ts";
-
-import { Match, MatchRules } from "./Match.ts";
-
 import { SceneManager } from './scene/SceneManager.ts';
+import { ZoneName } from "./config.ts";
 
+import {
+    TournamentParticipant,
+    Tournament 
+} from "./Tournament.ts";
+import {
+    Match,
+    MatchRules
+} from "./Match.ts";
 import { MatchFriendlyOnline } from './Match/MatchFriendlyOnLine.ts';
-
 import { Env } from './lockerRoom/scoreboardUI/menuCreate.ts';
 
-import { listInvitations, sendFriendInvitation } from './friends/api/friends.api.ts';
-
-import { FriendManager } from './friends/FriendsManager.ts';
+import {
+    FriendManager,
+    FriendInvitationsI
+} from './friends/FriendsManager.ts';
 import { Friend } from './friends/Friend.ts';
 import { FriendInvitation } from './friends/FriendInvitation.ts';
+import { PromiseUpdateResponse, StatusInvitation } from './friends/api/friends.api.ts';
+
 
 interface User
 {
@@ -38,12 +44,13 @@ interface User
 
 export class UserX 
 {
-    private match: Match | null = null;
-    private tournament: Tournament | null = null;
+    // PROPS
     private currentZone: ZoneName | null = null;
-
     private sceneManager : SceneManager;
     private user: User | null = null;
+    
+    private match: Match | null = null;
+    private tournament: Tournament | null = null;
 
     private friendManager: FriendManager;
 
@@ -52,6 +59,11 @@ export class UserX
         this.sceneManager = sceneManager;
         this.friendManager = new FriendManager(this);
     }
+
+
+    /***********************************/
+    /*              Friends            */
+    /***********************************/
 
 
     async sendFriendInvite(
@@ -66,63 +78,17 @@ export class UserX
         return (await this.friendManager.deleteFriend(friend))
     }
 
-    async loadFriendsInvitations() : Promise<{success: boolean, message?: string, data?: any}>
+    async updateInvitation(
+        invitation: FriendInvitation,
+        param: StatusInvitation
+    ) : Promise<PromiseUpdateResponse>
     {
-        
+        return (await this.friendManager.updateInvitation(invitation, param));
     }
 
-    createTournament(a: string) : boolean
-    {
-        if (this.user === null)
-            return (false);
-        const p : TournamentParticipant = {
-            login: this.user.login,
-            alias: a,
-            ready: true,
-            id: this.user.id,
-            eliminate: false
-        } 
-        this.tournament = new Tournament(this.sceneManager);
-        this.tournament.addParticipant(p);
-
-        return (true);
-    }
-
-    playTournamentMatch(
-        t: Tournament,
-        m: Match,
-        sceneManager: SceneManager
-    ) : boolean
-    {
-        return (t.playMatch(m, this.user.id, sceneManager));
-    }
-
-    createFriendlyMatch(
-        r: MatchRules
-    ) : boolean
-    {
-        if (!this.user)
-            return (false);
-        // Creer un nouveau match dans la bdd pour recuperer son ID, permet aussi de l'ajouter
-        // dans une liste de matchs en attente d'un joueur (creer une colonne pour dans la BDD)
-        /* var tmp en attendant bdd */ const idMatch = 2;
-        const match = new MatchFriendlyOnline(idMatch, r, this.sceneManager);
-
-        // Ecran d'attente d'un joueur
-
-
-        // Recuperer les informations du joueur qui a rejoint
-        const opp = {login: "test", id: 12};
-        const players = [
-            {alias: this.user.login, id: this.user.id, ready: false, me: true},
-            {alias: opp.login, id: opp.id, ready: false, me: false}
-        ];
-
-        if (!match.init(players))
-            return (false);
-
-        return (true);
-    }
+    /***********************************/
+    /*       Tournament / Matchs       */
+    /***********************************/
 
     joinFriendlyMatch(
         r: MatchRules,
@@ -157,6 +123,60 @@ export class UserX
         return (true);
     }
 
+    createFriendlyMatch(
+        r: MatchRules
+    ) : boolean
+    {
+        if (!this.user)
+            return (false);
+        // Creer un nouveau match dans la bdd pour recuperer son ID, permet aussi de l'ajouter
+        // dans une liste de matchs en attente d'un joueur (creer une colonne pour dans la BDD)
+        /* var tmp en attendant bdd */ const idMatch = 2;
+        const match = new MatchFriendlyOnline(idMatch, r, this.sceneManager);
+
+        // Ecran d'attente d'un joueur
+
+
+        // Recuperer les informations du joueur qui a rejoint
+        const opp = {login: "test", id: 12};
+        const players = [
+            {alias: this.user.login, id: this.user.id, ready: false, me: true},
+            {alias: opp.login, id: opp.id, ready: false, me: false}
+        ];
+
+        if (!match.init(players))
+            return (false);
+
+        return (true);
+    }
+
+    createTournament(a: string) : boolean
+    {
+        if (this.user === null)
+            return (false);
+        const p : TournamentParticipant = {
+            login: this.user.login,
+            alias: a,
+            ready: true,
+            id: this.user.id,
+            eliminate: false
+        } 
+        this.tournament = new Tournament(this.sceneManager);
+        this.tournament.addParticipant(p);
+
+        return (true);
+    }
+
+    playTournamentMatch(
+        t: Tournament,
+        m: Match,
+        sceneManager: SceneManager
+    ) : boolean
+    {
+        return (t.playMatch(m, this.user.id, sceneManager));
+    }
+    
+
     deleteTournament() : void
     {
         /*
@@ -166,6 +186,28 @@ export class UserX
         this.tournament = null;
     }
 
+    /***********************************/
+    /*              Getters            */
+    /***********************************/
+
+    // == Friends == //
+    get getFriends() : Friend[]
+    {
+        return (this.friendManager.getFriends);
+    }
+
+    get getFriendInvitations() : FriendInvitationsI
+    {
+        return (this.friendManager.getInvitations)
+    }
+
+    get getUserBlockeds() : string[]
+    {
+        return (this.friendManager.getBlockeds);
+    }
+    // ============ //
+
+    // == Match / Tournament == //
     get getMatch() : Match | null
     {
         return (this.match);
@@ -175,11 +217,8 @@ export class UserX
     {
         return (this.tournament);
     }
+    // ======================== //
 
-    get getFriends() : Friend[]
-    {
-        return (this.friendManager.getFriends);
-    }
 
     get getCurrentZone() : ZoneName | null
     {
@@ -191,13 +230,11 @@ export class UserX
         return (this.user);
     }
 
-    set setCurrentZone(
-        zone: ZoneName
-    )
-    {
-        this.currentZone = zone;
-    }
+    /***********************************/
+    /*             Setters             */
+    /***********************************/
 
+    // == Match / Tournament == //
     set setTournament(
         tournament: Tournament
     )
@@ -211,6 +248,15 @@ export class UserX
     {
         this.match = match;
     }
+    // ======================== //
+    
+    set setCurrentZone(
+        zone: ZoneName
+    )
+    {
+        this.currentZone = zone;
+    }
+
 
     set setUser(
         user: any

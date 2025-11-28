@@ -6,7 +6,7 @@
 /*   By: glions <glions@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/20 15:29:01 by glions            #+#    #+#             */
-/*   Updated: 2025/11/26 17:04:28 by glions           ###   ########.fr       */
+/*   Updated: 2025/11/28 17:11:14 by glions           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,7 +37,7 @@ export async function getInfoFriendController(
         const { username } = request.query;
         if (!username)
             return (reply.code(400).send({success: false, message: "Parametre username manquant"}));
-        const service = new UsersService(request.server);
+        const service = new UsersService(request.server.prisma);
         const response = await service.getInfoFriendService(username);
         // SUCCESS //
         return (reply.code(200).send({success: true, data: response}));

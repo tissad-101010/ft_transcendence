@@ -21,12 +21,13 @@ export interface PromiseGetInfoFriendResponse
   data?: infoFriend;
 }
 
-export enum statusInvitation
+export enum StatusInvitation
 {
     ACCEPTED,
     DECLINED,
     BLOCKED,
-    PENDING
+    PENDING,
+    CANCELED
 }
 
 const serviceUrl = "https://localhost:8443";
@@ -51,24 +52,24 @@ export async function getInfoFriend(username: string): Promise<PromiseGetInfoFri
   }
 }
 
-export async function updateInvitation(param: statusInvitation, invitation: FriendInvitation) : Promise<PromiseUpdateResponse>
+export async function updateInvitation(param: StatusInvitation, invitation: FriendInvitation) : Promise<PromiseUpdateResponse>
 {
   try
   {
     let mode: string = "";
     switch (param)
     {
-      case statusInvitation.ACCEPTED:
+      case StatusInvitation.ACCEPTED:
         mode = "/accept";
         break;
-      case statusInvitation.BLOCKED:
+      case StatusInvitation.BLOCKED:
         mode = "/blocked";
         break;
-      case statusInvitation.DECLINED:
+      case StatusInvitation.DECLINED:
         mode = "/decline";
         break;
     }
-    const call = await fetch(`${serviceUrl}/invite${mode}`, {
+    const call = await fetch(`${serviceUrl}/friend/invite${mode}`, {
       method: "POST",
       credentials: "include",
       headers: {
