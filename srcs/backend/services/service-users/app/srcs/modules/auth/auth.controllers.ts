@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   auth.controllers.ts                                :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
+/*   By: issad <issad@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/27 11:44:30 by tissad            #+#    #+#             */
-/*   Updated: 2025/11/27 18:50:29 by tissad           ###   ########.fr       */
+/*   Updated: 2025/11/28 08:35:20 by issad            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,9 +14,6 @@
 // to handle the request response
 
 import path from "path";
-import multipart from "@fastify/multipart";
-import { pipeline } from "stream/promises";
-const pump = pipeline;
 import { FastifyReply, FastifyRequest } from 'fastify';
 
 import { SignupUserDTO,
@@ -322,10 +319,8 @@ export async function changePasswordController(
         });
     }
 }
-import { promises as fs } from "fs";
-import { uploadAvatar,
-            generateSignedUrl,
- } from "../../utils/storage.utils";
+
+import { uploadAvatar} from "../../utils/storage.utils";
 
 
 // upload avatar controller
@@ -335,7 +330,7 @@ export async function uploadAvatarController(
 ) {
     console.log('[Upload Avatar Controller] START');
     const authService = new AuthService(request.server);
-    // Vérification JWT
+    // extract user from access token
     const cookies = JwtUtils.extractCookiesFromRequest(request);
     const access_token = JwtUtils.extractTokenFromCookies(cookies, 'access_token');
     const user = JwtUtils.extractUserFromAccessToken(access_token);
@@ -357,7 +352,7 @@ export async function uploadAvatarController(
         const fileExtension = path.extname(file.filename);
         const newFileName = `avatar-${user.userId}-${uniqueSuffix}${fileExtension}`;
         console.log('[Upload Avatar Controller] New file name:', newFileName);
-        // Convertir le fichier en buffer et l’écrire
+        // read file buffer
         const buffer = await file.toBuffer();
         console.log('[Upload Avatar Controller] File buffer size:', buffer.length);
         // upload to GCP Storage
@@ -371,7 +366,7 @@ export async function uploadAvatarController(
         const avatarUrl = filePath; // use direct GCP URL
         console.log('[Upload Avatar Controller] avatarUrl:', avatarUrl);
         
-        // update user avatar in database
+        // update user url avatar in database
         const result = await authService.uploadUserAvatar(user.userId, avatarUrl);
         return reply.code(200).send(result);
 
