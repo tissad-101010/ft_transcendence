@@ -4,6 +4,9 @@ import { AdvancedDynamicTexture, ScrollViewer, StackPanel, TextBlock, Control, R
 import { Friend } from "../Friend.ts";
 import { UserX } from "../UserX.ts";
 
+import { chatApi } from "../chatApi/chat.api.ts";
+
+
 export class Chat3D {
     private advancedTexture: AdvancedDynamicTexture;
     private mesh: AbstractMesh;
@@ -158,13 +161,32 @@ export class Chat3D {
         this.sendBtn.cornerRadius = 10;
         inputGrid.addControl(this.sendBtn, 0, 1);
 
-        this.sendBtn.onPointerUpObservable.add(() => {
+        this.sendBtn.onPointerUpObservable.add(async () => {
             const message = inputTxt.text.trim();
             if (message.length === 0) return;
 
             // Utiliser la méthode de la classe pour ajouter le message
             this.addMessage(this.userX.getUser.id, message, new Date());
 
+            console.log("Message envoyé :", message, this.userX.getUser?.id, this.friend.getId);
+            console.log("Message envoyé :", message, this.userX.getUser?.username, this.friend.getLogin);
+            try
+            {
+                // const conversation = chatApi.startConversation(
+                //     this.userX.getUser!.username,
+                //     this.friend.getLogin
+                // );
+                // console.log("Conversation démarrée :", conversation);
+                const sended = await chatApi.sendMessage(
+                    this.userX.getUser!.username,
+                    this.friend.getLogin,
+                    message,
+                );
+                console.log("Message envoyé via chatApi", sended);
+            } 
+            catch (error) {
+                console.error("Erreur lors du démarrage de la conversation :", error);
+            }
             // AJOUTER LE MESSAGE DANS LE TABLEAU MESSAGES PRESENT DANS FRIEND ET DANS LA BDD
             
             // Effacer le champ
@@ -278,14 +300,19 @@ export class Chat3D {
         this.lastDate = date;
     }
 
-    displayHistory() : void
+    async displayHistory() : Promise<void>
     {
-        const msgs = this.friend.loadMessages();
+        const msgs = await this.friend.loadMessages(this.userX.getUser!.username);
+        console.log("Messages chargés :", msgs);
+
         if (msgs.length === 0)
             return ;
 
         msgs.forEach((msg) => {
-            this.addMessage(msg.sender, msg.content, msg.date);
+            console.log("added a message:", msg);
+            console.log("added a message:", msg.content, msg.senderId, msg.sentAt);
+
+            this.addMessage(this.userX.getUser.id, msg.content, new Date(msg.sentAt));
         });
     }
 
@@ -297,7 +324,7 @@ export class Chat3D {
         this.onlineIcon.background = friend.getOnline ? "#128354ff" : "#e58ab8ff";
         this.chatContainer.clearControls();
         this.friend = friend;
-        this.friend.loadMessages();
+        // this.friend.loadMessages(this.userX.getUser!.username);
         this.displayHistory();
     }
 

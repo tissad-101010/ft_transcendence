@@ -20,14 +20,57 @@ datasource db {
 
 
 
-// =====================
-// User Profile
-// =====================
-model Chat {
-  // =====================
-  // Basic Info
-  // =====================
-  id        Int      @id @default(autoincrement())
-  message   String
-  timestamp DateTime @default(now())
+// ==============================
+//           MODELS
+// ==============================
+
+model User {
+  id        Int           @id @default(autoincrement())
+  username  String        @unique
+  messages  Message[]     
+  blocksByMe Block[]       @relation("BlocksByMe")
+  blocksToMe Block[]       @relation("BlocksToMe")
+  participants ConversationParticipant[]
 }
+
+model Conversation {
+  id            Int                       @id @default(autoincrement())
+  createdAt     DateTime                  @default(now())
+  messages      Message[]
+  participants  ConversationParticipant[]
+}
+
+model ConversationParticipant {
+  id             Int           @id @default(autoincrement())
+  userId         Int
+  conversationId Int
+
+  user           User          @relation(fields: [userId], references: [id])
+  conversation   Conversation  @relation(fields: [conversationId], references: [id])
+
+  @@unique([userId, conversationId])
+}
+
+model Message {
+  id             Int          @id @default(autoincrement())
+  conversationId Int
+  senderId       Int
+  content        String
+  sentAt         DateTime     @default(now())
+
+  conversation   Conversation @relation(fields: [conversationId], references: [id])
+  sender         User         @relation(fields: [senderId], references: [id])
+}
+
+model Block {
+  id         Int  @id @default(autoincrement())
+
+  blockerId  Int
+  blockedId  Int
+
+  blocker    User @relation("BlocksByMe", fields: [blockerId], references: [id])
+  blocked    User @relation("BlocksToMe", fields: [blockedId], references: [id])
+
+  @@unique([blockerId, blockedId])
+}
+

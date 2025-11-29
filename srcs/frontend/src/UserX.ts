@@ -75,6 +75,13 @@ export class UserX
         this.addFriend("Lolo");
         this.addFriend("Tissad");
         this.addFriend("Val");
+        this.addFriend("toto");
+        this.addFriend("test");
+        this.addFriend("Alice");
+        this.addFriend("Bob");
+        this.addFriend("Charlie");
+        this.addFriend("David");
+        this.addFriend("Eve");
     }
 
     createTournament(a: string) : boolean

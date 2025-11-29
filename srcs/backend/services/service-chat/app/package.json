@@ -6,6 +6,8 @@
     "dev": "ts-node-dev --respawn --clear --transpile-only srcs/api.ts",
     "build": "tsc",
     "start": "node dist/srcs/api.js",
+  "test": "vitest --environment node --globals --include 'tests/**/*.test.ts'",
+  "test:watch": "vitest --environment node --globals --include 'tests/**/*.test.ts' --watch",
     "prisma:generate": "prisma generate --schema=./srcs/prisma/prisma/schema.prisma",
     "prisma:migrate": "prisma migrate dev --schema=./srcs/prisma/prisma/schema.prisma --name initUserTable",
     "prisma:reset": "prisma migrate reset --force --schema=./srcs/prisma/prisma/schema.prisma",
@@ -37,17 +39,20 @@
     "@fastify/redis": "^7.0.0",
     "@types/better-sqlite3": "7.6.13",
     "@types/jsonwebtoken": "^9.0.2",
-    "@types/node": "^24.7.1",
+    "@types/node": "^24.10.1",
     "@types/nodemailer": "^6.4.7",
     "@types/twilio": "^3.19.2",
+    "@vitest/coverage-v8": "^4.0.14",
     "better-sqlite3": "11.10.0",
+    "esbuild": "^0.27.0",
     "jsonwebtoken": "^9.0.2",
     "nodemailer": "^7.0.9",
     "nodemon": "^3.x",
     "prisma": "^6.18.0",
-    "ts-node": "^10.x",
+    "ts-node": "^10.9.2",
     "ts-node-dev": "^2.0.0",
     "twilio": "^4.15.0",
-    "typescript": "^5.8.3"
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.14"
   }
 }

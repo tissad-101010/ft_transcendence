@@ -8,5 +8,9 @@
  *
  * 🟢 You can import this file directly.
  */
-export type * from './models/Chat'
+export type * from './models/User'
+export type * from './models/Conversation'
+export type * from './models/ConversationParticipant'
+export type * from './models/Message'
+export type * from './models/Block'
 export type * from './commonInputTypes'

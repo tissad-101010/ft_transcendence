@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   api.ts                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
+/*   By: tissad <issad@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/23 15:58:35 by tissad            #+#    #+#             */
-/*   Updated: 2025/11/27 19:11:08 by tissad           ###   ########.fr       */
+/*   Updated: 2025/11/28 11:50:30 by tissad            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,6 +32,12 @@ app.register(redisPlugin);
 app.register(prismaPlugin);
 
 
+// Import and register routes
+import { chatRoutes } from './routes/chat.routes';
+
+// Register chat routes
+app.register(chatRoutes);
+
 
 // Start the Fastify server
 const start = async () => {
@@ -39,7 +45,7 @@ const start = async () => {
     // Register CORS plugin to allow cross-origin requests  
     // need more testing/!\
     await app.register(cors, {
-      origin: 'https://localhost:8443', // Allow specific origins
+      origin: ['https://localhost:8443', 'http://localhost:3000'],  // Allow specific origins
       methods: ['GET', 'POST'], // Allow specific methods
       credentials: true, // Allow credentials
     });
