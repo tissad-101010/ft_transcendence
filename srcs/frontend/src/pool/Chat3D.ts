@@ -169,8 +169,8 @@ export class Chat3D {
             // Utiliser la méthode de la classe pour ajouter le message
             this.addMessage(this.userX.getUser.username, message, new Date());
 
-            console.log("Message envoyé :", message, this.userX.getUser?.id, this.friend.getId);
-            console.log("Message envoyé :", message, this.userX.getUser?.username, this.friend.getLogin);
+            console.log("Message envoyé :", message, this.userX.getUser?.id, this.friend.getUsername);
+            console.log("Message envoyé :", message, this.userX.getUser?.username, this.friend.getUsername);
             try
             {
                 // const conversation = chatApi.startConversation(
@@ -212,7 +212,7 @@ export class Chat3D {
                 ws.send(JSON.stringify({
                     type: "send_message",
                     from: this.userX.getUser!.username,
-                    to: this.friend.getLogin,
+                    to: this.friend.getUsername,
                     text: message,
                 }));
                 
