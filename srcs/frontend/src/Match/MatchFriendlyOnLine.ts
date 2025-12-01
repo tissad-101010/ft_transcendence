@@ -31,6 +31,8 @@ export class MatchFriendlyOnline extends MatchBase
     private dbIdToGameId: Map<number, number> = new Map(); // mapping DB user id -> game-local id (1/2)
     private myGamePlayerId: number | null = null; // 1 or 2 used when sending player_move
     private hasSentSyncThisServe: boolean = false; // true si on a déjà envoyé une synchro pour l'engagement en cours
+    private lastSyncedScore1: number = 0;
+    private lastSyncedScore2: number = 0;
 
     constructor(id : number, rules : MatchRules, sceneManager: SceneManager)
     {
@@ -629,6 +631,36 @@ export class MatchFriendlyOnline extends MatchBase
         console.log("📤 Message state_sync envoyé:", payload);
     }
 
+    /**
+     * Vérifie si le score a changé localement depuis la dernière synchro
+     * et envoie un state_sync pour forcer l'autre navigateur à se recaler.
+     * N'importe quel client peut déclencher cette synchro lorsqu'il détecte un but.
+     */
+    private checkAndSyncScoreChange(): void {
+        if (!this.websocket || !this.game || !this.game.logic) {
+            return;
+        }
+
+        if (this.websocket.readyState !== WebSocket.OPEN) {
+            return;
+        }
+
+        const currentScore1 = this.game.logic.getScore1;
+        const currentScore2 = this.game.logic.getScore2;
+
+        // Si aucun changement de score, ne rien faire
+        if (currentScore1 === this.lastSyncedScore1 && currentScore2 === this.lastSyncedScore2) {
+            return;
+        }
+
+        // Mettre à jour la référence locale
+        this.lastSyncedScore1 = currentScore1;
+        this.lastSyncedScore2 = currentScore2;
+
+        // Envoyer une synchro d'état complète (scores, timer, positions des joueurs)
+        this.sendStateSync();
+    }
+
     play() : boolean
     {
         console.log("▶️ MatchFriendlyOnline.play() appelé", { isOnline: this.isOnline, matchStarted: this.matchStarted, gameExists: !!this.game });
@@ -663,24 +695,28 @@ export class MatchFriendlyOnline extends MatchBase
                         // Gérer les touches pour mon joueur local
                         this.handleOnlineKeys();
 
-                        // Si ce client est le premier connecteur, il sert de référence pour la synchro
+                        // Si ce client est le premier connecteur, il sert de référence
+                        // pour la synchro au moment de l'engagement (balle au milieu).
                         if (this.isFirstConnector && this.websocket && this.websocket.readyState === WebSocket.OPEN) {
-                            // Lorsque l'on est en phase d'engagement (state === 2) et que la balle est au centre,
-                            // on envoie une synchro une seule fois pour ce point.
                             if (this.game.logic.getState === 2 && !this.hasSentSyncThisServe) {
                                 this.sendStateSync();
                                 this.hasSentSyncThisServe = true;
-                            }
-
-                            // Dès qu'un but est marqué, on prépare la synchro pour l'engagement suivant
-                            if (this.game.logic.getScored !== 0) {
-                                this.hasSentSyncThisServe = false;
                             }
                         }
 
                         // Mettre à jour l'interface 3D (qui appelle aussi la logique du jeu)
                         // On passe un Set vide car les touches sont déjà gérées dans handleOnlineKeys()
                         this.game.interface.update(new Set());
+
+                        // Après la mise à jour, si un but vient d'être marqué, autoriser
+                        // une nouvelle synchro d'engagement ET synchroniser immédiatement
+                        // le score de l'autre navigateur sur celui de ce client.
+                        if (this.game.logic.getScored !== 0) {
+                            // Prépare l'engagement suivant (nouvelle synchro au centre)
+                            this.hasSentSyncThisServe = false;
+                            // Synchronise les scores / positions / timer sur l'autre navigateur
+                            this.checkAndSyncScoreChange();
+                        }
                     } else {
                         // Même si le match n'a pas encore démarré, mettre à jour l'interface
                         // pour afficher les joueurs et la balle (en position initiale)
