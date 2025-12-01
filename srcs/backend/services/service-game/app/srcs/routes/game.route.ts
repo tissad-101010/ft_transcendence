@@ -206,6 +206,21 @@ async function handleWebSocketMessage( // rp route websocket messages by type
     case 'player_move': // rp move command
       await handlePlayerMove(fastify, ws, message); // rp process movement
       break; // rp exit switch branch
+    case 'state_sync': // rp full state synchronization from one client
+      try {
+        const { gameId } = message;
+        if (typeof gameId !== 'number') {
+          fastify.log.warn('state_sync sans gameId valide, message ignoré:', message);
+          break;
+        }
+        // rp simply broadcast the payload to all sockets in the room
+        // the client émetteur ignorera son propre echo grâce à senderId
+        broadcastToGame(gameId, message);
+        fastify.log.info(`📡 state_sync relayé pour gameId=${gameId}`);
+      } catch (error) {
+        fastify.log.error(error, '❌ Erreur lors du traitement de state_sync');
+      }
+      break;
     default: // rp unknown command branch
       fastify.log.warn('Type de message inconnu:', message.type); // rp log unsupported message type
   } // rp end switch statement

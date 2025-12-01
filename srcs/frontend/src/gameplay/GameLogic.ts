@@ -235,6 +235,8 @@ export default class GameLogic
     /**
      * Synchronise l'état critique de la partie à partir d'un état reçu à distance.
      * Utilisé uniquement pour le mode en ligne afin de recaler les deux navigateurs.
+     * On force le jeu dans un état d'engagement (state = 2) avec la balle au centre
+     * et un nouveau compteur d'engagement local basé sur la valeur reçue.
      */
     syncStateFromRemote(data: {
         score1: number;
@@ -247,8 +249,31 @@ export default class GameLogic
         this.score.team1 = data.score1;
         this.score.team2 = data.score2;
 
+        // Nettoyage de l'ancien compteur d'engagement s'il était actif
+        if (this.countDownGoal.active && this.countDownGoal.id) {
+            clearInterval(this.countDownGoal.id);
+        }
+
         // Recalage du timer d'engagement
         this.countDownGoal.value = data.time;
+        this.countDownGoal.active = true;
+
+        // On force l'état en "engagement"
+        this.state = 2;
+        this.scored = 0;
+
+        // On replace la balle au centre (engagement classique)
+        this.ball.reset();
+
+        // On redémarre un compteur local à partir de la valeur reçue
+        this.countDownGoal.id = setInterval(() => {
+            this.countDownGoal.value--;
+            if (this.countDownGoal.value === -1) {
+                this.state = 1;
+                this.countDownGoal.active = false;
+                clearInterval(this.countDownGoal.id);
+            }
+        }, 1000);
 
         // Mise à jour des positions verticales des joueurs
         data.players.forEach((remotePlayer) => {
