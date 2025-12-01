@@ -12,7 +12,7 @@ PBRMaterial,
 Material
 } from '@babylonjs/core';
 
-import {ZoneName} from '../config.ts';
+import { ZoneName } from '../config.ts';
 import {getCurrentGroup, setCurrentGroup, getTotalGroups, displayFriendsWithEmpty} from '../utils.ts';
 import { FriendUI } from './FriendUI.ts';
 import { MyProfilUI } from './MyProfilUI.ts';
@@ -82,16 +82,30 @@ export class StandsInteraction implements SpecificInteraction {
     }
 
 
-    private handleMyProfile() : void 
-    {
-        this.sceneInteractor.disableInteractions();
-        this.sceneManager.moveCameraTo(ZoneName.ARBITRATOR, () => {
-            this.clicArbitrator = true;
-            this.sceneInteractor.enableInteractions();
-            if (this.myProfilUI === null)
-                this.myProfilUI = new MyProfilUI(this.sceneManager, this.sceneManager.getUserX);
-        });
-    }
+    // private handleMyProfile() : void 
+    // {
+    //     this.sceneInteractor.disableInteractions();
+    //     this.sceneManager.moveCameraTo(ZoneName.ARBITRATOR, () => {
+    //         this.clicArbitrator = true;
+    //         this.sceneInteractor.enableInteractions();
+    //         if (this.myProfilUI === null)
+    //             this.myProfilUI = new MyProfilUI(this.sceneManager, this.sceneManager.getUserX);
+    //     });
+    // }
+    private handleMyProfile(): void {
+    this.sceneInteractor.disableInteractions();
+    this.sceneManager.moveCameraTo(ZoneName.ARBITRATOR, () => {
+        this.clicArbitrator = true;
+        this.sceneInteractor.enableInteractions();
+
+        if (this.myProfilUI === null)
+            this.myProfilUI = new MyProfilUI(
+                this.sceneManager,
+                this.sceneManager.getUserX
+            );
+    });
+}
+
 
     private handleFriendsProfile(
         mesh: AbstractMesh,
@@ -206,19 +220,19 @@ export class StandsInteraction implements SpecificInteraction {
                 }
                 else if (pickedMesh === buttonMeshes[2] || (pickedMesh === buttonMeshes[3] && this.clicArbitrator)){
                     this.sceneInteractor.disableInteractions();
-                    if (this.friendUI)
-                    {
-                        this.friendUI.switchOff();
-                        this.friendUI = null;
-                        this.resetMaterialForScoreboard();
-                    }
-                    this.resetState(buttonMeshes);
                     this.sceneManager.moveCameraTo(ZoneName.STANDS, () => {
-                            if (pickedMesh === buttonMeshes[2]){
-                                this.clicSeat = false;
-                                this.test = false;
+                        if (pickedMesh === buttonMeshes[2]){
+                            this.clicSeat = false;
+                            this.test = false;
+                                if (this.friendUI)
+                                {
+                                    this.friendUI.switchOff();
+                                    this.friendUI = null;
+                                    this.resetMaterialForScoreboard();
+                                }
+                                this.resetState(buttonMeshes);
                             }
-                            else if (pickedMesh === buttonMeshes[3])
+                            if (pickedMesh === buttonMeshes[3])
                             {
                                 if (this.myProfilUI)
                                 {
@@ -229,7 +243,7 @@ export class StandsInteraction implements SpecificInteraction {
                                 this.clicArbitrator = false;
                             }
                             this.sceneInteractor.enableInteractions();
-                        });
+                        }, this.sceneInteractor);
                 }
             }
         } else {

@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { SceneManager } from './scene/SceneManager';
 import { useAuth } from "./auth/context";
+import {handlePopState} from './CameraHistory';
 
 const BabylonScene = () => {
   const { user, isAuthenticated, pending2FA,  } = useAuth();
@@ -35,6 +36,18 @@ const BabylonScene = () => {
     }
   }, [isAuthenticated, user]);
 
+// Gestion back/forward navigateur
+useEffect(() => {
+  const handlePop = (event: PopStateEvent) => {
+    handlePopState(managerRef.current!, event.state);
+  };
+
+  window.addEventListener("popstate", handlePop);
+  return () => window.removeEventListener("popstate", handlePop);
+}, []);
+
+
+
   return (
     <canvas
       ref={canvasRef}
@@ -44,3 +57,4 @@ const BabylonScene = () => {
 };
 
 export default BabylonScene;
+

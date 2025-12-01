@@ -37,7 +37,6 @@ export class LockerInteraction implements SpecificInteraction {
      *                  CONSTRUCTOR                   *
      **************************************************/
     constructor(scene: Scene, sceneManager: SceneManager, sceneInteractor: SceneInteractor) {
-        console.log("Entree locker");
         this.scene = scene;
         this.sceneManager = sceneManager;
         this.sceneInteractor = sceneInteractor;
@@ -118,5 +117,34 @@ export class LockerInteraction implements SpecificInteraction {
         // console.log("LockerInteraction: nettoyage terminé.");
     }
 
+    public hide() : void{
+        if (this.scoreboardHandler) {
+            console.log("LockerInteraction:hide");
+            this.scoreboardHandler.hide();
+            // Optionnel : tu peux aussi null si tu veux la recréer plus tard
+            // this.friendUI = null;
+        }
+
+        // if (this.myProfilUI) {
+        //     console.log("StandInteraction:hide")
+        //     this.myProfilUI.hide();
+        //     // this.myProfilUI = null;
+        // }
+    }
+
+    public show() : void {
+        if (this.scoreboardHandler) {
+            console.log("LockerInteraction:show");
+            this.scoreboardHandler.show();
+            // Optionnel : tu peux aussi null si tu veux la recréer plus tard
+            // this.friendUI = null;
+        }
+
+        // if (this.myProfilUI) {
+        //     console.log("StandsInteractions:show");
+        //     this.myProfilUI.show();
+        //     // this.myProfilUI = null;
+        // }
+    }
   
 }

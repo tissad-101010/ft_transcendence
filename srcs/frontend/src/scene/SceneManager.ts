@@ -48,6 +48,17 @@ const poolMeshNames = [
     ...meshNamesByZone.pool.lounge,
     ...meshNamesByZone.pool.buttonsPool,
 ];
+
+//NE PAS TOUCHER!
+const meshNamesZones = ["stands", "furniture", "chair03"];
+
+interface CameraState {
+  position: Vector3;
+  rotation: Vector3;
+  zone?: ZoneName;
+}
+
+
 export class SceneManager {
     /**************************************************
      *           PRIVATE ATTRIBUTES                   *
@@ -67,7 +78,7 @@ export class SceneManager {
     private _loungeMeshes: AbstractMesh[] = [];
     // private lightInteractor : LightInteractor;
     private lightInteractor! : LightInteractor;
-
+    private cameraHistory: CameraState[] = [];
     private userX: UserX;
 
     /**************************************************
@@ -94,10 +105,10 @@ export class SceneManager {
         this.freeCamera.attachControl(canvas, true);
 
         // Bloque deplacements clavier
-        // this.freeCamera.keysUp = [];
-        // this.freeCamera.keysDown = [];
-        // this.freeCamera.keysLeft = [];
-        // this.freeCamera.keysRight = [];
+        this.freeCamera.keysUp = [];
+        this.freeCamera.keysDown = [];
+        this.freeCamera.keysLeft = [];
+        this.freeCamera.keysRight = [];
         //Bloque zoom molette
         this.freeCamera.inputs.attached.mousewheel?.detachControl();
         this.scene.activeCamera = this.freeCamera;
@@ -107,6 +118,7 @@ export class SceneManager {
     /**************************************************
      *               PRIVATE METHODS                  *
      **************************************************/
+
     private onResize = () => {
         this.engine.resize();
     }
@@ -259,6 +271,21 @@ export class SceneManager {
         const mouseInput = new FreeCameraMouseInput();
         this.freeCamera.inputs.add(mouseInput);
     }
+private resetInteractions(): void {
+    // Si tu as un SceneInteractor
+    if (this.sceneInteractor) {
+        this.sceneInteractor.disableInteractions(); // désactive tout
+        this.sceneInteractor.enableInteractionScene();  // réactive pour la nouvelle caméra
+    }
+    
+    // Optionnel : réattacher la caméra au canvas
+    this.freeCamera.detachControl();
+    this.freeCamera.attachControl(this.canvas, true);
+    
+    // Si tu limites la rotation
+    if (this.limitCameraRotation) this.enableRotationOnly();
+}
+
 
     /**************************************************
      *                PUBLIC METHODS                  *
@@ -268,9 +295,6 @@ export class SceneManager {
         onArrived?: () => void
     ) 
     {
-        //  if (zoneName === ZoneName.POOL || zoneName === ZoneName.SCREEN_TV ||
-        //     zoneName === ZoneName.SCOREBOARD || zoneName.includes(ZoneName.TSHIRT))
-        //     this.limitCameraRotation = false;
         const config = CAMERA_CONFIGS[zoneName];
         if (!config) return;
 
@@ -412,6 +436,7 @@ export class SceneManager {
     {
         return (this.lightInteractor);
     }
+
     // /**************************************************
     //  *                    SETTERS                     *
     //  **************************************************/
@@ -449,5 +474,4 @@ export class SceneManager {
     {
         this.userX.setUser = user;
     }
-
 }
