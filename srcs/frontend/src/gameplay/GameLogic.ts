@@ -232,6 +232,33 @@ export default class GameLogic
         return (this.countDownGoal.value);
     }
 
+    /**
+     * Synchronise l'état critique de la partie à partir d'un état reçu à distance.
+     * Utilisé uniquement pour le mode en ligne afin de recaler les deux navigateurs.
+     */
+    syncStateFromRemote(data: {
+        score1: number;
+        score2: number;
+        time: number;
+        players: { id: number; posY: number }[];
+    }): void
+    {
+        // Recalage du score
+        this.score.team1 = data.score1;
+        this.score.team2 = data.score2;
+
+        // Recalage du timer d'engagement
+        this.countDownGoal.value = data.time;
+
+        // Mise à jour des positions verticales des joueurs
+        data.players.forEach((remotePlayer) => {
+            const localPlayer = this.players.find((p) => p.getId === remotePlayer.id);
+            if (localPlayer) {
+                localPlayer.setPosY = remotePlayer.posY;
+            }
+        });
+    }
+
     set setField(field: IField)
     {
         this.field = field;

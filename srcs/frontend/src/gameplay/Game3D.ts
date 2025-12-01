@@ -316,6 +316,30 @@ export default class Game3D
         panelRight.addControl(this.score2);
     }
 
+    /**
+     * Force la mise à jour immédiate de l'affichage du score
+     * en se basant sur l'état courant de la GameLogic.
+     * Utile pour resynchroniser le client "en retard" en mode en ligne.
+     */
+    syncScoreFromLogic() {
+        if (!this.game || !this.game.logic || !this.score1 || !this.score2)
+            return;
+
+        this.score1.text = this.game.logic.getScore1.toString();
+        this.score2.text = this.game.logic.getScore2.toString();
+    }
+
+    /**
+     * Force la mise à jour immédiate de l'affichage du timer d'engagement
+     * à partir de GameLogic, sans animation.
+     */
+    syncTimeFromLogic() {
+        if (!this.game || !this.game.logic || !this.time)
+            return;
+
+        this.time.text = this.game.logic.getTime.toString();
+    }
+
     updateScoreBoard() {
         if (!this.score1 || !this.score2 || (this.game?.logic.getScored !== 1 && this.game?.logic.getScored !== 2)) return;
 

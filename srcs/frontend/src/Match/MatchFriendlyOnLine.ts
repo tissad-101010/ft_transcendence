@@ -30,6 +30,7 @@ export class MatchFriendlyOnline extends MatchBase
     private isFirstConnector: boolean | null = null; // true si ce navigateur est le premier à se connecter au match
     private dbIdToGameId: Map<number, number> = new Map(); // mapping DB user id -> game-local id (1/2)
     private myGamePlayerId: number | null = null; // 1 or 2 used when sending player_move
+    private hasSentSyncThisServe: boolean = false; // true si on a déjà envoyé une synchro pour l'engagement en cours
 
     constructor(id : number, rules : MatchRules, sceneManager: SceneManager)
     {
@@ -527,6 +528,42 @@ export class MatchFriendlyOnline extends MatchBase
                     });
                 }
                 break;
+            case 'state_sync':
+                // Synchronisation d'état envoyée par le client "référence"
+                console.log("📥 Message de synchronisation d'état reçu:", message);
+                if (!this.isOnline || !this.game || !this.game.logic) {
+                    console.warn("⚠️ state_sync ignoré (match hors ligne ou game manquant)");
+                    break;
+                }
+                if (message.gameId !== this.id) {
+                    console.warn("⚠️ state_sync pour un autre match, ignoré:", { expectedGameId: this.id, receivedGameId: message.gameId });
+                    break;
+                }
+                // Ne pas traiter notre propre message (echo éventuel du serveur)
+                if (this.myPlayerId && message.senderId === this.myPlayerId) {
+                    console.log("ℹ️ state_sync echo pour ce client, ignoré");
+                    break;
+                }
+
+                try {
+                    this.game.logic.syncStateFromRemote({
+                        score1: message.score1,
+                        score2: message.score2,
+                        time: message.time,
+                        players: message.players || [],
+                    });
+
+                    // Recalage immédiat de l'affichage score / timer pour éviter tout décalage visuel
+                    if (this.game.interface) {
+                        this.game.interface.syncScoreFromLogic();
+                        this.game.interface.syncTimeFromLogic();
+                    }
+
+                    console.log("✅ État du jeu resynchronisé depuis le client distant");
+                } catch (e) {
+                    console.error("❌ Erreur lors de l'application de state_sync:", e);
+                }
+                break;
             default:
                 console.warn("⚠️ Type de message WebSocket inconnu:", message.type);
         }
@@ -550,6 +587,46 @@ export class MatchFriendlyOnline extends MatchBase
         } else {
             console.warn("⚠️ WebSocket n'est pas ouvert, readyState:", this.websocket.readyState);
         }
+    }
+
+    /**
+     * Envoie une photographie de l'état du jeu au début d'un engagement
+     * afin de recaler le second joueur (score, positions verticales, timer).
+     * Seul le client "référence" (premier connecteur) doit appeler cette méthode.
+     */
+    private sendStateSync(): void {
+        if (!this.websocket || !this.game || !this.game.logic || !this.myPlayerId) {
+            console.warn("⚠️ sendStateSync: conditions non remplies", {
+                websocket: !!this.websocket,
+                game: !!this.game,
+                logic: !!this.game?.logic,
+                myPlayerId: this.myPlayerId,
+            });
+            return;
+        }
+
+        if (this.websocket.readyState !== WebSocket.OPEN) {
+            console.warn("⚠️ sendStateSync: WebSocket non ouvert, readyState:", this.websocket.readyState);
+            return;
+        }
+
+        const players = this.game.logic.getPlayers.map((p) => ({
+            id: p.getId,
+            posY: p.getPosY,
+        }));
+
+        const payload = {
+            type: 'state_sync',
+            gameId: this.id,
+            senderId: this.myPlayerId,
+            score1: this.game.logic.getScore1,
+            score2: this.game.logic.getScore2,
+            time: this.game.logic.getTime,
+            players,
+        };
+
+        this.websocket.send(JSON.stringify(payload));
+        console.log("📤 Message state_sync envoyé:", payload);
     }
 
     play() : boolean
@@ -585,6 +662,22 @@ export class MatchFriendlyOnline extends MatchBase
                     if (this.matchStarted) {
                         // Gérer les touches pour mon joueur local
                         this.handleOnlineKeys();
+
+                        // Si ce client est le premier connecteur, il sert de référence pour la synchro
+                        if (this.isFirstConnector && this.websocket && this.websocket.readyState === WebSocket.OPEN) {
+                            // Lorsque l'on est en phase d'engagement (state === 2) et que la balle est au centre,
+                            // on envoie une synchro une seule fois pour ce point.
+                            if (this.game.logic.getState === 2 && !this.hasSentSyncThisServe) {
+                                this.sendStateSync();
+                                this.hasSentSyncThisServe = true;
+                            }
+
+                            // Dès qu'un but est marqué, on prépare la synchro pour l'engagement suivant
+                            if (this.game.logic.getScored !== 0) {
+                                this.hasSentSyncThisServe = false;
+                            }
+                        }
+
                         // Mettre à jour l'interface 3D (qui appelle aussi la logique du jeu)
                         // On passe un Set vide car les touches sont déjà gérées dans handleOnlineKeys()
                         this.game.interface.update(new Set());
