@@ -3,17 +3,17 @@
 /*                                                        :::      ::::::::   */
 /*   chat.controller.ts                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: issad <issad@student.42.fr>                +#+  +:+       +#+        */
+/*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/16 19:00:31 by tissad            #+#    #+#             */
-/*   Updated: 2025/11/29 21:02:08 by issad            ###   ########.fr       */
+/*   Updated: 2025/12/01 08:48:26 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 
 import { FastifyReply, FastifyRequest } from 'fastify';
 import { chatService } from "../services/chat.service";
-
+import { Server } from "socket.io";
 
 export async function getUserConversations(request: FastifyRequest, reply: FastifyReply) {
     const { username } = (request as any).query;
@@ -79,23 +79,26 @@ export async function sendMessage(request: FastifyRequest, reply: FastifyReply) 
     
     const { senderUsername, receiverUsername, content } = (request as any).body;
     console.log("Request to send message from:", senderUsername, "to", receiverUsername, "with content:", content);
-    if (!senderUsername || !receiverUsername || !content) {
-        return reply.status(400).send({ error: "senderUsername, receiverUsername, and content are required." });
-    }
-    let senderUser = await chatService.getUserByUsername(senderUsername);
-    if (!senderUser) {
-        senderUser = await chatService.addUser(senderUsername);
-    }
-    let receiverUser = await chatService.getUserByUsername(receiverUsername);
-    if (!receiverUser) {
-        receiverUser = await chatService.addUser(receiverUsername);
-    }
-    const conversation = await chatService.startConversation(senderUser.id, receiverUser.id);
-    const conversationId = conversation.id;
-    const senderId = senderUser.id;
-    
     try {
+        if (!senderUsername || !receiverUsername || !content) {
+            return reply.status(400).send({ error: "senderUsername, receiverUsername, and content are required." });
+        }
+        let senderUser = await chatService.getUserByUsername(senderUsername);
+        if (!senderUser) {
+            senderUser = await chatService.addUser(senderUsername);
+        }
+        let receiverUser = await chatService.getUserByUsername(receiverUsername);
+        if (!receiverUser) {
+            receiverUser = await chatService.addUser(receiverUsername);
+        }
+        const conversation = await chatService.startConversation(senderUser.id, receiverUser.id);
+        const conversationId = conversation.id;
+        const senderId = senderUser.id;
+        
+
+
         const message = await chatService.sendMessage(conversationId, senderId, content);
+        
         return reply.send(message);
     }
     catch (error) {

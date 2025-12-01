@@ -17,14 +17,20 @@ import cors from '@fastify/cors';
 
 
 
+import websocketPlugin from "@fastify/websocket";
+
+
 /* ************************************************************************** */
 
 // Import the Fastify framework
 const app = Fastify({ logger: true });
-
+app.register(websocketPlugin);
 // import plugins
 import redisPlugin from './plugins/redis.plugin';
 import { prismaPlugin } from './plugins/prisma.plugin';
+
+// Enable WebSocket support
+// app.register(fastifyWebsocket);
 
 
 // Register plugins
@@ -34,6 +40,10 @@ app.register(prismaPlugin);
 
 // Import and register routes
 import { chatRoutes } from './routes/chat.routes';
+import { wsRoutes } from './ws/wsRoute.route';
+
+// Register WebSocket routes
+app.register(wsRoutes);
 
 // Register chat routes
 app.register(chatRoutes);
