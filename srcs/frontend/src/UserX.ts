@@ -2,24 +2,35 @@ import {
   Scene,
 } from '@babylonjs/core';
 
-import { ZoneName } from "./config.ts";
-import { TournamentParticipant, Tournament } from "./Tournament.ts";
-
-import { Match, MatchRules } from "./Match.ts";
-
 import { SceneManager } from './scene/SceneManager.ts';
+import { ZoneName } from "./config.ts";
 
-import { Friend } from './Friend.ts';
+import {
+    TournamentParticipant,
+    Tournament 
+} from "./Tournament.ts";
+import {
+    Match,
+    MatchRules
+} from "./Match.ts";
 import { MatchFriendlyOnline } from './Match/MatchFriendlyOnLine.ts';
-
 import { Env } from './lockerRoom/scoreboardUI/menuCreate.ts';
+
+
+import {
+    FriendManager,
+    FriendInvitationsI
+} from './friends/FriendsManager.ts';
+import { Friend } from './friends/Friend.ts';
+import { FriendInvitation } from './friends/FriendInvitation.ts';
+import { PromiseUpdateResponse, StatusInvitation } from './friends/api/friends.api.ts';
+
 
 interface TwoFactorMethods
 {
     type: string,
     enabled: boolean    
 }
-
 
 interface User
 {
@@ -41,103 +52,51 @@ interface User
 
 export class UserX 
 {
-    private match: Match | null = null;
-    private tournament: Tournament | null = null;
+    // PROPS
     private currentZone: ZoneName | null = null;
-
-    private friends : Friend[] = [];
     private sceneManager : SceneManager;
     private user: User | null = null;
+    
+    private match: Match | null = null;
+    private tournament: Tournament | null = null;
+
+    private friendManager: FriendManager;
 
     constructor(sceneManager : SceneManager)
     {
         this.sceneManager = sceneManager;
-        this.simuEnAttendantBDD();
+        this.friendManager = new FriendManager(this);
     }
 
-    /* Juste garder le parametre login une fois le backend ajoute*/
-    public addFriend(
-        login: string,
-    ) : number
+
+    /***********************************/
+    /*              Friends            */
+    /***********************************/
+
+
+    async sendFriendInvite(
+        username: string
+    ) : Promise<{success: boolean, message?: string, data?: any}>
     {
-        const test = this.friends.find((f) => f.getLogin === login)
-        if (test !== undefined)
-        {
-            console.log("Amis deja ajoute -> " + login);
-            return (1);
-        }
-        this.friends.push(new Friend(1, login, true));
-        return (0);
+        return (await this.friendManager.sendInvitation(username));
     }
 
-    private simuEnAttendantBDD() : void
+    async deleteFriend(friend: Friend) : Promise<boolean>
     {
-        this.addFriend("Lolo");
-        this.addFriend("Tissad");
-        this.addFriend("Val");
-        this.addFriend("toto");
-        this.addFriend("test");
-        this.addFriend("Alice");
-        this.addFriend("Bob");
-        this.addFriend("Charlie");
-        this.addFriend("David");
-        this.addFriend("Eve");
+        return (await this.friendManager.deleteFriend(friend))
     }
 
-    createTournament(a: string) : boolean
+    async updateInvitation(
+        invitation: FriendInvitation,
+        param: StatusInvitation
+    ) : Promise<PromiseUpdateResponse>
     {
-        if (this.user === null)
-            return (false);
-        const p : TournamentParticipant = {
-            login: this.user.login,
-            alias: a,
-            ready: true,
-            id: this.user.id,
-            eliminate: false
-        } 
-        this.tournament = new Tournament(this.sceneManager);
-        this.tournament.addParticipant(p);
-
-        return (true);
+        return (await this.friendManager.updateInvitation(invitation, param));
     }
 
-    playTournamentMatch(
-        t: Tournament,
-        m: Match,
-        sceneManager: SceneManager
-    ) : boolean
-    {
-        if (this.user === null)
-            return (false);
-        return (t.playMatch(m, this.user.id, sceneManager));
-    }
-
-    createFriendlyMatch(
-        r: MatchRules
-    ) : boolean
-    {
-        if (!this.user)
-            return (false);
-        // Creer un nouveau match dans la bdd pour recuperer son ID, permet aussi de l'ajouter
-        // dans une liste de matchs en attente d'un joueur (creer une colonne pour dans la BDD)
-        /* var tmp en attendant bdd */ const idMatch = 2;
-        const match = new MatchFriendlyOnline(idMatch, r, this.sceneManager);
-
-        // Ecran d'attente d'un joueur
-
-
-        // Recuperer les informations du joueur qui a rejoint
-        const opp = {login: "test", id: 12};
-        const players = [
-            {alias: this.user.login, id: this.user.id, ready: false, me: true},
-            {alias: opp.login, id: opp.id, ready: false, me: false}
-        ];
-
-        if (!match.init(players))
-            return (false);
-
-        return (true);
-    }
+    /***********************************/
+    /*       Tournament / Matchs       */
+    /***********************************/
 
     joinFriendlyMatch(
         r: MatchRules,
@@ -172,16 +131,59 @@ export class UserX
         return (true);
     }
 
-    
-    deleteFriend(
-        f: Friend
-    ) : void
+    createFriendlyMatch(
+        r: MatchRules
+    ) : boolean
     {
-        this.friends.splice(this.friends.findIndex(
-            (e) => e.getId === f.getId),
-            1
-        );
+        if (!this.user)
+            return (false);
+        // Creer un nouveau match dans la bdd pour recuperer son ID, permet aussi de l'ajouter
+        // dans une liste de matchs en attente d'un joueur (creer une colonne pour dans la BDD)
+        /* var tmp en attendant bdd */ const idMatch = 2;
+        const match = new MatchFriendlyOnline(idMatch, r, this.sceneManager);
+
+        // Ecran d'attente d'un joueur
+
+
+        // Recuperer les informations du joueur qui a rejoint
+        const opp = {login: "test", id: 12};
+        const players = [
+            {alias: this.user.login, id: this.user.id, ready: false, me: true},
+            {alias: opp.login, id: opp.id, ready: false, me: false}
+        ];
+
+        if (!match.init(players))
+            return (false);
+
+        return (true);
     }
+
+    createTournament(a: string) : boolean
+    {
+        if (this.user === null)
+            return (false);
+        const p : TournamentParticipant = {
+            login: this.user.login,
+            alias: a,
+            ready: true,
+            id: this.user.id,
+            eliminate: false
+        } 
+        this.tournament = new Tournament(this.sceneManager);
+        this.tournament.addParticipant(p);
+
+        return (true);
+    }
+
+    playTournamentMatch(
+        t: Tournament,
+        m: Match,
+        sceneManager: SceneManager
+    ) : boolean
+    {
+        return (t.playMatch(m, this.user.id, sceneManager));
+    }
+    
 
     deleteTournament() : void
     {
@@ -192,6 +194,28 @@ export class UserX
         this.tournament = null;
     }
 
+    /***********************************/
+    /*              Getters            */
+    /***********************************/
+
+    // == Friends == //
+    get getFriends() : Friend[]
+    {
+        return (this.friendManager.getFriends);
+    }
+
+    get getFriendInvitations() : FriendInvitationsI
+    {
+        return (this.friendManager.getInvitations)
+    }
+
+    get getUserBlockeds() : string[]
+    {
+        return (this.friendManager.getBlockeds);
+    }
+    // ============ //
+
+    // == Match / Tournament == //
     get getMatch() : Match | null
     {
         return (this.match);
@@ -201,11 +225,8 @@ export class UserX
     {
         return (this.tournament);
     }
+    // ======================== //
 
-    get getFriends() : Friend[]
-    {
-        return (this.friends);
-    }
 
     get getCurrentZone() : ZoneName | null
     {
@@ -217,13 +238,11 @@ export class UserX
         return (this.user);
     }
 
-    set setCurrentZone(
-        zone: ZoneName
-    )
-    {
-        this.currentZone = zone;
-    }
+    /***********************************/
+    /*             Setters             */
+    /***********************************/
 
+    // == Match / Tournament == //
     set setTournament(
         tournament: Tournament
     )
@@ -237,12 +256,22 @@ export class UserX
     {
         this.match = match;
     }
+    // ======================== //
+    
+    set setCurrentZone(
+        zone: ZoneName
+    )
+    {
+        this.currentZone = zone;
+    }
+
 
     set setUser(
         user: any
     )
     {
         this.user = user;
+        this.friendManager.loadData();
         console.log("user vaut mtn", this.user);
     }
     clearUser() : void

@@ -11,6 +11,7 @@ services:
     container_name: proxy
     depends_on:
       - service-users
+      - service-friends
     environment:
       - SSL_CERT=/etc/nginx/ssl/server.crt
       - SSL_CERT_KEY=/etc/nginx/ssl/server.key
@@ -130,8 +131,6 @@ services:
   #********************************************************************************#
 
   
-  
-  
   #********************************************************************************#
   #                            GAME SERVICE                                        #
   #********************************************************************************#
@@ -246,12 +245,9 @@ services:
       - DB_PORT=${FRIENDS_SERVICE_DB_PORT}
       - DB_SAMPLE_NAME=${FRIENDS_SERVICE_DB_SAMPLE_NAME}
       - DATABASE_URL=${FRIENDS_SERVICE_DATABASE_URL}
+      - USER_SERVICE_URL=http://service-users:4000
       - INTERNAL_API_KEY=${INTERNAL_API_KEY}
     restart: unless-stopped
-
-
-
-
 
   #********************************************************************************#
   #                            POSTGRES SERVICE                                    #

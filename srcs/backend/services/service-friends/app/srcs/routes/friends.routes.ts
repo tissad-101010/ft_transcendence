@@ -1,16 +1,30 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   game.routes.ts                                     :+:      :+:    :+:   */
+/*   friends.routes.ts                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
+/*   By: glions <glions@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/16 18:55:45 by tissad            #+#    #+#             */
-/*   Updated: 2025/10/07 15:36:14 by tissad           ###   ########.fr       */
+/*   Updated: 2025/11/22 21:06:54 by glions           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+// friends.routes.ts
 import { FastifyInstance } from "fastify";
+import * as controller from "../controllers/friends.controller";
+
+export async function friendsRoutes(
+  server: FastifyInstance
+) : Promise<void>
+{
+  server.get("/invitations", controller.listInvitationsController);
+  server.post("/invite", controller.sendInviteController);
+  server.post("/invite/accept", controller.acceptInviteController);
+  server.post("/invite/decline", controller.declineInviteController);
+  server.post("/invite/block", controller.blockUserController);
+  server.delete("/remove", controller.removeFriendController);
+}
 
 
 

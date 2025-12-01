@@ -1,8 +1,10 @@
 import { Scene, AbstractMesh, StandardMaterial } from "@babylonjs/core";
 import { AdvancedDynamicTexture, ScrollViewer, StackPanel, TextBlock, Control, Rectangle, Grid, Ellipse, Button, InputTextArea, Line } from "@babylonjs/gui";
 
-import { Friend } from "../Friend.ts";
 import { UserX } from "../UserX.ts";
+import { FriendManager } from "../friends/FriendsManager.ts";
+import { Friend } from "../friends/Friend.ts";
+import { Message } from "../friends/Friend.ts";
 
 import { chatApi } from "../chatApi/chat.api.ts";
 
@@ -22,7 +24,6 @@ export class Chat3D {
     private friend: Friend;
     private lastDate: Date | null;
     private userX: UserX;
-
 
     constructor(
         scene: Scene,
@@ -79,7 +80,7 @@ export class Chat3D {
 
         // TEXTE
         this.loginText = new TextBlock();
-        this.loginText.text = friend.getLogin;
+        this.loginText.text = friend.getUsername;
         this.loginText.color = "white";
         this.loginText.fontSize = 40;
         this.loginText.paddingLeft = "30px";
@@ -166,7 +167,7 @@ export class Chat3D {
             if (message.length === 0) return;
 
             // Utiliser la méthode de la classe pour ajouter le message
-            this.addMessage(this.userX.getUser.id, message, new Date());
+            this.addMessage(this.userX.getUser.username, message, new Date());
 
             console.log("Message envoyé :", message, this.userX.getUser?.id, this.friend.getId);
             console.log("Message envoyé :", message, this.userX.getUser?.username, this.friend.getLogin);
@@ -352,7 +353,7 @@ export class Chat3D {
         friend: Friend
     ) : void
     {
-        this.loginText.text = friend.getLogin;
+        this.loginText.text = friend.getUsername;
         this.onlineIcon.background = friend.getOnline ? "#128354ff" : "#e58ab8ff";
         this.chatContainer.clearControls();
         this.friend = friend;
@@ -391,7 +392,7 @@ export class Chat3D {
     
     // ================= Méthode pour ajouter un message =================
     addMessage = (
-        sender: number,
+        sender: string,
         text: string,
         date: Date
     ) => {
@@ -408,9 +409,9 @@ export class Chat3D {
         msgRect.height = estHeight + "px";
         msgRect.cornerRadius = 10;
         msgRect.thickness = 0;
-        msgRect.background = sender !== this.friend.getId ? "rgba(104, 174, 179, 1)" : "#d397a6ff";
+        msgRect.background = sender !== this.friend.getUsername ? "rgba(104, 174, 179, 1)" : "#d397a6ff";
         msgRect.horizontalAlignment =
-            sender !== this.friend.getId
+            sender !== this.friend.getUsername
                 ? Control.HORIZONTAL_ALIGNMENT_RIGHT
                 : Control.HORIZONTAL_ALIGNMENT_LEFT;
 

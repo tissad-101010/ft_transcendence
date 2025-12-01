@@ -1,30 +1,22 @@
-import React, { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-
+import React, { useState } from "react";
 import SignIn from "./components/signIn";
 import SignUp from "./components/signUp";
 import TwoFactor from "./components/twoFactor";
+import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "./context";
-
 import "./styles/authPage.css";
 
 const AuthPage: React.FC = () => {
-  const { user, pending2FA, loading } = useAuth();
   const [showRegister, setShowRegister] = useState(false);
-  const [currentRoute, setCurrentRoute] = useState(window.location.pathname);
+  const { user, pending2FA } = useAuth();
 
-  // Écoute des changements de "route" pour simuler navigation sans React Router
-  useEffect(() => {
-    const handlePop = () => setCurrentRoute(window.location.pathname);
-    window.addEventListener("popstate", handlePop);
-    return () => window.removeEventListener("popstate", handlePop);
-  }, []);
+  // Si l'utilisateur est déjà connecté → on ne rend pas la page d’authentification
+  if (user) return null;
 
-  // Si l'utilisateur est connecté ou en train de charger → ne rien afficher
-  if (user || loading) return null;
-
-  // Détermine quel écran afficher
-  const activeKey =  pending2FA?.required
+  // Détermine quel écran afficher :
+  // - Si 2FA est requis → affiche TwoFactor
+  // - Sinon → affiche SignIn ou SignUp selon l’état
+  const activeKey = pending2FA?.required
     ? "twofactor"
     : showRegister
     ? "signup"
@@ -33,7 +25,7 @@ const AuthPage: React.FC = () => {
   return (
     <div className="authPage-overlay">
       <AnimatePresence mode="wait">
-        {activeKey === "twofactor" && (
+        {activeKey === "twofactor" ? (
           <motion.div
             key="twofactor"
             initial={{ opacity: 0, y: 20 }}
@@ -42,14 +34,12 @@ const AuthPage: React.FC = () => {
             transition={{ duration: 0.4 }}
           >
             <TwoFactor
-              methodsEnabled={pending2FA?.methods || []}
+              methodsEnabled={pending2FA?.required ? pending2FA.methods : []}
               onSuccess={() => {}}
 
             />
           </motion.div>
-        )}
-
-        {activeKey === "signup" && (
+        ) : activeKey === "signup" ? (
           <motion.div
             key="signup"
             initial={{ opacity: 0, y: 20 }}
@@ -59,9 +49,7 @@ const AuthPage: React.FC = () => {
           >
             <SignUp onSwitch={() => setShowRegister(false)} />
           </motion.div>
-        )}
-
-        {activeKey === "signin" && (
+        ) : (
           <motion.div
             key="signin"
             initial={{ opacity: 0, y: 20 }}
