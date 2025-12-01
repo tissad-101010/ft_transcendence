@@ -8,8 +8,8 @@ Container,
 AbstractMesh } from '@babylonjs/core';
 
 import { ZoneName } from './config.ts';
-import { Friend } from './Friend.ts';
 import { TournamentParticipant } from './Tournament.ts';
+import { Friend } from './friends/Friend.ts';
 
 /***********************
  *       INTERFACES    *
@@ -218,7 +218,7 @@ export function displayFriendsWithEmpty(scene: Scene, friends: Friend[], meshes:
 
         const friend = friends[index];
         if (friend) {
-            dynTex.drawText(friend.getLogin, 150, 650, "bold 150px Arial", "white", "transparent", true);
+            dynTex.drawText(friend.getUsername, 150, 650, "bold 150px Arial", "white", "transparent", true);
             mat.emissiveColor = Color3.White(); // rose si ami
         } else {
             mat.emissiveColor = Color3.White(); // turquoise si vide
