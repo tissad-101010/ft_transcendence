@@ -3,13 +3,16 @@
 /*                                                        :::      ::::::::   */
 /*   users.services.ts                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: glions <glions@student.42.fr>              +#+  +:+       +#+        */
+/*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/27 11:51:29 by tissad            #+#    #+#             */
-/*   Updated: 2025/11/14 15:57:18 by glions           ###   ########.fr       */
+/*   Updated: 2025/11/19 11:07:37 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+
+
+import { create } from "domain";
 import { OAuthProvider, OAuthProviderType } from "../../types/user.types";
 /***********************************/
 /*       Users Service Class       */

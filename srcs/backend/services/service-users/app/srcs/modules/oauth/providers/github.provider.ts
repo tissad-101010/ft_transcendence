@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   github.ts                                          :+:      :+:    :+:   */
+/*   github.provider.ts                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/27 12:12:13 by tissad            #+#    #+#             */
-/*   Updated: 2025/10/30 17:19:43 by tissad           ###   ########.fr       */
+/*   Updated: 2025/11/19 14:00:13 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -106,22 +106,21 @@ export class GitHubOAuthProvider {
     // link OAuth provider to the new user
     if (user)
     {
-        console.log("[google.service] Linking Google OAuth provider to user:", user.id);
-        const DB_provider : OAuthProvider = {
-          provider: OAuthProviderType.GITHUB,
-          providerId: github_profile.id.toString(),
-          accessToken: undefined,
-          refreshToken: undefined,
-        }
-        try {
-            await this.userService.linkOAuthProviderToUser(user.id, DB_provider);
-            console.log("[google.service] Successfully linked Google OAuth provider to user:", user.id);
-            return user;
-        } catch (error) {
-            console.log("[google.service] Error linking OAuth provider to user:", error);
-            return null;
-        }    
+      console.log("[google.service] Linking Google OAuth provider to user:", user.id);
+      const DB_provider : OAuthProvider = {
+        provider: OAuthProviderType.GITHUB,
+        providerId: github_profile.id.toString(),
+        accessToken: undefined,
+        refreshToken: undefined,
+      }
+      try {
+          await this.userService.linkOAuthProviderToUser(user.id, DB_provider);
+          console.log("[google.service] Successfully linked Google OAuth provider to user:", user.id);
+          return user;
+      } catch (error) {
+          console.log("[google.service] Error linking OAuth provider to user:", error);
+          return null;
+      }    
     }
   }
-  
 }

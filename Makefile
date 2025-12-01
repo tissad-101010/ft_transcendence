@@ -38,11 +38,13 @@ local:
 	mkdir -p ./srcs/backend/postgresql/data
 	mkdir -p ./srcs/backend/services/service-users/data
 	mkdir -p ./srcs/backend/services/service-game/data
+	mkdir -p ./srcs/backend/services/service-friends/data
 	cp ./srcs/.env ~/.env.local
 	
 npm_cache_clean:
 	npm cache clean --force
-
+friends:
+	docker compose -f srcs/docker-compose.yml up service-friends --build
 postgresql:
 	docker compose -f srcs/docker-compose.yml up postgreSQL --build
 chat:

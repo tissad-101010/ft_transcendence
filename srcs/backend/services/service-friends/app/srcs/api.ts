@@ -6,11 +6,11 @@
 /*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/23 15:58:35 by tissad            #+#    #+#             */
-/*   Updated: 2025/10/10 17:51:46 by tissad           ###   ########.fr       */
+/*   Updated: 2025/11/18 15:57:44 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-// Friend service
+// Chat service
 
 import Fastify from 'fastify';
 import cors from '@fastify/cors';
@@ -21,6 +21,15 @@ import cors from '@fastify/cors';
 
 // Import the Fastify framework
 const app = Fastify({ logger: true });
+
+// import plugins
+import redisPlugin from './plugins/redis.plugin';
+import { prismaPlugin } from './plugins/prisma.plugin';
+
+
+// Register plugins
+app.register(redisPlugin);
+app.register(prismaPlugin);
 
 
 
@@ -43,7 +52,7 @@ const start = async () => {
     });
     
     await app.listen({ port: 4003, host: '0.0.0.0' });
-    console.log('🚀Friend  server is running at http://localhost:4003');
+    console.log('🚀 Chat  server is running at http://localhost:4003');
   } catch (err) {
     app.log.error(err);
     process.exit(1);
