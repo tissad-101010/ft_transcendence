@@ -177,12 +177,44 @@ export class Chat3D {
                 //     this.friend.getLogin
                 // );
                 // console.log("Conversation démarrée :", conversation);
-                const sended = await chatApi.sendMessage(
-                    this.userX.getUser!.username,
-                    this.friend.getLogin,
-                    message,
-                );
-                console.log("Message envoyé via chatApi", sended);
+                // const sended = await chatApi.sendMessage(
+                //     this.userX.getUser!.username,
+                //     this.friend.getLogin,
+                //     message,
+                // );
+                // console.log("Message envoyé via chatApi", sended);
+                const token = "123"; // normalement ton vrai JWT
+
+                const ws = new WebSocket(`wss://localhost:8443/chat/ws?token=${token}`);
+
+                ws.onopen = () => {
+                console.log("WebSocket connecté");
+                };
+
+                ws.onmessage = (event) => {
+                const data = JSON.parse(event.data);
+                console.log("MESSAGE REÇU WS:", data);
+
+                if (data.type === "new_message") {
+                    // Ajouter dans l’état du chat
+                    console.log("Nouveau message:", data.message);
+                }
+                };
+
+                ws.onclose = () => {
+                console.log("WebSocket fermé");
+                };
+
+                ws.onerror = (err) => {
+                console.error("Erreur WebSocket", err);
+                };
+                ws.send(JSON.stringify({
+                    type: "send_message",
+                    from: this.userX.getUser!.username,
+                    to: this.friend.getLogin,
+                    text: message,
+                }));
+                
             } 
             catch (error) {
                 console.error("Erreur lors du démarrage de la conversation :", error);
