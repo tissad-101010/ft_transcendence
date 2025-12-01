@@ -14,6 +14,13 @@ import { MatchFriendlyOnline } from './Match/MatchFriendlyOnLine.ts';
 
 import { Env } from './lockerRoom/scoreboardUI/menuCreate.ts';
 
+interface TwoFactorMethods
+{
+    type: string,
+    enabled: boolean    
+}
+
+
 interface User
 {
     login: string,
@@ -25,6 +32,7 @@ interface User
     wins: number,
     loss: number,
     avatarUrl: string
+    twoFactorMethods: TwoFactorMethods[],
 }
 
 /*
@@ -92,6 +100,8 @@ export class UserX
         sceneManager: SceneManager
     ) : boolean
     {
+        if (this.user === null)
+            return (false);
         return (t.playMatch(m, this.user.id, sceneManager));
     }
 
@@ -227,5 +237,9 @@ export class UserX
     {
         this.user = user;
         console.log("user vaut mtn", this.user);
+    }
+    clearUser() : void
+    {
+        this.user = null;
     }
 }

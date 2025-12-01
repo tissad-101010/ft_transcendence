@@ -3,16 +3,17 @@
 /*                                                        :::      ::::::::   */
 /*   auth.controllers.ts                                :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
+/*   By: issad <issad@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/27 11:44:30 by tissad            #+#    #+#             */
-/*   Updated: 2025/11/19 11:07:09 by tissad           ###   ########.fr       */
+/*   Updated: 2025/11/28 08:35:20 by issad            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 // this file receives the request from the frontend and call userservice 
 // to handle the request response
 
+import path from "path";
 import { FastifyReply, FastifyRequest } from 'fastify';
 
 import { SignupUserDTO,
@@ -25,6 +26,7 @@ import { CredentialUtils } from '../../utils/credential.utils';
 import { AuthService } from './auth.services';
 import { CryptUtils } from '../../utils/crypt.utils';
 import { JwtUtils } from '../../utils/jwt.utils';
+import { TwoFactorType } from '../../prisma/prisma/generated/client/browser';
 
 
 /***********************************/
@@ -139,7 +141,7 @@ export async function signinController(
         JwtUtils.setAccessTokenCookie(reply, loginResponse.accessToken!);
         
         console.log('[Signin Controller] JWT cookies set successfully');
-        console.log('[Signin Controller] reponseData:', responseData);
+        console.log('[Signin Controller] responseData:', responseData);
         return reply.code(200).send(responseData);
 
         
@@ -162,7 +164,7 @@ export async function getProfileController(
     console.log('[Profile Controller] Received profile request');
     const redisClient = request.server.redis;
     const authService = new AuthService(request.server);
-    const cookies = JwtUtils.esxtractCookiesFromRequest(request);
+    const cookies = JwtUtils.extractCookiesFromRequest(request);
     const access_token = JwtUtils.extractTokenFromCookies(cookies, 'access_token');
     // check if access token is valid in redis cache
     if (access_token) {
@@ -219,7 +221,25 @@ export async function refreshTokenController(
     const redisClient = request.server.redis;
     console.log('[Refresh Token Controller] Received refresh token request');
     const authService = new AuthService(request.server);
-    const incomingCookies = JwtUtils.esxtractCookiesFromRequest(request);
+    const incomingCookies = JwtUtils.extractCookiesFromRequest(request);
+    // const incomingTempToken = JwtUtils.extractTokenFromCookies(incomingCookies, 'temp_token');
+    // if (incomingTempToken) {
+    //     const user = JwtUtils.extractUserFromTempToken(incomingTempToken);
+    //     if (user) {
+    //         console.error(`[Refresh Token Controller] Temp token belongs to user ID: ${user.userId}`);
+    //         //test for refreshing tokens using temp token when user connect with oauth and 2fa is enabled
+    //         return reply.send( { signinComplete: true,
+    //           message?: "Tokens refreshed successfully",
+    //           twoFactorRequired: true
+    //           methodsEnabled?:
+    //           accessToken?: string;
+    //           refreshToken?: string;
+    //           tempToken?: string;);
+    //     } else {
+    //         console.error('[Refresh Token Controller] Invalid temp token provided');
+    //     }
+    //     return reply.code(401).send({ message: 'Unauthorized ❌' }); 
+    // }
     const incomingRefreshToken = JwtUtils.extractTokenFromCookies(incomingCookies, 'refresh_token');
     const incomingUserId = JwtUtils.extractUserFromRefreshToken(incomingRefreshToken)?.userId;
     if (!incomingRefreshToken || !incomingUserId) {
@@ -260,5 +280,105 @@ export async function refreshTokenController(
             message: 'Internal server error during token refresh',
             refreshComplete: false,
         });
-    }   
+    }
 }
+// change password controller
+export async function changePasswordController(
+    request: FastifyRequest,
+    reply: FastifyReply
+) {
+    console.log('[Change Password Controller] Received change password request');
+    const authService = new AuthService(request.server);
+    const cookies = JwtUtils.extractCookiesFromRequest(request);
+    const access_token = JwtUtils.extractTokenFromCookies(cookies, 'access_token');
+    const user = JwtUtils.extractUserFromAccessToken(access_token);
+    if (!user) {
+        console.error('[Change Password Controller] Unauthorized: No valid user found in request');
+        return reply.code(401).send({ message: 'Unauthorized ❌' });
+    }
+    const { currentPassword, newPassword } = request.body as { currentPassword: string; newPassword: string };
+    if (!currentPassword || !newPassword) {
+        console.error('[Change Password Controller] Bad Request: Missing current or new password');
+        return reply.code(400).send({ message: 'Bad Request: Missing current or new password',
+            passwordChangeComplete: false
+         });
+    }
+    try {
+        const changeResult = await authService.changeUserPassword(user.userId, currentPassword, newPassword);
+        if (!changeResult.passwordChangeComplete) {
+            console.error('[Change Password Controller] Password change failed:', changeResult.message);
+            return reply.code(400).send(changeResult);
+        }
+        console.log('[Change Password Controller] Password changed successfully for user ID:', user.userId);
+        return reply.code(200).send(changeResult);
+    } catch (error) {
+        console.error('[Change Password Controller] Error during password change:', error);
+        return reply.code(500).send({
+            message: 'Internal server error during password change',
+            passwordChangeComplete: false,
+        });
+    }
+}
+
+import { uploadAvatar} from "../../utils/storage.utils";
+
+
+// upload avatar controller
+export async function uploadAvatarController(
+    request: FastifyRequest,
+    reply: FastifyReply
+) {
+    console.log('[Upload Avatar Controller] START');
+    const authService = new AuthService(request.server);
+    // extract user from access token
+    const cookies = JwtUtils.extractCookiesFromRequest(request);
+    const access_token = JwtUtils.extractTokenFromCookies(cookies, 'access_token');
+    const user = JwtUtils.extractUserFromAccessToken(access_token);
+
+    if (!user) {
+        return reply.code(401).send({ message: 'Unauthorized ❌' });
+    }
+
+    try {
+        const data = await request.body as any;
+        const file = data.avatar;
+        console.log('[Upload Avatar Controller] File received:', file);
+        console.log('[Upload Avatar Controller] File name:', file.filename);
+        if (!file) {
+            return reply.code(400).send({ message: 'No avatar file provided', uploadComplete: false });
+        }
+        // new unique file name to avoid conflicts
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+        const fileExtension = path.extname(file.filename);
+        const newFileName = `avatar-${user.userId}-${uniqueSuffix}${fileExtension}`;
+        console.log('[Upload Avatar Controller] New file name:', newFileName);
+        // read file buffer
+        const buffer = await file.toBuffer();
+        console.log('[Upload Avatar Controller] File buffer size:', buffer.length);
+        // upload to GCP Storage
+        /****************************************************** */
+        const filePath = await uploadAvatar(buffer, newFileName, file.mimetype);
+        // const signedUrl = await generateSignedUrl(newFileName, 24 * 3600); // URL valide 24h
+        //****************************************************** */
+        console.log('[Upload Avatar Controller] File saved successfully:', filePath);
+        console.log('[Upload Avatar Controller] basename:', path.basename(filePath));
+        // console.log('[Upload Avatar Controller] signedUrl:', signedUrl);
+        const avatarUrl = filePath; // use direct GCP URL
+        console.log('[Upload Avatar Controller] avatarUrl:', avatarUrl);
+        
+        // update user url avatar in database
+        const result = await authService.uploadUserAvatar(user.userId, avatarUrl);
+        return reply.code(200).send(result);
+
+    } catch (error) {
+        console.error("[Upload Avatar Controller] ERROR:", error);
+
+        return reply.code(500).send({
+            message: "Internal server error during avatar upload",
+            uploadComplete: false,
+        });
+    }
+}
+
+
+/* ************************************************************************** */

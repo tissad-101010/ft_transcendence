@@ -6,25 +6,31 @@
 /*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/23 15:58:35 by tissad            #+#    #+#             */
-/*   Updated: 2025/11/20 14:40:07 by tissad           ###   ########.fr       */
+/*   Updated: 2025/11/27 19:11:08 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 import Fastify from 'fastify';
+import fastifyMultipart from '@fastify/multipart';
 import cors from '@fastify/cors';
 import fastifyCookie from '@fastify/cookie';
-
+import path from "path";
+import fastifyStatic from "@fastify/static";
 // import routes
 import {  authRoutes,
           userRoutes
         } from './modules/auth/auth.routes';
 import { oauthRoutes } from './modules/oauth/routes/oauth.routes';
-import { signoutRoutes } from './modules/signup/signout.routes';
- 
-// import { TwoFactorAuth } from './routes/TwoFactorAuth.routes';
+import { signoutRoutes } from './modules/signout/signout.routes';
+import { TwoFactorAuth } from './modules/twoFactor/twoFactor.routes';
+// internal services routes responsible for internal communications between services
 // import { githubRoutes } from './routes/OauthGithub.routes';
 // // import { googleRoutes } from './routes/OauthGoogle.routes';
 // import { oauth42Routes } from './routes/Oauth42.routes';
+
+// internal services routes 
+import { internalServicesRoutes }  from './internal-services-routes/internalServicesRoutes';
+ 
 
 // import plugins
 import redisPlugin from './plugins/redis.plugin';
@@ -49,7 +55,19 @@ app.register(fastifyCookie, {
 app.register(redisPlugin);
 app.register(prismaPlugin);
 
+app.register(fastifyMultipart, {
+  limits: {
+    fileSize: 10 * 1024 * 1024, // 10 MB
+    files: 1, // Maximum number of files
+  },
+  attachFieldsToBody: true,
+});
 
+// Serve static files from the "uploads" directory
+app.register(fastifyStatic, {
+  root: path.join(process.cwd(), 'uploads'),
+  prefix: '/uploads/',
+});
 
 
 // Register routes
@@ -57,14 +75,14 @@ app.register(authRoutes, { prefix: '/user/auth' });
 app.register(oauthRoutes, { prefix: '/user/oauth' });
 app.register(userRoutes, { prefix: '/user' });
 app.register(signoutRoutes, { prefix: '/user/auth' });
+app.register(TwoFactorAuth, { prefix: '/user/2fa' });
+app.register(internalServicesRoutes, { prefix: '/internal' });
 
-// app.register(TwoFactorAuth, { prefix: '/two-factor' });
 // app.register(githubRoutes, { prefix: '/auth' });
 // app.register(googleRoutes, { prefix: '/auth' });
 // app.register(oauth42Routes, { prefix: '/auth' });
 
-
-
+// Serve static files from the "uploads" directory
 
 
 // Start the Fastify server
@@ -74,7 +92,7 @@ const start = async () => {
     // need more testing/!\
     await app.register(cors, {
       // reel origin is 'https://localhost:8443'
-      origin: ['http://localhost:3000', 'https://localhost:8443'],
+      origin: ['http://localhost:3000', 'https://localhost:8443'], // Allow specific origins
       methods: ['GET', 'POST'], // Allow specific methods
       credentials: true, // Allow credentials
     });

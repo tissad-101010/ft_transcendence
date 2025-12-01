@@ -6,7 +6,7 @@
 /*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/27 11:44:27 by tissad            #+#    #+#             */
-/*   Updated: 2025/11/20 12:53:03 by tissad           ###   ########.fr       */
+/*   Updated: 2025/11/26 19:21:02 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -219,5 +219,48 @@ export class AuthService {
                  refreshComplete: true,
                  message: "refresh successful"
         };
-    }  
+    } 
+    // change user password
+    async changeUserPassword(userId: string, currentPassword: string, newPassword: string): Promise<{passwordChangeComplete: boolean, message: string}> {
+        const user = await this.userService.getUserById(userId);
+        if (!user) {
+            console.log("[AuthService] User not found for password change:", userId);
+            return {passwordChangeComplete: false, message: "User not found"};
+        }
+        // verify current password
+        const isPasswordValid = await CryptUtils.verifyLongPassword(
+            currentPassword,
+            user.passwordHash
+        );
+        if (!isPasswordValid) {
+            console.log("[AuthService] Current password is incorrect for user:", userId);
+            return {passwordChangeComplete: false, message: "Current password is incorrect"}
+        }
+        // hash new password
+        const hashedNewPassword = await CryptUtils.hashLongPassword(newPassword);
+        // update password in database
+        const updateResult = await this.userService.updateUserPassword(userId, hashedNewPassword);
+        if (!updateResult) {
+            console.log("[AuthService] Failed to update password for user:", userId);
+            return {passwordChangeComplete: false, message: "Failed to update password"}
+        }
+        console.log("[AuthService] Password updated successfully for user:", userId);
+        return {passwordChangeComplete: true, message: "Password updated successfully"};
+    } 
+
+    // upload user avatar
+    async uploadUserAvatar(userId: string, avatarUrl:string): Promise<{uploadComplete: boolean, message: string}> {
+          // @fastify/multipart
+          
+        // delete cache or old avatar if exists
+        await this.redisClient.del(`user_profile:${userId}`); 
+        const updateResult = await this.userService.uploadUserAvatar(userId, avatarUrl);
+        if (!updateResult) {
+            console.log("[AuthService] Failed to update avatar for user:", userId);
+            return {uploadComplete: false, message: "Failed to update avatar"}
+        }
+        console.log("[AuthService] Avatar updated successfully for user:", userId);
+        return {uploadComplete: true, message: "Avatar updated successfully"};
+    }
+    
 }

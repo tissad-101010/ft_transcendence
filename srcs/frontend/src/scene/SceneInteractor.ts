@@ -214,5 +214,35 @@ export class SceneInteractor {
     {
         return (this.fieldTest);
     }
+    public reset(): void {
+        // 1. Supprimer interaction spécifique
+        if (this.currSpecificInteraction) {
+            this.currSpecificInteraction.dispose();
+            this.currSpecificInteraction = null;
+        }
+
+        // 2. Réactiver tous les meshes pickables
+        this.scene.meshes.forEach(mesh => {
+            mesh.metadata = mesh.metadata || {};
+            mesh.metadata.ignoreHighlight = false;
+            mesh.isPickable = true;
+        });
+
+        // 3. Reset highlights
+        this.highlightLayer.removeAllMeshes();
+
+        // 4. Zeroriser le hover
+        this.lastHoveredMesh = null;
+
+        // 5. Réinitialiser la liste des zones interactives
+        this.interactiveMainMeshes = [
+            ZoneName.POOL,
+            ZoneName.LOCKER_ROOM,
+            ZoneName.STANDS,
+        ];
+    // 6. Réactiver tous les événements
+    this.enableInteractions();
+}
+
 }
 

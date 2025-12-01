@@ -1,23 +1,17 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   otp.type.d.ts                                      :+:      :+:    :+:   */
+/*   internalVerifyToken.routes.ts                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/09/16 18:52:49 by tissad            #+#    #+#             */
-/*   Updated: 2025/11/24 12:45:03 by tissad           ###   ########.fr       */
+/*   Created: 2025/11/21 14:40:28 by tissad            #+#    #+#             */
+/*   Updated: 2025/11/21 17:03:24 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-
-
-
-export interface OtpEmailRequest {
-  email: string;
-}
-
-export interface VerifyOtpEmailRequest {
-  email: string;
-  code: string;
-}
+import { FastifyInstance } from "fastify";
+import { verifyTokenController } from "../internal-controllers/verifyToken.controllers";
+export async function internalVerifyTokenRoutes(app: FastifyInstance) {
+  app.post("/verify-token", verifyTokenController);
+}   

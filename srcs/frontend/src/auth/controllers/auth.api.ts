@@ -6,7 +6,7 @@
 /*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/18 19:09:22 by tissad            #+#    #+#             */
-/*   Updated: 2025/11/19 11:12:48 by tissad           ###   ########.fr       */
+/*   Updated: 2025/11/27 19:11:08 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -126,4 +126,30 @@ export async function logoutUser(): Promise<{ success: boolean; message?: string
         console.error(err);
         return { success: false, message: "An error occurred during logout" };
     }
+}
+
+// change password
+export async function changePassword(currentPassword: string, newPassword: string): Promise<{ success: boolean; message?: string }> {
+  try {
+    const response = await authFetch("https://localhost:8443/api/user/change-password", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+      credentials: "include",
+      body: JSON.stringify({ currentPassword, newPassword }),
+    });
+
+    const data = await response.json();
+
+    if (response.ok) {
+      return { success: true, message: data.message || "Password changed successfully" };
+    } else {
+      return { success: false, message: data.message || "Password change failed" };
+    }
+  } catch (err) {
+    console.error(err);
+    return { success: false, message: "An error occurred during password change" };
+  }
 }

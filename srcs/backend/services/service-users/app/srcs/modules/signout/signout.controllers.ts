@@ -6,7 +6,7 @@
 /*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/20 12:59:59 by tissad            #+#    #+#             */
-/*   Updated: 2025/11/20 15:35:52 by tissad           ###   ########.fr       */
+/*   Updated: 2025/11/24 17:49:43 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,7 +28,7 @@ export async function signoutController(
 ) {
     console.log('[Signout Controller] Received logout request');
     const signoutService = new SignoutService(request.server);
-    const cookies = JwtUtils.esxtractCookiesFromRequest(request);
+    const cookies = JwtUtils.extractCookiesFromRequest(request);
     const refresh_Token = JwtUtils.extractTokenFromCookies(cookies, 'refresh_token');
     const user = JwtUtils.extractUserFromRefreshToken(refresh_Token);
     if (!user) {
@@ -45,7 +45,9 @@ export async function signoutController(
         // Clear cookies
         reply.clearCookie('access_token', { path: '/' });
         reply.clearCookie('refresh_token', { path: '/' });
-        return reply.code(200).redirect('https://localhost:8443').send({ message: 'Logged out successfully ✅' });
+        reply.clearCookie('temp_token', { path: '/' });
+        return reply.code(200).send({ message: 'Logout successful ✅' });
+        // reply.code(200).send({ message: 'Logout successful ✅' });
     } catch (error) {
         console.error('[Signout Controller] Error processing logout request:', error);
         return reply.code(500).send({ message: 'Internal server error ❌' });

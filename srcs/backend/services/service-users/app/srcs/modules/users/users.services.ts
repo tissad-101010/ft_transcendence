@@ -6,13 +6,11 @@
 /*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/27 11:51:29 by tissad            #+#    #+#             */
-/*   Updated: 2025/11/19 11:07:37 by tissad           ###   ########.fr       */
+/*   Updated: 2025/11/26 16:59:55 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 
-
-import { create } from "domain";
 import { OAuthProvider, OAuthProviderType } from "../../types/user.types";
 /***********************************/
 /*       Users Service Class       */
@@ -139,7 +137,7 @@ export class UsersService {
     /*                       2FA Methods                      */
     /**********************************************************/
     // add 2FA method to user
-    async addUserTwoFactorMethod(userId: number, method: string) {
+    async addUserTwoFactorMethod(userId: string, method: string) {
       return this.prismaClient.twoFactorMethod.create({
         data: {
           type: method,
@@ -153,7 +151,7 @@ export class UsersService {
 
     
     // Get enabled 2FA methods for a user
-    async getUserTwoFactorMethods(userId: number): Promise<any[]> {
+    async getUserTwoFactorMethods(userId: string): Promise<any[]> {
       const userWith2FA = await this.prismaClient.user.findUnique({
         where: { id: userId },
         include: {
@@ -162,4 +160,35 @@ export class UsersService {
       });
       return userWith2FA?.twoFactorMethods || [];
     }
+    // remove 2FA method from user
+    async removeUserTwoFactorMethod(userId: string, method: string) {
+      return this.prismaClient.twoFactorMethod.deleteMany({
+        where: {
+          userId,
+          type: method,
+        },
+      });
+    }
+
+  /**********************************************************/
+  /*               update user password method              */
+  /**********************************************************/
+  async updateUserPassword(userId: string, newHashedPassword: string) {
+    return this.prismaClient.user.update({
+      where: { id: userId },
+      data: { passwordHash: newHashedPassword },
+    });
+  }
+  async uploadUserAvatar(userId: string, avatarUrl:string): Promise<boolean> {
+    try {
+      await this.prismaClient.user.update({
+        where: { id: userId },
+        data: { avatarUrl },
+      });
+      return true;
+    } catch (error) {
+      console.error("❌ [users.services.ts] Error updating avatar for user ID:", userId, error);
+      return false;
+    }
+  }
 }

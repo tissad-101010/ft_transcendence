@@ -1,23 +1,25 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   otp.type.d.ts                                      :+:      :+:    :+:   */
+/*   verifyToken.service.ts                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/09/16 18:52:49 by tissad            #+#    #+#             */
-/*   Updated: 2025/11/24 12:45:03 by tissad           ###   ########.fr       */
+/*   Created: 2025/11/21 12:43:37 by tissad            #+#    #+#             */
+/*   Updated: 2025/11/21 14:35:49 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+import { FastifyInstance } from "fastify";
+import { JwtUtils } from "../../utils/jwt.utils";
 
-
-
-export interface OtpEmailRequest {
-  email: string;
-}
-
-export interface VerifyOtpEmailRequest {
-  email: string;
-  code: string;
+// fuction to verify token returns the payload if the token is valid
+export async function internalVerifyTokenService(tocken : string): Promise<any> {
+    try {
+        const payload = JwtUtils.verifyAccessToken(tocken);
+        return payload;
+    }
+    catch (error) {
+        return null;
+    }
 }

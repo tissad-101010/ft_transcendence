@@ -6,7 +6,7 @@
 /*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/27 11:48:41 by tissad            #+#    #+#             */
-/*   Updated: 2025/11/19 11:19:03 by tissad           ###   ########.fr       */
+/*   Updated: 2025/11/26 11:05:51 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,15 +21,20 @@ import QRCode from "qrcode";
 import { UsersService } from "../users/users.services";
 import { TwoFactorType } from "../../prisma/prisma/generated/client/enums";
 
-
+interface twoFactorMethods {
+  type: TwoFactorType;
+  enabled: boolean;
+}
 
 export class TwoFactorAuthService {
-  private fastify: FastifyInstance;
+  private redisClient:any;
+  private prismaClient:any;
   private usersService:UsersService;
   
   constructor(fastify: FastifyInstance) {
-    this.fastify = fastify;
-    this.usersService = new UsersService(fastify.prisma);
+    this.redisClient = fastify.redis;
+    this.prismaClient = fastify.prisma;
+    this.usersService = new UsersService(this.prismaClient);
   }
   
   // Generate a 6-digit OTP
@@ -37,15 +42,17 @@ export class TwoFactorAuthService {
     return (Math.floor(100000 + Math.random() * 900000).toString());
   }
   // update user to enable tfa
-  async enableTfaForUser(userId: number, methodstr:string ): Promise<boolean> {
-    const method = methodstr as TwoFactorType;
+  async enableTwoFactorAuth(userId: string, methodStr:string ): Promise<boolean> {
+    const method = methodStr as TwoFactorType;
     const methods = await this.usersService.getUserTwoFactorMethods(userId);
     if (methods.find((m) => m.type === method)) {
       console.log("⚠️ [2fa.service.ts] TFA method already enabled for user ID:", userId);
       return true; // already enabled
     }
     try {
-      await this.usersService.addUserTwoFactorMethod(userId, method);      
+      await this.usersService.addUserTwoFactorMethod(userId, method);    
+      //delete user profile from redis tfa session if exists
+      await this.redisClient.del(`user_profile:${userId}`);  
       console.log("✅ [2fa.service.ts] TFA enabled for user ID:", userId);
       return true;
     }
@@ -56,7 +63,7 @@ export class TwoFactorAuthService {
   }
 
   // get user enabled tfa methods
-  async getEnabledTfaMethodsForUser(userId: number): Promise<TwoFactorType[]> {
+  async getEnabledTfaMethodsForUser(userId: string): Promise<TwoFactorType[]> {
     const methods = await this.usersService.getUserTwoFactorMethods(userId);
     return methods.map((m) => m.type);
   }
@@ -78,7 +85,9 @@ export class TwoFactorAuthService {
       // store otp in redis with expiration time of 5 minutes
       try
       {
-        this.fastify.redis.set(`otp:${email}`, otp, "EX", 300); // expire in 300 seconds (5 minutes)
+        const storedInRedis = await this.redisClient.set(`otp:${email}`, otp, "EX", 300) 
+        console.log("✅ [2fa.service.ts] OTP stored in Redis response:", storedInRedis);
+        console.log("✅ [2fa.service.ts] Storing OTP in Redis for email:", email);
         console.log("✅ [2fa.service.ts] OTP stored in Redis for email:", email);
         return (true);
       } catch (error)
@@ -91,61 +100,82 @@ export class TwoFactorAuthService {
 
   // Verify OTP for email  
   async verifyOtpEmail(email: string, otp: string): Promise<boolean> {
-    const storedOtp = await this.fastify.redis.get(`otp:${email}`);
+    const storedOtp = await this.redisClient.get(`otp:${email}`);
     console.log(`[2fa.service.ts] Verifying OTP for email: ${email}`);
     console.log("[2fa.service.ts] Retrieved OTP from Redis:", storedOtp);
     
     // No OTP found or expired
     if (!storedOtp) {
       console.log("❌ [2fa.service.ts] No OTP found or OTP expired for email:", email);
+      await this.redisClient.del(`otp:${email}`);
       return (false); 
     }
     // OTP does not match
     if (storedOtp.trim() !== String(otp).trim()) {
       console.log("❌ [2fa.service.ts] OTP mismatch for email:", email);
+      console.log("[2fa.service.ts] Provided OTP:", otp);
+      console.log("[2fa.service.ts] Stored OTP:", storedOtp);
       return (false);
     }
     
     // OTP matches, delete it from Redis
-    await this.fastify.redis.del(`otp:${email}`);
+    await this.redisClient.del(`otp:${email}`);
     console.log("✅ [2fa.service.ts] OTP verified and deleted from Redis for email:", email);
     return true;
   }
 
-  // gerate TFA secret and QR code and store  in db
-  async generateTotpSecretAndQrCode(userId: number): Promise<{qrCodeUrl: string }> {
+  
+
+  // Disable TFA method for user
+  async disableTwoFactorAuth(userId: string, methodStr:string ): Promise<boolean> {
+    const method = methodStr as TwoFactorType;
+    try {
+      await this.usersService.removeUserTwoFactorMethod(userId, method);      
+      //delete user profile from redis tfa session if exists
+      await this.redisClient.del(`user_profile:${userId}`);
+      console.log("✅ [2fa.service.ts] TFA disabled for user ID:", userId);
+      return true;
+    } catch (error) {
+      console.error("❌ [2fa.service.ts] Error disabling TFA for user ID:", userId, error);
+      return false;
+    }
+  }
+
+
+  // generate TFA secret and QR code and store  in db
+  async generateTotpSecretAndQrCode(userId: string): Promise<{qrCodeUrl: string }> {
     const secret = speakeasy.generateSecret({ length: 20, name: `ft_transcendence_user_${userId}` });
     console.log("✅ [2fa.service.ts] TFA secret generated for user ID:", userId);
     // store tfa secret in redis with expiration time of 10 minutes
-    await this.fastify.redis.set(`tfa_secret:${userId}`, secret.base32, "EX", 100 * 60); // expire in 10 minutes
+    await this.redisClient.set(`tfa_secret:${userId}`, secret.base32, "EX", 100 * 60); // expire in 10 minutes
     
-    // warnning:
+    // warning:
     // In production, you should never store the TFA secret in plain text in your database.
     // store the secret in hashicorp vault
     // you should configure vault and implement the logic to store and retrieve secrets securely.
     // generate QR code from secret 
-    const otpauthUrl = speakeasy.otpauthURL({
+    const TotpAuthUrl = speakeasy.otpauthURL({
       secret: secret.base32,
       label: `ft_transcendence_user_${userId}`, 
       issuer: "ft_transcendence",
       encoding: "base32",
     });
-    const qrCodeUrl = await QRCode.toDataURL(otpauthUrl);
+    const qrCodeUrl = await QRCode.toDataURL(TotpAuthUrl);
     console.log("✅ [2fa.service.ts] QR code generated for user ID:", userId);
     
     // store qr code data url in redis
-    await this.fastify.redis.set(`tfa_qr_code:${userId}`, qrCodeUrl, "EX", 600); // expire in 10 minutes
+    await this.redisClient.set(`tfa_qr_code:${userId}`, qrCodeUrl, "EX", 600); // expire in 10 minutes
     
     return { qrCodeUrl };
   }
 
   // Verify TFA token
-  async verifyTotpTocken(userId: number, token: string): Promise<boolean> {
+  async verifyTotpToken(userId: string, token: string): Promise<boolean> {
     // retrieve tfa secret from vault
     // for demo purpose, we will retrieve the secret from redis
-    const client = await this.fastify.redis;
     try {
-      const tfaSecret = await client.get(`tfa_secret:${userId}`);
+      console.log(`[2fa.service.ts] Verifying TFA token for user ID: ${userId}`);
+      const tfaSecret = await this.redisClient.get(`tfa_secret:${userId}`);
       if (!tfaSecret) {
         console.log("❌ [2fa.service.ts] No TFA secret found for user ID:", userId);
         return false;
@@ -156,10 +186,12 @@ export class TwoFactorAuthService {
         token,
         window: 1, // allow 30 seconds before or after
       });
+      console.log(`[2fa.service.ts] TFA token verification result for user ID ${userId}:`, verified);
       if (verified) {
         console.log("✅ [2fa.service.ts] TFA token verified for user ID:", userId);
       } else {
         console.log("❌ [2fa.service.ts] TFA token verification failed for user ID:", userId);
+        await this.redisClient.del(`tfa_secret:${userId}`);
       }
       return verified;
   
@@ -167,6 +199,12 @@ export class TwoFactorAuthService {
       console.error("❌ [2fa.service.ts] Error verifying TFA token for user ID:", userId, error);
       return false;
     }
+  }
+  
+  // get 2FA status
+  async getTwoFactorAuthMethods(userId: string): Promise<twoFactorMethods[]> {
+    const methods = await this.usersService.getUserTwoFactorMethods(userId);
+    return methods.map((m) => ({ type: m.type, enabled: true }) );
   }
 }
 
