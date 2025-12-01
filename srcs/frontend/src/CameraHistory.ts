@@ -1,107 +1,147 @@
 import { SceneManager } from "./scene/SceneManager";
-import { SceneInteractor } from "./scene/SceneInteractor";
 import { ZoneName } from "./config";
 
 export interface CameraHistoryEntry {
   zone: ZoneName;
-  callback: () => void; // ce qui se passe quand on arrive sur la zone
+  callback: () => void; // Ce qui se passe quand on arrive sur la zone
 }
 
+// -------------------------
+// HISTORIQUE INTERNE
+// -------------------------
 export const cameraHistory: CameraHistoryEntry[] = [];
 export let currentIndex = -1;
 
-// Liste des zones autorisées dans l'historique
-const mainZones: ZoneName[] = [
+// Zone active réelle (main ou secondary)
+export let currentActiveZone: ZoneName | null = null;
+export let currentZoneIsSecondary = false;
+
+// -------------------------
+// ZONES
+// -------------------------
+export const mainZones: ZoneName[] = [
   ZoneName.STANDS,
   ZoneName.LOCKER_ROOM,
+  ZoneName.POOL,
   ZoneName.START,
 ];
 
-/**
- * Déplace la caméra sur une zone principale et enregistre le mouvement
- */
-export function addCameraMove(
+export const secondaryZones: ZoneName[] = Object.values(ZoneName).filter(
+  (z) => !mainZones.includes(z)
+);
+
+// -------------------------
+// NAVIGATION PRINCIPALE
+// -------------------------
+export function navigateToZone(
   manager: SceneManager,
   zone: ZoneName,
-  callback: () => void
+  callback: () => void,
+  addToHistory: boolean = true
 ) {
-  if (!mainZones.includes(zone)) {
-    console.log(`🚫 Zone ignorée, non autorisée pour l'historique : ${zone}`);
-    return;
-  }
-
   const interactor = manager.getSceneInteractor;
   if (!interactor) return;
 
-  interactor.disposeCurrInteraction();
+  currentActiveZone = zone;
+  currentZoneIsSecondary = secondaryZones.includes(zone);
 
-  const existingIndex = cameraHistory.findIndex(e => e.zone === zone);
-  if (existingIndex !== -1) {
-    cameraHistory.splice(existingIndex, 1);
-    if (existingIndex <= currentIndex) currentIndex--;
-  }
-
-  cameraHistory.splice(currentIndex + 1);
-  cameraHistory.push({ zone, callback });
-  currentIndex++;
+  console.log(
+    currentZoneIsSecondary
+      ? `🔹 SecondaryZone : ${zone}`
+      : `🏷 MainZone active : ${zone}`
+  );
 
   manager.moveCameraTo(zone);
   callback();
-  window.history.pushState({ cameraState: zone }, "");
 
-  console.log("📷 Historique caméras :", cameraHistory.map(e => e.zone));
+  if (!currentZoneIsSecondary && addToHistory) {
+    const existingIndex = cameraHistory.findIndex((e) => e.zone === zone);
+    if (existingIndex !== -1) {
+      cameraHistory.splice(existingIndex, 1);
+      if (existingIndex <= currentIndex) currentIndex--;
+    }
+
+    // **Ne pas supprimer l'historique après currentIndex si addToHistory = false**
+    cameraHistory.splice(currentIndex + 1); // <-- garder uniquement pour addToHistory = true
+    cameraHistory.push({ zone, callback });
+    currentIndex++;
+
+    window.history.pushState({ cameraState: zone }, "");
+
+    console.log("📷 Historique mainZones :", cameraHistory.map((e) => e.zone));
+    console.log("📌 currentIndex :", currentIndex);
+  }
 }
 
-/**
- * BACK navigateur
- */
+
+// -------------------------
+// BACK / FORWARD NAVIGATEUR
+// -------------------------
+export function handlePopState(manager: SceneManager, state: any) {
+  const zone = state?.cameraState as ZoneName;
+  if (!zone) return;
+
+  console.log("🔙 popstate détecté :", zone);
+
+  // Bloquer BACK/Forward si on est dans une secondaryZone
+  if (currentZoneIsSecondary) {
+    console.log(
+      "🚫 BACK/FORWARD navigateur bloqué : utilisateur dans secondaryZone"
+    );
+    return;
+  }
+
+  const index = cameraHistory.findIndex((e) => e.zone === zone);
+  if (index === -1) return;
+
+  if (index < currentIndex) back(manager);
+  else if (index > currentIndex) forward(manager);
+}
+
+// -------------------------
+// BACK / FORWARD INTERNES
+// -------------------------
 export function back(manager: SceneManager) {
-  if (currentIndex <= 0) {
-    alert("⛔ Vous êtes déjà au début de l'historique !");
-    return;
-  }
-
-  const entry = cameraHistory[currentIndex - 1];
-
-  if (!mainZones.includes(entry.zone)) {
-    alert("🚫 Impossible de naviguer vers une zone secondaire !");
-    return;
-  }
-
-  currentIndex--;
+  if (currentIndex <= 0) return;
   const interactor = manager.getSceneInteractor;
   if (!interactor) return;
 
-  interactor.disposeCurrInteraction();
-  manager.moveCameraTo(entry.zone);
-  entry.callback();
+  const entry = cameraHistory[currentIndex - 1];
+  currentIndex--;
+  currentActiveZone = entry.zone;
+  currentZoneIsSecondary = false;
 
-  console.log("⬅️ BACK vers zone :", entry.zone);
+  const targetMesh = interactor.getMeshByZone(entry.zone);
+  if (!targetMesh) return;
+
+  console.log("⬅️ BACK vers :", entry.zone);
+
+  interactor.handleMainZoneClick(targetMesh, true, false); // <-- ne pas ajouter à l'historique
+
+  console.log("📷 Historique mainZones :", cameraHistory.map((e) => e.zone));
+  console.log("📌 currentIndex :", currentIndex);
 }
 
-/**
- * FORWARD navigateur
- */
 export function forward(manager: SceneManager) {
-  if (currentIndex >= cameraHistory.length - 1) {
-    alert("⛔ Vous êtes déjà à la fin de l'historique !");
-    return;
-  }
+  if (currentIndex >= cameraHistory.length - 1) return;
+  const interactor = manager.getSceneInteractor;
+  if (!interactor) return;
 
   const entry = cameraHistory[currentIndex + 1];
 
-  if (!mainZones.includes(entry.zone)) {
-    alert("🚫 Impossible de naviguer vers une zone secondaire !");
-    return;
-  }
+  const targetMesh = interactor.getMeshByZone(entry.zone);
+  if (!targetMesh) return;
 
+  console.log("➡️ FORWARD vers :", entry.zone);
+
+  // Incrémenter l'index AVANT la navigation
   currentIndex++;
-  const interactor = manager.getSceneInteractor;
-  if (!interactor) return;
+  currentActiveZone = entry.zone;
+  currentZoneIsSecondary = false;
 
-  interactor.disposeCurrInteraction();
-  manager.moveCameraTo(entry.zone);
-  entry.callback();
+  // Naviguer sans toucher à l'historique
+  interactor.handleMainZoneClick(targetMesh, true, false);
 
-  console.log("➡️ FORWARD vers zone :", entry.zone);
+  console.log("📷 Historique mainZones :", cameraHistory.map((e) => e.zone));
+  console.log("📌 currentIndex :", currentIndex);
 }

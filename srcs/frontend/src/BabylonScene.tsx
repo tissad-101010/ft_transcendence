@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { SceneManager } from './scene/SceneManager';
 import { useAuth } from "./auth/context";
-import { back, forward, cameraHistory, currentIndex} from './CameraHistory';
+import {handlePopState} from './CameraHistory';
 
 const BabylonScene = () => {
   const { user, isAuthenticated } = useAuth();
@@ -32,54 +32,14 @@ const BabylonScene = () => {
     }
   }, [isAuthenticated, user]);
 
-      // Gestion back/forward navigateur
+// Gestion back/forward navigateur
 useEffect(() => {
-  const handlePopState = (event: PopStateEvent) => {
-    if (!managerRef.current) return;
-
-    const state = event.state?.cameraState;
-    if (!state) return;
-
-    console.log("📌 popstate détecté - zone :", state);
-
-    // Vérifie si la zone est dans l'historique
-    const index = cameraHistory.findIndex(e => e.zone === state);
-    console.log("📍 index demandé :", index);
-    console.log("📍 index actuel :", currentIndex);
-
-    if (index === -1) {
-      console.log("🚫 Zone non enregistrée : back/forward bloqué");
-      // Optionnel : on peut afficher un message
-      alert("⚠️ Cette zone n'est pas dans l'historique !");
-      return; // NE FAIT RIEN si la zone n'est pas dans l'historique
-    }
-
-    // Bloquer le back si déjà au début
-    if (currentIndex === 0 && index <= currentIndex) {
-      console.log("⛔ BACK impossible : déjà au début de l'historique");
-      alert("⛔ Vous êtes déjà au début de l'historique !");
-      return;
-    }
-
-    if (index < currentIndex) {
-      console.log("⬅️ BACK navigateur exécuté");
-
-      // Bloque l'interaction pendant le back
-      managerRef.current?.getSceneInteractor?.disableInteractions?.();
-      back(managerRef.current);
-      managerRef.current?.getSceneInteractor?.enableInteractions?.();
-    } 
-    else if (index > currentIndex) {
-      console.log("➡️ FORWARD navigateur exécuté");
-
-      managerRef.current?.getSceneInteractor?.disableInteractions?.();
-      forward(managerRef.current);
-      managerRef.current?.getSceneInteractor?.enableInteractions?.();
-    }
+  const handlePop = (event: PopStateEvent) => {
+    handlePopState(managerRef.current!, event.state);
   };
 
-  window.addEventListener("popstate", handlePopState);
-  return () => window.removeEventListener("popstate", handlePopState);
+  window.addEventListener("popstate", handlePop);
+  return () => window.removeEventListener("popstate", handlePop);
 }, []);
 
 

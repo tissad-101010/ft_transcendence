@@ -15,7 +15,7 @@ import { ZoneName } from "../config.ts";
 import { LockerInteraction } from '../lockerRoom/LockerInteraction.ts';
 import { PoolInteraction } from '../pool/PoolInteraction.ts';
 import { StandsInteraction } from '../field/StandsInteraction.ts';
-import { addCameraMove } from '../CameraHistory.ts';
+import {navigateToZone } from '../CameraHistory.ts';
 
 
 export class SceneInteractor {
@@ -83,52 +83,19 @@ export class SceneInteractor {
         }
     }
 
-
-    public recreateZone(zone: ZoneName) {
+    public handleMainZoneClick(
+    pickedMesh: AbstractMesh,
+    isClick: boolean,
+    addToHistory: boolean = true
+    ) : void {
         if (this.currSpecificInteraction) {
-            switch(zone) {
-                case ZoneName.POOL:
-                    this.currSpecificInteraction = new PoolInteraction(this.scene, this.sceneManager, this);
-                    //Ajout start une fois dans la piscine
-                    if (!this.interactiveMainMeshes.includes(ZoneName.START)) {
-                        this.interactiveMainMeshes.push(ZoneName.START);
-                    }
-                    break;
-                case ZoneName.STANDS:
-                    this.currSpecificInteraction = new StandsInteraction(this.scene, this.sceneManager, this);
-                    break;
-                case ZoneName.LOCKER_ROOM:
-                    this.currSpecificInteraction = new LockerInteraction(this.scene, this.sceneManager, this);
-                    break;
-                case ZoneName.START:
-                    if (this.currSpecificInteraction instanceof PoolInteraction) {
-                        this.currSpecificInteraction.resetState(this.sceneManager.getLounge);
-                    }
-                    this.currSpecificInteraction = null;
-                    this.removeInteractiveMesh(ZoneName.START);
-                    break;
-                default:
-                    this.currSpecificInteraction = null;
-            }
-        }
-    }
-
-    public disposeCurrInteraction(): void {
-        if (!this.currSpecificInteraction) return;
+            console.log("SceneInteractor: Entree dans handleMainZoneClick, currentZone existe->dispose");
             this.currSpecificInteraction.dispose();
             this.currSpecificInteraction = null;
-    }
-
-    public handleMainZoneClick(pickedMesh: AbstractMesh, isClick: boolean) : void {
-        // console.log("entree dans handlemainzoneclick de sceneinteractr");
-        if (this.currSpecificInteraction) {
-            console.log("SceneInteractor: Entree dans handleMainZoneClick, curr existe");
-            this.currSpecificInteraction.dispose();
-            this.currSpecificInteraction = null;
-        }
-        else{
+        } else {
             console.log("SceneInteractor: Entree dans handleMainZoneClick, curr n'existe pas");
         }
+
         this.highlightLayer.removeAllMeshes();
         if (this.lastHoveredMesh && this.lastHoveredMesh !== pickedMesh)
             this.meshPickable(this.lastHoveredMesh);
@@ -138,14 +105,13 @@ export class SceneInteractor {
 
         const zoneName = pickedMesh.name as ZoneName;
         if (Object.values(ZoneName).includes(zoneName)) {
-            this.disableInteractions(); //desactiver clic/survol avant le mouvement
-            addCameraMove(this.sceneManager, zoneName, () => {
+            this.disableInteractions();
+            navigateToZone(this.sceneManager, zoneName, () => {
                 console.log("SceneInteractor: Addmove Creation instance: ", zoneName);
-                this.enableInteractions(); //reactiver clic/survol
+                this.enableInteractions();
                 switch (zoneName) {
                     case ZoneName.POOL:
                         this.currSpecificInteraction = new PoolInteraction(this.scene, this.sceneManager, this);
-                        //Ajout start une fois dans la piscine
                         if (!this.interactiveMainMeshes.includes(ZoneName.START)) {
                             this.interactiveMainMeshes.push(ZoneName.START);
                         }
@@ -166,14 +132,23 @@ export class SceneInteractor {
                     default:
                         this.currSpecificInteraction = null;
                 }
-            });
-            
+            }, addToHistory); // <-- important
         }
     }
+
 
     /**************************************************
      *                PUBLIC METHODS                  *
      **************************************************/
+
+    public getMeshByZone(zone: ZoneName): AbstractMesh | null {
+    // Récupère le mesh même si ce n’est pas interactif
+    const mesh = this.scene.getMeshByName(zone);
+    return mesh || null;
+    }
+
+
+
     public enableInteractionScene(): void {
         this.scene.onPointerObservable.add((pointerInfo: PointerInfo) => {
             const isClick = pointerInfo.type === PointerEventTypes.POINTERPICK;
