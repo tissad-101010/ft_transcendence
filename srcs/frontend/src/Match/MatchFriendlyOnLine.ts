@@ -548,12 +548,19 @@ export class MatchFriendlyOnline extends MatchBase
                 }
 
                 try {
-                    this.game.logic.syncStateFromRemote({
+                    const payload = {
                         score1: message.score1,
                         score2: message.score2,
                         time: message.time,
                         players: message.players || [],
-                    });
+                    };
+
+                    // Mettre à jour notre référence locale de score pour éviter
+                    // de considérer cet état comme un "nouveau" score à resynchroniser.
+                    this.lastSyncedScore1 = payload.score1;
+                    this.lastSyncedScore2 = payload.score2;
+
+                    this.game.logic.syncStateFromRemote(payload);
 
                     // Recalage immédiat de l'affichage score / timer pour éviter tout décalage visuel
                     if (this.game.interface) {
@@ -634,9 +641,15 @@ export class MatchFriendlyOnline extends MatchBase
     /**
      * Vérifie si le score a changé localement depuis la dernière synchro
      * et envoie un state_sync pour forcer l'autre navigateur à se recaler.
-     * N'importe quel client peut déclencher cette synchro lorsqu'il détecte un but.
+     * Seul le PREMIER connecteur (client de référence) doit déclencher cette synchro.
      */
     private checkAndSyncScoreChange(): void {
+        // Si ce client n'est pas le premier connecteur, il ne doit JAMAIS
+        // envoyer de state_sync, pour éviter les boucles et divergences.
+        if (!this.isFirstConnector) {
+            return;
+        }
+
         if (!this.websocket || !this.game || !this.game.logic) {
             return;
         }
