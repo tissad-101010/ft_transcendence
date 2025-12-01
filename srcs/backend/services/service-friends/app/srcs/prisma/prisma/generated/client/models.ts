@@ -8,5 +8,5 @@
  *
  * 🟢 You can import this file directly.
  */
-export type * from './models/FriendInvitation'
+export type * from './models/Freinds'
 export type * from './commonInputTypes'

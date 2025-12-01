@@ -49,7 +49,7 @@ export const AnyNull = runtime.objectEnumValues.instances.AnyNull
 
 
 export const ModelName = {
-  FriendInvitation: 'FriendInvitation'
+  Freinds: 'Freinds'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -68,18 +68,13 @@ export const TransactionIsolationLevel = runtime.makeStrictEnum({
 export type TransactionIsolationLevel = (typeof TransactionIsolationLevel)[keyof typeof TransactionIsolationLevel]
 
 
-export const FriendInvitationScalarFieldEnum = {
+export const FreindsScalarFieldEnum = {
   id: 'id',
-  fromUserId: 'fromUserId',
-  toUserId: 'toUserId',
-  fromUserUsername: 'fromUserUsername',
-  toUserUsername: 'toUserUsername',
-  status: 'status',
-  createdAt: 'createdAt',
-  responsedAt: 'responsedAt'
+  message: 'message',
+  timestamp: 'timestamp'
 } as const
 
-export type FriendInvitationScalarFieldEnum = (typeof FriendInvitationScalarFieldEnum)[keyof typeof FriendInvitationScalarFieldEnum]
+export type FreindsScalarFieldEnum = (typeof FreindsScalarFieldEnum)[keyof typeof FreindsScalarFieldEnum]
 
 
 export const SortOrder = {
@@ -96,12 +91,4 @@ export const QueryMode = {
 } as const
 
 export type QueryMode = (typeof QueryMode)[keyof typeof QueryMode]
-
-
-export const NullsOrder = {
-  first: 'first',
-  last: 'last'
-} as const
-
-export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder]
 

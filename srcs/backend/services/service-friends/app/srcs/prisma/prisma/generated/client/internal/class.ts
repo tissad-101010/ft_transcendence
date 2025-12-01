@@ -55,8 +55,8 @@ const config: runtime.GetPrismaClientConfig = {
       }
     }
   },
-  "inlineSchema": "// Prisma schema file\n\n// =====================\n// Generator\n// =====================\ngenerator client {\n  provider = \"prisma-client\"\n  output   = \"./generated/client\"\n}\n\n// =====================\n// Datasource\n// =====================\ndatasource db {\n  provider = \"postgresql\"\n  url      = env(\"DATABASE_URL\")\n}\n\n// =====================\n// Friend Invitation\n// =====================\nmodel FriendInvitation {\n  id               Int       @id @default(autoincrement())\n  fromUserId       String\n  toUserId         String\n  fromUserUsername String\n  toUserUsername   String\n  status           String    @default(\"PENDING\")\n  createdAt        DateTime  @default(now())\n  responsedAt      DateTime?\n\n  @@unique([fromUserId, toUserId])\n}\n",
-  "inlineSchemaHash": "9e9170eaafb475f452dd1f690be0472d94acea736e9aca39f70f19cd19410ca7",
+  "inlineSchema": "// Prisma schema file\n\n// =====================\n// Generator\n// =====================\ngenerator client {\n  provider = \"prisma-client\"\n  output   = \"./generated/client\"\n}\n\n// =====================\n// Datasource\n// =====================\ndatasource db {\n  provider = \"postgresql\"\n  url      = env(\"DATABASE_URL\")\n}\n\n// =====================\n// User Profile\n// =====================\nmodel Freinds {\n  // =====================\n  // Basic Info\n  // =====================\n  id        Int      @id @default(autoincrement())\n  message   String\n  timestamp DateTime @default(now())\n}\n",
+  "inlineSchemaHash": "68ddc4f492576541e1b0ba84e9b697d1003ad1ec4f0d31287f99de3c96e21daa",
   "copyEngine": true,
   "runtimeDataModel": {
     "models": {},
@@ -66,7 +66,7 @@ const config: runtime.GetPrismaClientConfig = {
   "dirname": ""
 }
 
-config.runtimeDataModel = JSON.parse("{\"models\":{\"FriendInvitation\":{\"dbName\":null,\"schema\":null,\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"isList\":false,\"isRequired\":true,\"isUnique\":false,\"isId\":true,\"isReadOnly\":false,\"hasDefaultValue\":true,\"type\":\"Int\",\"nativeType\":null,\"default\":{\"name\":\"autoincrement\",\"args\":[]},\"isGenerated\":false,\"isUpdatedAt\":false},{\"name\":\"fromUserId\",\"kind\":\"scalar\",\"isList\":false,\"isRequired\":true,\"isUnique\":false,\"isId\":false,\"isReadOnly\":false,\"hasDefaultValue\":false,\"type\":\"String\",\"nativeType\":null,\"isGenerated\":false,\"isUpdatedAt\":false},{\"name\":\"toUserId\",\"kind\":\"scalar\",\"isList\":false,\"isRequired\":true,\"isUnique\":false,\"isId\":false,\"isReadOnly\":false,\"hasDefaultValue\":false,\"type\":\"String\",\"nativeType\":null,\"isGenerated\":false,\"isUpdatedAt\":false},{\"name\":\"fromUserUsername\",\"kind\":\"scalar\",\"isList\":false,\"isRequired\":true,\"isUnique\":false,\"isId\":false,\"isReadOnly\":false,\"hasDefaultValue\":false,\"type\":\"String\",\"nativeType\":null,\"isGenerated\":false,\"isUpdatedAt\":false},{\"name\":\"toUserUsername\",\"kind\":\"scalar\",\"isList\":false,\"isRequired\":true,\"isUnique\":false,\"isId\":false,\"isReadOnly\":false,\"hasDefaultValue\":false,\"type\":\"String\",\"nativeType\":null,\"isGenerated\":false,\"isUpdatedAt\":false},{\"name\":\"status\",\"kind\":\"scalar\",\"isList\":false,\"isRequired\":true,\"isUnique\":false,\"isId\":false,\"isReadOnly\":false,\"hasDefaultValue\":true,\"type\":\"String\",\"nativeType\":null,\"default\":\"PENDING\",\"isGenerated\":false,\"isUpdatedAt\":false},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"isList\":false,\"isRequired\":true,\"isUnique\":false,\"isId\":false,\"isReadOnly\":false,\"hasDefaultValue\":true,\"type\":\"DateTime\",\"nativeType\":null,\"default\":{\"name\":\"now\",\"args\":[]},\"isGenerated\":false,\"isUpdatedAt\":false},{\"name\":\"responsedAt\",\"kind\":\"scalar\",\"isList\":false,\"isRequired\":false,\"isUnique\":false,\"isId\":false,\"isReadOnly\":false,\"hasDefaultValue\":false,\"type\":\"DateTime\",\"nativeType\":null,\"isGenerated\":false,\"isUpdatedAt\":false}],\"primaryKey\":null,\"uniqueFields\":[[\"fromUserId\",\"toUserId\"]],\"uniqueIndexes\":[{\"name\":null,\"fields\":[\"fromUserId\",\"toUserId\"]}],\"isGenerated\":false}},\"enums\":{},\"types\":{}}")
+config.runtimeDataModel = JSON.parse("{\"models\":{\"Freinds\":{\"dbName\":null,\"schema\":null,\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"isList\":false,\"isRequired\":true,\"isUnique\":false,\"isId\":true,\"isReadOnly\":false,\"hasDefaultValue\":true,\"type\":\"Int\",\"nativeType\":null,\"default\":{\"name\":\"autoincrement\",\"args\":[]},\"isGenerated\":false,\"isUpdatedAt\":false},{\"name\":\"message\",\"kind\":\"scalar\",\"isList\":false,\"isRequired\":true,\"isUnique\":false,\"isId\":false,\"isReadOnly\":false,\"hasDefaultValue\":false,\"type\":\"String\",\"nativeType\":null,\"isGenerated\":false,\"isUpdatedAt\":false},{\"name\":\"timestamp\",\"kind\":\"scalar\",\"isList\":false,\"isRequired\":true,\"isUnique\":false,\"isId\":false,\"isReadOnly\":false,\"hasDefaultValue\":true,\"type\":\"DateTime\",\"nativeType\":null,\"default\":{\"name\":\"now\",\"args\":[]},\"isGenerated\":false,\"isUpdatedAt\":false}],\"primaryKey\":null,\"uniqueFields\":[],\"uniqueIndexes\":[],\"isGenerated\":false}},\"enums\":{},\"types\":{}}")
 config.engineWasm = undefined
 config.compilerWasm = undefined
 
@@ -84,8 +84,8 @@ export interface PrismaClientConstructor {
    * @example
    * ```
    * const prisma = new PrismaClient()
-   * // Fetch zero or more FriendInvitations
-   * const friendInvitations = await prisma.friendInvitation.findMany()
+   * // Fetch zero or more Freinds
+   * const freinds = await prisma.freinds.findMany()
    * ```
    * 
    * Read more in our [docs](https://www.prisma.io/docs/reference/tools-and-interfaces/prisma-client).
@@ -106,8 +106,8 @@ export interface PrismaClientConstructor {
  * @example
  * ```
  * const prisma = new PrismaClient()
- * // Fetch zero or more FriendInvitations
- * const friendInvitations = await prisma.friendInvitation.findMany()
+ * // Fetch zero or more Freinds
+ * const freinds = await prisma.freinds.findMany()
  * ```
  * 
  * Read more in our [docs](https://www.prisma.io/docs/reference/tools-and-interfaces/prisma-client).
@@ -202,14 +202,14 @@ export interface PrismaClient<
   }>>
 
       /**
-   * `prisma.friendInvitation`: Exposes CRUD operations for the **FriendInvitation** model.
+   * `prisma.freinds`: Exposes CRUD operations for the **Freinds** model.
     * Example usage:
     * ```ts
-    * // Fetch zero or more FriendInvitations
-    * const friendInvitations = await prisma.friendInvitation.findMany()
+    * // Fetch zero or more Freinds
+    * const freinds = await prisma.freinds.findMany()
     * ```
     */
-  get friendInvitation(): Prisma.FriendInvitationDelegate<ExtArgs, { omit: OmitOpts }>;
+  get freinds(): Prisma.FreindsDelegate<ExtArgs, { omit: OmitOpts }>;
 }
 
 export function getPrismaClientClass(dirname: string): PrismaClientConstructor {

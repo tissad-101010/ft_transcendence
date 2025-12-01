@@ -27,8 +27,8 @@ export * from "./enums"
  * @example
  * ```
  * const prisma = new PrismaClient()
- * // Fetch zero or more FriendInvitations
- * const friendInvitations = await prisma.friendInvitation.findMany()
+ * // Fetch zero or more Freinds
+ * const freinds = await prisma.freinds.findMany()
  * ```
  * 
  * Read more in our [docs](https://www.prisma.io/docs/reference/tools-and-interfaces/prisma-client).
@@ -43,7 +43,7 @@ path.join(__dirname, "libquery_engine-debian-openssl-3.0.x.so.node")
 path.join(process.cwd(), "srcs/prisma/prisma/generated/client/libquery_engine-debian-openssl-3.0.x.so.node")
 
 /**
- * Model FriendInvitation
+ * Model Freinds
  * 
  */
-export type FriendInvitation = Prisma.FriendInvitationModel
+export type Freinds = Prisma.FreindsModel

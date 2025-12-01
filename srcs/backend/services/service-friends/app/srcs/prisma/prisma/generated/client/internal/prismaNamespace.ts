@@ -390,7 +390,7 @@ type FieldRefInputType<Model, FieldType> = Model extends never ? never : FieldRe
 
 
 export const ModelName = {
-  FriendInvitation: 'FriendInvitation'
+  Freinds: 'Freinds'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -406,81 +406,81 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "friendInvitation"
+    modelProps: "freinds"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
-    FriendInvitation: {
-      payload: Prisma.$FriendInvitationPayload<ExtArgs>
-      fields: Prisma.FriendInvitationFieldRefs
+    Freinds: {
+      payload: Prisma.$FreindsPayload<ExtArgs>
+      fields: Prisma.FreindsFieldRefs
       operations: {
         findUnique: {
-          args: Prisma.FriendInvitationFindUniqueArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$FriendInvitationPayload> | null
+          args: Prisma.FreindsFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FreindsPayload> | null
         }
         findUniqueOrThrow: {
-          args: Prisma.FriendInvitationFindUniqueOrThrowArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$FriendInvitationPayload>
+          args: Prisma.FreindsFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FreindsPayload>
         }
         findFirst: {
-          args: Prisma.FriendInvitationFindFirstArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$FriendInvitationPayload> | null
+          args: Prisma.FreindsFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FreindsPayload> | null
         }
         findFirstOrThrow: {
-          args: Prisma.FriendInvitationFindFirstOrThrowArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$FriendInvitationPayload>
+          args: Prisma.FreindsFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FreindsPayload>
         }
         findMany: {
-          args: Prisma.FriendInvitationFindManyArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$FriendInvitationPayload>[]
+          args: Prisma.FreindsFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FreindsPayload>[]
         }
         create: {
-          args: Prisma.FriendInvitationCreateArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$FriendInvitationPayload>
+          args: Prisma.FreindsCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FreindsPayload>
         }
         createMany: {
-          args: Prisma.FriendInvitationCreateManyArgs<ExtArgs>
+          args: Prisma.FreindsCreateManyArgs<ExtArgs>
           result: BatchPayload
         }
         createManyAndReturn: {
-          args: Prisma.FriendInvitationCreateManyAndReturnArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$FriendInvitationPayload>[]
+          args: Prisma.FreindsCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FreindsPayload>[]
         }
         delete: {
-          args: Prisma.FriendInvitationDeleteArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$FriendInvitationPayload>
+          args: Prisma.FreindsDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FreindsPayload>
         }
         update: {
-          args: Prisma.FriendInvitationUpdateArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$FriendInvitationPayload>
+          args: Prisma.FreindsUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FreindsPayload>
         }
         deleteMany: {
-          args: Prisma.FriendInvitationDeleteManyArgs<ExtArgs>
+          args: Prisma.FreindsDeleteManyArgs<ExtArgs>
           result: BatchPayload
         }
         updateMany: {
-          args: Prisma.FriendInvitationUpdateManyArgs<ExtArgs>
+          args: Prisma.FreindsUpdateManyArgs<ExtArgs>
           result: BatchPayload
         }
         updateManyAndReturn: {
-          args: Prisma.FriendInvitationUpdateManyAndReturnArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$FriendInvitationPayload>[]
+          args: Prisma.FreindsUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FreindsPayload>[]
         }
         upsert: {
-          args: Prisma.FriendInvitationUpsertArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$FriendInvitationPayload>
+          args: Prisma.FreindsUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FreindsPayload>
         }
         aggregate: {
-          args: Prisma.FriendInvitationAggregateArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.AggregateFriendInvitation>
+          args: Prisma.FreindsAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateFreinds>
         }
         groupBy: {
-          args: Prisma.FriendInvitationGroupByArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.FriendInvitationGroupByOutputType>[]
+          args: Prisma.FreindsGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.FreindsGroupByOutputType>[]
         }
         count: {
-          args: Prisma.FriendInvitationCountArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.FriendInvitationCountAggregateOutputType> | number
+          args: Prisma.FreindsCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.FreindsCountAggregateOutputType> | number
         }
       }
     }
@@ -523,18 +523,13 @@ export const TransactionIsolationLevel = runtime.makeStrictEnum({
 export type TransactionIsolationLevel = (typeof TransactionIsolationLevel)[keyof typeof TransactionIsolationLevel]
 
 
-export const FriendInvitationScalarFieldEnum = {
+export const FreindsScalarFieldEnum = {
   id: 'id',
-  fromUserId: 'fromUserId',
-  toUserId: 'toUserId',
-  fromUserUsername: 'fromUserUsername',
-  toUserUsername: 'toUserUsername',
-  status: 'status',
-  createdAt: 'createdAt',
-  responsedAt: 'responsedAt'
+  message: 'message',
+  timestamp: 'timestamp'
 } as const
 
-export type FriendInvitationScalarFieldEnum = (typeof FriendInvitationScalarFieldEnum)[keyof typeof FriendInvitationScalarFieldEnum]
+export type FreindsScalarFieldEnum = (typeof FreindsScalarFieldEnum)[keyof typeof FreindsScalarFieldEnum]
 
 
 export const SortOrder = {
@@ -551,14 +546,6 @@ export const QueryMode = {
 } as const
 
 export type QueryMode = (typeof QueryMode)[keyof typeof QueryMode]
-
-
-export const NullsOrder = {
-  first: 'first',
-  last: 'last'
-} as const
-
-export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder]
 
 
 
@@ -709,7 +696,7 @@ export interface PrismaClientOptions {
   omit?: GlobalOmitConfig
 }
 export type GlobalOmitConfig = {
-  friendInvitation?: Prisma.FriendInvitationOmit
+  freinds?: Prisma.FreindsOmit
 }
 
 /* Types for Logging */
