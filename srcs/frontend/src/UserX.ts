@@ -1,11 +1,7 @@
-import {
-  Scene,
-} from '@babylonjs/core';
-
 import { ZoneName } from "./config.ts";
 import { TournamentParticipant, Tournament } from "./Tournament.ts";
 
-import { Match, MatchRules } from "./Match.ts";
+import { Match, MatchRules, MatchParticipant } from "./Match.ts";
 
 import { SceneManager } from './scene/SceneManager.ts';
 
@@ -141,6 +137,10 @@ export class UserX
         sceneManager: SceneManager
     ) : boolean
     {
+        if (this.user === null) {
+            console.error("Impossible de jouer un match de tournoi: utilisateur non connecté");
+            return (false);
+        }
         return (t.playMatch(m, this.user.id, sceneManager));
     }
 
