@@ -59,7 +59,7 @@ const SignIn: React.FC<SignInProps> = ({ onSwitch }) => {
     }
   };
   return (
-    <div className="authPage-window" id ="signIn">
+    <div className="authPage-window">
       <img
         src="/logoWhite.png"
         alt="Logo"
@@ -114,7 +114,7 @@ const SignIn: React.FC<SignInProps> = ({ onSwitch }) => {
 
       <p>
         New to Moonset?{" "}
-        <a href="#signup" onClick={onSwitch}>
+        <a href="#" onClick={onSwitch}>
           Create an account
         </a>
       </p>

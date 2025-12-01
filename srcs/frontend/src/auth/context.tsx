@@ -89,7 +89,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         resetPending2FA,
       }}
     >
-      {!loading && children}
+      {children}
     </AuthContext.Provider>
   );
 };

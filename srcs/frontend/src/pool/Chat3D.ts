@@ -1,11 +1,14 @@
 import { Scene, AbstractMesh, StandardMaterial } from "@babylonjs/core";
 import { AdvancedDynamicTexture, ScrollViewer, StackPanel, TextBlock, Control, Rectangle, Grid, Ellipse, Button, InputTextArea, Line } from "@babylonjs/gui";
 
-import { Friend } from "../Friend.ts";
 import { UserX } from "../UserX.ts";
+import { FriendManager } from "../friends/FriendsManager.ts";
+import { Friend } from "../friends/Friend.ts";
+import { Message } from "../friends/Friend.ts";
 
 import { chatApi } from "../chatApi/chat.api.ts";
 
+import WebSocket from "isomorphic-ws";
 
 export class Chat3D {
     private advancedTexture: AdvancedDynamicTexture;
@@ -22,7 +25,6 @@ export class Chat3D {
     private friend: Friend;
     private lastDate: Date | null;
     private userX: UserX;
-
 
     constructor(
         scene: Scene,
@@ -79,7 +81,7 @@ export class Chat3D {
 
         // TEXTE
         this.loginText = new TextBlock();
-        this.loginText.text = friend.getLogin;
+        this.loginText.text = friend.getUsername;
         this.loginText.color = "white";
         this.loginText.fontSize = 40;
         this.loginText.paddingLeft = "30px";
@@ -166,17 +168,17 @@ export class Chat3D {
             if (message.length === 0) return;
 
             // Utiliser la méthode de la classe pour ajouter le message
-            this.addMessage(this.userX.getUser.id, message, new Date());
+            this.addMessage(this.userX.getUser?.id, message, new Date());
 
-            console.log("Message envoyé :", message, this.userX.getUser?.id, this.friend.getId);
-            console.log("Message envoyé :", message, this.userX.getUser?.username, this.friend.getLogin);
+            console.log("Message envoyé :", message, this.userX.getUser?.id, this.friend.getUsername);
+            console.log("Message envoyé :", message, this.userX.getUser?.username, this.friend.getUsername);
             try
             {
                 // const conversation = chatApi.startConversation(
                 //     this.userX.getUser!.username,
-                //     this.friend.getLogin
+                //     this.friend.getUsername,
                 // );
-                // console.log("Conversation démarrée :", conversation);
+                // console.log("=====>Conversation démarrée :", conversation);
                 // const sended = await chatApi.sendMessage(
                 //     this.userX.getUser!.username,
                 //     this.friend.getLogin,
@@ -185,36 +187,36 @@ export class Chat3D {
                 // console.log("Message envoyé via chatApi", sended);
                 const token = "123"; // normalement ton vrai JWT
 
-                const ws = new WebSocket(`wss://localhost:8443/chat/ws?token=${token}`);
+                const ws = new WebSocket("wss://localhost:8443/chat/ws?token=" + token);
 
-                ws.onopen = () => {
-                console.log("WebSocket connecté");
+                // Handler pour tous les messages
+                ws.onmessage = (event) => {
+                    const data = JSON.parse(event.data);
+                    console.log("MESSAGE REÇU WS:", data);
+
+                    if (data.type === "new_message") {
+                        console.log("Nouveau message:", data.message);
+                    }
                 };
 
-                ws.onmessage = (event) => {
-                const data = JSON.parse(event.data);
-                console.log("MESSAGE REÇU WS:", data);
+                ws.onopen = () => {
+                    console.log("WebSocket connecté");
 
-                if (data.type === "new_message") {
-                    // Ajouter dans l’état du chat
-                    console.log("Nouveau message:", data.message);
-                }
+                    ws.send(JSON.stringify({
+                        type: "send_message",
+                        from: this.userX.getUser!.username,
+                        to: this.friend.getUsername,
+                        text: message,
+                    }));
                 };
 
                 ws.onclose = () => {
-                console.log("WebSocket fermé");
+                    console.log("WebSocket fermé");
                 };
 
                 ws.onerror = (err) => {
-                console.error("Erreur WebSocket", err);
+                    console.error("Erreur WebSocket", err);
                 };
-                ws.send(JSON.stringify({
-                    type: "send_message",
-                    from: this.userX.getUser!.username,
-                    to: this.friend.getLogin,
-                    text: message,
-                }));
-                
             } 
             catch (error) {
                 console.error("Erreur lors du démarrage de la conversation :", error);
@@ -344,7 +346,7 @@ export class Chat3D {
             console.log("added a message:", msg);
             console.log("added a message:", msg.content, msg.senderId, msg.sentAt);
 
-            this.addMessage(this.userX.getUser.id, msg.content, new Date(msg.sentAt));
+            this.addMessage(this.userX.getUser?.id, msg.content, new Date(msg.sentAt));
         });
     }
 
@@ -352,7 +354,7 @@ export class Chat3D {
         friend: Friend
     ) : void
     {
-        this.loginText.text = friend.getLogin;
+        this.loginText.text = friend.getUsername;
         this.onlineIcon.background = friend.getOnline ? "#128354ff" : "#e58ab8ff";
         this.chatContainer.clearControls();
         this.friend = friend;
@@ -391,7 +393,7 @@ export class Chat3D {
     
     // ================= Méthode pour ajouter un message =================
     addMessage = (
-        sender: number,
+        sender: string,
         text: string,
         date: Date
     ) => {
@@ -408,9 +410,9 @@ export class Chat3D {
         msgRect.height = estHeight + "px";
         msgRect.cornerRadius = 10;
         msgRect.thickness = 0;
-        msgRect.background = sender !== this.friend.getId ? "rgba(104, 174, 179, 1)" : "#d397a6ff";
+        msgRect.background = sender !== this.friend.getUsername ? "rgba(104, 174, 179, 1)" : "#d397a6ff";
         msgRect.horizontalAlignment =
-            sender !== this.friend.getId
+            sender !== this.friend.getUsername
                 ? Control.HORIZONTAL_ALIGNMENT_RIGHT
                 : Control.HORIZONTAL_ALIGNMENT_LEFT;
 
