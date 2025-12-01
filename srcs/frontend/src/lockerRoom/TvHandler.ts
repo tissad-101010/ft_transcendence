@@ -13,6 +13,7 @@ import {pressButtonAnimation, applyTextureToMesh} from './utils.ts';
 
 import { SceneInteractor } from '../scene/SceneInteractor.ts';
 import { SceneManager } from '../scene/SceneManager.ts';
+import { navigateToZone } from '../CameraHistory.ts';
 
 export class TvHandler {
     /**************************************************
@@ -76,7 +77,7 @@ export class TvHandler {
         if (pickedMesh === tvMeshes[0]){
             // //Desactiver Interactions utilisateur
             this.sceneInteractor.disableInteractions();
-            this.sceneManager.moveCameraTo(ZoneName.SCREEN_TV, () => {
+            navigateToZone(this.sceneManager, ZoneName.SCREEN_TV, () => {
                 this.sceneManager.setSpecificMesh(true);
                 this.turnOnTv(tvMeshes); // visualiser les scores/match sur ecran
                 this.clicTv = true;
@@ -91,7 +92,7 @@ export class TvHandler {
                 pressButtonAnimation(pickedMesh, this.scene, () => {
                     this.turnOffTv(tvMeshes);
                     this.sceneInteractor.disableInteractions();
-                    this.sceneManager.moveCameraTo(ZoneName.LOCKER_ROOM, () => {
+                    navigateToZone(this.sceneManager, ZoneName.LOCKER_ROOM, () => {
                         this.buttonHighlightLayer.removeMesh(tvMeshes[1], new Color3(1, 0.75, 0.8));
                         this.sceneManager.setSpecificMesh(false);
                         this.clicTv = false;

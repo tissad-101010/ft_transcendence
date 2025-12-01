@@ -5,7 +5,8 @@ import {
   AbstractMesh,
   PointerEventTypes,
   HighlightLayer,
-  PointerInfo
+  PointerInfo,
+  Mesh
 } from '@babylonjs/core';
 import "@babylonjs/loaders";
 import { SceneManager } from './SceneManager.ts';
@@ -14,6 +15,7 @@ import { ZoneName } from "../config.ts";
 import { LockerInteraction } from '../lockerRoom/LockerInteraction.ts';
 import { PoolInteraction } from '../pool/PoolInteraction.ts';
 import { StandsInteraction } from '../field/StandsInteraction.ts';
+import {navigateToZone } from '../CameraHistory.ts';
 
 
 export class SceneInteractor {
@@ -28,6 +30,7 @@ export class SceneInteractor {
     private currSpecificInteraction: SpecificInteraction | null = null;
     private interactionsEnabled: boolean = true;
     private fieldTest: boolean = false;
+    private zone? : ZoneName; //optionnelle
 
     /**************************************************
      *                  CONSTRUCTOR                   *
@@ -41,6 +44,8 @@ export class SceneInteractor {
             ZoneName.LOCKER_ROOM,
             ZoneName.STANDS,
         ];
+        // if (zone)
+        //     this.zone = zone;
     }
 
 
@@ -48,6 +53,7 @@ export class SceneInteractor {
      *               PRIVATE METHODS                 *
      **************************************************/
      private handlePointer(pointerInfo: PointerInfo, isClick: boolean) : void {
+        // console.log("entree dans handlePointeur de sceneinteractr");
         if (!this.interactionsEnabled)
         {
             return;
@@ -57,11 +63,8 @@ export class SceneInteractor {
             return;
         }   
         const pickRes = this.scene.pick(this.scene.pointerX, this.scene.pointerY);
-        const pickedMesh = pickRes?.pickedMesh;
-
-        // console.log(pickedMesh.name);
+        const  pickedMesh = pickRes?.pickedMesh as Mesh | undefined;
         
-        //Je veux pouvoir survoler juste l echelle etd
         //Pour tous les survols global
         if (!isClick && pickedMesh && this.interactiveMainMeshes.includes(pickedMesh.name) && !this.sceneManager.getSpecificMesh) {
             // highlight zone principale au survol
@@ -80,11 +83,19 @@ export class SceneInteractor {
         }
     }
 
-    public handleMainZoneClick(pickedMesh: AbstractMesh, isClick: boolean) : void {
+    public handleMainZoneClick(
+    pickedMesh: AbstractMesh,
+    isClick: boolean,
+    addToHistory: boolean = true
+    ) : void {
         if (this.currSpecificInteraction) {
+            console.log("SceneInteractor: Entree dans handleMainZoneClick, currentZone existe->dispose");
             this.currSpecificInteraction.dispose();
             this.currSpecificInteraction = null;
+        } else {
+            console.log("SceneInteractor: Entree dans handleMainZoneClick, curr n'existe pas");
         }
+
         this.highlightLayer.removeAllMeshes();
         if (this.lastHoveredMesh && this.lastHoveredMesh !== pickedMesh)
             this.meshPickable(this.lastHoveredMesh);
@@ -94,13 +105,13 @@ export class SceneInteractor {
 
         const zoneName = pickedMesh.name as ZoneName;
         if (Object.values(ZoneName).includes(zoneName)) {
-            this.disableInteractions(); //desactiver clic/survol avant le mouvement
-            this.sceneManager.moveCameraTo(zoneName, () => {
-                this.enableInteractions(); //reactiver clic/survol
+            this.disableInteractions();
+            navigateToZone(this.sceneManager, zoneName, () => {
+                console.log("SceneInteractor: Addmove Creation instance: ", zoneName);
+                this.enableInteractions();
                 switch (zoneName) {
                     case ZoneName.POOL:
                         this.currSpecificInteraction = new PoolInteraction(this.scene, this.sceneManager, this);
-                        //Ajout start une fois dans la piscine
                         if (!this.interactiveMainMeshes.includes(ZoneName.START)) {
                             this.interactiveMainMeshes.push(ZoneName.START);
                         }
@@ -121,13 +132,23 @@ export class SceneInteractor {
                     default:
                         this.currSpecificInteraction = null;
                 }
-            });
+            }, addToHistory); // <-- important
         }
     }
+
 
     /**************************************************
      *                PUBLIC METHODS                  *
      **************************************************/
+
+    public getMeshByZone(zone: ZoneName): AbstractMesh | null {
+    // Récupère le mesh même si ce n’est pas interactif
+    const mesh = this.scene.getMeshByName(zone);
+    return mesh || null;
+    }
+
+
+
     public enableInteractionScene(): void {
         this.scene.onPointerObservable.add((pointerInfo: PointerInfo) => {
             const isClick = pointerInfo.type === PointerEventTypes.POINTERPICK;

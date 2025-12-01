@@ -46,6 +46,17 @@ const poolMeshNames = [
     ...meshNamesByZone.pool.lounge,
     ...meshNamesByZone.pool.buttonsPool,
 ];
+
+//NE PAS TOUCHER!
+const meshNamesZones = ["stands", "furniture", "chair03"];
+
+interface CameraState {
+  position: Vector3;
+  rotation: Vector3;
+  zone?: ZoneName;
+}
+
+
 export class SceneManager {
     /**************************************************
      *           PRIVATE ATTRIBUTES                   *
@@ -60,6 +71,7 @@ export class SceneManager {
     private loadedMeshes: {[zone: string]: AbstractMesh[]} = {};
     private meshMap: Record<string, AbstractMesh> = {};
     private _specificMesh : boolean = false;
+    
 
 private players: Player[] = [
     { id: 1, login: "RetroKid" },
@@ -107,7 +119,7 @@ private players: Player[] = [
     private _loungeMeshes: AbstractMesh[] = [];
     // private lightInteractor : LightInteractor;
     private lightInteractor! : LightInteractor;
-
+    private cameraHistory: CameraState[] = [];
     private userX: UserX;
 
     /**************************************************
@@ -134,10 +146,10 @@ private players: Player[] = [
         this.freeCamera.attachControl(canvas, true);
 
         // Bloque deplacements clavier
-        // this.freeCamera.keysUp = [];
-        // this.freeCamera.keysDown = [];
-        // this.freeCamera.keysLeft = [];
-        // this.freeCamera.keysRight = [];
+        this.freeCamera.keysUp = [];
+        this.freeCamera.keysDown = [];
+        this.freeCamera.keysLeft = [];
+        this.freeCamera.keysRight = [];
         //Bloque zoom molette
         this.freeCamera.inputs.attached.mousewheel?.detachControl();
         this.scene.activeCamera = this.freeCamera;
@@ -147,6 +159,7 @@ private players: Player[] = [
     /**************************************************
      *               PRIVATE METHODS                  *
      **************************************************/
+
     private onResize = () => {
         this.engine.resize();
     }
@@ -299,6 +312,21 @@ private players: Player[] = [
         const mouseInput = new FreeCameraMouseInput();
         this.freeCamera.inputs.add(mouseInput);
     }
+private resetInteractions(): void {
+    // Si tu as un SceneInteractor
+    if (this.sceneInteractor) {
+        this.sceneInteractor.disableInteractions(); // désactive tout
+        this.sceneInteractor.enableInteractionScene();  // réactive pour la nouvelle caméra
+    }
+    
+    // Optionnel : réattacher la caméra au canvas
+    this.freeCamera.detachControl();
+    this.freeCamera.attachControl(this.canvas, true);
+    
+    // Si tu limites la rotation
+    if (this.limitCameraRotation) this.enableRotationOnly();
+}
+
 
     /**************************************************
      *                PUBLIC METHODS                  *
@@ -308,9 +336,6 @@ private players: Player[] = [
         onArrived?: () => void
     ) 
     {
-        //  if (zoneName === ZoneName.POOL || zoneName === ZoneName.SCREEN_TV ||
-        //     zoneName === ZoneName.SCOREBOARD || zoneName.includes(ZoneName.TSHIRT))
-        //     this.limitCameraRotation = false;
         const config = CAMERA_CONFIGS[zoneName];
         if (!config) return;
 
@@ -462,6 +487,7 @@ private players: Player[] = [
     {
         return (this.lightInteractor);
     }
+
     // /**************************************************
     //  *                    SETTERS                     *
     //  **************************************************/
@@ -499,5 +525,4 @@ private players: Player[] = [
     {
         this.userX.setUser = user;
     }
-
 }
