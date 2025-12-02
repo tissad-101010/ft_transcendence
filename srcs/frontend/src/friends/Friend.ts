@@ -5,6 +5,8 @@ export interface Message
     content: string;
     sentAt: Date;
     senderId: number;
+    senderUsername: string;
+    receiverUsername: string;
 }
 
 

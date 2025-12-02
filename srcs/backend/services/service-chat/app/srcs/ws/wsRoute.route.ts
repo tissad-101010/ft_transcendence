@@ -1,19 +1,17 @@
 import { FastifyInstance } from "fastify";
-
 import { handleWebSocketConnection } from "../ws/handleWebSocketConnection";
 import { WebSocket } from "ws";
 
 export async function wsRoutes(app: FastifyInstance) {
-  console.log("===========================================>Registering WebSocket routes...");
+  console.log("Registering WebSocket routes...");
 
-  // 2. Map des clients connectés
   const clients = new Map<number, WebSocket>();
 
-  // 3. Route WS
   app.get(
     "/ws",
     { websocket: true },
+    // cast to any to satisfy Fastify's handler type for websocket routes
     handleWebSocketConnection(clients)
   );
-
 }
+

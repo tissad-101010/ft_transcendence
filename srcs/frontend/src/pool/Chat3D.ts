@@ -199,19 +199,42 @@ export class Chat3D {
                 const token = "123"; // normalement ton vrai JWT
 
                 const ws = new WebSocket("wss://localhost:8443/chat/ws?token=" + token);
+                if (!ws)
+                {
+                    console.error("Impossible de créer la connexion WebSocket");
+                    return ;
+                }
+                else
+                {
+                    console.log("WebSocket créé avec succès");
+                }
+                    
+                if (ws.readyState === WebSocket.OPEN) {
+                    console.log("WebSocket déjà ouvert");
+                }
 
                 // Handler pour tous les messages
                 ws.onmessage = (event) => {
-                    const data = JSON.parse(event.data);
+                    console.log("Message reçu du serveur WebSocket");
+                    console.log("Données brutes :", event.data);
+                    const data = JSON.parse(event.data.toString());
                     console.log("MESSAGE REÇU WS:", data);
 
                     if (data.type === "new_message") {
-                        console.log("Nouveau message:", data.message);
+                        const msg: Message = data.message;
+                         this.addMessage(
+                            this.friend.getUsername,
+                            msg.content,
+                            new Date(msg.sentAt)
+                        );
+                        console.log("Nouveau message:", data.message.content);
                     }
                 };
 
+                console.log("==========>WebSocket créé, envoi du message...");
                 ws.onopen = () => {
-                    console.log("WebSocket connecté");
+                    console.log("WebSocket connecté");  
+                    console.log("=======>Envoi du message via WebSocket :", message);
 
                     ws.send(JSON.stringify({
                         type: "send_message",
@@ -221,9 +244,9 @@ export class Chat3D {
                     }));
                 };
 
-                ws.onclose = () => {
-                    console.log("WebSocket fermé");
-                };
+                // ws.onclose = () => {
+                //     console.log("WebSocket fermé");
+                // };
 
                 ws.onerror = (err) => {
                     console.error("Erreur WebSocket", err);
@@ -357,7 +380,7 @@ export class Chat3D {
             console.log("added a message:", msg);
             console.log("added a message:", msg.content, msg.senderId, msg.sentAt);
 
-            this.addMessage(this.userX.getUser?.id, msg.content, new Date(msg.sentAt));
+            this.addMessage(msg.receiverUsername, msg.content, new Date(msg.sentAt));
         });
     }
 

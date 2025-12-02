@@ -6,7 +6,7 @@
 /*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/16 19:00:31 by tissad            #+#    #+#             */
-/*   Updated: 2025/12/01 08:48:26 by tissad           ###   ########.fr       */
+/*   Updated: 2025/12/02 17:09:30 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -97,7 +97,7 @@ export async function sendMessage(request: FastifyRequest, reply: FastifyReply) 
         
 
 
-        const message = await chatService.sendMessage(conversationId, senderId, content);
+        const message = await chatService.sendMessage(conversationId, senderId, content, senderUsername, receiverUsername);
         
         return reply.send(message);
     }

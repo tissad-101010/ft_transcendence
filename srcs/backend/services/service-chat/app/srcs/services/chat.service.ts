@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   chat.service.ts                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: issad <issad@student.42.fr>                +#+  +:+       +#+        */
+/*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/16 18:54:11 by tissad            #+#    #+#             */
-/*   Updated: 2025/11/29 18:39:01 by issad            ###   ########.fr       */
+/*   Updated: 2025/12/02 17:04:26 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,8 +53,8 @@ export class ChatService {
         if (!conversation) throw new Error("Forbidden");
         return await getMessages(conversationId);
     }
-    async sendMessage(conversationId: number, senderId: number, content: string) {
-        return await sendMessage(conversationId, senderId, content);
+    async sendMessage(conversationId: number, senderId: number, content: string, senderUsername: string, receiverUsername: string) {
+        return await sendMessage(conversationId, senderId, content, senderUsername, receiverUsername);
     }
     async blockUser(userId: number, targetUserId: number) {
         return await blockUser(userId, targetUserId);

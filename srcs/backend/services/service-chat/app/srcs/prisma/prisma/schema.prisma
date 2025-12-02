@@ -55,6 +55,8 @@ model Message {
   id             Int          @id @default(autoincrement())
   conversationId Int
   senderId       Int
+  senderUsername String
+  receiverUsername String
   content        String
   sentAt         DateTime     @default(now())
 

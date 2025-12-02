@@ -112,7 +112,7 @@ export async function getUserConversations(userId: number) {
         include: { user: true }
       },
       messages: {
-        orderBy: { sentAt: "desc" }
+        orderBy: { sentAt: "asc"}
       }
     }
   });
@@ -126,7 +126,7 @@ export async function getConversationById(conversationId: number) {
         include: { user: true }
       },
       messages: {
-        take: 1,
+
         orderBy: { sentAt: "desc" }
       }
     }
@@ -150,9 +150,11 @@ export async function getMessages(conversationId: number) {
 }
 
 // Send a message
-export async function sendMessage(conversationId: number, senderId: number, content: string) {
+export async function sendMessage(conversationId: number, senderId: number, content: string, senderUsername: string, receiverUsername: string) {
   return prisma.message.create({
     data: {
+      senderUsername,
+      receiverUsername,
       conversationId,
       senderId,
       content,
