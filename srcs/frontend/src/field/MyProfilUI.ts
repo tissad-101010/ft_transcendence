@@ -1,4 +1,5 @@
 // function that logout user from the application
+// fuuction that logout user from the application
 import { logoutUser } from "../auth/controllers/signout.ts";
 import { changePassword } from "../auth/controllers/auth.api.ts";
 import {    sendEnableEmailOtp,
@@ -98,6 +99,7 @@ export class MyProfilUI
     private enable2faMail = false;
    
     
+
     constructor(sceneManager: SceneManager, userX: UserX)
     {
          
@@ -470,6 +472,12 @@ export class MyProfilUI
             }
         });
         rightPanel.addControl(changePwdBtn);
+        let enable2faBtn = Button.CreateSimpleButton("enable2FAApp", "");
+        enable2faBtn.height = "50px";
+        enable2faBtn.width = "70%";
+        enable2faBtn.color = "white";
+        enable2faBtn.fontSize = 20;
+        enable2faBtn.cornerRadius = 10;
 
         // change this with 2fa user methods request/!\
          //get 2fa methods from request
@@ -495,7 +503,7 @@ export class MyProfilUI
 
         console.log("App 2FA enabled state:", this.enable2faApp);
 
-        const enable2faBtn = create2faButton({
+        enable2faBtn = create2faButton({ // warning merge conflict
             id: "enable2FAApp",
             stateVar: () => this.enable2faApp,
             setStateVar: (val) => this.enable2faApp = val,

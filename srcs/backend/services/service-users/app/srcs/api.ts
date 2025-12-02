@@ -6,7 +6,7 @@
 /*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/23 15:58:35 by tissad            #+#    #+#             */
-/*   Updated: 2025/11/27 19:11:08 by tissad           ###   ########.fr       */
+/*   Updated: 2025/12/01 11:51:23 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,12 +29,14 @@ import { TwoFactorAuth } from './modules/twoFactor/twoFactor.routes';
 // import { oauth42Routes } from './routes/Oauth42.routes';
 
 // internal services routes 
-import { internalServicesRoutes }  from './internal-services-routes/internalServicesRoutes';
+import { internalVerifyTokenRoutes } from "./internal-services-routes/internal-routes/internalVerifyToken.routes";
+import { internalSelectUserRoutes } from './internal-services-routes/internal-routes/internalSelectUser.routes';
  
 
 // import plugins
 import redisPlugin from './plugins/redis.plugin';
 import { prismaPlugin } from './plugins/prisma.plugin';
+import { infoFriendRoute } from './modules/users/users.routes';
 
 
 
@@ -48,7 +50,6 @@ const app = Fastify({ logger: true });
 app.register(fastifyCookie, {
   secret: process.env.COOKIE_SECRET || 'supersecret', // optionnel (pour signer les cookies)
 });
-
 
 // Register plugins (database, redis, etc.)
 // app.register(dbPlugin);
@@ -76,7 +77,13 @@ app.register(oauthRoutes, { prefix: '/user/oauth' });
 app.register(userRoutes, { prefix: '/user' });
 app.register(signoutRoutes, { prefix: '/user/auth' });
 app.register(TwoFactorAuth, { prefix: '/user/2fa' });
-app.register(internalServicesRoutes, { prefix: '/internal' });
+// app.register(internalServicesRoutes, { prefix: '/internal' }); warnning mergre conflict
+
+// Register internals routes
+app.register(internalVerifyTokenRoutes, { prefix: '/internal' });
+app.register(internalSelectUserRoutes, { prefix: '/internalUser'});
+
+app.register(infoFriendRoute);
 
 // app.register(githubRoutes, { prefix: '/auth' });
 // app.register(googleRoutes, { prefix: '/auth' });

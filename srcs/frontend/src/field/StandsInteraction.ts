@@ -16,7 +16,7 @@ import { ZoneName } from '../config.ts';
 import {getCurrentGroup, setCurrentGroup, getTotalGroups, displayFriendsWithEmpty} from '../utils.ts';
 import { FriendUI } from './FriendUI.ts';
 import { MyProfilUI } from './MyProfilUI.ts';
-import { Friend } from '../Friend.ts';
+import { Friend } from '../friends/Friend.ts';
 
 
 export class StandsInteraction implements SpecificInteraction {
@@ -123,15 +123,14 @@ export class StandsInteraction implements SpecificInteraction {
             {
                 this.friendUI = new FriendUI(   
                                     this.sceneManager,
-                                    null,
                                     this.updateChair.bind(this),
                                     buttonMeshes,
                                     this
                                 );
             }
             else
-                this.friendUI.update(null);
-        }, this.sceneInteractor);
+                this.friendUI.leaveFriend();
+        });
     }
 
 
@@ -199,14 +198,12 @@ export class StandsInteraction implements SpecificInteraction {
                 const index = (getCurrentGroup(ZoneName.SEAT) * 4) + nb;
                 if (!this.friendUI)
                     this.friendUI = new FriendUI(   
-                                                    this.sceneManager,
-                                                    this.sceneManager.getUserX.getFriends[index],
-                                                    this.updateChair.bind(this),
-                                                    buttonMeshes,
-                                                    this
-                                                );
-                else
-                    this.friendUI.update(this.sceneManager.getUserX.getFriends[index]);
+                        this.sceneManager,
+                        this.updateChair.bind(this),
+                        buttonMeshes,
+                        this
+                    );
+                this.friendUI.displayFriend(this.sceneManager.getUserX.getFriends[index]);
             } else if (arbitratorMeshes.includes(pickedMesh)) {
                 this.handleMyProfile();
             } else if (spectatorMeshes.includes(pickedMesh)) {

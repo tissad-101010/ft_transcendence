@@ -12,27 +12,6 @@ const AuthPage: React.FC = () => {
   const { user, pending2FA, loading } = useAuth();
   const [showRegister, setShowRegister] = useState(false);
   const [currentRoute, setCurrentRoute] = useState(window.location.pathname);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  
-
-
-
-
-
   
   // Écoute des changements de "route" pour simuler navigation sans React Router
   useEffect(() => {

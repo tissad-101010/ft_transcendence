@@ -13,9 +13,10 @@ import
 
 import { UIData } from "./utils.ts";
 
-import { UserX } from "../UserX.ts";
+import { Friend } from "../../friends/Friend.ts";
+import { UserX } from "../../UserX.ts";
+
 import { myClearControls } from "../../utils.ts";
-import { Friend } from "../../Friend.ts";
 
 
 function genFriendList(
@@ -55,7 +56,7 @@ function genFriendList(
     for (let i = 0; i < friends.length; i++)
     {
         const test = new TextBlock();
-        test.text = friends[i].getLogin;
+        test.text = friends[i].getUsername;
         test.height = "30px";
         test.width = "100%";
         test.fontSize = env.text.fontSize - 3;

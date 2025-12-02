@@ -7,8 +7,6 @@ start : local
 build :
 	docker compose -f $(COMPOSE) build
 
-
-
 down : 
 	docker compose -f $(COMPOSE) down -v
 

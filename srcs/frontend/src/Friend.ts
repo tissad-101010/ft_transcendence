@@ -321,7 +321,7 @@ export class Friend
         ];
         return (this.matchs);
     }
-
+    // warning merge  move loadMessages to src/friend/Friend.ts 
     public async loadMessages(username: string) : Promise<IMessage[]>
     {
         // APPEL API POUR RECUPERER LA DISCUSSION EXISTANTE

@@ -144,24 +144,3 @@
   background-color: rgb(250, 158, 219);
 }
 
-/* Spinner au centre de la fenêtre */
-.spinner {
-  width: 50px;
-  height: 50px;
-  border: 5px solid rgba(255, 255, 255, 0.3);
-  border-top-color: #fff;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-  margin-top: 30px;
-}
-
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-.authPage-error-message {
-  color: #ff4d4d;
-  margin-top: 10px;
-  font-size: 14px;
-}

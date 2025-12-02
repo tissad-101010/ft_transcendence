@@ -11,17 +11,19 @@ import {
   FreeCameraMouseInput,
   Texture,
   ParticleSystem,
+  Mesh
 } from '@babylonjs/core';
 import "@babylonjs/inspector";
-import { SceneInteractor } from './SceneInteractor.ts';
 import { AdvancedDynamicTexture, TextBlock } from "@babylonjs/gui";
+
+import { SceneInteractor } from './SceneInteractor.ts';
 import { CAMERA_CONFIGS, ZoneName, meshNamesByZone } from "../config.ts";
+
 import { 
 normalizeRotation,
 displayPlayers, 
 groupConfigs,
-Player,
-Friend
+Player
  } from '../utils.ts';
 
 import { UserX } from '../UserX.ts';
@@ -71,49 +73,6 @@ export class SceneManager {
     private loadedMeshes: {[zone: string]: AbstractMesh[]} = {};
     private meshMap: Record<string, AbstractMesh> = {};
     private _specificMesh : boolean = false;
-    
-
-private players: Player[] = [
-    { id: 1, login: "RetroKid" },
-    { id: 2, login: "SpaceAce" },
-    { id: 3, login: "PixelQueen" },
-    { id: 4, login: "NeoPong" },
-    { id: 5, login: "LoLMaster" },
-    { id: 6, login: "FastFingers" },
-    { id: 0, login: "Nostag" },
-    { id: 8, login: "Tissad" },
-    { id: 9, login: "CyberSam" },
-    { id: 10, login: "GlitchGuru" },
-    { id: 11, login: "PixelKnight" },
-    { id: 12, login: "MegaMage" },
-    { id: 13, login: "RocketRex" },
-    { id: 14, login: "ShadowFox" },
-    { id: 15, login: "TurboTiger" },
-    { id: 16, login: "QuantumQuill" },
-    { id: 17, login: "BlazeWolf" },
-    { id: 18, login: "CrystalCat" },
-    { id: 19, login: "NovaNinja" },
-    { id: 20, login: "PixelPilot" },
-    { id: 21, login: "LunarLion" },
-    { id: 22, login: "StarStriker" },
-    { id: 23, login: "FrostFalcon" },
-    { id: 24, login: "VortexViper" },
-    { id: 25, login: "EchoEagle" },
-    { id: 26, login: "MysticMoth" },
-];
-
-    private friends: Friend[] = [
-    { login: "Bestie1" },
-    { login: "Bestie2" },
-    { login: "Bestie3" },
-    { login: "Bestie4" },
-    { login: "Bestie5" },
-    { login: "Bestie6" },
-    { login: "Bestie7" },
-    { login: "Bestie8" },
-
-
-    ];
     private _tshirtMeshes: AbstractMesh[] = [];
     private _chairMeshes: AbstractMesh[] = [];
     private _loungeMeshes: AbstractMesh[] = [];
@@ -166,7 +125,7 @@ private players: Player[] = [
 
     private buildMeshMap(): void {
         this.meshMap = {};
-        this.scene.meshes.forEach(mesh => {
+        this.scene.meshes.forEach((mesh : Mesh) => {
             this.meshMap[mesh.name] = mesh as AbstractMesh;
         });
     }
@@ -175,12 +134,12 @@ private players: Player[] = [
     {
         this.scene.debugLayer.show();
         console.table(
-            this.scene.meshes.map(m => ({
+            this.scene.meshes.map((m : Mesh) => ({
                 name: m.name,
                 indices: m.getTotalIndices(),
                 vertices: m.getTotalVertices(),
                 triangles: m.getTotalIndices() / 3
-            })).sort((a, b) => b.indices - a.indices).slice(0, 10)); 
+            })).sort((a : Mesh, b : Mesh) => b.indices - a.indices).slice(0, 10)); 
         this.scene.debugLayer.showBoundingBoxes = true;
     }
 
@@ -441,16 +400,6 @@ private resetInteractions(): void {
     public get getFreeCamera() : FreeCamera 
     {
         return this.freeCamera;
-    }
-
-    public get getPlayers() : Player[] 
-    {
-        return this.players;
-    }
-
-    public get getFriends(): Friend[] 
-    {
-        return this.friends;
     }
 
     public get getChair(): AbstractMesh[] 
