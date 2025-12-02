@@ -206,6 +206,9 @@ async function handleWebSocketMessage( // rp route websocket messages by type
     case 'player_move': // rp move command
       await handlePlayerMove(fastify, ws, message); // rp process movement
       break; // rp exit switch branch
+    case 'score_sync': // rp synchronize score between clients
+      broadcastToGame(message.gameId, message);
+      break;
     default: // rp unknown command branch
       fastify.log.warn('Type de message inconnu:', message.type); // rp log unsupported message type
   } // rp end switch statement

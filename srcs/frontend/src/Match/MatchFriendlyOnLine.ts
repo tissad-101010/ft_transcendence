@@ -30,6 +30,7 @@ export class MatchFriendlyOnline extends MatchBase
     private isFirstConnector: boolean | null = null; // true si ce navigateur est le premier à se connecter au match
     private dbIdToGameId: Map<number, number> = new Map(); // mapping DB user id -> game-local id (1/2)
     private myGamePlayerId: number | null = null;  // 1 or 2 - position dans le jeu (gauche/droite)
+    private lastScoreSnapshot = { score1: 0, score2: 0 };
 
     constructor(id : number, rules : MatchRules, sceneManager: SceneManager)
     {
@@ -207,6 +208,10 @@ export class MatchFriendlyOnline extends MatchBase
         }
         this.game.interface.initScoreBoard();
         this.game.interface.initTimeBefore();
+        this.lastScoreSnapshot = {
+            score1: this.game.logic.getScore1,
+            score2: this.game.logic.getScore2
+        };
 
         if (this.gameReady())
         {
@@ -241,6 +246,94 @@ export class MatchFriendlyOnline extends MatchBase
         } 
 
         return (true);
+    }
+
+    private monitorScoreChanges(): void {
+        if (!this.game)
+            return;
+
+        const currentScore = {
+            score1: this.game.logic.getScore1,
+            score2: this.game.logic.getScore2
+        };
+
+        if (
+            currentScore.score1 === this.lastScoreSnapshot.score1 &&
+            currentScore.score2 === this.lastScoreSnapshot.score2
+        )
+            return;
+
+        const previousScore = { ...this.lastScoreSnapshot };
+        this.lastScoreSnapshot = currentScore;
+
+        if (!this.isOnline)
+            return;
+
+        const scoringTeam = this.game.logic.getScored ||
+            (currentScore.score1 > previousScore.score1 ? 1 :
+                currentScore.score2 > previousScore.score2 ? 2 : 0);
+
+        if (!scoringTeam)
+            return;
+
+        this.sendScoreSync(currentScore.score1, currentScore.score2, scoringTeam);
+    }
+
+    private sendScoreSync(
+        score1: number,
+        score2: number,
+        scoringTeam: number
+    ): void {
+        if (!this.websocket || this.websocket.readyState !== WebSocket.OPEN || !this.myUserId)
+            return;
+
+        const maxScore = parseInt(this.rules.score, 10);
+        const isMatchFinished = !isNaN(maxScore) && (score1 >= maxScore || score2 >= maxScore);
+        const payload = {
+            type: 'score_sync',
+            gameId: this.id,
+            score1,
+            score2,
+            scoringTeam,
+            isMatchFinished,
+            sourceUserId: this.myUserId,
+            timestamp: Date.now(),
+        };
+        this.websocket.send(JSON.stringify(payload));
+        console.log("📤 score_sync envoyé:", payload);
+    }
+
+    private handleRemoteScoreSync(message: any): void {
+        if (!this.isOnline || !this.game)
+            return;
+        if (message.gameId !== this.id)
+            return;
+        if (message.sourceUserId && this.myUserId && message.sourceUserId === this.myUserId)
+            return;
+
+        const score1 = Number(message.score1);
+        const score2 = Number(message.score2);
+        if (Number.isNaN(score1) || Number.isNaN(score2))
+            return;
+
+        if (
+            score1 === this.lastScoreSnapshot.score1 &&
+            score2 === this.lastScoreSnapshot.score2
+        )
+            return;
+
+        const scoringTeam = typeof message.scoringTeam === "number" ? message.scoringTeam : 0;
+        this.lastScoreSnapshot = { score1, score2 };
+
+        this.game.logic.syncScore(score1, score2, scoringTeam);
+        this.game.interface.updateScoreBoard();
+
+        console.log("🔄 score_sync reçu et appliqué:", {
+            score1,
+            score2,
+            scoringTeam,
+            from: message.sourceUserId,
+        });
     }
 
     private connectWebSocket(): void {
@@ -470,6 +563,9 @@ export class MatchFriendlyOnline extends MatchBase
                     }
                 }
                 break;
+            case 'score_sync':
+                this.handleRemoteScoreSync(message);
+                break;
             default:
                 console.warn("⚠️ Type de message WebSocket inconnu:", message.type);
         }
@@ -540,6 +636,7 @@ export class MatchFriendlyOnline extends MatchBase
                     // Mode local : utiliser les touches normalement
                     this.game.interface.update(this.keys);
                 }
+                this.monitorScoreChanges();
             } else if (this.game && this.game.logic.getState === 3) {
                 this.onFinish().catch((error) => {
                     console.error("Erreur lors de la fin du match amical:", error);

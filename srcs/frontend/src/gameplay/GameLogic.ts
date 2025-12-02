@@ -133,7 +133,7 @@ export default class GameLogic
                         this.state = 3;
                     else
                     {
-                        this.ball.reset();
+                        this.ball.reset(this.scored);
                         this.countDownGoal.value = this.rules.countDownGoalTime;
                         this.countDownGoal.active = true;
                         this.startCountDown();
@@ -237,4 +237,37 @@ export default class GameLogic
         this.field = field;
     }
 
+    /**
+     * Force le score à une valeur donnée (utilisé pour resynchroniser les matchs en ligne).
+     * scoringTeam : 1 si l'équipe gauche vient de marquer, 2 pour la droite, 0 sinon.
+     */
+    syncScore(
+        score1: number,
+        score2: number,
+        scoringTeam: number = 0
+    ) : void
+    {
+        this.score.team1 = score1;
+        this.score.team2 = score2;
+        this.scored = scoringTeam;
+
+        if (this.ball)
+            this.ball.reset(scoringTeam);
+
+        if (this.countDownGoal.id)
+            clearInterval(this.countDownGoal.id);
+
+        // Si un joueur a atteint le score maximum, terminer immédiatement la partie
+        if (this.score.team1 >= this.rules.scoreMax || this.score.team2 >= this.rules.scoreMax)
+        {
+            this.hasWinner();
+            this.state = 3;
+            this.countDownGoal.active = false;
+            return;
+        }
+
+        this.countDownGoal.value = this.rules.countDownGoalTime;
+        this.countDownGoal.active = true;
+        this.startCountDown();
+    }
 };
