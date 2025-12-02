@@ -10,11 +10,7 @@ import { MatchFriendlyOnline } from './Match/MatchFriendlyOnLine.ts';
 
 import { Env } from './lockerRoom/scoreboardUI/menuCreate.ts';
 
-interface User
-{
-    login: string,
-    id: number
-}
+import { User, userToBackendFormat } from './types.ts';
 
 /*
     Classe permettant de gérer les actions de l'utilisateur, lieu où seront stockées les données
@@ -57,7 +53,7 @@ export class UserX
         // Cet utilisateur sera remplacé par l'utilisateur réel du contexte React
         // si l'utilisateur est connecté via BabylonScene.tsx
         const uniqueId = Math.floor(Math.random() * 1000000) + 1; // Génère un ID aléatoire entre 1 et 1000000
-        this.user = { login: `test_user_${uniqueId}`, id: uniqueId };
+        this.user = { username: `test_user_${uniqueId}`, id: uniqueId };
         console.log("UserX initialisé avec utilisateur de test unique:", this.user);
         
         this.addFriend("Lolo");
@@ -72,10 +68,11 @@ export class UserX
             console.error("Impossible de créer un tournoi: utilisateur non connecté");
             return (false);
         }
-        // Utiliser le login de l'utilisateur comme alias si aucun alias n'est fourni
-        const alias = a || this.user.login;
+        // Utiliser le username de l'utilisateur comme alias si aucun alias n'est fourni
+        const alias = a || this.user.username;
+        const backendUser = userToBackendFormat(this.user);
         const p : TournamentParticipant = {
-            login: this.user.login,
+            login: backendUser.login,
             alias: alias,
             ready: true,
             id: this.user.id,
@@ -84,9 +81,9 @@ export class UserX
         this.tournament = new Tournament(this.sceneManager);
         const result = this.tournament.addParticipant(p);
         if (result === 0) {
-            console.log(`Utilisateur ${this.user.login} ajouté automatiquement au tournoi`);
+            console.log(`Utilisateur ${this.user.username} ajouté automatiquement au tournoi`);
         } else {
-            console.error(`Erreur lors de l'ajout de l'utilisateur ${this.user.login} au tournoi`);
+            console.error(`Erreur lors de l'ajout de l'utilisateur ${this.user.username} au tournoi`);
             return (false);
         }
 
@@ -106,6 +103,7 @@ export class UserX
                     scoreMax: "5", // Valeur par défaut, sera mise à jour
                     timeBefore: "3", // Valeur par défaut, sera mise à jour
                     player1_id: this.user.id,
+                    player1_login: backendUser.login, // Envoyer le login pour synchronisation avec le système d'auth
                 }),
             });
 
@@ -159,12 +157,14 @@ export class UserX
         console.log("Mode:", isOnline ? "En ligne" : "Local");
         
         // Créer le match dans la base de données
+        const backendUser = userToBackendFormat(this.user);
         try {
             const requestBody = {
                 speed: r.speed || "1",
                 scoreMax: r.score || "5",
                 timeBefore: r.timeBefore || "3",
                 player1_id: this.user.id,
+                player1_login: backendUser.login, // Envoyer le login pour synchronisation avec le système d'auth
                 isOnline: isOnline,
             };
             console.log("Envoi de la requête POST /api/friendly/create avec:", requestBody);
@@ -205,7 +205,7 @@ export class UserX
             if (data.match && data.match.player1 && typeof data.match.player1.id === "number") {
                 const oldUser = { ...this.user };
                 this.user = {
-                    login: data.match.player1.login || this.user.login,
+                    username: data.match.player1.login || this.user.username,
                     id: data.match.player1.id,
                 };
                 console.log("Synchronisation de l'utilisateur créateur avec la DB du service game:", {
@@ -242,6 +242,7 @@ export class UserX
         }
         
         // Appeler l'API pour rejoindre le match
+        const backendUser = userToBackendFormat(this.user);
         try {
             const response = await fetch(`https://localhost:8443/api/friendly/${idMatch}/join`, {
                 method: "POST",
@@ -252,6 +253,7 @@ export class UserX
                 credentials: "include",
                 body: JSON.stringify({
                     player2_id: this.user.id,
+                    player2_login: backendUser.login, // Envoyer le login pour synchronisation avec le système d'auth
                 }),
             });
 
@@ -265,40 +267,38 @@ export class UserX
             console.log("Match amical rejoint:", data.match);
             console.log("Match en ligne:", data.match?.isOnline || false);
 
-            // Synchroniser l'utilisateur local avec celui retourné par le service game
-            // Cas 1: je suis le créateur (player1)
-            if (data.match?.player1 && typeof data.match.player1.id === "number") {
-                // Si mon ID actuel ne correspond pas à l'ID player1 de la DB, on le met à jour
-                if (this.user.id !== data.match.player1.id && this.user.login !== data.match.player1.login) {
-                    const oldUser = { ...this.user };
-                    this.user = {
-                        login: data.match.player1.login || this.user.login,
-                        id: data.match.player1.id,
-                    };
-                    console.log("Synchronisation de l'utilisateur (créateur) avec la DB du service game dans joinFriendlyMatch:", {
-                        oldUser,
-                        newUser: this.user,
-                    });
-                }
-            }
-            // Cas 2: je suis le second joueur (player2)
-            if (data.match?.player2 && typeof data.match.player2.id === "number") {
-                // Si je ne corresponds ni à player1Id ni à player2Id avec mon ID actuel,
-                // il y a de fortes chances que la DB ait créé un utilisateur de test (playerXXXX).
-                // Dans ce cas, on se synchronise sur player2.
-                const player1Id = data.match.player1Id;
-                const player2Id = data.match.player2Id;
-                if (this.user.id !== player1Id && this.user.id !== player2Id) {
-                    const oldUser = { ...this.user };
-                    this.user = {
-                        login: data.match.player2.login || this.user.login,
-                        id: data.match.player2.id,
-                    };
-                    console.log("Synchronisation de l'utilisateur (second joueur) avec la DB du service game dans joinFriendlyMatch:", {
-                        oldUser,
-                        newUser: this.user,
-                    });
-                }
+            const backendLogin = backendUser.login;
+            const player1LoginDb = data.match?.player1?.login;
+            const player2LoginDb = data.match?.player2?.login;
+            const isCurrentPlayer1 = backendLogin && player1LoginDb && backendLogin === player1LoginDb;
+            const isCurrentPlayer2 = backendLogin && player2LoginDb && backendLogin === player2LoginDb;
+
+            if (isCurrentPlayer1 && data.match?.player1 && typeof data.match.player1.id === "number") {
+                const oldUser = { ...this.user };
+                this.user = {
+                    username: data.match.player1.login || this.user.username,
+                    id: data.match.player1.id,
+                };
+                console.log("Synchronisation (player1) avec la DB du service game dans joinFriendlyMatch:", {
+                    oldUser,
+                    newUser: this.user,
+                });
+            } else if (isCurrentPlayer2 && data.match?.player2 && typeof data.match.player2.id === "number") {
+                const oldUser = { ...this.user };
+                this.user = {
+                    username: data.match.player2.login || this.user.username,
+                    id: data.match.player2.id,
+                };
+                console.log("Synchronisation (player2) avec la DB du service game dans joinFriendlyMatch:", {
+                    oldUser,
+                    newUser: this.user,
+                });
+            } else {
+                console.warn("Impossible de déterminer le rôle player1/player2 pour l'utilisateur courant lors de joinFriendlyMatch:", {
+                    backendLogin,
+                    player1Login: player1LoginDb,
+                    player2Login: player2LoginDb
+                });
             }
 
             const match = new MatchFriendlyOnline(idMatch, r, this.sceneManager);
@@ -509,21 +509,23 @@ export class UserX
     )
     {
         // Adapter la structure de l'utilisateur du contexte React vers UserX
-        // Le contexte React utilise 'username' mais UserX attend 'login'
+        // Le type User utilise maintenant 'username' (cohérent avec le contexte React)
         if (user && user.id !== undefined && user.id !== null && user.id > 0) {
             // Si l'utilisateur est authentifié et a un ID valide, l'utiliser
             this.user = {
-                login: user.username || user.login || "authenticated_user",
-                id: user.id
+                username: user.username || user.login || "authenticated_user",
+                id: user.id,
+                email: user.email,
+                avatar: user.avatar
             };
             console.log("Utilisateur authentifié défini dans UserX:", this.user);
-            console.log("Détails de l'utilisateur - ID:", this.user.id, "Login:", this.user.login, "ID source:", user.id);
+            console.log("Détails de l'utilisateur - ID:", this.user.id, "Username:", this.user.username, "ID source:", user.id);
         } else {
             // Si user est null ou non authentifié, garder l'ID existant s'il existe
             // Sinon, générer un ID unique pour l'utilisateur de test
             if (!this.user || this.user.id === 0) {
                 const uniqueId = Math.floor(Math.random() * 1000000) + 1;
-                this.user = { login: `test_user_${uniqueId}`, id: uniqueId };
+                this.user = { username: `test_user_${uniqueId}`, id: uniqueId };
                 console.log("Utilisateur non authentifié ou invalide reçu, création d'un utilisateur de test unique:", this.user);
             } else {
                 // Conserver l'utilisateur existant pour maintenir la cohérence des IDs

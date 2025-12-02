@@ -14,9 +14,11 @@ export async function tournamentRoutes(fastify: FastifyInstance) {
         scoreMax: string;
         timeBefore: string;
         player1_id: number;
+        player1_login?: string; // Login de l'utilisateur authentifié
       };
 
-      const { name, speed, scoreMax, timeBefore, player1_id } = body;
+      const { name, speed, scoreMax, timeBefore, player1_login } = body;
+      let player1_id = body.player1_id;
 
       // Validation des règles
       if (!speed || !['1', '2', '3'].includes(speed)) {
@@ -40,22 +42,48 @@ export async function tournamentRoutes(fastify: FastifyInstance) {
         });
       }
 
-      // Vérifier/créer l'utilisateur
-      let user = await (fastify.prisma as any).user.findUnique({
-        where: { id: player1_id },
-      });
-
-      if (!user) {
-        user = await (fastify.prisma as any).user.upsert({
-          where: { login: `player${player1_id}` },
-          update: {},
-          create: {
-            login: `player${player1_id}`,
-            email: `player${player1_id}@test.com`,
-            password: 'test123',
-          },
+      // Rechercher ou créer l'utilisateur en priorité par login (si fourni)
+      let user = null;
+      
+      if (player1_login) {
+        // Rechercher par login d'abord (identifiant unique du système d'auth)
+        user = await (fastify.prisma as any).user.findUnique({
+          where: { login: player1_login },
         });
-        fastify.log.info(`✅ Utilisateur de test trouvé/créé: ID ${user.id}, login: ${user.login}`);
+        
+        if (!user) {
+          // Créer l'utilisateur avec le vrai login
+          user = await (fastify.prisma as any).user.create({
+            data: {
+              login: player1_login,
+              email: `${player1_login}@transcendence.local`,
+              password: 'oauth_user',
+            },
+          });
+          fastify.log.info(`Utilisateur authentifié créé: ID ${user.id}, login: ${user.login}`);
+        } else {
+          fastify.log.info(`Utilisateur authentifié trouvé: ID ${user.id}, login: ${user.login}`);
+        }
+        player1_id = user.id;
+      } else {
+        // Fallback: rechercher par ID (comportement legacy)
+        user = await (fastify.prisma as any).user.findUnique({
+          where: { id: player1_id },
+        });
+
+        if (!user) {
+          user = await (fastify.prisma as any).user.upsert({
+            where: { login: `player${player1_id}` },
+            update: {},
+            create: {
+              login: `player${player1_id}`,
+              email: `player${player1_id}@test.com`,
+              password: 'test123',
+            },
+          });
+          fastify.log.info(`Utilisateur de test trouvé/créé: ID ${user.id}, login: ${user.login}`);
+          player1_id = user.id;
+        }
       }
 
       // Créer le tournoi
@@ -80,7 +108,7 @@ export async function tournamentRoutes(fastify: FastifyInstance) {
         },
       });
 
-      fastify.log.info(`✅ Tournoi créé: ID ${tournament.id}`);
+      fastify.log.info(`Tournoi créé: ID ${tournament.id}`);
 
       return reply.code(200).send({
         success: true,
@@ -105,14 +133,19 @@ export async function tournamentRoutes(fastify: FastifyInstance) {
   fastify.post('/api/tournament/:tournamentId/join', async (request: any, reply: any) => {
     try {
       const { tournamentId } = request.params as { tournamentId: string };
-      const body = request.body as { userId: number; alias?: string };
+      const body = request.body as { 
+        userId: number; 
+        userLogin?: string; // Login de l'utilisateur authentifié
+        alias?: string;
+      };
 
-      const { userId, alias } = body;
+      let { userId, alias } = body;
+      const userLogin = body.userLogin;
 
-      if (!userId) {
+      if (!userId && !userLogin) {
         return reply.code(400).send({
           success: false,
-          message: 'userId requis',
+          message: 'userId ou userLogin requis',
         });
       }
 
@@ -136,21 +169,44 @@ export async function tournamentRoutes(fastify: FastifyInstance) {
         });
       }
 
-      // Vérifier/créer l'utilisateur
-      let user = await (fastify.prisma as any).user.findUnique({
-        where: { id: userId },
-      });
-
-      if (!user) {
-        user = await (fastify.prisma as any).user.upsert({
-          where: { login: `player${userId}` },
-          update: {},
-          create: {
-            login: `player${userId}`,
-            email: `player${userId}@test.com`,
-            password: 'test123',
-          },
+      // Rechercher ou créer l'utilisateur en priorité par login (si fourni)
+      let user = null;
+      
+      if (userLogin) {
+        // Rechercher par login d'abord
+        user = await (fastify.prisma as any).user.findUnique({
+          where: { login: userLogin },
         });
+        
+        if (!user) {
+          user = await (fastify.prisma as any).user.create({
+            data: {
+              login: userLogin,
+              email: `${userLogin}@transcendence.local`,
+              password: 'oauth_user',
+            },
+          });
+          fastify.log.info(`Utilisateur authentifié créé: ID ${user.id}, login: ${user.login}`);
+        }
+        userId = user.id;
+      } else {
+        // Fallback: rechercher par ID
+        user = await (fastify.prisma as any).user.findUnique({
+          where: { id: userId },
+        });
+
+        if (!user) {
+          user = await (fastify.prisma as any).user.upsert({
+            where: { login: `player${userId}` },
+            update: {},
+            create: {
+              login: `player${userId}`,
+              email: `player${userId}@test.com`,
+              password: 'test123',
+            },
+          });
+          userId = user.id;
+        }
       }
 
       // Vérifier que l'utilisateur n'est pas déjà dans le tournoi
@@ -176,7 +232,7 @@ export async function tournamentRoutes(fastify: FastifyInstance) {
         },
       });
 
-      fastify.log.info(`✅ Joueur ${user.id} a rejoint le tournoi ${tournamentId}`);
+      fastify.log.info(`Joueur ${user.id} a rejoint le tournoi ${tournamentId}`);
 
       return reply.code(200).send({
         success: true,
@@ -367,7 +423,7 @@ export async function tournamentRoutes(fastify: FastifyInstance) {
         },
       });
 
-      fastify.log.info(`✅ Tournoi ${tournamentId} démarré avec ${matches.length} matches`);
+      fastify.log.info(`Tournoi ${tournamentId} démarré avec ${matches.length} matches`);
 
       return reply.code(200).send({
         success: true,
@@ -560,7 +616,7 @@ export async function tournamentRoutes(fastify: FastifyInstance) {
         });
       }
 
-      fastify.log.info(`✅ Match ${matchId} terminé, gagnant: ${winnerId}`);
+      fastify.log.info(`Match ${matchId} terminé, gagnant: ${winnerId}`);
 
       return reply.code(200).send({
         success: true,

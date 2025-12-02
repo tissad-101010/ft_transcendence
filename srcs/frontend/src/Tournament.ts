@@ -2,7 +2,8 @@ import {
   Scene,
 } from '@babylonjs/core';
 
-import { Match, MatchRules, MatchTournament, MatchParticipant } from "./Match.ts"
+import { Match } from "./Match.ts"
+import { MatchRules, MatchTournament, MatchParticipant } from "./types.ts";
 import { shuffleArray } from "./utils.ts";
 
 import { SceneManager } from './scene/SceneManager.ts';

@@ -7,49 +7,21 @@ import GameLogic from "./gameplay/GameLogic.ts";
 import { Tournament } from './Tournament.ts';
 import { SceneManager } from './scene/SceneManager.ts';
 
+// Import des types centralisés
+import { 
+    MatchParticipant,
+    MatchRules,
+    MatchTournament,
+    MatchFriendly
+} from './types.ts';
 
-export interface MatchParticipant
-{
-    alias: string;
-    id: number;
-    ready: boolean;
-    me: boolean;
-}
-
-export interface MatchRules
-{
-    speed: string,
-    timeBefore: string,
-    score: string
-}
+// Ré-exporter les types pour la compatibilité avec les imports existants
+export { MatchParticipant, MatchRules, MatchTournament, MatchFriendly };
 
 interface IGame
 {
     interface: Game3D,
     logic: GameLogic
-}
-
-/*
-    Status : 0 (en attente) 1 (en cours) 2(termine)
-*/
-export interface MatchTournament
-{
-    sloatA: MatchParticipant | null;
-    sloatB: MatchParticipant | null;
-    round: number | undefined;
-    nextMatchId: number | undefined;
-    nextMatchSlot: number | undefined;
-    tournament: Tournament | undefined;
-    type: "tournament";
-    dbMatchId?: number; // ID du match dans la base de données
-    dbTournamentId?: number; // ID du tournoi dans la base de données
-}
-
-export interface MatchFriendly
-{
-    sloatA: MatchParticipant | null;
-    sloatB: MatchParticipant | null;
-    type: "friendly";
 }
 
 enum MatchStatus
