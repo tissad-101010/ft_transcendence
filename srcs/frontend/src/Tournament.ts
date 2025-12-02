@@ -101,13 +101,13 @@ export class Tournament
                     const errorData = await response.json();
                     console.error("Erreur lors de la sauvegarde du match:", errorData);
                 } else {
-                    console.log("✅ Résultats du match sauvegardés dans la base de données");
+                    console.log("Résultats du match sauvegardés dans la base de données");
                 }
             } catch (error) {
                 console.error("Erreur lors de l'appel API pour sauvegarder le match:", error);
             }
         } else {
-            console.log("⚠️ Match non synchronisé avec la base de données, résultats non sauvegardés");
+            console.log("Match non synchronisé avec la base de données, résultats non sauvegardés");
         }
 
         const nextMatchId = match.getMatchInfo?.nextMatchId;
@@ -116,7 +116,7 @@ export class Tournament
         // Si pas de match suivant, le tournoi est terminé
         if (nextMatch === undefined)
         {
-            console.log("🏆 Tournoi terminé !");
+            console.log("Tournoi terminé !");
             displayPlayers(this.sceneManager.getScene(), this.participants, this.sceneManager.getTshirt);
             return true; // Tournoi terminé
         }
@@ -334,7 +334,7 @@ export class Tournament
 
                 if (response.ok) {
                     const data = await response.json();
-                    console.log("✅ Tournoi démarré dans la base de données, matchs créés:", data.matches);
+                    console.log("Tournoi démarré dans la base de données, matchs créés:", data.matches);
 
                     // Mapper les IDs des matchs de la BDD aux matchs locaux
                     if (data.matches && Array.isArray(data.matches)) {
