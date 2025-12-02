@@ -265,9 +265,26 @@ export function setupWebSocketRoute(fastify: FastifyInstance) { // rp register w
         }
 
       for (const [gameId, room] of gameRooms.entries()) { // rp iterate each game room
-        room.delete(socket); // rp remove socket from the room set
+        const wasInRoom = room.delete(socket);
+        if (!wasInRoom)
+          continue;
+
         if (room.size === 0) { // rp clean up empty rooms
           gameRooms.delete(gameId); // rp delete room when nobody left
+        } else {
+          const remainingUserIds: number[] = [];
+          room.forEach((sock: any) => {
+            const rid = socketToUserId.get(sock);
+            if (typeof rid === 'number')
+              remainingUserIds.push(rid);
+          });
+
+          broadcastToGame(gameId, {
+            type: 'opponent_disconnected',
+            gameId,
+            disconnectedUserId: uid ?? null,
+            winnerUserId: remainingUserIds[0] ?? null,
+          });
         } // rp end emptiness check
       } // rp end rooms loop
     }); // rp finish close listener

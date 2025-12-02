@@ -336,6 +336,90 @@ export class MatchFriendlyOnline extends MatchBase
         });
     }
 
+    private handleOpponentDisconnected(message: any): void {
+        if (!this.game) {
+            console.warn("opponent_disconnected reçu alors que le match est déjà terminé:", message);
+            return;
+        }
+        console.warn("⚠️ L'adversaire s'est déconnecté, abandon du match", message);
+        const winnerUserId = typeof message.winnerUserId === "number"
+            ? message.winnerUserId
+            : this.myUserId;
+
+        let winnerParticipant: MatchParticipant | null = null;
+        if (winnerUserId) {
+            winnerParticipant = this.participants.find((p) => p.id === winnerUserId) || null;
+        }
+        if (!winnerParticipant) {
+            winnerParticipant = this.participants.find((p) => p.me) || null;
+        }
+        if (winnerParticipant) {
+            this.winner = winnerParticipant;
+        }
+
+        const scoreSnapshot = {
+            score1: this.game.logic.getScore1,
+            score2: this.game.logic.getScore2,
+        };
+        this.status = MatchStatus.FINISHED;
+        this.playersConnected.clear();
+        this.dbIdToGameId.clear();
+        this.matchStarted = false;
+        this.isFirstConnector = null;
+        this.myGamePlayerId = null;
+        this.teardownMatchScene(true);
+        this.sendForfeitResult(winnerParticipant?.id ?? null, scoreSnapshot.score1, scoreSnapshot.score2);
+    }
+
+    private teardownMatchScene(redirectToMenu: boolean = true): void {
+        const currentGame = this.game;
+        if (currentGame && currentGame.interface) {
+            currentGame.interface.getPlayers.forEach((p) => {
+                p.mesh.dispose();
+            });
+        }
+        window.removeEventListener("keydown", this.keyDownHandler);
+        window.removeEventListener("keyup", this.keyUpHandler);
+        if (this.websocket) {
+            this.websocket.close();
+            this.websocket = null;
+        }
+        this.sceneManager.getScene().onBeforeRenderObservable.remove(this.renderObserver);
+        if (redirectToMenu && currentGame && currentGame.interface) {
+            currentGame.interface.showWinner(true);
+        }
+        this.game = null;
+    }
+
+    private async sendForfeitResult(
+        winnerId: number | null,
+        score1: number,
+        score2: number
+    ): Promise<void> {
+        if (!winnerId) {
+            console.warn("Impossible d'enregistrer le forfait: winnerId manquant");
+            return;
+        }
+        try {
+            await fetch(`https://localhost:8443/api/friendly/${this.id}/finish`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Accept: "application/json",
+                },
+                credentials: "include",
+                body: JSON.stringify({
+                    winnerId,
+                    score1,
+                    score2,
+                }),
+            });
+            console.log("✅ Forfait enregistré côté serveur");
+        } catch (error) {
+            console.error("Erreur lors de l'enregistrement du forfait:", error);
+        }
+    }
+
     private connectWebSocket(): void {
         console.log("🔌 connectWebSocket() appelé", { 
             myUserId: this.myUserId, 
@@ -563,6 +647,9 @@ export class MatchFriendlyOnline extends MatchBase
                     }
                 }
                 break;
+            case 'opponent_disconnected':
+                this.handleOpponentDisconnected(message);
+                break;
             case 'score_sync':
                 this.handleRemoteScoreSync(message);
                 break;
@@ -695,9 +782,6 @@ export class MatchFriendlyOnline extends MatchBase
     {
         if (!this.game)
             return ;
-        this.game.interface.getPlayers.forEach((p) => {
-            p.mesh.dispose();
-        });
         this.score[0] = this.game.logic.getScore1;
         this.score[1] = this.game.logic.getScore2;
         if (this.score[0] > this.score[1])
@@ -736,29 +820,12 @@ export class MatchFriendlyOnline extends MatchBase
             }
         }
 
-        // Nettoyer les event listeners et websocket (TOUJOURS, y compris pour les matchs en ligne)
-        window.removeEventListener("keydown", this.keyDownHandler);
-        window.removeEventListener("keyup", this.keyUpHandler);
-        
-        if (this.websocket) {
-            this.websocket.close();
-            this.websocket = null;
-        }
-        
-        // Réinitialiser les états pour les prochaines parties
         this.playersConnected.clear();
         this.dbIdToGameId.clear();
         this.matchStarted = false;
         this.isFirstConnector = null;
         this.myGamePlayerId = null;
-        this.sceneManager.getScene().onBeforeRenderObservable.remove(this.renderObserver);
 
-        // Passer l'information à showWinner pour redirection vers le menu principal (avant de mettre game à null)
-        if (this.game && this.game.interface) {
-            this.game.interface.showWinner(true); // true = rediriger vers le menu principal
-        }
-        
-        // Nettoyer le game après avoir appelé showWinner
-        this.game = null;
+        this.teardownMatchScene(true);
     }
 };

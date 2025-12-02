@@ -589,9 +589,11 @@ export default class Game3D
         text.outlineWidth = 4;
         panel.addControl(text);
 
+        const returnDelay = shouldReturnToMainMenu ? 4000 : 12000;
         setTimeout(() => {
             if (this.sceneManager.getSceneInteractor)
             {
+                ui.dispose();
                 this.highlights.forEach((h) => h.dispose());
                 this.advancedTLeft.dispose();
                 this.advancedTRight.dispose();
@@ -606,22 +608,19 @@ export default class Game3D
                 }
                 
                 // Rediriger vers le menu principal si tournoi terminé ou match amical
-                const targetZone = shouldReturnToMainMenu ? ZoneName.START : ZoneName.LOCKER_ROOM;
-                this.sceneManager.moveCameraTo(targetZone, () => {
-                    this.sceneManager.setSpecificMesh(false);
-                    this.sceneManager.getSceneInteractor?.enableInteractions();
-                    this.sceneManager.getLights().turnOnLights();
-                    
-                    // Si on retourne au menu principal, déclencher la navigation
-                    if (shouldReturnToMainMenu) {
-                        const startMesh = this.scene.getMeshByName(ZoneName.START);
-                        if (startMesh && this.sceneManager.getSceneInteractor) {
-                            this.sceneManager.getSceneInteractor.handleMainZoneClick(startMesh, true);
-                        }
-                    }
-                });
+                const interactor = this.sceneManager.getSceneInteractor;
+                const lockerMesh = this.scene.getMeshByName(ZoneName.LOCKER_ROOM);
+                if (shouldReturnToMainMenu && lockerMesh && interactor) {
+                    interactor.handleMainZoneClick(lockerMesh, true);
+                } else {
+                    this.sceneManager.moveCameraTo(ZoneName.LOCKER_ROOM, () => {
+                        this.sceneManager.setSpecificMesh(false);
+                        interactor?.enableInteractions();
+                        this.sceneManager.getLights().turnOnLights();
+                    });
+                }
             }
-        }, 12000);
+        }, returnDelay);
     }
 
     // MET A JOUR TOUS LES ELEMENTS 3D
