@@ -29,7 +29,65 @@ export class UserX
     constructor(sceneManager : SceneManager)
     {
         this.sceneManager = sceneManager;
-        this.simuEnAttendantBDD();
+        console.log("UserX initialisé, en attente de l'utilisateur depuis le contexte React");
+    }
+
+    private extractNumericId(value: any): number
+    {
+        if (typeof value === "number" && Number.isFinite(value))
+            return value;
+        if (typeof value === "string") {
+            const parsed = parseInt(value, 10);
+            if (!Number.isNaN(parsed))
+                return parsed;
+        }
+        return 0;
+    }
+
+    private normalizeUserPayload(payload: any): User | null
+    {
+        if (!payload)
+            return null;
+        const username =
+            payload.username ||
+            payload.login ||
+            payload.displayName ||
+            (typeof payload.email === "string" ? payload.email.split("@")[0] : null);
+        if (!username)
+            return null;
+        return {
+            id: this.extractNumericId(payload.id ?? payload.userId ?? payload.playerId ?? payload.gameId),
+            username,
+            email: payload.email,
+            avatar: payload.avatar || payload.avatarUrl,
+        };
+    }
+
+    private async syncUserFromProfile(): Promise<boolean> {
+        if (this.user && this.user.username)
+            return true;
+        try {
+            const response = await fetch("https://localhost:8443/api/user/profile", {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                    Accept: "application/json",
+                },
+                credentials: "include",
+            });
+            if (!response.ok)
+                return false;
+            const data = await response.json();
+            const normalized = this.normalizeUserPayload(data);
+            if (normalized) {
+                this.user = normalized;
+                console.log("UserX synchronisé via profil backend:", this.user);
+                return true;
+            }
+        } catch (error) {
+            console.warn("Erreur lors de la récupération du profil utilisateur:", error);
+        }
+        return false;
     }
 
     /* Juste garder le parametre login une fois le backend ajoute*/
@@ -47,26 +105,16 @@ export class UserX
         return (0);
     }
 
-    private simuEnAttendantBDD() : void
-    {
-        // Initialiser un utilisateur de test par défaut avec un ID unique
-        // Cet utilisateur sera remplacé par l'utilisateur réel du contexte React
-        // si l'utilisateur est connecté via BabylonScene.tsx
-        const uniqueId = Math.floor(Math.random() * 1000000) + 1; // Génère un ID aléatoire entre 1 et 1000000
-        this.user = { username: `test_user_${uniqueId}`, id: uniqueId };
-        console.log("UserX initialisé avec utilisateur de test unique:", this.user);
-        
-        this.addFriend("Lolo");
-        this.addFriend("Tissad");
-        this.addFriend("Val");
-    }
-
     async createTournament(a: string) : Promise<boolean>
     {
         if (this.user === null)
         {
-            console.error("Impossible de créer un tournoi: utilisateur non connecté");
-            return (false);
+            console.warn("Utilisateur non défini pour createTournament, tentative de synchronisation");
+            const synced = await this.syncUserFromProfile();
+            if (!synced || this.user === null) {
+                console.error("Impossible de créer un tournoi: utilisateur non connecté");
+                return (false);
+            }
         }
         // Utiliser le username de l'utilisateur comme alias si aucun alias n'est fourni
         const alias = a || this.user.username;
@@ -102,7 +150,7 @@ export class UserX
                     speed: "1", // Valeur par défaut, sera mise à jour
                     scoreMax: "5", // Valeur par défaut, sera mise à jour
                     timeBefore: "3", // Valeur par défaut, sera mise à jour
-                    player1_id: this.user.id,
+                    player1_id: this.user.id || 0,
                     player1_login: backendUser.login, // Envoyer le login pour synchronisation avec le système d'auth
                 }),
             });
@@ -139,7 +187,7 @@ export class UserX
             console.error("Impossible de jouer un match de tournoi: utilisateur non connecté");
             return (false);
         }
-        return (t.playMatch(m, this.user.id, sceneManager));
+        return (t.playMatch(m, this.user.id || 0, sceneManager));
     }
 
     async createFriendlyMatch(
@@ -148,8 +196,12 @@ export class UserX
     ) : Promise<boolean>
     {
         if (!this.user) {
-            console.error("Impossible de créer un match amical: utilisateur non défini dans UserX");
-            return (false);
+            console.warn("Utilisateur non défini pour createFriendlyMatch, tentative de synchronisation");
+            const synced = await this.syncUserFromProfile();
+            if (!synced || !this.user) {
+                console.error("Impossible de créer un match amical: utilisateur non défini dans UserX");
+                return (false);
+            }
         }
         
         console.log("Création d'un match amical avec l'utilisateur:", this.user);
@@ -163,7 +215,7 @@ export class UserX
                 speed: r.speed || "1",
                 scoreMax: r.score || "5",
                 timeBefore: r.timeBefore || "3",
-                player1_id: this.user.id,
+                player1_id: this.user.id || 0,
                 player1_login: backendUser.login, // Envoyer le login pour synchronisation avec le système d'auth
                 isOnline: isOnline,
             };
@@ -252,7 +304,7 @@ export class UserX
                 },
                 credentials: "include",
                 body: JSON.stringify({
-                    player2_id: this.user.id,
+                    player2_id: this.user.id || 0,
                     player2_login: backendUser.login, // Envoyer le login pour synchronisation avec le système d'auth
                 }),
             });
@@ -508,29 +560,13 @@ export class UserX
         user: any
     )
     {
-        // Adapter la structure de l'utilisateur du contexte React vers UserX
-        // Le type User utilise maintenant 'username' (cohérent avec le contexte React)
-        if (user && user.id !== undefined && user.id !== null && user.id > 0) {
-            // Si l'utilisateur est authentifié et a un ID valide, l'utiliser
-            this.user = {
-                username: user.username || user.login || "authenticated_user",
-                id: user.id,
-                email: user.email,
-                avatar: user.avatar
-            };
+        const normalized = this.normalizeUserPayload(user);
+        if (normalized) {
+            this.user = normalized;
             console.log("Utilisateur authentifié défini dans UserX:", this.user);
-            console.log("Détails de l'utilisateur - ID:", this.user.id, "Username:", this.user.username, "ID source:", user.id);
         } else {
-            // Si user est null ou non authentifié, garder l'ID existant s'il existe
-            // Sinon, générer un ID unique pour l'utilisateur de test
-            if (!this.user || this.user.id === 0) {
-                const uniqueId = Math.floor(Math.random() * 1000000) + 1;
-                this.user = { username: `test_user_${uniqueId}`, id: uniqueId };
-                console.log("Utilisateur non authentifié ou invalide reçu, création d'un utilisateur de test unique:", this.user);
-            } else {
-                // Conserver l'utilisateur existant pour maintenir la cohérence des IDs
-                console.log("Utilisateur non authentifié reçu, conservation de l'utilisateur existant:", this.user);
-            }
+            console.warn("Aucun utilisateur authentifié exploitable fourni à UserX, réinitialisation du contexte utilisateur.");
+            this.user = null;
         }
     }
 }
