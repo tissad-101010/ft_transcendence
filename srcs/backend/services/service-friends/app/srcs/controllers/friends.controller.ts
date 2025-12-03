@@ -6,7 +6,7 @@
 /*   By: glions <glions@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/16 19:00:31 by tissad            #+#    #+#             */
-/*   Updated: 2025/12/03 12:14:53 by glions           ###   ########.fr       */
+/*   Updated: 2025/12/03 15:24:19 by glions           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -138,6 +138,30 @@ export async function acceptInviteController(
   }
 }
 
+export async function blockUserController(
+  request: FastifyRequest<{ Body: { user1: string, user2: string } }>,
+  reply: FastifyReply
+)
+{
+  try {
+    // CHECK TOCKEN //
+    const token = await verifyToken(request.cookies["access_token"]!);
+    if (!token) throw new AuthError();
+    // VERIF PARAMS
+    const {user1, user2} = request.body;
+    if (!user1 || !user2) 
+      return (reply.code(400).send({success: false, message: "Paramètres invalides"}))
+    const service = new FriendsService(request.server);
+    const response = await service.blockInvitation(user1, user2);
+    // SUCCESS
+    return (reply.code(200).send({success: true, message: "Invitation acceptee"}));
+  } catch (err: any)
+  {
+    console.error("/!\\ ACCEPT INVITE CONTROLLER ERROR /!\\");
+    return (handleError(reply, err));
+  }
+}
+
 export async function declineInviteController(
   request: FastifyRequest<{ Params: { id: string } }>,
   reply: FastifyReply
@@ -153,19 +177,6 @@ export async function declineInviteController(
   }
 }
 
-export async function blockUserController(
-  request: FastifyRequest<{ Params: { id: string } }>,
-  reply: FastifyReply
-)
-{
-  try {
-    const service = new FriendsService(request.server);
-    const updated = await service.blockUser(Number(request.params.id));
-    return reply.send({ success: true, data: updated });
-  } catch (err: any) {
-    console.error(err);
-    return reply.status(400).send({ success: false, message: err.message });
-  }
-}
+
 
 

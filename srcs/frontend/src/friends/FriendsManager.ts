@@ -7,7 +7,8 @@ import {
     StatusInvitation,
     PromiseUpdateResponse,
     getInfoFriend,
-    sendFriendInvitation
+    sendFriendInvitation,
+    removeBlocked
 } from "./api/friends.api";
 import { UserX } from "../UserX";
 
@@ -66,10 +67,25 @@ export class FriendManager
                 console.error("Invitation pas trouvee, tres bizarre");
                 return ({success: false, message: "Invitation non trouvee dans le tableau"});
             }
-            console.log("avant :", this.invitations);
             this.invitations.sent.splice(index, 1);
-            console.log("apres :", this.invitations);
             return ({success: true, message: "Invitation supprimee"});
+        }
+        return (response);
+    }
+
+    public async deleteBlocked(
+        username: string
+    ) : Promise<PromiseUpdateResponse>
+    {
+
+        const response : PromiseUpdateResponse = await removeBlocked(username, this.userX.getUser!.username);
+        if (response.success)
+        {
+            let index = this.blockeds.findIndex((i: string) => i === username);
+            if (index === -1)
+                return ({success: false, message: `${username} non trouve dans la liste des bloques`});
+            this.invitations.sent.splice(index, 1);
+            return ({success: true, message: `${username} a ete retire de la liste des bloques`});
         }
         return (response);
     }
@@ -90,16 +106,25 @@ export class FriendManager
                 response = await invitation.accept();
                 break;
             case StatusInvitation.BLOCKED:
-                response = {success: false, message: "Pas encore fait"};
+                response = await invitation.block();
                 break;
             case StatusInvitation.DECLINED:
-                response = {success: false, message: "Pas encore fait"};
-                break;
-            case StatusInvitation.CANCELED:
-                response = {success: false, message: "Pas encore fait"};
+                response = await invitation.delete();
+                if (response.success)
+                {
+                    let index = this.invitations.received.findIndex(
+                        (i: FriendInvitation) => i.getUsernames[0] === invitation.getUsernames[0]
+                            && i.getUsernames[1] === invitation.getUsernames[1]); 
+                    if (index === -1)
+                    {
+                        console.error("Invitation pas trouvee, tres bizarre");
+                        return ({success: false, message: "Invitation non trouvee dans le tableau"});
+                    }
+                    this.invitations.received.splice(index, 1);
+                    response = ({success: true, message: "Invitation refusee"});
+                }
                 break;
         }
-
         return (response);
     }
 
@@ -141,7 +166,8 @@ export class FriendManager
                         ));
                 }
                 // USER BLOCKED //
-                else if (d.status === "BLOCKED")
+                else if (d.status === "BLOCKED" 
+                    && d.toUserUsername === this.userX.getUser.username)
                     this.blockeds.push(username);
                 // INVITATION PENDING //
                 else if (d.status === "PENDING")

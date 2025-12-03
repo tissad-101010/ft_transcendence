@@ -241,14 +241,25 @@ export class InvitationUI
 
         if (this.currView === Page.SENT || this.currView === Page.BLOCKED)
         {
-            const cancel = Button.CreateSimpleButton("cancel", "X");
-            cancel.onPointerClickObservable.add(() => {
-                this.friendUI.getSceneManager.getUserX.deleteInvitation(
-                    (d as FriendInvitation))
-                        .then((response : PromiseUpdateResponse) => {
-                            console.log(response.message);
-                        })
-            });
+            const cancel = Button.CreateSimpleButton("cancel", "Annuler");
+            if (this.currView === Page.SENT)
+                cancel.onPointerClickObservable.add(() => {
+                    this.friendUI.getSceneManager.getUserX.deleteInvitation(
+                        (d as FriendInvitation))
+                            .then((response : PromiseUpdateResponse) => {
+                                console.log(response.message);
+                            }
+                    )
+                });
+            else
+                cancel.onPointerClickObservable.add(() => {
+                    this.friendUI.getSceneManager.getUserX.deleteBlocked(
+                        (d as string))
+                            .then((response : PromiseUpdateResponse) => {
+                                console.log(response.message);
+                            }
+                    )
+                });
             applyStyle("rgba(177, 67, 168, 1)", cancel);
             b.push(cancel);
         }
@@ -264,7 +275,7 @@ export class InvitationUI
             });
 
             const declined = Button.CreateSimpleButton("decline", "Refuser");
-            accept.onPointerClickObservable.add(() => {
+            declined.onPointerClickObservable.add(() => {
                 this.friendUI.getSceneManager.getUserX.updateInvitation(
                     (d as FriendInvitation), StatusInvitation.DECLINED)
                         .then((response) => {
@@ -273,13 +284,14 @@ export class InvitationUI
             });
 
             const blocked = Button.CreateSimpleButton("block", "Bloquer");
-            accept.onPointerClickObservable.add(() => {
+            blocked.onPointerClickObservable.add(() => {
                 this.friendUI.getSceneManager.getUserX.updateInvitation(
                     (d as FriendInvitation), StatusInvitation.BLOCKED)
                         .then((response) => {
                             console.log(response.message);
                         })
             });
+
             applyStyle("rgba(30, 68, 99, 1)", accept);
             applyStyle("rgba(177, 67, 168, 1)", declined);
             applyStyle("rgba(99, 30, 30, 1)", blocked);

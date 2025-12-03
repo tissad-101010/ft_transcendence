@@ -101,6 +101,13 @@ export class UserX
         return (await this.friendManager.deleteInvitation(invitation));
     }
 
+    async deleteBlocked(
+        username: string
+    ) : Promise<PromiseUpdateResponse>
+    {
+        return (await this.friendManager.deleteBlocked(username));
+    }
+
     /***********************************/
     /*       Tournament / Matchs       */
     /***********************************/

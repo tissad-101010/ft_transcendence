@@ -6,7 +6,7 @@
 /*   By: glions <glions@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/16 18:54:11 by tissad            #+#    #+#             */
-/*   Updated: 2025/12/03 12:09:55 by glions           ###   ########.fr       */
+/*   Updated: 2025/12/03 15:24:17 by glions           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -86,8 +86,10 @@ export class FriendsService {
     return (await safePrisma(() => 
       this.prismaClient.friendInvitation.deleteMany({
           where: {
-            toUserUsername: toUser,
-            fromUserUsername: fromUser
+            OR: [
+              {fromUserUsername: fromUser, toUserUsername: toUser},
+              {fromUserUsername: toUser, toUserUsername: fromUser}
+            ]
           }
       })
     ))
@@ -155,6 +157,32 @@ export class FriendsService {
       this.prismaClient.friendInvitation.update({
         where: { id: invitation.id },
         data: { status: "ACCEPTED", responsedAt: new Date() },
+      })
+    ));
+  }
+
+  async blockInvitation(
+    user1: string,
+    user2: string
+  ) : Promise<invitationFriend> 
+  {
+    const invitation : invitationFriend = await safePrisma(() => 
+      this.prismaClient.friendInvitation.findFirst({
+        where: {
+          OR: [
+            { fromUserUsername: user1, toUserUsername: user2 },
+            { fromUserUsername: user2, toUserUsername: user1 },
+          ],
+          status: "PENDING"
+        }
+      })
+    );
+    if (!invitation)
+      throw new InvitationError("Invitation introuvable");
+    return (await safePrisma(() =>
+      this.prismaClient.friendInvitation.update({
+        where: { id: invitation.id },
+        data: { status: "BLOCKED", responsedAt: new Date() },
       })
     ));
   }

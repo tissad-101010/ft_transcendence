@@ -35,19 +35,12 @@ export class FriendInvitation
         return (await removeInvitation(this));
     }
 
-    cancel()
+    async block() : Promise<PromiseUpdateResponse>
     {
-
-    }
-
-    refuse()
-    {
-
-    }
-
-    block()
-    {
-
+        const response: PromiseUpdateResponse = await updateInvitation(StatusInvitation.BLOCKED, this);
+        if (response.success)
+            this.status = StatusInvitation.BLOCKED;
+        return (response);
     }
 
     // PRIVATE METHODS

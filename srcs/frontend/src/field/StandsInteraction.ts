@@ -81,17 +81,6 @@ export class StandsInteraction implements SpecificInteraction {
             this.handleButtonField(buttonMeshes[1], current < total - 1);
     }
 
-
-    // private handleMyProfile() : void 
-    // {
-    //     this.sceneInteractor.disableInteractions();
-    //     this.sceneManager.moveCameraTo(ZoneName.ARBITRATOR, () => {
-    //         this.clicArbitrator = true;
-    //         this.sceneInteractor.enableInteractions();
-    //         if (this.myProfilUI === null)
-    //             this.myProfilUI = new MyProfilUI(this.sceneManager, this.sceneManager.getUserX);
-    //     });
-    // }
     private handleMyProfile(): void {
     this.sceneInteractor.disableInteractions();
     this.sceneManager.moveCameraTo(ZoneName.ARBITRATOR, () => {

@@ -358,7 +358,7 @@ private resetInteractions(): void {
     }
 
     public async setupEnvironment(): Promise<void> {
-        // this.setupHDR();
+        this.setupHDR();
         await this.setupMeshes(); // attendre les GLB
         this.advancedTexture = AdvancedDynamicTexture.CreateFullscreenUI("UI", true, this.scene);
         // this.createCoordinateLabels();
