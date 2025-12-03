@@ -94,6 +94,13 @@ export class UserX
         return (await this.friendManager.updateInvitation(invitation, param));
     }
 
+    async deleteInvitation(
+        invitation: FriendInvitation
+    ) : Promise<PromiseUpdateResponse>
+    {
+        return (await this.friendManager.deleteInvitation(invitation));
+    }
+
     /***********************************/
     /*       Tournament / Matchs       */
     /***********************************/

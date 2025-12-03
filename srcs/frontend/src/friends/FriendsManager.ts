@@ -51,6 +51,29 @@ export class FriendManager
             return ({success: false, message: response.message});
     }
 
+    public async deleteInvitation(
+        invitation: FriendInvitation
+    ) : Promise<PromiseUpdateResponse>
+    {
+        const response : PromiseUpdateResponse = await invitation.delete();
+        if (response.success)
+        {
+            let index = this.invitations.sent.findIndex(
+                (i: FriendInvitation) => i.getUsernames[0] === invitation.getUsernames[0]
+                    && i.getUsernames[1] === invitation.getUsernames[1]);
+            if (index === -1)
+            {
+                console.error("Invitation pas trouvee, tres bizarre");
+                return ({success: false, message: "Invitation non trouvee dans le tableau"});
+            }
+            console.log("avant :", this.invitations);
+            this.invitations.sent.splice(index, 1);
+            console.log("apres :", this.invitations);
+            return ({success: true, message: "Invitation supprimee"});
+        }
+        return (response);
+    }
+
     public async deleteFriend(friend: Friend) : Promise<boolean>
     {
         // CALL API FOR DELETE FRIEND ON BDD

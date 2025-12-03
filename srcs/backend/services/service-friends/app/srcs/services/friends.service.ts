@@ -6,7 +6,7 @@
 /*   By: glions <glions@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/16 18:54:11 by tissad            #+#    #+#             */
-/*   Updated: 2025/11/27 17:52:18 by glions           ###   ########.fr       */
+/*   Updated: 2025/12/03 12:09:55 by glions           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -74,6 +74,23 @@ export class FriendsService {
     );
     // SUCCESS
     return { result };
+  }
+
+  async removeInvitation(
+    fromUser: string,
+    toUser: string
+  ) : Promise<{count: number}>
+  {
+    if (!fromUser || !toUser)
+      throw new InvitationError("Parametre invalide");
+    return (await safePrisma(() => 
+      this.prismaClient.friendInvitation.deleteMany({
+          where: {
+            toUserUsername: toUser,
+            fromUserUsername: fromUser
+          }
+      })
+    ))
   }
 
   async sendInvitation(

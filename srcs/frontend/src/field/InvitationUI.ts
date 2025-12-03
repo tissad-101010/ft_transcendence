@@ -13,7 +13,7 @@ import { FriendUI } from "./FriendUI";
 import { ContainerUI } from "./FriendUI";
 import { FriendInvitation } from "../friends/FriendInvitation";
 import { P } from "framer-motion/dist/types.d-BJcRxCew";
-import { StatusInvitation } from "../friends/api/friends.api";
+import { PromiseUpdateResponse, StatusInvitation } from "../friends/api/friends.api";
 
 enum Page
 {
@@ -243,9 +243,9 @@ export class InvitationUI
         {
             const cancel = Button.CreateSimpleButton("cancel", "X");
             cancel.onPointerClickObservable.add(() => {
-                this.friendUI.getSceneManager.getUserX.updateInvitation(
-                    (d as FriendInvitation), StatusInvitation.CANCELED)
-                        .then((response) => {
+                this.friendUI.getSceneManager.getUserX.deleteInvitation(
+                    (d as FriendInvitation))
+                        .then((response : PromiseUpdateResponse) => {
                             console.log(response.message);
                         })
             });

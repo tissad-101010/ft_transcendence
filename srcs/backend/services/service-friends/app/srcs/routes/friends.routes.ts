@@ -6,7 +6,7 @@
 /*   By: glions <glions@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/16 18:55:45 by tissad            #+#    #+#             */
-/*   Updated: 2025/11/22 21:06:54 by glions           ###   ########.fr       */
+/*   Updated: 2025/12/03 11:58:35 by glions           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,7 @@ export async function friendsRoutes(
   server.post("/invite/accept", controller.acceptInviteController);
   server.post("/invite/decline", controller.declineInviteController);
   server.post("/invite/block", controller.blockUserController);
-  server.delete("/remove", controller.removeFriendController);
+  server.delete("/remove/:fromUser/:toUser", controller.removeFriendController);
 }
 
 

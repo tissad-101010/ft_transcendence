@@ -52,6 +52,25 @@ export async function getInfoFriend(username: string): Promise<PromiseGetInfoFri
   }
 }
 
+export async function removeInvitation(
+  invitation: FriendInvitation
+) : Promise<{success: boolean, message: string}>
+{
+  try
+  {
+    const call = await fetch(`${serviceUrl}/friend/remove/${invitation.getUsernames[0]}/${invitation.getUsernames[1]}`, {
+      method: "DELETE",
+      credentials: "include"
+    });
+    const response = await call.json();
+    return (response);
+  } catch(err: any)
+  {
+    console.error('Error remove invitation', err);
+    return ({success: false, message: 'Network or unexpected error'});
+  }
+}
+
 export async function updateInvitation(param: StatusInvitation, invitation: FriendInvitation) : Promise<PromiseUpdateResponse>
 {
   try

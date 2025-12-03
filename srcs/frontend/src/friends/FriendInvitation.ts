@@ -1,7 +1,10 @@
 import { PromiseUpdateResponse } from "./api/friends.api";
 
-import { updateInvitation } from "./api/friends.api";
-import { StatusInvitation } from "./api/friends.api";
+import {
+    updateInvitation,
+    StatusInvitation,
+    removeInvitation 
+} from "./api/friends.api";
 
 export class FriendInvitation
 {
@@ -25,6 +28,11 @@ export class FriendInvitation
         if (response.success)
             this.status = StatusInvitation.ACCEPTED;
         return (response);
+    }
+
+    async delete() : Promise<PromiseUpdateResponse>
+    {
+        return (await removeInvitation(this));
     }
 
     cancel()
