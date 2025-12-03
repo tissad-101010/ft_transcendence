@@ -25,7 +25,7 @@ import { Friend } from './friends/Friend.ts';
 import { FriendInvitation } from './friends/FriendInvitation.ts';
 import { PromiseUpdateResponse, StatusInvitation } from './friends/api/friends.api.ts';
 
-import { WsUtils } from './ws.utils.ts';
+
 interface TwoFactorMethods
 {
     type: string,
@@ -61,14 +61,11 @@ export class UserX
     private tournament: Tournament | null = null;
 
     private friendManager: FriendManager;
-    // WebSocket for chat
-    private ChatWs: WsUtils | null = null;
 
     constructor(sceneManager : SceneManager)
     {
         this.sceneManager = sceneManager;
         this.friendManager = new FriendManager(this);
-        this.ChatWs = null;
     }
 
 
@@ -280,19 +277,5 @@ export class UserX
     clearUser() : void
     {
         this.user = null;
-    }
-
-    // ======================== //
-    // Chat WebSocket management//
-    async initChatWebSocket() : Promise<void>
-    {
-        const url = 'wss://localhost:8443/chat/ws';
-        this.ChatWs = new WsUtils(url);
-        if (this.ChatWs) {
-            this.ChatWs.onMessage((message: any) => {
-                console.log("Received WebSocket message:", message);
-                // Handle incoming chat messages here
-            });
-        }
     }
 }
