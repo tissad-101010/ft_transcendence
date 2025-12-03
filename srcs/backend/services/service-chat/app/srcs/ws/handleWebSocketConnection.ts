@@ -32,6 +32,15 @@ export function handleWebSocketConnection(
     }
     // valid jwt token with services users
     console.log("WebSocket connection with token:", token);
+    // send error if token is invalid
+    socket.on("error", (err) => {
+      console.error("WebSocket error:", err);
+    });
+    // respond to client
+    socket.send(
+      JSON.stringify({ type: "connection_established", message: "Connected to WebSocket server" })
+    );
+
     // let payload: JwtPayload;
     // try {
     //   payload = jwt.verify(token, process.env.JWT_SECRET!) as JwtPayload;
@@ -49,7 +58,7 @@ export function handleWebSocketConnection(
     //   clients.delete(userId);
     //   console.log(`User ${userId} disconnected`);
     // });
-
+    // Listen for incoming messages
     socket.on("message", async (raw: string) => {
       const data = JSON.parse(raw) as IncomingMessage;
 
