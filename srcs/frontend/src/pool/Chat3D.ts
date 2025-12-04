@@ -45,7 +45,7 @@ export class Chat3D {
 
         // --- Fond principal ---
         const backgroundRect = new Rectangle();
-        backgroundRect.width = "65%";
+        backgroundRect.width = "55%";
         backgroundRect.height = "100%";
         backgroundRect.background = "#363636AA";
         backgroundRect.thickness = 3;
@@ -145,7 +145,7 @@ export class Chat3D {
 
         // Champ texte
         const inputTxt = new InputTextArea();
-        inputTxt.width = "100%";
+        inputTxt.width = "95%";
         inputTxt.height = "80%";
         inputTxt.color = "white";
         inputTxt.fontSize = 25;
