@@ -5,7 +5,7 @@ import { WebSocket } from "ws";
 export async function wsRoutes(app: FastifyInstance) {
   console.log("Registering WebSocket routes...");
 
-  const clients = new Map<number, WebSocket>();
+  const clients = new Map<string, WebSocket>();
 
   app.get(
     "/ws",

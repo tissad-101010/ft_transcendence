@@ -241,7 +241,7 @@ wait "$PG_PID"
 #******************************************************************************#
 
 
-
+chmod 750 "$DATA_DIR"
 
 
 # Create the init.sql script that will be executed on the first run

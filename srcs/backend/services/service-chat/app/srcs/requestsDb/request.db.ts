@@ -150,7 +150,7 @@ export async function getMessages(conversationId: number) {
 }
 
 // Send a message
-export async function sendMessage(conversationId: number, senderId: number, content: string, senderUsername: string, receiverUsername: string) {
+export async function storeMessageIndb(conversationId: number, senderId: number, content: string, senderUsername: string, receiverUsername: string) {
   return prisma.message.create({
     data: {
       senderUsername,
