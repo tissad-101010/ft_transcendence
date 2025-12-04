@@ -14,9 +14,10 @@ import {    sendEnableEmailOtp,
 import { ZoneName } from "../config.ts";
 
 import { 
+    StandardMaterial,
+    Mesh,
     AbstractMesh,
-    Vector3,
-    Matrix 
+    Material
 } from "@babylonjs/core";
 
 import {
@@ -88,7 +89,7 @@ const BTN_BACK = "#1b1b1b";
 export class MyProfilUI
 {
     private sceneManager: SceneManager;
-    private container: AdvancedDynamicTexture;
+    private container!: AdvancedDynamicTexture;
     private userX: UserX; 
     
     private profilePanel! :  Rectangle;
@@ -97,18 +98,26 @@ export class MyProfilUI
     private flag : boolean = false;
     private enable2faApp = false;
     private enable2faMail = false;
-   
-    
+    private originalMaterial: Material | null = null;
+    private mesh : AbstractMesh | null= null;
+    private logoMesh : AbstractMesh | null = null;
+    private ballPong : AbstractMesh | null = null;
 
     constructor(sceneManager: SceneManager, userX: UserX)
     {
          
         this.sceneManager = sceneManager;
-        this.sceneManager.getScene().getMeshByName("logo").isVisible = false;
-        this.sceneManager.getScene().getMeshByName("ballPong").isVisible = false;
-
-        const mesh = this.sceneManager.getScene().getMeshByName("field");
-        this.container = AdvancedDynamicTexture.CreateForMesh(mesh ,1024, 1024);
+        this.logoMesh = this.sceneManager.getScene()?.getMeshByName("logo");
+        if(this.logoMesh)
+            this.logoMesh.isVisible = false;
+        this.ballPong = this.sceneManager.getScene()?.getMeshByName("ballPong");
+        if(this.ballPong)
+            this.ballPong.isVisible = false;
+        this.mesh = this.sceneManager.getScene().getMeshByName("field");
+        if (this.mesh){
+            this.originalMaterial = this.mesh.material;
+            this.container = AdvancedDynamicTexture.CreateForMesh(this.mesh ,1024, 1024);
+        }
         this.userX = userX;
         this.displayMenu();
     }
@@ -881,7 +890,21 @@ export class MyProfilUI
 
     public dispose() : void
     {
-        if (this.container)
+        if (this.container) {
+            this.container.rootContainer.dispose(); // supprime tout le contenu GUI
+            this.container.clear(); // retire les contrôles de la texture
             this.container.dispose();
+            this.container = null!;
+        }
+
+        // Réaffecte le matériau d'origine obligatoire
+        if (this.mesh && !this.mesh.isDisposed()) {
+            this.mesh.material = this.originalMaterial; // doit exister
+            this.mesh.isVisible = true;
+            if (this.ballPong)
+                this.ballPong.isVisible = true;
+
+        }
+
     }
 }

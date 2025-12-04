@@ -22,7 +22,7 @@ export let currentZoneIsSecondary = false;
 export const mainZones: ZoneName[] = [
   ZoneName.STANDS,
   ZoneName.LOCKER_ROOM,
-  ZoneName.POOL,
+  // ZoneName.POOL,
   ZoneName.START,
 ];
 

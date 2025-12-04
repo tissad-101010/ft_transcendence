@@ -170,7 +170,6 @@ export class ScoreboardHandler {
         if (pickedMesh === scoreMeshes[0] && this.clicScoreboard === false){
             this.sceneInteractor.disableInteractions();
             navigateToZone(this.sceneManager, ZoneName.SCOREBOARD, () => {
-                console.log("------------------__>1");
                 this.sceneInteractor.getHighlightLayer().removeMesh(pickedMesh);
                 if (!this.playMatch)
                     this.selectMenu(scoreMeshes[0]);
@@ -180,7 +179,6 @@ export class ScoreboardHandler {
             });
         }
         else if (pickedMesh === scoreMeshes[1]){
-            console.log("------------->2");
             if (this.clicScoreboard){
                 moveSponge(pickedMesh, this.scene);
                 if (this.interval.id !== -1)

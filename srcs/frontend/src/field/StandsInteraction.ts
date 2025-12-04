@@ -17,6 +17,7 @@ import {getCurrentGroup, setCurrentGroup, getTotalGroups, displayFriendsWithEmpt
 import { FriendUI } from './FriendUI.ts';
 import { MyProfilUI } from './MyProfilUI.ts';
 import { Friend } from '../friends/Friend.ts';
+import { navigateToZone } from '../CameraHistory.ts';
 
 
 export class StandsInteraction implements SpecificInteraction {
@@ -94,7 +95,7 @@ export class StandsInteraction implements SpecificInteraction {
     // }
     private handleMyProfile(): void {
     this.sceneInteractor.disableInteractions();
-    this.sceneManager.moveCameraTo(ZoneName.ARBITRATOR, () => {
+    navigateToZone(this.sceneManager, ZoneName.ARBITRATOR, () => {
         this.clicArbitrator = true;
         this.sceneInteractor.enableInteractions();
 
@@ -114,7 +115,7 @@ export class StandsInteraction implements SpecificInteraction {
     {
         this.sceneInteractor.getHighlightLayer().removeAllMeshes();
         this.sceneInteractor.disableInteractions();
-        this.sceneManager.moveCameraTo(ZoneName.SEAT, () => {
+        navigateToZone(this.sceneManager, ZoneName.SEAT, () => {
             this.clicSeat = true;
             displayFriendsWithEmpty(this.scene, this.sceneManager.getUserX.getFriends, this.sceneManager.getChair);
             this.updateButtons(buttonMeshes);
@@ -182,6 +183,7 @@ export class StandsInteraction implements SpecificInteraction {
         mesh: AbstractMesh
     ): void 
     {
+        console.log(mesh.name);
         if (!this.sceneInteractor.areInteractionsEnabled()) return;
         const pickedMesh = mesh;
         if (!pickedMesh)return;
@@ -220,7 +222,7 @@ export class StandsInteraction implements SpecificInteraction {
                 }
                 else if (pickedMesh === buttonMeshes[2] || (pickedMesh === buttonMeshes[3] && this.clicArbitrator)){
                     this.sceneInteractor.disableInteractions();
-                    this.sceneManager.moveCameraTo(ZoneName.STANDS, () => {
+                    navigateToZone(this.sceneManager, ZoneName.STANDS, () => {
                         if (pickedMesh === buttonMeshes[2]){
                             this.clicSeat = false;
                             this.test = false;

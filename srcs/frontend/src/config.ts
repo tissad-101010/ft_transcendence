@@ -23,6 +23,8 @@ export const meshNamesByZone = {
         spectator: [
             "seatsSpectator_primitive0",
             "seatsSpectator_primitive1",
+            "seatsSpectator_primitive2",
+            "seatsSpectator_primitive3",
             "chair00",
             "chair01",
             "chair02",
