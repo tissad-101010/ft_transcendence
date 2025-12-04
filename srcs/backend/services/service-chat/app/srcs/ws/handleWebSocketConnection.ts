@@ -11,9 +11,10 @@ interface JwtPayload {
   email: string;
 }
 
+type MessageType = "init_connection" | "send_message" | "new_message";
+
 type MessagePayload =
-  | { type: "send_message"; from: string; to: string; text: string }
-  | { type: "init_connection", from: string };
+{ type: MessageType; from: string; to: string; text: string, sentAt?: string };
 
 // Initialize a new WebSocket connection
 // Store the connection in the clients map
@@ -61,15 +62,15 @@ async function closeConnection(
 async function sendMessageToUser(
   clients: Map<string, WebSocket>,
   toUsername: string,
-  message: any
+  message: MessagePayload
 ): Promise<void> {
   console.log("===================================================>Processing to send message to user:", toUsername);
   const targetSocket = clients.get(toUsername);
   if (targetSocket) {
     targetSocket.send(JSON.stringify(message));
-    console.log("Message sent to user:", toUsername);
+    console.log("==========================================================================>Message sent to user:", toUsername, "Message:", message);
   }else{
-    console.log("User not connected:", toUsername);
+    console.log("===========================================================================>User", toUsername, "is not connected. Message not sent.");
   }
 }
 
@@ -124,7 +125,7 @@ async function verifyAccessToken(token: string): Promise<any | null> {
     return null;
   }
   console.log("Access token verified successfully:", res.data);
-  return (res.data);
+  return (res.data.data);
 }
 
 // WebSocket connection handler
@@ -149,23 +150,44 @@ export function handleWebSocketConnection(
       return;
     }
     else {
-      console.log("WebSocket connection established for user ID:", payload.userId, "email:", payload.email);
+      console.log("WebSocket connection established for user ID:", payload);
     }
-    socket.on("message", async (data: WebSocket.Data) => {
+    socket.on("message", async (data :any) => {
     console.log("===================================================>WebSocket message received:", data.toString());
-    //   try {
-    //     const message: MessagePayload = JSON.parse(data.toString());
-    //     if (message.type === "init_connection") {
-    //       await initConnection(clients, message.from, socket);
-    //       console.log("=>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>WebSocket init_connection processed for username:", message.username);
-    //     }
-    //   }catch (err) {
-    //     console.error("WebSocket message handling error:", err);
-    //   }
-    // });
-
-    // socket.on("close", async () => {
-    //   await closeConnection(clients, payload.email);
+      try {
+        const message: MessagePayload = JSON.parse(data.toString());
+        if (message.type === "init_connection") {
+          await initConnection(clients, message.from, socket);
+          console.log("=>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>WebSocket init_connection processed for username:", message.from);
+        }
+        if (message.type === "send_message") {
+          const senderUser = await chatService.getUserByUsername(message.from);
+          const receiverUser =  await chatService.getUserByUsername(message.to);
+          if (!senderUser || !receiverUser) {
+            console.error("WebSocket message error: Sender or receiver user not found");
+            return;
+          }
+          // store message in database
+          await storeMessageInDb(
+            senderUser.id,
+            receiverUser.id,
+            message.text,
+            message.from,
+            message.to
+          );
+          // send message to receiver if connected
+          await sendMessageToUser(clients, message.to, {
+            type: "new_message",
+            from: message.from,
+            to: message.to,
+            text: message.text,
+            sentAt: new Date().toISOString()
+          });
+          console.log("=>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>WebSocket send_message processed from:", message.from, "to:", message.to);
+        }
+      }catch (err) {
+        console.error("WebSocket message handling error:", err);
+      }
     });
   }
 }

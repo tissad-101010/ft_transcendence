@@ -6,7 +6,7 @@
 /*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/16 19:00:31 by tissad            #+#    #+#             */
-/*   Updated: 2025/12/02 17:09:30 by tissad           ###   ########.fr       */
+/*   Updated: 2025/12/04 18:23:12 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -97,7 +97,7 @@ export async function sendMessage(request: FastifyRequest, reply: FastifyReply) 
         
 
 
-        const message = await chatService.sendMessage(conversationId, senderId, content, senderUsername, receiverUsername);
+        const message = await chatService.storeMessageInDb(conversationId, senderId, content, senderUsername, receiverUsername);
         
         return reply.send(message);
     }
@@ -106,4 +106,5 @@ export async function sendMessage(request: FastifyRequest, reply: FastifyReply) 
         return reply.status(500).send({ error: "Internal Server Error" });
     }
 }
+
 

@@ -6,6 +6,7 @@ import { Friend } from "../friends/Friend.ts";
 import { Message } from "../friends/Friend.ts";
 
 import WebSocket from "isomorphic-ws";
+import { chatApi } from "../chatApi/chat.api.ts";
 
 export class Chat3D {
     private advancedTexture: AdvancedDynamicTexture;
@@ -142,7 +143,6 @@ export class Chat3D {
                 console.error("WebSocket non connecté.");
                 return;
             }
-
             this.ws.send(JSON.stringify({
                 type: "send_message",
                 from: this.userX.getUser!.username,
@@ -209,12 +209,12 @@ export class Chat3D {
         };
 
         this.ws.onmessage = (event) => {
+            console.log("WebSocket message reçu:", event.data);
             try {
-                const data = JSON.parse(event.data.toString());
 
+                const data = JSON.parse(event.data.toString());
                 if (data.type === "new_message") {
-                    const msg: Message = data.message;
-                    this.addMessage(msg.senderUsername, msg.content, new Date(msg.sentAt));
+                    this.addMessage(data.from, data.text, new Date(data.sentAt) );
                 }
             } catch (e) {
                 console.error("WS parse error", e);
@@ -269,7 +269,14 @@ export class Chat3D {
 
     async displayHistory(): Promise<void> {
         const msgs = await this.friend.loadMessages(this.userX.getUser!.username);
-        if (msgs.length === 0) return;
+        if (msgs.length === 0)
+        {
+            if (chatApi.startConversation(this.userX.getUser!.username, this.friend.getUsername) === null) {
+                console.error("Erreur lors du démarrage de la conversation.");
+                return;
+            }
+            return;
+        }
 
         msgs.forEach((msg) => {
             this.addMessage(msg.senderUsername, msg.content, new Date(msg.sentAt));
@@ -284,67 +291,191 @@ export class Chat3D {
         this.displayHistory();
     }
 
-    estimateTextHeight(text: string, fontSize: number, containerWidth: number, fontFamily = "Arial", lineHeight = 1.2): number {
-        const canvas = document.createElement("canvas");
-        const ctx = canvas.getContext("2d")!;
-        ctx.font = `${fontSize}px ${fontFamily}`;
+private readonly MAX_WIDTH = 400;
+private readonly FONT_SIZE = 24;
+private readonly LINE_HEIGHT = 1.3;
+private readonly FONT_FAMILY = "Arial";
 
-        const words = text.split(/\s+/);
-        let line = "";
-        let lineCount = 1;
 
-        for (let word of words) {
-            const testLine = line + word + " ";
-            const metrics = ctx.measureText(testLine);
-            if (metrics.width > containerWidth && line !== "") {
-                line = word + " ";
-                lineCount++;
-            } else {
-                line = testLine;
+wrapTextForChat(
+    text: string,
+    fontSize = this.FONT_SIZE,
+    containerWidth = this.MAX_WIDTH,
+    fontFamily = this.FONT_FAMILY
+): string {
+    const canvas = document.createElement("canvas");
+    const ctx = canvas.getContext("2d")!;
+    ctx.font = `${fontSize}px ${fontFamily}`;
+
+    const words = text.split(/\s+/);
+    let line = "";
+    const lines: string[] = [];
+
+    for (let word of words) {
+        // Si mot trop long -> découpage caractère par caractère
+        if (ctx.measureText(word).width > containerWidth) {
+            let segment = "";
+            for (const char of word) {
+                const test = segment + char;
+                if (ctx.measureText(test).width > containerWidth) {
+                    if (line !== "") {
+                        lines.push(line.trim());
+                        line = "";
+                    }
+                    lines.push(segment); // push segment coupé
+                    segment = char;
+                } else {
+                    segment = test;
+                }
             }
+            // push dernier segment
+            if (segment) {
+                if (line !== "") {
+                    line += " ";
+                }
+                line += segment;
+            }
+            continue;
         }
-        return lineCount * fontSize * lineHeight;
+
+        const testLine = line + (line ? " " : "") + word;
+        if (ctx.measureText(testLine).width > containerWidth) {
+            if (line) lines.push(line);
+            line = word;
+        } else {
+            line = testLine;
+        }
     }
 
-    estimateTextWidth(text: string, fontSize: number, fontFamily = "Arial"): number {
-        const canvas = document.createElement("canvas");
-        const ctx = canvas.getContext("2d")!;
-        ctx.font = `${fontSize}px ${fontFamily}`;
-        const metrics = ctx.measureText(text);
-        return metrics.width;
+    if (line) lines.push(line);
+
+    return lines.join("\n");
+}
+
+
+estimateTextHeightModern(
+    text: string,
+    fontSize = this.FONT_SIZE,
+    containerWidth = this.MAX_WIDTH,
+    fontFamily = this.FONT_FAMILY,
+    lineHeight = this.LINE_HEIGHT
+): number {
+    const canvas = document.createElement("canvas");
+    const ctx = canvas.getContext("2d")!;
+    ctx.font = `${fontSize}px ${fontFamily}`;
+
+    const words = text.split(/\s+/);
+    let line = "";
+    let lineCount = 1;
+
+    for (let word of words) {
+        // 1. Si un mot dépasse la largeur max, on le découpe
+        if (ctx.measureText(word).width > containerWidth) {
+            const segments = this.breakLongWord(word, ctx, containerWidth);
+            for (let i = 0; i < segments.length; i++) {
+                const segment = segments[i];
+
+                if (line !== "") {
+                    lineCount++;
+                }
+                line = segment;
+
+                // Si ce n’est pas le dernier segment, on force une nouvelle ligne
+                if (i < segments.length - 1) {
+                    lineCount++;
+                }
+            }
+            continue;
+        }
+
+        // 2. Gestion classique wrap mot par mot
+        const testLine = line + word + " ";
+        if (ctx.measureText(testLine).width > containerWidth && line !== "") {
+            line = word + " ";
+            lineCount++;
+        } else {
+            line = testLine;
+        }
     }
 
-    addMessage(sender: string, text: string, date: Date) {
-        const estHeight = this.estimateTextHeight(text, 34, 700, "Arial");
-        const estWidth = this.estimateTextWidth(text, 34, "Arial");
+    return lineCount * fontSize * lineHeight;
+}
 
-        if (this.areMessagesOnDifferentDays(date))
-            this.displayDate(date);
+private breakLongWord(
+    word: string,
+    ctx: CanvasRenderingContext2D,
+    maxWidth: number
+): string[] {
+    const segments: string[] = [];
+    let current = "";
 
-        const msgRect = new Rectangle();
-        msgRect.width = (estWidth < 400 ? estWidth + 40 : 400) + "px";
-        msgRect.height = estHeight + "px";
-        msgRect.cornerRadius = 10;
-        msgRect.thickness = 0;
-        msgRect.background = sender !== this.friend.getUsername ? "rgba(104, 174, 179, 1)" : "#d397a6ff";
-        msgRect.horizontalAlignment =
-            sender !== this.friend.getUsername
-                ? Control.HORIZONTAL_ALIGNMENT_RIGHT
-                : Control.HORIZONTAL_ALIGNMENT_LEFT;
-
-        const msgText = new TextBlock();
-        msgText.text = text;
-        msgText.color = "white";
-        msgText.width = "100%";
-        msgText.paddingLeft = "10px";
-        msgText.paddingRight = "10px";
-        msgText.fontSize = 24;
-        msgText.textWrapping = true;
-        msgRect.addControl(msgText);
-
-        this.chatContainer.addControl(msgRect);
-        this.scrollViewer.verticalBar.value = this.scrollViewer.verticalBar.maximum;
+    for (const char of word) {
+        const test = current + char;
+        if (ctx.measureText(test).width > maxWidth) {
+            segments.push(current);
+            current = char;
+        } else {
+            current = test;
+        }
     }
+
+    if (current.length > 0) {
+        segments.push(current);
+    }
+
+    return segments;
+}
+
+estimateTextWidthModern(
+    text: string,
+    fontSize = this.FONT_SIZE,
+    fontFamily = this.FONT_FAMILY
+): number {
+    const canvas = document.createElement("canvas");
+    const ctx = canvas.getContext("2d")!;
+    ctx.font = `${fontSize}px ${fontFamily}`;
+    return ctx.measureText(text).width;
+}
+
+addMessage(sender: string, text: string, date: Date) {
+    if (this.areMessagesOnDifferentDays(date)) this.displayDate(date);
+
+    const wrappedText = this.wrapTextForChat(text);
+
+    const estHeight = this.estimateTextHeightModern(wrappedText, this.FONT_SIZE, this.MAX_WIDTH);
+    const estWidth = Math.min(this.estimateTextWidthModern(wrappedText), this.MAX_WIDTH);
+
+    const bubble = new Rectangle();
+    bubble.width = (estWidth + 40) + "px";
+    bubble.height = estHeight + "px";
+    bubble.cornerRadius = 16;
+    bubble.thickness = 0;
+
+    const isMe = sender !== this.friend.getUsername;
+    bubble.background = isMe ? "#68AEB3" : "#D397A6";
+    bubble.horizontalAlignment = isMe
+        ? Control.HORIZONTAL_ALIGNMENT_RIGHT
+        : Control.HORIZONTAL_ALIGNMENT_LEFT;
+
+    const msgText = new TextBlock();
+    msgText.text = wrappedText; // ici le texte déjà wrappé
+    msgText.color = "white";
+    msgText.width = "100%";
+    msgText.textWrapping = true;
+    msgText.fontSize = this.FONT_SIZE;
+    msgText.paddingLeft = "12px";
+    msgText.paddingRight = "12px";
+    msgText.paddingTop = "6px";
+    msgText.paddingBottom = "6px";
+    msgText.textHorizontalAlignment = Control.HORIZONTAL_ALIGNMENT_LEFT
+
+    bubble.addControl(msgText);
+    this.chatContainer.addControl(bubble);
+
+    this.scrollViewer.verticalBar.value = this.scrollViewer.verticalBar.maximum;
+}
+
+
 
     public dispose() {
         if (this.advancedTexture) {
