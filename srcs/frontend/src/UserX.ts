@@ -73,6 +73,10 @@ export class UserX
     /*              Friends            */
     /***********************************/
 
+    async loadDataFriends() : Promise<{success: boolean, message: string}>
+    {
+        return (await this.friendManager.loadData());
+    }
 
     async sendFriendInvite(
         username: string

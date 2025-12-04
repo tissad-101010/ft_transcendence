@@ -119,7 +119,7 @@ export class FriendUI
             this.containerUI.menuPanel.isVertical = true;
             this.containerUI.menuPanel.height = "100%";
             this.containerUI.menuPanel.width = "100%";
-            this.containerUI.menuPanel.background = "lightblue";
+            this.containerUI.menuPanel.background = "rgba(79, 79, 79, 1)";
             this.containerUI.menuPanel.paddingTop = "150px";
             this.containerUI.menuPanel.paddingBottom = "0px";
             this.containerUI.menuPanel.paddingLeft = "0px";
@@ -145,7 +145,7 @@ export class FriendUI
             this.containerUI.viewPanel.isVertical = true;
             this.containerUI.viewPanel.height = "100%";
             this.containerUI.viewPanel.width = "100%";
-            this.containerUI.viewPanel.background = "lightblue";
+            this.containerUI.viewPanel.background = "rgba(79, 79, 79, 1)";
             this.containerUI.viewPanel.paddingTop = "150px";
             this.containerUI.viewPanel.paddingBottom = "0px";
             this.containerUI.viewPanel.paddingLeft = "0px";

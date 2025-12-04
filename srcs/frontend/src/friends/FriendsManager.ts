@@ -47,7 +47,16 @@ export class FriendManager
     {
         const response = await sendFriendInvitation(username);
         if (response.success)
+        {
+            this.invitations.sent.push(
+                new FriendInvitation(
+                    [ response.data.fromUserUsername, response.data.toUserUsername ],
+                    new Date(response.data.createdAt),
+                    StatusInvitation.PENDING
+                )
+            );
             return ({success: true, data: response.data});
+        }
         else
             return ({success: false, message: response.message});
     }
@@ -84,7 +93,7 @@ export class FriendManager
             let index = this.blockeds.findIndex((i: string) => i === username);
             if (index === -1)
                 return ({success: false, message: `${username} non trouve dans la liste des bloques`});
-            this.invitations.sent.splice(index, 1);
+            this.blockeds.splice(index, 1);
             return ({success: true, message: `${username} a ete retire de la liste des bloques`});
         }
         return (response);
@@ -107,6 +116,19 @@ export class FriendManager
                 break;
             case StatusInvitation.BLOCKED:
                 response = await invitation.block();
+                if (response.success)
+                {
+                    let index = this.invitations.received.findIndex(
+                        (i: FriendInvitation) => i.getUsernames[0] === invitation.getUsernames[0]
+                            && i.getUsernames[1] === invitation.getUsernames[1]);
+                    if (index === -1)
+                    {
+                        console.error("Invitation pas trouvee, tres bizarre");
+                        return ({success: false, message: "Invitation non trouvee dans le tableau"});
+                    }
+                    this.invitations.received.splice(index, 1);
+                    this.blockeds.push(invitation.getUsernames[0]);
+                }
                 break;
             case StatusInvitation.DECLINED:
                 response = await invitation.delete();
@@ -174,13 +196,13 @@ export class FriendManager
                     if (username === d.toUserUsername)
                         this.invitations.sent.push(new FriendInvitation(
                             [ d.fromUserUsername, d.toUserUsername ],
-                            d.createdAt,
+                            new Date(d.createdAt),
                             StatusInvitation.PENDING
                         ));
                     else
                        this.invitations.received.push(new FriendInvitation(
                             [ d.fromUserUsername, d.toUserUsername ],
-                            d.createdAt,
+                            new Date(d.createdAt),
                             StatusInvitation.PENDING
                         )); 
             }
