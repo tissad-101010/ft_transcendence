@@ -8,7 +8,8 @@ import {
     PromiseUpdateResponse,
     getInfoFriend,
     sendFriendInvitation,
-    removeBlocked
+    removeBlocked,
+    PromiseGetInfoFriendResponse
 } from "./api/friends.api";
 import { UserX } from "../UserX";
 
@@ -99,11 +100,18 @@ export class FriendManager
         return (response);
     }
 
-    public async deleteFriend(friend: Friend) : Promise<boolean>
+    public async deleteFriend(friend: Friend) : Promise<{success: boolean, message: string}>
     {
-        // CALL API FOR DELETE FRIEND ON BDD
-        // UPDATE TAB WITHOUT FRIEND DELETED
-        return (true);
+        const response : PromiseUpdateResponse = await friend.delete(this.userX.getUser!.username);
+        if (response.success)
+        {
+            const index = this.friends.findIndex((f) => f.getUsername === friend.getUsername);
+            if (index === -1)
+                return ({success: false, message: `${friend.getUsername} non trouve dans la liste des amis`});
+            this.friends.splice(index, 1);
+            return ({success: true, message: `${friend.getUsername} n'est plus votre amis`});
+        }
+        return (response);
     }
 
     public async updateInvitation(invitation: FriendInvitation, param: StatusInvitation) : Promise<PromiseUpdateResponse>
@@ -113,6 +121,26 @@ export class FriendManager
         {
             case StatusInvitation.ACCEPTED:
                 response = await invitation.accept();
+                if (response.success)
+                {
+                    let index = this.invitations.received.findIndex(
+                        (i: FriendInvitation) => i.getUsernames[0] === invitation.getUsernames[0]
+                            && i.getUsernames[1] === invitation.getUsernames[1]);
+                    if (index === -1)
+                    {
+                        console.error("Invitation pas trouvee, tres bizarre");
+                        return ({success: false, message: "Invitation non trouvee dans le tableau"});
+                    }
+                    const data : PromiseGetInfoFriendResponse = await getInfoFriend(invitation.getUsernames[0]);
+                    if (data.success)
+                    {
+                        this.invitations.received.splice(index, 1);
+                        this.friends.push(new Friend(invitation.getUsernames[0], data.data!.avatarUrl, data.data!.lastLogin, new Date()));
+                        return ({success: true, message: response.message});
+                    }
+                    else
+                        return ({success: false, message: data.message!});
+                }
                 break;
             case StatusInvitation.BLOCKED:
                 response = await invitation.block();

@@ -372,7 +372,8 @@ export class InvitationUI
                                     this.textLog!.color = "rgba(63, 124, 173, 1)";
                                 else
                                     this.textLog!.color = "rgba(177, 67, 168, 1)";
-                            this.displayContainerR();
+                                this.friendUI.getUpdateChair(this.friendUI.getButtonMeshes);
+                                this.friendUI.leaveFriend();
                         })
             });
 

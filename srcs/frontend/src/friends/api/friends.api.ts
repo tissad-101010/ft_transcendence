@@ -70,6 +70,26 @@ export async function removeInvitation(
   }
 }
 
+export async function removeFriend(
+  user1: string,
+  user2: string
+) : Promise<{success: boolean, message: string}>
+{
+  try
+  {
+    const call = await fetch(`${serviceUrl}/friend/remove/${user1}/${user2}`, {
+      method: "DELETE",
+      credentials: "include"
+    });
+    const response = await call.json();
+    return (response);
+  } catch (err: any)
+  {
+    console.error('Error remove friend', err);
+    return ({success: false, message: 'Network or unexpected error'});
+  }
+};
+
 export async function removeBlocked(
   user1: string,
   user2: string

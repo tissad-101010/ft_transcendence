@@ -85,7 +85,7 @@ export class UserX
         return (await this.friendManager.sendInvitation(username));
     }
 
-    async deleteFriend(friend: Friend) : Promise<boolean>
+    async deleteFriend(friend: Friend) : Promise<{success: boolean, message: string}>
     {
         return (await this.friendManager.deleteFriend(friend))
     }
@@ -199,7 +199,7 @@ export class UserX
         sceneManager: SceneManager
     ) : boolean
     {
-        return (t.playMatch(m, this.user.id, sceneManager));
+        return (t.playMatch(m, this.user!.id, sceneManager));
     }
     
 

@@ -1,4 +1,5 @@
 import { chatApi } from "../chatApi/chat.api";
+import { removeFriend } from "./api/friends.api";
 export interface Message
 {
     id: number;
@@ -58,6 +59,11 @@ export class Friend
     {
         // APPEL API POUR RECUPERER LES MATCHS PRESENTS DANS SERVICE-GAME
         return ({success: true, message: "Matchs bien charges"});
+    }
+
+    public async delete(username: string) : Promise<{success: boolean, message: string}>
+    {
+        return (await removeFriend(this.username, username));
     }
 
     // PRIVATE METHODS

@@ -185,7 +185,8 @@ export class StandsInteraction implements SpecificInteraction {
             {
                 const nb = parseInt(pickedMesh.name[pickedMesh.name.length - 1]);
                 const index = (getCurrentGroup(ZoneName.SEAT) * 4) + nb;
-                if (index >= this.sceneManager.getUserX.getFriends.length)
+                console.log("valeur de index ->", index);
+                if (index >= this.sceneManager.getUserX.getFriends.length || (!index && index !== 0))
                     return ;
                 if (!this.friendUI)
                     this.friendUI = new FriendUI(   

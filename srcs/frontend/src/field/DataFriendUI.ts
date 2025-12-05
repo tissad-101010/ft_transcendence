@@ -1,5 +1,13 @@
 // IMPORTS FOR BABYLON.JS
-import { AbstractMesh, Vector3, Matrix } from "@babylonjs/core";
+import { 
+    AbstractMesh,
+    Vector3,
+    Matrix,
+    Nullable,
+    Observer,
+    Scene 
+} from "@babylonjs/core";
+
 import {
     AdvancedDynamicTexture,
     ScrollViewer,
@@ -9,7 +17,8 @@ import {
     Rectangle,
     InputText,
     Button,
-    Image
+    Image,
+    Ellipse,
 } from "@babylonjs/gui";
 
 // IMPORTS FOR CHART.JS
@@ -30,7 +39,6 @@ import { Friend } from "../friends/Friend";
 import { FriendUI } from "./FriendUI";
 import { ContainerUI } from "./FriendUI";
 import { Match } from "../friends/Friend";
-import { url } from "inspector";
 
 Chart.register(LineController, LineElement, PointElement, LinearScale, CategoryScale, Title, Tooltip, Legend, Filler);
 
@@ -43,6 +51,7 @@ export class DataFriendUI
     private chartCanvas: HTMLCanvasElement | null = null;
     private buttonsMenu: Button[] = [];
     private currView: string;
+    private spinnerObserver: Nullable<Observer<Scene>> = null;
 
     constructor(friendUI: FriendUI, friend: Friend)
     {
@@ -206,81 +215,86 @@ export class DataFriendUI
     private displayDeleteFriend()
     {
         const spacing = new Rectangle();
-        spacing.height = "200px";
+        spacing.height = "100px";
         spacing.thickness = 0;
         this.containerUI.viewPanel!.addControl(spacing);
 
+        const rect = new Rectangle();
+        rect.background = "rgba(51, 51, 51, 1)";
+        rect.width = "800px";
+        rect.height = "500px";
+        rect.thickness = 2;
+        rect.color = "white";
+        this.containerUI.viewPanel?.addControl(rect);
+
+        const panel = new StackPanel();
+        panel.isVertical = true;
+        panel.width = "800px";
+        panel.height = "500px";
+        rect.addControl(panel);
+
         const text = new TextBlock();
         text.text = "Consequences de la suppresion :";
-        text.color = "black";
+        text.color = "white";
         text.width = "100%";
         text.height = "100px";
-        text.fontSize = 50;
-        this.containerUI.viewPanel!.addControl(text);
+        text.fontSize = 30;
+        panel.addControl(text);
 
         const elem1 = new TextBlock();
         elem1.text = "- Perte du chat si existant";
         elem1.width = "100%";
         elem1.height = "100px";
-        elem1.color = "black";
-        elem1.fontSize = 50;
-        this.containerUI.viewPanel!.addControl(elem1);
+        elem1.color = "white";
+        elem1.fontSize = 30;
+        panel.addControl(elem1);
 
         const elem2 = new TextBlock();
         elem2.text = "- Perte de l'acces au profil de cet utilisateur";
         elem2.width = "100%";
         elem2.height = "100px";
-        elem2.color = "black";
-        elem2.fontSize = 50;
-        this.containerUI.viewPanel!.addControl(elem2);
+        elem2.color = "white";
+        elem2.fontSize = 30;
+        panel.addControl(elem2);
 
-        const space = new Rectangle();
-        space.height = "200px";
-        space.thickness = 0;
-        this.containerUI.viewPanel!.addControl(space);
-
-        const button = new Rectangle();
-        button.background = "white";
-        button.width = "500px";
-        button.height = "100px";
-        button.color = "black";
-        button.thickness = 2;
-        this.containerUI.viewPanel!.addControl(button);
-
-        const textButton = new TextBlock();
-        textButton.width = "100%";
-        textButton.height = "100%";
-        textButton.fontSize = 50;
-        textButton.text = "Supprimer";
-        button.addControl(textButton);
+        const button = Button.CreateSimpleButton("confirm", "Confirmer");
+        button.width = "200px";
+        button.paddingTop = 50;
+        button.height = "150px";
+        button.background = "rgba(24, 61, 69, 1)";
+        button.cornerRadius = 10;
+        (button.textBlock as TextBlock).fontFamily = "Arial";
+        (button.textBlock as TextBlock).fontSize = 30;
+        (button.textBlock as TextBlock).color = "white";
+        panel.addControl(button);
 
         button.onPointerClickObservable.add(() => {
             this.friendUI.getSceneManager.getUserX.deleteFriend(this.friend)
                 .then((response) => {
-                    if (response)
+                    if (response.success)
                     {
-                        this.friendUI.leaveFriend();
                         this.friendUI.getUpdateChair(this.friendUI.getButtonMeshes);
+                        this.friendUI.leaveFriend();
                     }
                     else
                     {
                         const error = new TextBlock();
-                        error.text = "Erreur lors de la suppression";
+                        error.text = response.message;
                         error.width = "100%";
                         error.height = "100px";
-                        error.color = "red";
+                        error.color = "rgba(111, 54, 67, 1)";
                         error.fontSize = 50;
-                        this.containerUI.viewPanel!.addControl(error);
+                        panel.addControl(error);
                     }
                 })
         })
 
         button.onPointerEnterObservable.add(() => {
-            button.background = "red";
+            button.background = "rgba(111, 54, 67, 1)";
         })
 
         button.onPointerOutObservable.add(() => {
-            button.background = "white";
+            button.background = "rgba(24, 61, 69, 1)";
         })
     }
 
@@ -374,44 +388,58 @@ export class DataFriendUI
                 if (response.success)
                 {
                     const matchs = this.friend.getMatchs;
-                    const username = this.friend.getUsername;
-                    let cumulativeWins = 0;
-                    const percentages: number[] = [];
-                    const labels: string[] = [];
-    
-                    matchs.forEach((match, i) => {
-                        const userIndex = match.participants.indexOf(username);
-                        if (userIndex !== -1 && (value === -1 || i < value)) {
-                            const userScore = match.score[userIndex];
-                            const opponentScore = match.score[1 - userIndex];
-                            if (userScore > opponentScore) cumulativeWins++;
-                            percentages.push((cumulativeWins / (i + 1)) * 100);
-                            labels.push(`${i + 1}`);
-                        }
-                    });
-                    new Chart(ctx, {
-                        type: "line",
-                        data: {
-                            labels,
-                            datasets: [{
-                                label: "Taux de victoire cumulée (%)",
-                                data: percentages,
-                                borderColor: "rgb(75, 192, 192)",
-                                backgroundColor: "rgba(75, 192, 192, 0.2)",
-                                tension: 0.3,
-                                fill: true,
-                                pointRadius: 4
-                            }]
-                        },
-                        options: { responsive: true, maintainAspectRatio: false }
-                    });
+                    if (matchs.length < 1)
+                    {
+                        const text = new TextBlock();
+                        text.width = "800px";
+                        text.height = "300px";
+                        text.color = "white";
+                        text.fontSize = 40;
+                        text.fontFamily = "Arial";
+                        text.text = "Aucun matchs enregistres";
+                        this.containerUI.viewPanel?.addControl(text);
+                    }
+                    else
+                    {
+                        const username = this.friend.getUsername;
+                        let cumulativeWins = 0;
+                        const percentages: number[] = [];
+                        const labels: string[] = [];
+        
+                        matchs.forEach((match, i) => {
+                            const userIndex = match.participants.indexOf(username);
+                            if (userIndex !== -1 && (value === -1 || i < value)) {
+                                const userScore = match.score[userIndex];
+                                const opponentScore = match.score[1 - userIndex];
+                                if (userScore > opponentScore) cumulativeWins++;
+                                percentages.push((cumulativeWins / (i + 1)) * 100);
+                                labels.push(`${i + 1}`);
+                            }
+                        });
+                        new Chart(ctx, {
+                            type: "line",
+                            data: {
+                                labels,
+                                datasets: [{
+                                    label: "Taux de victoire cumulée (%)",
+                                    data: percentages,
+                                    borderColor: "rgba(111, 54, 67, 1)",
+                                    backgroundColor: "rgba(51, 51, 51, 1)",
+                                    tension: 0.3,
+                                    fill: true,
+                                    pointRadius: 4
+                                }]
+                            },
+                            options: { responsive: true, maintainAspectRatio: false }
+                        });
+                    }
                 }
                 else
                 {
                     const msgInfo = new TextBlock();
                     msgInfo.text = response.message;
                     msgInfo.fontSize = 100;
-                    msgInfo.color = "black";
+                    msgInfo.color = "white";
                     msgInfo.fontFamily = "Arial";
                     msgInfo.height = "100px";
                     msgInfo.width = "100%";
@@ -420,16 +448,71 @@ export class DataFriendUI
             })
     }
 
-    private displayStatsGlobals() : void
+    private startLoading(container: StackPanel, msg: string, paddingTop: number)
     {
+
+        const space = new Rectangle();
+        space.thickness = 0;
+        space.height = paddingTop + "px";
+        container.addControl(space);
+
+        const rect = new Rectangle();
+        rect.width = "500px";
+        rect.height = "300px";
+        rect.background = "rgba(51, 51, 51, 1)";
+        rect.thickness = 2;
+        rect.color = "white";
+        container.addControl(rect);
+
+        const panel = new StackPanel();
+        panel.isVertical = true;
+        panel.width = "500px";
+        panel.height = "300px";
+        rect.addControl(panel);
+
+        const spinner = new Image("spinner", "icon/loading.png");
+        spinner.paddingTop = 10;
+        spinner.width = "200px";
+        spinner.height = "200px";
+        spinner.stretch = Image.STRETCH_UNIFORM;
+        panel.addControl(spinner);
+
+        const text = new TextBlock();
+        text.text = msg;
+        text.fontSize = 30;
+        text.height = "100px";
+        text.width = "500px";
+        text.color = "white";
+        text.fontFamily = "Arial";
+        panel.addControl(text);
+
+
+        // Animation simple
+        this.spinnerObserver = this.friendUI.getSceneManager
+            .getScene().onBeforeRenderObservable.add(() => {
+            if (spinner.isVisible) {
+                spinner.rotation -= 0.05;
+            }
+        });
+    }
+
+    private displayChart() : void
+    {
+        const test = new Rectangle();
+        test.thickness = 0;
+        test.width = "1024px";
+        test.paddingTop = 20;
+        test.height = "100px";
+        this.containerUI.viewPanel!.addControl(test);
+
         const line = new StackPanel("lineStatsGlobals");
         line.isVertical = false;
-        line.width = "100%";
-        line.height = "500px";
+        line.width = "1024px";
+        line.height = "100px";
         line.spacing = 10;
         line.horizontalAlignment = Control.HORIZONTAL_ALIGNMENT_CENTER;
         line.verticalAlignment = Control.VERTICAL_ALIGNMENT_CENTER;
-        this.containerUI.viewPanel!.addControl(line);
+        test.addControl(line);
 
         const buttons : Rectangle[] = [];
         const self = this;
@@ -489,20 +572,62 @@ export class DataFriendUI
         line.addControl(createButton(10));
         line.addControl(createButton(15));
         line.addControl(createButton(-1));
+
         this.updateCanvas(currValue);
     }
 
-    private displayHistoric() : void
+    private displayStatsGlobals() : void
     {
-        if (this.friend === null)
-            return ;
-        if (this.containerUI.viewPanel === null)
-            return ;
+        this.startLoading(this.containerUI.viewPanel!, "Chargement des matchs", 200);
+        this.friend.loadMatchs()
+            .then((response) => {
+                this.friendUI.getSceneManager.getScene().onBeforeRenderObservable.remove(this.spinnerObserver);
+                this.containerUI.viewPanel?.clearControls();
+                if (response.success)
+                {
+                    if (this.friend.getMatchs.length > 0)
+                        this.displayChart();
+                    else
+                    {
+                        const space = new Rectangle();
+                        space.height = "300px";
+                        space.thickness = 0;
+                        this.containerUI.viewPanel?.addControl(space);
+
+                        const rect = new Rectangle();
+                        rect.width = "800px";
+                        rect.height = "200px";
+                        rect.cornerRadius = 10;
+                        rect.background = "rgba(51, 51, 51, 1)";
+                        this.containerUI.viewPanel?.addControl(rect);
+
+                        const text = new TextBlock();
+                        text.text = `${this.friend.getUsername} a 0 match enregistre`;
+                        text.fontSize = 50;
+                        text.fontFamily = "Arial";
+                        text.color = "white";
+                        rect.addControl(text);
+                    }
+                }
+                else
+                {
+                    const text = new TextBlock();
+                    text.text = response.message;
+                    text.fontSize = 40;
+                    text.fontFamily = "Arial";
+                    text.color = "white";
+                    this.containerUI.viewPanel?.addControl(text);
+                }
+            });
         
+    }
+
+    private displayHistoric() : void
+    {   
         const rect = new Rectangle();
         rect.thickness = 0;
         rect.height = "150px";
-        this.containerUI.viewPanel.addControl(rect);
+        this.containerUI.viewPanel?.addControl(rect);
 
         const scrollViewer = new ScrollViewer();
         scrollViewer.width = "970px";
@@ -512,7 +637,7 @@ export class DataFriendUI
         scrollViewer.verticalAlignment = Control.VERTICAL_ALIGNMENT_CENTER;
         scrollViewer.barColor = "white";
         scrollViewer.thickness = 0;
-        this.containerUI.viewPanel.addControl(scrollViewer);
+        this.containerUI.viewPanel?.addControl(scrollViewer);
 
         const historicContainer = new StackPanel();
         historicContainer.width = "100%";
