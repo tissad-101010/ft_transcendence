@@ -70,7 +70,7 @@ export class Friend
 
     get getAvatarUrl() : string
     {
-        return (this.username);
+        return (this.avatarUrl);
     }
 
     get getLastLogin() : Date

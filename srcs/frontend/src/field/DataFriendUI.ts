@@ -1,6 +1,16 @@
 // IMPORTS FOR BABYLON.JS
 import { AbstractMesh, Vector3, Matrix } from "@babylonjs/core";
-import { AdvancedDynamicTexture, ScrollViewer, StackPanel, TextBlock, Control, Rectangle, InputText, Button } from "@babylonjs/gui";
+import {
+    AdvancedDynamicTexture,
+    ScrollViewer,
+    StackPanel,
+    TextBlock,
+    Control,
+    Rectangle,
+    InputText,
+    Button,
+    Image
+} from "@babylonjs/gui";
 
 // IMPORTS FOR CHART.JS
 import {
@@ -20,6 +30,7 @@ import { Friend } from "../friends/Friend";
 import { FriendUI } from "./FriendUI";
 import { ContainerUI } from "./FriendUI";
 import { Match } from "../friends/Friend";
+import { url } from "inspector";
 
 Chart.register(LineController, LineElement, PointElement, LinearScale, CategoryScale, Title, Tooltip, Legend, Filler);
 
@@ -30,7 +41,7 @@ export class DataFriendUI
     private containerUI: ContainerUI;
     private friend: Friend;
     private chartCanvas: HTMLCanvasElement | null = null;
-    private buttonsMenu: Rectangle[] = [];
+    private buttonsMenu: Button[] = [];
     private currView: string;
 
     constructor(friendUI: FriendUI, friend: Friend)
@@ -56,82 +67,102 @@ export class DataFriendUI
         login.text = this.friend.getUsername;
         login.color = "black";
         login.fontSize = 100;
-        login.width = "500px"
+        login.width = "700px";
+        login.paddingTop = 100;
         login.fontFamily = "Arial";
         login.horizontalAlignment = Control.HORIZONTAL_ALIGNMENT_CENTER;
         login.verticalAlignment = Control.VERTICAL_ALIGNMENT_CENTER;
-        this.containerUI.headerPanel.addControl(login);
+        this.containerUI.headerPanel!.addControl(login);
 
-        const avatar = new Rectangle("RectAvatar");
-        avatar.width = "200px";
-        avatar.height = "200px";
-        avatar.thickness = 1;
-        avatar.color = "black";
+        let avatar : Image;
+        if (this.friend.getAvatarUrl)
+            avatar = new Image("imgAvatar", this.friend.getAvatarUrl);
+        else
+            avatar = new Image("imgAvatar", "icon/user.png");
+        avatar.width = "175px";
+        avatar.height = "175px";
         avatar.horizontalAlignment = Control.HORIZONTAL_ALIGNMENT_CENTER;
         avatar.verticalAlignment = Control.VERTICAL_ALIGNMENT_CENTER;
-        this.containerUI.headerPanel.addControl(avatar);
+        this.containerUI.headerPanel!.addControl(avatar);
     }
 
     displayContainerL()
     {
         this.friendUI.resetContainerL();
-        const rect = new Rectangle();
-        rect.thickness = 0;
-        rect.height = "100px";
-        this.containerUI.menuPanel.addControl(rect);
+        const space = new Rectangle();
+        space.thickness = 0;
+        space.height = "100px";
+        this.containerUI.menuPanel!.addControl(space);
+
+        const rectUp = new Rectangle();
+        rectUp.width = "625px";
+        rectUp.height = "300px";
+        rectUp.thickness = 0;
+        this.containerUI.menuPanel!.addControl(rectUp);
+
+        const panelUp = new StackPanel();
+        panelUp.isVertical = false;
+        panelUp.width = "625px";
+        panelUp.height = "300px";
+        panelUp.spacing = 25;
+        rectUp.addControl(panelUp);
+
+        const rectDown = new Rectangle();
+        rectDown.width = "625px";
+        rectDown.height = "300px";
+        rectDown.thickness = 0;
+        this.containerUI.menuPanel!.addControl(rectDown);
+
+        const panelDown = new StackPanel();
+        panelDown.isVertical = false;
+        panelDown.width = "625px";
+        panelDown.height = "300px";
+        panelDown.spacing = 25;
+        rectDown.addControl(panelDown);
 
         const self = this;
-        function createButton(label: string, self: DataFriendUI) : Rectangle
+        function createButton(label: string, urlImg: string, self: DataFriendUI) : Button
         {
-            const rect = new Rectangle("rectButton " + label);
-            rect.width = "750px";
-            rect.height = "100px";
-            if (self.currView === label)
-                rect.background = "gray";
-            else
-                rect.background = "white";
-            rect.thickness = 1;
-            rect.color = "black";
+            const button = Button.CreateImageOnlyButton("buttonMenu", urlImg);
+            button.width = "300px";
+            button.height = "300px";
+            button.cornerRadius = 20;
+            (button.image as Image).width = "150px";
+            (button.image as Image).height = "150px";
+            (button.image as Image).stretch = Image.STRETCH_UNIFORM;
+            (button.image as Image).horizontalAlignment = Control.HORIZONTAL_ALIGNMENT_CENTER;
+            (button.image as Image).verticalAlignment = Control.VERTICAL_ALIGNMENT_CENTER;
+            button.background = "rgba(51, 51, 51, 1)";
 
-            self.buttonsMenu.push(rect);
+            button.onPointerEnterObservable.add(() => {
+                if (self.currView !== label)
+                    button.background = "rgba(111, 54, 67, 1)";            
+            });
 
-            rect.onPointerClickObservable.add(() => {
-                self.buttonsMenu.forEach((rect) => {
-                    rect.background = "white";
-                })
-                rect.background = "gray";
+            button.onPointerOutObservable.add(() => {
+                if (label === self.currView)
+                    button.background = 'rgba(24, 61, 69, 1)';
+                else
+                    button.background = "rgba(51, 51, 51, 1)";
+            });
+
+            self.buttonsMenu.push(button);
+
+            button.onPointerClickObservable.add(() => {
+                self.buttonsMenu.forEach((b: Button) => {
+                    b.background = "rgba(51, 51, 51, 1)";
+                });
+                button.background = 'rgba(24, 61, 69, 1)';
                 self.switchView(label);
             });
-
-            rect.onPointerEnterObservable.add(() => {
-                if (self.currView !== label)
-                    rect.background = "lightgray";
-            });
-
-            rect.onPointerOutObservable.add(() => {
-                if (label === self.currView)
-                    rect.background = "gray";
-                else
-                    rect.background = "white";
-            })
-
-            const text = new TextBlock("textButton " + label);
-            text.text = label;
-            text.fontSize = 50;
-            text.color = "black";
-            text.width = "100%";
-            text.height = "100%";
-            rect.addControl(text);
-            return (rect);
+            return (button);
         }
 
-        this.containerUI.menuPanel.addControl(createButton("Stats globales", this));
-        this.containerUI.menuPanel.addControl(createButton("Stats tournoi", this));
-        this.containerUI.menuPanel.addControl(createButton("Historique", this));
-        this.containerUI.menuPanel.addControl(createButton("Supprimer l'ami", this));
-        this.containerUI.menuPanel.addControl(createButton("Quitter", this));
+        panelUp.addControl(createButton("Stats globales", "icon/stats.png", this));
+        panelUp.addControl(createButton("Historique", "icon/historic.png", this));
+        panelDown.addControl(createButton("Supprimer l'ami", "icon/deleteFriend.png", this));
+        panelDown.addControl(createButton("Quitter", "icon/leave.png", this));
     }
-
     displayContainerR()
     {
         this.friendUI.resetContainerR();
@@ -148,7 +179,7 @@ export class DataFriendUI
             this.friendUI.getSceneManager.getScene().onBeforeRenderObservable.add(() => {
                 const mesh = this.friendUI.getSceneManager.getMesh("scoreBoard")[1];
                 if (mesh && document.getElementById("chartContainer")) {
-                    this.updateCanvas(5);
+                    this.updateCanvasPosition();
                 }
             });
         }
@@ -177,7 +208,7 @@ export class DataFriendUI
         const spacing = new Rectangle();
         spacing.height = "200px";
         spacing.thickness = 0;
-        this.containerUI.viewPanel.addControl(spacing);
+        this.containerUI.viewPanel!.addControl(spacing);
 
         const text = new TextBlock();
         text.text = "Consequences de la suppresion :";
@@ -185,7 +216,7 @@ export class DataFriendUI
         text.width = "100%";
         text.height = "100px";
         text.fontSize = 50;
-        this.containerUI.viewPanel.addControl(text);
+        this.containerUI.viewPanel!.addControl(text);
 
         const elem1 = new TextBlock();
         elem1.text = "- Perte du chat si existant";
@@ -193,7 +224,7 @@ export class DataFriendUI
         elem1.height = "100px";
         elem1.color = "black";
         elem1.fontSize = 50;
-        this.containerUI.viewPanel.addControl(elem1);
+        this.containerUI.viewPanel!.addControl(elem1);
 
         const elem2 = new TextBlock();
         elem2.text = "- Perte de l'acces au profil de cet utilisateur";
@@ -201,12 +232,12 @@ export class DataFriendUI
         elem2.height = "100px";
         elem2.color = "black";
         elem2.fontSize = 50;
-        this.containerUI.viewPanel.addControl(elem2);
+        this.containerUI.viewPanel!.addControl(elem2);
 
         const space = new Rectangle();
         space.height = "200px";
         space.thickness = 0;
-        this.containerUI.viewPanel.addControl(space);
+        this.containerUI.viewPanel!.addControl(space);
 
         const button = new Rectangle();
         button.background = "white";
@@ -214,7 +245,7 @@ export class DataFriendUI
         button.height = "100px";
         button.color = "black";
         button.thickness = 2;
-        this.containerUI.viewPanel.addControl(button);
+        this.containerUI.viewPanel!.addControl(button);
 
         const textButton = new TextBlock();
         textButton.width = "100%";
@@ -239,7 +270,7 @@ export class DataFriendUI
                         error.height = "100px";
                         error.color = "red";
                         error.fontSize = 50;
-                        this.containerUI.viewPanel.addControl(error);
+                        this.containerUI.viewPanel!.addControl(error);
                     }
                 })
         })
@@ -251,6 +282,48 @@ export class DataFriendUI
         button.onPointerOutObservable.add(() => {
             button.background = "white";
         })
+    }
+
+    private updateCanvasPosition()
+    {
+        const mesh = this.friendUI.getSceneManager.getMesh("scoreBoard")[1];
+        if (!mesh)
+            return ;
+        const scene = this.friendUI.getSceneManager.getScene();
+        const camera = scene.activeCamera;
+        if (!camera)
+            return ;
+        const engine = scene.getEngine();
+
+        let container = document.getElementById("chartContainer");
+        if (!container)
+            return ;
+        
+        const bbox = mesh.getBoundingInfo().boundingBox;
+        const corners = bbox.vectorsWorld;
+        const projected = corners.map(v => camera ? Vector3.Project(
+            v,
+            Matrix.Identity(),
+            scene.getTransformMatrix(),
+            camera.viewport.toGlobal(engine.getRenderWidth(), engine.getRenderHeight())
+        ) : null).filter(p => p !== null) as Vector3[];
+
+        const xs = projected.map(p => p.x);
+        const ys = projected.map(p => p.y);
+        const width = Math.max(...xs) - Math.min(...xs);
+        const height = Math.max(...ys) - Math.min(...ys);
+        const center = Vector3.Project(
+            mesh.position,
+            Matrix.Identity(),
+            scene.getTransformMatrix(),
+            camera.viewport.toGlobal(engine.getRenderWidth(), engine.getRenderHeight())
+        );
+
+        // Met à jour position et taille HTML
+        container.style.left = `${center.x - width / 2.5}px`;
+        container.style.top = `${center.y - height / 4}px`;
+        container.style.width = `${width * 0.8}px`;
+        container.style.height = `${height * 0.7}px`;
     }
 
     private updateCanvas(
@@ -287,32 +360,7 @@ export class DataFriendUI
             container.appendChild(this.chartCanvas);
         }
 
-        // Calcule la position et la taille du mesh projeté
-        const bbox = mesh.getBoundingInfo().boundingBox;
-        const corners = bbox.vectorsWorld;
-        const projected = corners.map(v => camera ? Vector3.Project(
-            v,
-            Matrix.Identity(),
-            scene.getTransformMatrix(),
-            camera.viewport.toGlobal(engine.getRenderWidth(), engine.getRenderHeight())
-        ) : null).filter(p => p !== null) as Vector3[];
-
-        const xs = projected.map(p => p.x);
-        const ys = projected.map(p => p.y);
-        const width = Math.max(...xs) - Math.min(...xs);
-        const height = Math.max(...ys) - Math.min(...ys);
-        const center = Vector3.Project(
-            mesh.position,
-            Matrix.Identity(),
-            scene.getTransformMatrix(),
-            camera.viewport.toGlobal(engine.getRenderWidth(), engine.getRenderHeight())
-        );
-
-        // Met à jour position et taille HTML
-        container.style.left = `${center.x - width / 2.5}px`;
-        container.style.top = `${center.y - height / 4}px`;
-        container.style.width = `${width * 0.8}px`;
-        container.style.height = `${height * 0.7}px`;
+        this.updateCanvasPosition();
 
         // Dessine le graphique
         const ctx = this.chartCanvas.getContext("2d");
@@ -367,7 +415,7 @@ export class DataFriendUI
                     msgInfo.fontFamily = "Arial";
                     msgInfo.height = "100px";
                     msgInfo.width = "100%";
-                    this.containerUI.viewPanel.addControl(msgInfo);
+                    this.containerUI.viewPanel!.addControl(msgInfo);
                 }
             })
     }
@@ -381,7 +429,7 @@ export class DataFriendUI
         line.spacing = 10;
         line.horizontalAlignment = Control.HORIZONTAL_ALIGNMENT_CENTER;
         line.verticalAlignment = Control.VERTICAL_ALIGNMENT_CENTER;
-        this.containerUI.viewPanel.addControl(line);
+        this.containerUI.viewPanel!.addControl(line);
 
         const buttons : Rectangle[] = [];
         const self = this;
@@ -392,9 +440,9 @@ export class DataFriendUI
             rect.width = "150px";
             rect.height = "75px";
             if (currValue === value)
-                rect.background = "gray";
+                rect.background = "rgba(24, 61, 69, 1)";
             else
-                rect.background = "white";
+                rect.background = "rgba(51, 51, 51, 1)";
             rect.thickness = 1;
             rect.color = "black";
 
@@ -402,23 +450,23 @@ export class DataFriendUI
 
             rect.onPointerClickObservable.add(() => {
                 buttons.forEach((rect: Rectangle) => {
-                    rect.background = "white";
+                    rect.background = "rgba(51, 51, 51, 1)";
                 })
                 currValue  = value;
-                rect.background = "gray";
+                rect.background = "rgba(24, 61, 69, 1)";
                 self.updateCanvas(value);
             });
 
             rect.onPointerEnterObservable.add(() => {
                 if (value !== currValue )
-                    rect.background = "lightgray";
+                    rect.background = "rgba(111, 54, 67, 1)";
             });
 
             rect.onPointerOutObservable.add(() => {
                 if (value === currValue )
-                    rect.background = "gray";
+                    rect.background = "rgba(24, 61, 69, 1)";
                 else
-                    rect.background = "white";
+                    rect.background = "rgba(51, 51, 51, 1)";
             })
 
             const text = new TextBlock("textButton " + value);
@@ -427,7 +475,7 @@ export class DataFriendUI
             else
                 text.text = value.toString();
             text.fontSize = 40;
-            text.color = "black";
+            text.color = "white";
             text.width = "100%";
             text.height = "100%";
             rect.addControl(text);
@@ -486,7 +534,7 @@ export class DataFriendUI
                         msgInfo.fontFamily = "Arial";
                         msgInfo.height = "100px";
                         msgInfo.width = "100%";
-                        this.containerUI.viewPanel.addControl(msgInfo);
+                        this.containerUI.viewPanel!.addControl(msgInfo);
                     }
                     else
                         this.displayDataMatchs(historicContainer, matchs);
@@ -500,7 +548,7 @@ export class DataFriendUI
                     msgInfo.fontFamily = "Arial";
                     msgInfo.height = "100px";
                     msgInfo.width = "100%";
-                    this.containerUI.viewPanel.addControl(msgInfo);
+                    this.containerUI.viewPanel!.addControl(msgInfo);
                 }
             });
     }

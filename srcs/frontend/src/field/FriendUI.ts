@@ -170,8 +170,8 @@ export class FriendUI
             this.containerUI.headerPanel = new StackPanel("panelHeader");
             this.containerUI.headerPanel.isVertical = false;
             this.containerUI.headerPanel.height = "100%";
-            this.containerUI.headerPanel.width = "1000px";
-            this.containerUI.headerPanel.background = "green";
+            this.containerUI.headerPanel.width = "1024px";
+            this.containerUI.headerPanel.background = "rgba(79, 79, 79, 1)";
             this.containerUI.headerPanel.horizontalAlignment = Control.HORIZONTAL_ALIGNMENT_CENTER;
             this.containerUI.headerPanel.verticalAlignment = Control.VERTICAL_ALIGNMENT_CENTER;
             this.containerUI.headerPanel.paddingTop = "0px";

@@ -32,7 +32,7 @@ export class InvitationUI
     private containerUI: ContainerUI;
     private currView: Page;
     private buttons: Button[];
-    private containerLog: Rectangle | null = null;
+    private textLog: TextBlock | null = null;
 
     constructor(friendUI: FriendUI)
     {
@@ -108,40 +108,76 @@ export class InvitationUI
         (button.image as Image).verticalAlignment = Control.VERTICAL_ALIGNMENT_CENTER;
         line.addControl(button);
 
-        this.containerLog = new Rectangle();
-        this.containerLog.paddingTop = 400;
-        this.containerLog.width = "800px";
-        this.containerLog.height = "300px";
-        this.containerLog.background = "rgba(51, 51, 51, 1)";
-        this.containerLog.thickness = 2;
-        this.containerLog.cornerRadius = 10;
-        this.containerLog.color = "rgba(75, 75, 75, 1)";
-        this.containerUI.menuPanel?.addControl(this.containerLog);
+        const containerLog = new Rectangle();
+        containerLog.paddingTop = 300;
+        containerLog.width = "950px";
+        containerLog.height = "400px";
+        containerLog.background = "rgba(51, 51, 51, 1)";
+        containerLog.thickness = 2;
+        containerLog.cornerRadius = 10;
+        containerLog.color = "rgba(75, 75, 75, 1)";
+        this.containerUI.menuPanel?.addControl(containerLog);
+
+        const logLine = new StackPanel();
+        logLine.isVertical = false;
+        logLine.width = "950px";
+        logLine.height = "300px";
+        // logLine.spacing = 20;
+        containerLog.addControl(logLine);
+
+        const logSpace = new Rectangle();
+        logSpace.thickness = 0;
+        logSpace.width = "50px";
+        logLine.addControl(logSpace);
+
+        const imgLeft = new Image("infoLeft", "icon/info.png");
+        imgLeft.width = "50px";
+        imgLeft.height = "50px";
+        logLine.addControl(imgLeft);
+
+        this.textLog = new TextBlock();
+        this.textLog.text = "";
+        this.textLog.color = "white";
+        this.textLog.fontSize = 40;
+        this.textLog.width = "725px";
+        this.textLog.fontFamily = "Arial";
+        logLine.addControl(this.textLog);
+
+        const imgRight = new Image("infoRight", "icon/info.png");
+        imgRight.width = "50px";
+        imgRight.height = "50px";
+        logLine.addControl(imgRight);
 
         // CLICK ON BUTTON
         button.onPointerClickObservable.add(() => {
             this.friendUI.getSceneManager.getUserX.sendFriendInvite(login)
             .then((res) => {
-                if (!msgInfo)
-                {
-                    msgInfo = new TextBlock();
-                    msgInfo.fontSize = 50;
-                    msgInfo.color = "black";
-                    msgInfo.fontFamily = "Arial";
-                    msgInfo.height = "100px";
-                    msgInfo.width = "100%";
-                    this.containerUI.menuPanel?.addControl(msgInfo);
-                }
                 console.log(res);
                 if (res.success)
-                    msgInfo.text = "Invitation envoyée";
+                {
+                    this.textLog!.text = "Invitation envoyée";
+                    this.textLog!.color = "rgba(40, 80, 112, 1)";
+                }
                 else
-                    msgInfo.text = res.message || "error";
+                {
+                    this.textLog!.text = res.message || "error";
+                    this.textLog!.color = "rgba(177, 67, 168, 1)";
+                }
             })
-            .catch ((err) => {
+            .catch ((err: any) => {
                 console.error("Problème lors de l'appel à sendFriendInvite", err);
+                this.textLog!.text = err.message;
+                this.textLog!.color = "rgba(177, 67, 168, 1)";
             });
         });
+
+        button.onPointerEnterObservable.add(() => {
+            button.background = "rgba(111, 54, 67, 1)";            
+        });
+
+        button.onPointerOutObservable.add(() => {
+            button.background = "rgba(51, 51, 51, 1)";
+        })
     }
 
     public displayContainerR()
@@ -187,7 +223,11 @@ export class InvitationUI
         updateButton.onPointerClickObservable.add(() => {
             this.friendUI.getSceneManager.getUserX.loadDataFriends()
                 .then((response) => {
-                    console.log(response);
+                    this.textLog!.text = response.message;
+                    if (response.success)
+                        this.textLog!.color = "rgba(63, 124, 173, 1)";
+                    else
+                        this.textLog!.color = "rgba(177, 67, 168, 1)";
                     this.displayContainerR();
                 });
         });
@@ -216,7 +256,9 @@ export class InvitationUI
         text.text = "Gestion amis";
         text.color = "black";
         text.fontSize = 100;
-        text.width = "1100px";
+        text.paddingTop = "125px";
+        text.width = "1024px";
+        text.height = "1024px";
         text.fontFamily = "Arial";
         text.textHorizontalAlignment = Control.HORIZONTAL_ALIGNMENT_CENTER;
         text.textVerticalAlignment = Control.VERTICAL_ALIGNMENT_CENTER;
@@ -292,7 +334,11 @@ export class InvitationUI
                     this.friendUI.getSceneManager.getUserX.deleteInvitation(
                         (d as FriendInvitation))
                             .then((response : PromiseUpdateResponse) => {
-                                console.log(response.message);
+                                this.textLog!.text = response.message;
+                                if (response.success)
+                                    this.textLog!.color = "rgba(63, 124, 173, 1)";
+                                else
+                                    this.textLog!.color = "rgba(177, 67, 168, 1)";
                                 this.displayContainerR();
                             }
                     )
@@ -302,7 +348,11 @@ export class InvitationUI
                     this.friendUI.getSceneManager.getUserX.deleteBlocked(
                         (d as string))
                             .then((response : PromiseUpdateResponse) => {
-                                console.log(response.message);
+                                this.textLog!.text = response.message;
+                                if (response.success)
+                                    this.textLog!.color = "rgba(63, 124, 173, 1)";
+                                else
+                                    this.textLog!.color = "rgba(177, 67, 168, 1)";
                                 this.displayContainerR();
                             }
                     )
@@ -317,7 +367,11 @@ export class InvitationUI
                 this.friendUI.getSceneManager.getUserX.updateInvitation(
                     (d as FriendInvitation), StatusInvitation.ACCEPTED)
                         .then((response) => {
-                            console.log(response.message);
+                            this.textLog!.text = response.message;
+                                if (response.success)
+                                    this.textLog!.color = "rgba(63, 124, 173, 1)";
+                                else
+                                    this.textLog!.color = "rgba(177, 67, 168, 1)";
                             this.displayContainerR();
                         })
             });
@@ -327,7 +381,11 @@ export class InvitationUI
                 this.friendUI.getSceneManager.getUserX.updateInvitation(
                     (d as FriendInvitation), StatusInvitation.DECLINED)
                         .then((response) => {
-                            console.log(response.message);
+                            this.textLog!.text = response.message;
+                                if (response.success)
+                                    this.textLog!.color = "rgba(63, 124, 173, 1)";
+                                else
+                                    this.textLog!.color = "rgba(177, 67, 168, 1)";
                             this.displayContainerR();
                         })
             });
@@ -337,7 +395,11 @@ export class InvitationUI
                 this.friendUI.getSceneManager.getUserX.updateInvitation(
                     (d as FriendInvitation), StatusInvitation.BLOCKED)
                         .then((response) => {
-                            console.log(response.message);
+                            this.textLog!.text = response.message;
+                                if (response.success)
+                                    this.textLog!.color = "rgba(63, 124, 173, 1)";
+                                else
+                                    this.textLog!.color = "rgba(177, 67, 168, 1)";
                             this.displayContainerR();
                         })
             });
