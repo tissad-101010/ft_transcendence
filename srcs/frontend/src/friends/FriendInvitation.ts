@@ -1,7 +1,10 @@
 import { PromiseUpdateResponse } from "./api/friends.api";
 
-import { updateInvitation } from "./api/friends.api";
-import { StatusInvitation } from "./api/friends.api";
+import {
+    updateInvitation,
+    StatusInvitation,
+    removeInvitation 
+} from "./api/friends.api";
 
 export class FriendInvitation
 {
@@ -27,19 +30,17 @@ export class FriendInvitation
         return (response);
     }
 
-    cancel()
+    async delete() : Promise<PromiseUpdateResponse>
     {
-
+        return (await removeInvitation(this));
     }
 
-    refuse()
+    async block() : Promise<PromiseUpdateResponse>
     {
-
-    }
-
-    block()
-    {
-
+        const response: PromiseUpdateResponse = await updateInvitation(StatusInvitation.BLOCKED, this);
+        if (response.success)
+            this.status = StatusInvitation.BLOCKED;
+        return (response);
     }
 
     // PRIVATE METHODS

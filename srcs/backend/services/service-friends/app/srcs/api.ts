@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   api.ts                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
+/*   By: glions <glions@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/23 15:58:35 by tissad            #+#    #+#             */
-/*   Updated: 2025/12/01 11:47:11 by tissad           ###   ########.fr       */
+/*   Updated: 2025/12/03 10:52:06 by glions           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,7 +53,7 @@ const start = async () => {
     await app.register(cors, {
       // reel origin is 'https://localhost:8443'
       origin: ['http://localhost:3000', 'https://localhost:8443'],
-      methods: ['GET', 'POST'], // Allow specific methods
+      methods: ['GET', 'POST', 'PATCH', 'DELETE'], // Allow specific methods
       credentials: true, // Allow credentials
     });
 

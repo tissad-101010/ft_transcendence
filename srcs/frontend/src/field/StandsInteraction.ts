@@ -81,17 +81,6 @@ export class StandsInteraction implements SpecificInteraction {
             this.handleButtonField(buttonMeshes[1], current < total - 1);
     }
 
-
-    // private handleMyProfile() : void 
-    // {
-    //     this.sceneInteractor.disableInteractions();
-    //     this.sceneManager.moveCameraTo(ZoneName.ARBITRATOR, () => {
-    //         this.clicArbitrator = true;
-    //         this.sceneInteractor.enableInteractions();
-    //         if (this.myProfilUI === null)
-    //             this.myProfilUI = new MyProfilUI(this.sceneManager, this.sceneManager.getUserX);
-    //     });
-    // }
     private handleMyProfile(): void {
     this.sceneInteractor.disableInteractions();
     this.sceneManager.moveCameraTo(ZoneName.ARBITRATOR, () => {
@@ -196,6 +185,9 @@ export class StandsInteraction implements SpecificInteraction {
             {
                 const nb = parseInt(pickedMesh.name[pickedMesh.name.length - 1]);
                 const index = (getCurrentGroup(ZoneName.SEAT) * 4) + nb;
+                console.log("valeur de index ->", index);
+                if (index >= this.sceneManager.getUserX.getFriends.length || (!index && index !== 0))
+                    return ;
                 if (!this.friendUI)
                     this.friendUI = new FriendUI(   
                         this.sceneManager,

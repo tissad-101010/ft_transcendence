@@ -6,14 +6,16 @@ import {
     Control,
     Rectangle,
     InputText,
-    Button
+    Button,
+    Image
 } from "@babylonjs/gui";
 
 import { FriendUI } from "./FriendUI";
 import { ContainerUI } from "./FriendUI";
 import { FriendInvitation } from "../friends/FriendInvitation";
 import { P } from "framer-motion/dist/types.d-BJcRxCew";
-import { StatusInvitation } from "../friends/api/friends.api";
+import { PromiseUpdateResponse, StatusInvitation } from "../friends/api/friends.api";
+import { url } from "inspector";
 
 enum Page
 {
@@ -30,6 +32,7 @@ export class InvitationUI
     private containerUI: ContainerUI;
     private currView: Page;
     private buttons: Button[];
+    private textLog: TextBlock | null = null;
 
     constructor(friendUI: FriendUI)
     {
@@ -56,32 +59,31 @@ export class InvitationUI
         space.thickness = 0;
         this.containerUI.menuPanel?.addControl(space);
 
-        const title = new TextBlock();
-        title.text = "Ajouter un amis";
-        title.fontSize = 100;
-        title.fontFamily = "Arial";
-        title.color = "black";
-        title.width = "100%";
-        title.height = "100px";
-        this.containerUI.menuPanel?.addControl(title);
-
         const line = new StackPanel();
         line.isVertical = false;
         line.height = "200px";
         line.spacing = 20;
         this.containerUI.menuPanel?.addControl(line);
         
+        const containerInput = new Rectangle();
+        containerInput.width = "500px";
+        containerInput.height = "150px";
+        containerInput.thickness = 5;
+        containerInput.color = "rgba(75, 75, 75, 1)";
+        containerInput.cornerRadius = 10;
+        line.addControl(containerInput);
 
         const inputText = new InputText();
-        inputText.width = "400px";
-        inputText.height = "100px";
+        inputText.width = "100%";
+        inputText.height = "100%";
         inputText.fontSize = 50;
         inputText.fontFamily = "Arial";
-        inputText.background = "white";
-        inputText.color = "black";
+        inputText.background = "rgba(51, 51, 51, 1)";
+        inputText.color = "white";
         inputText.focusedBackground = "gray";
-        inputText.thickness = 2;
-        line.addControl(inputText);
+        inputText.placeholderText = "Ajouter un amis";
+        inputText.thickness = 0;
+        containerInput.addControl(inputText);
 
         let msgInfo : TextBlock | null = null;
         let login : string = "";
@@ -91,62 +93,96 @@ export class InvitationUI
             login = inputText.text;
         });
 
-        const button = new Rectangle();
-        button.width = "200px";
-        button.height = "100px";
-        button.thickness = 2;
-        button.background = "white";
-        button.color = "black";
+        const button = Button.CreateImageOnlyButton("send", "icon/sended.png");
+        button.width = "140px";
+        button.height = "140px";
+        button.color = "rgba(75, 75, 75, 1)";
+        button.background = 'rgba(51, 51, 51, 1)';
+        button.cornerRadius = 10;
+        button.horizontalAlignment = Control.HORIZONTAL_ALIGNMENT_CENTER;
+        button.verticalAlignment = Control.VERTICAL_ALIGNMENT_CENTER;
+        (button.image as Image).width = "70px";
+        (button.image as Image).height = "70px";
+        (button.image as Image).stretch = Image.STRETCH_UNIFORM;
+        (button.image as Image).horizontalAlignment = Control.HORIZONTAL_ALIGNMENT_CENTER;
+        (button.image as Image).verticalAlignment = Control.VERTICAL_ALIGNMENT_CENTER;
         line.addControl(button);
 
-        const self = this;
+        const containerLog = new Rectangle();
+        containerLog.paddingTop = 300;
+        containerLog.width = "950px";
+        containerLog.height = "400px";
+        containerLog.background = "rgba(51, 51, 51, 1)";
+        containerLog.thickness = 2;
+        containerLog.cornerRadius = 10;
+        containerLog.color = "rgba(75, 75, 75, 1)";
+        this.containerUI.menuPanel?.addControl(containerLog);
+
+        const logLine = new StackPanel();
+        logLine.isVertical = false;
+        logLine.width = "950px";
+        logLine.height = "300px";
+        // logLine.spacing = 20;
+        containerLog.addControl(logLine);
+
+        const logSpace = new Rectangle();
+        logSpace.thickness = 0;
+        logSpace.width = "50px";
+        logLine.addControl(logSpace);
+
+        const imgLeft = new Image("infoLeft", "icon/info.png");
+        imgLeft.width = "50px";
+        imgLeft.height = "50px";
+        logLine.addControl(imgLeft);
+
+        this.textLog = new TextBlock();
+        this.textLog.text = "";
+        this.textLog.color = "white";
+        this.textLog.fontSize = 40;
+        this.textLog.width = "725px";
+        this.textLog.fontFamily = "Arial";
+        logLine.addControl(this.textLog);
+
+        const imgRight = new Image("infoRight", "icon/info.png");
+        imgRight.width = "50px";
+        imgRight.height = "50px";
+        logLine.addControl(imgRight);
+
         // CLICK ON BUTTON
         button.onPointerClickObservable.add(() => {
             this.friendUI.getSceneManager.getUserX.sendFriendInvite(login)
             .then((res) => {
-                if (!msgInfo)
-                {
-                    msgInfo = new TextBlock();
-                    msgInfo.fontSize = 50;
-                    msgInfo.color = "black";
-                    msgInfo.fontFamily = "Arial";
-                    msgInfo.height = "100px";
-                    msgInfo.width = "100%";
-                    this.containerUI.menuPanel?.addControl(msgInfo);
-                }
                 console.log(res);
                 if (res.success)
-                    msgInfo.text = "Invitation envoyée";
+                {
+                    this.textLog!.text = "Invitation envoyée";
+                    this.textLog!.color = "rgba(40, 80, 112, 1)";
+                }
                 else
-                    msgInfo.text = res.message || "error";
+                {
+                    this.textLog!.text = res.message || "error";
+                    this.textLog!.color = "rgba(177, 67, 168, 1)";
+                }
             })
-            .catch ((err) => {
+            .catch ((err: any) => {
                 console.error("Problème lors de l'appel à sendFriendInvite", err);
+                this.textLog!.text = err.message;
+                this.textLog!.color = "rgba(177, 67, 168, 1)";
             });
         });
 
-        const textButton = new TextBlock();
-        textButton.text = "Envoyer";
-        textButton.height = "100%";
-        textButton.width = "100%";
-        textButton.color = "black";
-        textButton.fontSize = 50;
-        textButton.fontFamily = "Arial";
-        button.addControl(textButton);
+        button.onPointerEnterObservable.add(() => {
+            button.background = "rgba(111, 54, 67, 1)";            
+        });
+
+        button.onPointerOutObservable.add(() => {
+            button.background = "rgba(51, 51, 51, 1)";
+        })
     }
 
     public displayContainerR()
     {
         this.friendUI.resetContainerR();
-
-        const title = new TextBlock("Title invitation");
-        title.text = "Invitations :";
-        title.color = "black";
-        title.fontSize = 100;
-        title.fontFamily = "Arial";
-        title.width = "100%";
-        title.height = "200px";
-        this.containerUI.viewPanel?.addControl(title);
 
         const navigationButtonsPanel = new StackPanel("NavigationPanel");
         navigationButtonsPanel.isVertical = false;
@@ -156,7 +192,7 @@ export class InvitationUI
 
         const scrollViewer = new ScrollViewer();
         scrollViewer.width = "800px";
-        scrollViewer.height = "100%";
+        scrollViewer.height = "500px";
         scrollViewer.background = "transparent";
         scrollViewer.horizontalAlignment = Control.HORIZONTAL_ALIGNMENT_CENTER;
         scrollViewer.verticalAlignment = Control.VERTICAL_ALIGNMENT_CENTER;
@@ -167,12 +203,47 @@ export class InvitationUI
         const listContainer = new StackPanel();
         listContainer.width = "100%";
         listContainer.isVertical = true;
-        listContainer.spacing = 20;
+        listContainer.spacing = 10;
         scrollViewer.addControl(listContainer);
+
+        const updateButton = Button.CreateImageButton("update", "", "icon/update.png");
+        updateButton.width = "200px";
+        updateButton.height = "100px";
+        updateButton.color = "rgba(75, 75, 75, 1)";
+        updateButton.background = 'rgba(51, 51, 51, 1)';
+        updateButton.cornerRadius = 10;
+        updateButton.horizontalAlignment = Control.HORIZONTAL_ALIGNMENT_CENTER;
+        updateButton.verticalAlignment = Control.VERTICAL_ALIGNMENT_CENTER;
+        (updateButton.image as Image).width = "150px";
+        (updateButton.image as Image).height = "75px";
+        (updateButton.image as Image).stretch = Image.STRETCH_UNIFORM;
+        (updateButton.image as Image).horizontalAlignment = Control.HORIZONTAL_ALIGNMENT_CENTER;
+        (updateButton.image as Image).verticalAlignment = Control.VERTICAL_ALIGNMENT_CENTER;
+
+        updateButton.onPointerClickObservable.add(() => {
+            this.friendUI.getSceneManager.getUserX.loadDataFriends()
+                .then((response) => {
+                    this.textLog!.text = response.message;
+                    if (response.success)
+                        this.textLog!.color = "rgba(63, 124, 173, 1)";
+                    else
+                        this.textLog!.color = "rgba(177, 67, 168, 1)";
+                    this.displayContainerR();
+                });
+        });
+
+        updateButton.onPointerEnterObservable.add(() => {
+            updateButton.background = "rgba(111, 54, 67, 1)";            
+        });
+
+        updateButton.onPointerOutObservable.add(() => {
+            updateButton.background = "rgba(51, 51, 51, 1)";
+        })
 
         navigationButtonsPanel.addControl(this.createButtonNavigation(Page.RECEIVED, listContainer));
         navigationButtonsPanel.addControl(this.createButtonNavigation(Page.SENT, listContainer));
         navigationButtonsPanel.addControl(this.createButtonNavigation(Page.BLOCKED, listContainer));
+        navigationButtonsPanel.addControl(updateButton);
 
         this.displayList(listContainer);
     }
@@ -185,7 +256,9 @@ export class InvitationUI
         text.text = "Gestion amis";
         text.color = "black";
         text.fontSize = 100;
-        text.width = "100%";
+        text.paddingTop = "125px";
+        text.width = "1024px";
+        text.height = "1024px";
         text.fontFamily = "Arial";
         text.textHorizontalAlignment = Control.HORIZONTAL_ALIGNMENT_CENTER;
         text.textVerticalAlignment = Control.VERTICAL_ALIGNMENT_CENTER;
@@ -206,28 +279,42 @@ export class InvitationUI
         container.clearControls();
 
         data.forEach((d: string | FriendInvitation) => {
+            const rect = new Rectangle();
+            rect.background = "rgba(51, 51, 51, 1)";
+            rect.color = "rgba(75, 75, 75, 1)";
+            rect.cornerRadius = 20;
+            rect.width = "1100px";
+            rect.height = "100px";
+            container.addControl(rect);
+
             const panel = new StackPanel("panelInvite");
-            panel.height = "200px";
+            panel.width = "1100px";
+            panel.height = "100px";
             panel.isVertical = false;
-            panel.spacing = 10;
+            panel.spacing = 5;
             panel.horizontalAlignment = Control.HORIZONTAL_ALIGNMENT_CENTER;
             panel.verticalAlignment = Control.VERTICAL_ALIGNMENT_CENTER;
-            container.addControl(panel);
-    
+            rect.addControl(panel);
+
             const username = new TextBlock();
-            username.width = "300px";
-            username.height = "200px";
-            username.fontSize = 50;
-            username.color = "black";
+            username.paddingLeft = 200;
+            username.height = "100px";
+            username.width = "675px"
+            username.textWrapping = true;
+            username.fontSize = 30;
+            username.color = "white";
             username.fontFamily = "Arial";
+            username.textHorizontalAlignment = Control.HORIZONTAL_ALIGNMENT_LEFT;
             if (this.currView === Page.SENT)
-                username.text = (d as FriendInvitation).getUsernames[1];
+                username.text = (d as FriendInvitation).getUsernames[1]
+                    + " - " + (d as FriendInvitation).getCreatedAt.toLocaleDateString("fr-FR");
             else if (this.currView === Page.RECEIVED)
-                username.text = (d as FriendInvitation).getUsernames[0];
+                username.text = (d as FriendInvitation).getUsernames[0]
+                    + " - " + (d as FriendInvitation).getCreatedAt.toLocaleDateString("fr-FR");
             else if (this.currView === Page.BLOCKED)
                 username.text = (d as string);
-
             panel.addControl(username);
+
             const buttons = this.createButtonsInvitation(d);
             buttons.forEach((b) => {
                 panel.addControl(b);
@@ -241,47 +328,85 @@ export class InvitationUI
 
         if (this.currView === Page.SENT || this.currView === Page.BLOCKED)
         {
-            const cancel = Button.CreateSimpleButton("cancel", "X");
-            cancel.onPointerClickObservable.add(() => {
-                this.friendUI.getSceneManager.getUserX.updateInvitation(
-                    (d as FriendInvitation), StatusInvitation.CANCELED)
-                        .then((response) => {
-                            console.log(response.message);
-                        })
-            });
+            const cancel = Button.CreateImageButton("cancel", "", "icon/cancel.png");
+            if (this.currView === Page.SENT)
+                cancel.onPointerClickObservable.add(() => {
+                    this.friendUI.getSceneManager.getUserX.deleteInvitation(
+                        (d as FriendInvitation))
+                            .then((response : PromiseUpdateResponse) => {
+                                this.textLog!.text = response.message;
+                                if (response.success)
+                                    this.textLog!.color = "rgba(63, 124, 173, 1)";
+                                else
+                                    this.textLog!.color = "rgba(177, 67, 168, 1)";
+                                this.displayContainerR();
+                            }
+                    )
+                });
+            else
+                cancel.onPointerClickObservable.add(() => {
+                    this.friendUI.getSceneManager.getUserX.deleteBlocked(
+                        (d as string))
+                            .then((response : PromiseUpdateResponse) => {
+                                this.textLog!.text = response.message;
+                                if (response.success)
+                                    this.textLog!.color = "rgba(63, 124, 173, 1)";
+                                else
+                                    this.textLog!.color = "rgba(177, 67, 168, 1)";
+                                this.displayContainerR();
+                            }
+                    )
+                });
             applyStyle("rgba(177, 67, 168, 1)", cancel);
             b.push(cancel);
         }
         else if (this.currView === Page.RECEIVED)
         {
-            const accept = Button.CreateSimpleButton("accept", "Accepter");
+            const accept = Button.CreateImageButton("accept", "", "icon/accept.png");
             accept.onPointerClickObservable.add(() => {
                 this.friendUI.getSceneManager.getUserX.updateInvitation(
                     (d as FriendInvitation), StatusInvitation.ACCEPTED)
                         .then((response) => {
-                            console.log(response.message);
+                            this.textLog!.text = response.message;
+                                if (response.success)
+                                    this.textLog!.color = "rgba(63, 124, 173, 1)";
+                                else
+                                    this.textLog!.color = "rgba(177, 67, 168, 1)";
+                                this.friendUI.getUpdateChair(this.friendUI.getButtonMeshes);
+                                this.friendUI.leaveFriend();
                         })
             });
 
-            const declined = Button.CreateSimpleButton("decline", "Refuser");
-            accept.onPointerClickObservable.add(() => {
+            const declined = Button.CreateImageButton("decline", "", "icon/cancel.png");
+            declined.onPointerClickObservable.add(() => {
                 this.friendUI.getSceneManager.getUserX.updateInvitation(
                     (d as FriendInvitation), StatusInvitation.DECLINED)
                         .then((response) => {
-                            console.log(response.message);
+                            this.textLog!.text = response.message;
+                                if (response.success)
+                                    this.textLog!.color = "rgba(63, 124, 173, 1)";
+                                else
+                                    this.textLog!.color = "rgba(177, 67, 168, 1)";
+                            this.displayContainerR();
                         })
             });
 
-            const blocked = Button.CreateSimpleButton("block", "Bloquer");
-            accept.onPointerClickObservable.add(() => {
+            const blocked = Button.CreateImageButton("block", "", "icon/blocked.png");
+            blocked.onPointerClickObservable.add(() => {
                 this.friendUI.getSceneManager.getUserX.updateInvitation(
                     (d as FriendInvitation), StatusInvitation.BLOCKED)
                         .then((response) => {
-                            console.log(response.message);
+                            this.textLog!.text = response.message;
+                                if (response.success)
+                                    this.textLog!.color = "rgba(63, 124, 173, 1)";
+                                else
+                                    this.textLog!.color = "rgba(177, 67, 168, 1)";
+                            this.displayContainerR();
                         })
             });
-            applyStyle("rgba(30, 68, 99, 1)", accept);
-            applyStyle("rgba(177, 67, 168, 1)", declined);
+
+            applyStyle("rgba(24, 61, 69, 1)", accept);
+            applyStyle("rgba(111, 54, 67, 1)", declined);
             applyStyle("rgba(99, 30, 30, 1)", blocked);
             b.push(accept);
             b.push(declined);
@@ -293,10 +418,13 @@ export class InvitationUI
             button.color = color;
             button.background = color;
             button.cornerRadius = 5;
-            button.width = "100px";
+            button.width = "75px";
             button.height = "75px";
-            (button.textBlock as TextBlock).fontSize = 20;
-            (button.textBlock as TextBlock).color = "white";
+            (button.image as Image).width = "35px";
+            (button.image as Image).height = "35px";
+            (button.image as Image).stretch = Image.STRETCH_UNIFORM;
+            (button.image as Image).horizontalAlignment = Control.HORIZONTAL_ALIGNMENT_CENTER;
+            (button.image as Image).verticalAlignment = Control.VERTICAL_ALIGNMENT_CENTER;
 
         };
         return (b);
@@ -305,25 +433,42 @@ export class InvitationUI
     private createButtonNavigation(page: Page, container: StackPanel) : Button
     {
         let label: string = "";
+        let urlImg: string = "";
         if (page === Page.SENT)
+        {
             label = "Envoyees";
+            urlImg = "icon/sended.png";
+        }
         else if (page === Page.RECEIVED)
+        {
             label = "Recues";
+            urlImg = "icon/received.png";
+        }
         else if (page === Page.BLOCKED)
+        {
             label = "Bloquees";
-        const button = Button.CreateSimpleButton(label + "Button", label);
+            urlImg = "icon/blocked.png";
+        }
+        const button = Button.CreateImageButton(label + "Button", "", urlImg);
         button.width = "200px";
         button.height = "100px";
-        button.color = "rgba(51, 51, 51, 1)";
+        button.color = "rgba(75, 75, 75, 1)";
         if (page === this.currView)
-            button.background = 'rgba(40, 80, 112, 1)';
+            button.background = 'rgba(24, 61, 69, 1)';
         else
             button.background = 'rgba(51, 51, 51, 1)';
-        button.cornerRadius = 5;
+        button.cornerRadius = 10;
         button.horizontalAlignment = Control.HORIZONTAL_ALIGNMENT_CENTER;
         button.verticalAlignment = Control.VERTICAL_ALIGNMENT_CENTER;
-        (button.textBlock as TextBlock).color = "white";
-        (button.textBlock as TextBlock).fontSize = 25;
+        (button.image as Image).width = "150px";
+        (button.image as Image).height = "75px";
+        (button.image as Image).stretch = Image.STRETCH_UNIFORM;
+        (button.image as Image).horizontalAlignment = Control.HORIZONTAL_ALIGNMENT_CENTER;
+        (button.image as Image).verticalAlignment = Control.VERTICAL_ALIGNMENT_CENTER;
+
+
+        // (button.textBlock as TextBlock).color = "white";
+        // (button.textBlock as TextBlock).fontSize = 25;
 
         this.buttons.push(button);
 
@@ -337,6 +482,19 @@ export class InvitationUI
             }
         });
 
+        button.onPointerEnterObservable.add(() => {
+            if (page !== this.currView)
+                button.background = "rgba(111, 54, 67, 1)";            
+        });
+
+        button.onPointerOutObservable.add(() => {
+            if (page !== this.currView)
+                button.background = "rgba(51, 51, 51, 1)";   
+            else       
+                button.background = "rgba(40, 80, 112, 1)";
+        })
+
+        
         return (button);
     }
 
