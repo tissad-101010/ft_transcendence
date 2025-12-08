@@ -6,7 +6,7 @@
 /*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/18 19:09:22 by tissad            #+#    #+#             */
-/*   Updated: 2025/12/01 17:05:10 by tissad           ###   ########.fr       */
+/*   Updated: 2025/12/08 17:54:12 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -83,6 +83,7 @@ export async function fetchUserProfile(): Promise<{ success: boolean; data?: any
             headers: {
                 "Content-Type": "application/json",
                 Accept: "application/json",
+                authorization: "Bearer cookie", // dummy value to trigger auth header check in backend
             },
             credentials: "include", // envoie les cookies si backend les utilise
         };

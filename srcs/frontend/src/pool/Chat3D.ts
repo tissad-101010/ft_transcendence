@@ -37,7 +37,7 @@ export class Chat3D {
         this.advancedTexture = AdvancedDynamicTexture.CreateForMesh(mesh);
         
         const backgroundRect = new Rectangle();
-        backgroundRect.width = "65%";
+        backgroundRect.width = "60%";
         backgroundRect.height = "100%";
         backgroundRect.background = "#363636AA";
         backgroundRect.thickness = 3;
@@ -116,7 +116,7 @@ export class Chat3D {
         inputGrid.addColumnDefinition(0.3);
 
         const inputTxt = new InputTextArea();
-        inputTxt.width = "100%";
+        inputTxt.width = "80%";
         inputTxt.height = "80%";
         inputTxt.color = "white";
         inputTxt.fontSize = 25;
@@ -125,7 +125,7 @@ export class Chat3D {
         inputGrid.addControl(inputTxt, 0, 0);
 
         this.sendBtn = Button.CreateSimpleButton("sendBtn", "Envoyer");
-        this.sendBtn.width = "90%";
+        this.sendBtn.width = "60%";
         this.sendBtn.height = "80%";
         this.sendBtn.color = "white";
         this.sendBtn.background = "#026379AA";

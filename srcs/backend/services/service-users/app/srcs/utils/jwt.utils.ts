@@ -6,7 +6,7 @@
 /*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/27 14:02:23 by tissad            #+#    #+#             */
-/*   Updated: 2025/12/04 12:02:43 by tissad           ###   ########.fr       */
+/*   Updated: 2025/12/08 17:48:23 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,16 +30,17 @@ export class JwtUtils {
     static verifyToken(token: string, secret: string): JwtPayload | null {
         try {
             return jwt.verify(token, secret) as JwtPayload;
-        } catch {
-            return null; 
+        } catch (error) {
+            console.error('JWT verification error:', error);
+            return null;
         }
     }
     static generateAccessToken(payload: Record<string, any>): string {
         return this.generateToken(
             payload,
             process.env.ACCESS_TOKEN_SECRET!,
-            process.env.ACCESS_TOKEN_EXPIRATION! ||
-            '15min' // for testing purpose
+            // process.env.ACCESS_TOKEN_EXPIRATION! ||
+            '1min' // for testing purpose
         );
     }
 

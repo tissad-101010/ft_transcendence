@@ -6,7 +6,7 @@
 /*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/23 15:58:35 by tissad            #+#    #+#             */
-/*   Updated: 2025/12/01 11:51:23 by tissad           ###   ########.fr       */
+/*   Updated: 2025/12/08 17:06:01 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,7 @@ import cors from '@fastify/cors';
 import fastifyCookie from '@fastify/cookie';
 import path from "path";
 import fastifyStatic from "@fastify/static";
+
 // import routes
 import {  authRoutes,
           userRoutes
@@ -23,26 +24,18 @@ import {  authRoutes,
 import { oauthRoutes } from './modules/oauth/routes/oauth.routes';
 import { signoutRoutes } from './modules/signout/signout.routes';
 import { TwoFactorAuth } from './modules/twoFactor/twoFactor.routes';
-// internal services routes responsible for internal communications between services
-// import { githubRoutes } from './routes/OauthGithub.routes';
-// // import { googleRoutes } from './routes/OauthGoogle.routes';
-// import { oauth42Routes } from './routes/Oauth42.routes';
 
-// internal services routes 
+// internal services routes responsible for internal communications between services
 import { internalVerifyTokenRoutes } from "./internal-services-routes/internal-routes/internalVerifyToken.routes";
 import { internalSelectUserRoutes } from './internal-services-routes/internal-routes/internalSelectUser.routes';
+import { infoFriendRoute } from './modules/users/users.routes';
  
-
 // import plugins
 import redisPlugin from './plugins/redis.plugin';
 import { prismaPlugin } from './plugins/prisma.plugin';
-import { infoFriendRoute } from './modules/users/users.routes';
-
-
-
+import requestLoggerPlugin from "./plugins/requestLogger.plugin";
 
 /* ************************************************************************** */
-
 // register the Fastify framework
 const app = Fastify({ logger: true });
 
@@ -52,9 +45,9 @@ app.register(fastifyCookie, {
 });
 
 // Register plugins (database, redis, etc.)
-// app.register(dbPlugin);
 app.register(redisPlugin);
 app.register(prismaPlugin);
+app.register(requestLoggerPlugin);
 
 app.register(fastifyMultipart, {
   limits: {
@@ -84,14 +77,6 @@ app.register(internalVerifyTokenRoutes, { prefix: '/internal' });
 app.register(internalSelectUserRoutes, { prefix: '/internalUser'});
 
 app.register(infoFriendRoute);
-
-// app.register(githubRoutes, { prefix: '/auth' });
-// app.register(googleRoutes, { prefix: '/auth' });
-// app.register(oauth42Routes, { prefix: '/auth' });
-
-// Serve static files from the "uploads" directory
-
-
 // Start the Fastify server
 const start = async () => {
   try {
@@ -102,13 +87,6 @@ const start = async () => {
       origin: ['http://localhost:3000', 'https://localhost:8443'], // Allow specific origins
       methods: ['GET', 'POST'], // Allow specific methods
       credentials: true, // Allow credentials
-    });
-
-    app.addHook('onRequest', async (req) => {
-      console.log('Origin reçue :', req.headers.origin);
-      console.log('Méthode reçue :', req.method);
-      console.log('URL de la requête :', req.url);
-      console.log('Headers de la requête :', req.headers);
     });
     
     await app.listen({ port: 4000, host: '0.0.0.0' });
