@@ -143,7 +143,6 @@ export class PoolInteraction implements SpecificInteraction {
             else if (buttonMeshes.includes(pickedMesh)) {
                 const current = getCurrentGroup(ZoneName.LOUNGE);
                 if (pickedMesh === buttonMeshes[0]) {
-
                     setCurrentGroup(ZoneName.LOUNGE, current - 1, this.userX.getFriends, this.scene);
                     this.updateButtons(buttonMeshes);
                 } else if (pickedMesh === buttonMeshes[1]) {

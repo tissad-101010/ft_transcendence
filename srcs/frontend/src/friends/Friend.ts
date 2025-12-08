@@ -1,10 +1,13 @@
 import { chatApi } from "../chatApi/chat.api";
+import { removeFriend } from "./api/friends.api";
 export interface Message
 {
     id: number;
     content: string;
     sentAt: Date;
     senderId: number;
+    senderUsername: string;
+    receiverUsername: string;
 }
 
 
@@ -60,6 +63,11 @@ export class Friend
         return ({success: true, message: "Matchs bien charges"});
     }
 
+    public async delete(username: string) : Promise<{success: boolean, message: string}>
+    {
+        return (await removeFriend(this.username, username));
+    }
+
     // PRIVATE METHODS
 
     // GETTERS
@@ -70,7 +78,7 @@ export class Friend
 
     get getAvatarUrl() : string
     {
-        return (this.username);
+        return (this.avatarUrl);
     }
 
     get getLastLogin() : Date

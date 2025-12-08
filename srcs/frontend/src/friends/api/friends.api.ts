@@ -26,8 +26,7 @@ export enum StatusInvitation
     ACCEPTED,
     DECLINED,
     BLOCKED,
-    PENDING,
-    CANCELED
+    PENDING
 }
 
 const serviceUrl = "https://localhost:8443";
@@ -52,6 +51,65 @@ export async function getInfoFriend(username: string): Promise<PromiseGetInfoFri
   }
 }
 
+export async function removeInvitation(
+  invitation: FriendInvitation
+) : Promise<{success: boolean, message: string}>
+{
+  try
+  {
+    const call = await fetch(`${serviceUrl}/friend/remove/${invitation.getUsernames[0]}/${invitation.getUsernames[1]}`, {
+      method: "DELETE",
+      credentials: "include"
+    });
+    const response = await call.json();
+    return (response);
+  } catch(err: any)
+  {
+    console.error('Error remove invitation', err);
+    return ({success: false, message: 'Network or unexpected error'});
+  }
+}
+
+export async function removeFriend(
+  user1: string,
+  user2: string
+) : Promise<{success: boolean, message: string}>
+{
+  try
+  {
+    const call = await fetch(`${serviceUrl}/friend/remove/${user1}/${user2}`, {
+      method: "DELETE",
+      credentials: "include"
+    });
+    const response = await call.json();
+    return (response);
+  } catch (err: any)
+  {
+    console.error('Error remove friend', err);
+    return ({success: false, message: 'Network or unexpected error'});
+  }
+};
+
+export async function removeBlocked(
+  user1: string,
+  user2: string
+) : Promise<{success: boolean, message: string}>
+{
+  try
+  {
+    const call = await fetch(`${serviceUrl}/friend/remove/${user1}/${user2}`, {
+      method: "DELETE",
+      credentials: "include"
+    });
+    const response = await call.json();
+    return (response);
+  } catch(err: any)
+  {
+    console.error('Error remove blocked', err);
+    return ({success: false, message: 'Network or unexpected error'});
+  }
+}
+
 export async function updateInvitation(param: StatusInvitation, invitation: FriendInvitation) : Promise<PromiseUpdateResponse>
 {
   try
@@ -63,7 +121,7 @@ export async function updateInvitation(param: StatusInvitation, invitation: Frie
         mode = "/accept";
         break;
       case StatusInvitation.BLOCKED:
-        mode = "/blocked";
+        mode = "/block";
         break;
       case StatusInvitation.DECLINED:
         mode = "/decline";

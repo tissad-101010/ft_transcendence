@@ -1,6 +1,25 @@
 // IMPORTS FOR BABYLON.JS
-import { AbstractMesh, Vector3, Matrix } from "@babylonjs/core";
-import { AdvancedDynamicTexture, ScrollViewer, StackPanel, TextBlock, Control, Rectangle, InputText, Button } from "@babylonjs/gui";
+import { 
+    AbstractMesh,
+    Vector3,
+    Matrix,
+    Nullable,
+    Observer,
+    Scene 
+} from "@babylonjs/core";
+
+import {
+    AdvancedDynamicTexture,
+    ScrollViewer,
+    StackPanel,
+    TextBlock,
+    Control,
+    Rectangle,
+    InputText,
+    Button,
+    Image,
+    Ellipse,
+} from "@babylonjs/gui";
 
 // IMPORTS FOR CHART.JS
 import {
@@ -30,8 +49,9 @@ export class DataFriendUI
     private containerUI: ContainerUI;
     private friend: Friend;
     private chartCanvas: HTMLCanvasElement | null = null;
-    private buttonsMenu: Rectangle[] = [];
+    private buttonsMenu: Button[] = [];
     private currView: string;
+    private spinnerObserver: Nullable<Observer<Scene>> = null;
 
     constructor(friendUI: FriendUI, friend: Friend)
     {
@@ -56,82 +76,102 @@ export class DataFriendUI
         login.text = this.friend.getUsername;
         login.color = "black";
         login.fontSize = 100;
-        login.width = "500px"
+        login.width = "700px";
+        login.paddingTop = 100;
         login.fontFamily = "Arial";
         login.horizontalAlignment = Control.HORIZONTAL_ALIGNMENT_CENTER;
         login.verticalAlignment = Control.VERTICAL_ALIGNMENT_CENTER;
-        this.containerUI.headerPanel.addControl(login);
+        this.containerUI.headerPanel!.addControl(login);
 
-        const avatar = new Rectangle("RectAvatar");
-        avatar.width = "200px";
-        avatar.height = "200px";
-        avatar.thickness = 1;
-        avatar.color = "black";
+        let avatar : Image;
+        if (this.friend.getAvatarUrl)
+            avatar = new Image("imgAvatar", this.friend.getAvatarUrl);
+        else
+            avatar = new Image("imgAvatar", "icon/user.png");
+        avatar.width = "175px";
+        avatar.height = "175px";
         avatar.horizontalAlignment = Control.HORIZONTAL_ALIGNMENT_CENTER;
         avatar.verticalAlignment = Control.VERTICAL_ALIGNMENT_CENTER;
-        this.containerUI.headerPanel.addControl(avatar);
+        this.containerUI.headerPanel!.addControl(avatar);
     }
 
     displayContainerL()
     {
         this.friendUI.resetContainerL();
-        const rect = new Rectangle();
-        rect.thickness = 0;
-        rect.height = "100px";
-        this.containerUI.menuPanel.addControl(rect);
+        const space = new Rectangle();
+        space.thickness = 0;
+        space.height = "100px";
+        this.containerUI.menuPanel!.addControl(space);
+
+        const rectUp = new Rectangle();
+        rectUp.width = "625px";
+        rectUp.height = "300px";
+        rectUp.thickness = 0;
+        this.containerUI.menuPanel!.addControl(rectUp);
+
+        const panelUp = new StackPanel();
+        panelUp.isVertical = false;
+        panelUp.width = "625px";
+        panelUp.height = "300px";
+        panelUp.spacing = 25;
+        rectUp.addControl(panelUp);
+
+        const rectDown = new Rectangle();
+        rectDown.width = "625px";
+        rectDown.height = "300px";
+        rectDown.thickness = 0;
+        this.containerUI.menuPanel!.addControl(rectDown);
+
+        const panelDown = new StackPanel();
+        panelDown.isVertical = false;
+        panelDown.width = "625px";
+        panelDown.height = "300px";
+        panelDown.spacing = 25;
+        rectDown.addControl(panelDown);
 
         const self = this;
-        function createButton(label: string, self: DataFriendUI) : Rectangle
+        function createButton(label: string, urlImg: string, self: DataFriendUI) : Button
         {
-            const rect = new Rectangle("rectButton " + label);
-            rect.width = "750px";
-            rect.height = "100px";
-            if (self.currView === label)
-                rect.background = "gray";
-            else
-                rect.background = "white";
-            rect.thickness = 1;
-            rect.color = "black";
+            const button = Button.CreateImageOnlyButton("buttonMenu", urlImg);
+            button.width = "300px";
+            button.height = "300px";
+            button.cornerRadius = 20;
+            (button.image as Image).width = "150px";
+            (button.image as Image).height = "150px";
+            (button.image as Image).stretch = Image.STRETCH_UNIFORM;
+            (button.image as Image).horizontalAlignment = Control.HORIZONTAL_ALIGNMENT_CENTER;
+            (button.image as Image).verticalAlignment = Control.VERTICAL_ALIGNMENT_CENTER;
+            button.background = "rgba(51, 51, 51, 1)";
 
-            self.buttonsMenu.push(rect);
+            button.onPointerEnterObservable.add(() => {
+                if (self.currView !== label)
+                    button.background = "rgba(111, 54, 67, 1)";            
+            });
 
-            rect.onPointerClickObservable.add(() => {
-                self.buttonsMenu.forEach((rect) => {
-                    rect.background = "white";
-                })
-                rect.background = "gray";
+            button.onPointerOutObservable.add(() => {
+                if (label === self.currView)
+                    button.background = 'rgba(24, 61, 69, 1)';
+                else
+                    button.background = "rgba(51, 51, 51, 1)";
+            });
+
+            self.buttonsMenu.push(button);
+
+            button.onPointerClickObservable.add(() => {
+                self.buttonsMenu.forEach((b: Button) => {
+                    b.background = "rgba(51, 51, 51, 1)";
+                });
+                button.background = 'rgba(24, 61, 69, 1)';
                 self.switchView(label);
             });
-
-            rect.onPointerEnterObservable.add(() => {
-                if (self.currView !== label)
-                    rect.background = "lightgray";
-            });
-
-            rect.onPointerOutObservable.add(() => {
-                if (label === self.currView)
-                    rect.background = "gray";
-                else
-                    rect.background = "white";
-            })
-
-            const text = new TextBlock("textButton " + label);
-            text.text = label;
-            text.fontSize = 50;
-            text.color = "black";
-            text.width = "100%";
-            text.height = "100%";
-            rect.addControl(text);
-            return (rect);
+            return (button);
         }
 
-        this.containerUI.menuPanel.addControl(createButton("Stats globales", this));
-        this.containerUI.menuPanel.addControl(createButton("Stats tournoi", this));
-        this.containerUI.menuPanel.addControl(createButton("Historique", this));
-        this.containerUI.menuPanel.addControl(createButton("Supprimer l'ami", this));
-        this.containerUI.menuPanel.addControl(createButton("Quitter", this));
+        panelUp.addControl(createButton("Stats globales", "icon/stats.png", this));
+        panelUp.addControl(createButton("Historique", "icon/historic.png", this));
+        panelDown.addControl(createButton("Supprimer l'ami", "icon/deleteFriend.png", this));
+        panelDown.addControl(createButton("Quitter", "icon/leave.png", this));
     }
-
     displayContainerR()
     {
         this.friendUI.resetContainerR();
@@ -148,7 +188,7 @@ export class DataFriendUI
             this.friendUI.getSceneManager.getScene().onBeforeRenderObservable.add(() => {
                 const mesh = this.friendUI.getSceneManager.getMesh("scoreBoard")[1];
                 if (mesh && document.getElementById("chartContainer")) {
-                    this.updateCanvas(5);
+                    this.updateCanvasPosition();
                 }
             });
         }
@@ -175,82 +215,129 @@ export class DataFriendUI
     private displayDeleteFriend()
     {
         const spacing = new Rectangle();
-        spacing.height = "200px";
+        spacing.height = "100px";
         spacing.thickness = 0;
-        this.containerUI.viewPanel.addControl(spacing);
+        this.containerUI.viewPanel!.addControl(spacing);
+
+        const rect = new Rectangle();
+        rect.background = "rgba(51, 51, 51, 1)";
+        rect.width = "800px";
+        rect.height = "500px";
+        rect.thickness = 2;
+        rect.color = "white";
+        this.containerUI.viewPanel?.addControl(rect);
+
+        const panel = new StackPanel();
+        panel.isVertical = true;
+        panel.width = "800px";
+        panel.height = "500px";
+        rect.addControl(panel);
 
         const text = new TextBlock();
         text.text = "Consequences de la suppresion :";
-        text.color = "black";
+        text.color = "white";
         text.width = "100%";
         text.height = "100px";
-        text.fontSize = 50;
-        this.containerUI.viewPanel.addControl(text);
+        text.fontSize = 30;
+        panel.addControl(text);
 
         const elem1 = new TextBlock();
         elem1.text = "- Perte du chat si existant";
         elem1.width = "100%";
         elem1.height = "100px";
-        elem1.color = "black";
-        elem1.fontSize = 50;
-        this.containerUI.viewPanel.addControl(elem1);
+        elem1.color = "white";
+        elem1.fontSize = 30;
+        panel.addControl(elem1);
 
         const elem2 = new TextBlock();
         elem2.text = "- Perte de l'acces au profil de cet utilisateur";
         elem2.width = "100%";
         elem2.height = "100px";
-        elem2.color = "black";
-        elem2.fontSize = 50;
-        this.containerUI.viewPanel.addControl(elem2);
+        elem2.color = "white";
+        elem2.fontSize = 30;
+        panel.addControl(elem2);
 
-        const space = new Rectangle();
-        space.height = "200px";
-        space.thickness = 0;
-        this.containerUI.viewPanel.addControl(space);
-
-        const button = new Rectangle();
-        button.background = "white";
-        button.width = "500px";
-        button.height = "100px";
-        button.color = "black";
-        button.thickness = 2;
-        this.containerUI.viewPanel.addControl(button);
-
-        const textButton = new TextBlock();
-        textButton.width = "100%";
-        textButton.height = "100%";
-        textButton.fontSize = 50;
-        textButton.text = "Supprimer";
-        button.addControl(textButton);
+        const button = Button.CreateSimpleButton("confirm", "Confirmer");
+        button.width = "200px";
+        button.paddingTop = 50;
+        button.height = "150px";
+        button.background = "rgba(24, 61, 69, 1)";
+        button.cornerRadius = 10;
+        (button.textBlock as TextBlock).fontFamily = "Arial";
+        (button.textBlock as TextBlock).fontSize = 30;
+        (button.textBlock as TextBlock).color = "white";
+        panel.addControl(button);
 
         button.onPointerClickObservable.add(() => {
             this.friendUI.getSceneManager.getUserX.deleteFriend(this.friend)
                 .then((response) => {
-                    if (response)
+                    if (response.success)
                     {
-                        this.friendUI.leaveFriend();
                         this.friendUI.getUpdateChair(this.friendUI.getButtonMeshes);
+                        this.friendUI.leaveFriend();
                     }
                     else
                     {
                         const error = new TextBlock();
-                        error.text = "Erreur lors de la suppression";
+                        error.text = response.message;
                         error.width = "100%";
                         error.height = "100px";
-                        error.color = "red";
+                        error.color = "rgba(111, 54, 67, 1)";
                         error.fontSize = 50;
-                        this.containerUI.viewPanel.addControl(error);
+                        panel.addControl(error);
                     }
                 })
         })
 
         button.onPointerEnterObservable.add(() => {
-            button.background = "red";
+            button.background = "rgba(111, 54, 67, 1)";
         })
 
         button.onPointerOutObservable.add(() => {
-            button.background = "white";
+            button.background = "rgba(24, 61, 69, 1)";
         })
+    }
+
+    private updateCanvasPosition()
+    {
+        const mesh = this.friendUI.getSceneManager.getMesh("scoreBoard")[1];
+        if (!mesh)
+            return ;
+        const scene = this.friendUI.getSceneManager.getScene();
+        const camera = scene.activeCamera;
+        if (!camera)
+            return ;
+        const engine = scene.getEngine();
+
+        let container = document.getElementById("chartContainer");
+        if (!container)
+            return ;
+        
+        const bbox = mesh.getBoundingInfo().boundingBox;
+        const corners = bbox.vectorsWorld;
+        const projected = corners.map(v => camera ? Vector3.Project(
+            v,
+            Matrix.Identity(),
+            scene.getTransformMatrix(),
+            camera.viewport.toGlobal(engine.getRenderWidth(), engine.getRenderHeight())
+        ) : null).filter(p => p !== null) as Vector3[];
+
+        const xs = projected.map(p => p.x);
+        const ys = projected.map(p => p.y);
+        const width = Math.max(...xs) - Math.min(...xs);
+        const height = Math.max(...ys) - Math.min(...ys);
+        const center = Vector3.Project(
+            mesh.position,
+            Matrix.Identity(),
+            scene.getTransformMatrix(),
+            camera.viewport.toGlobal(engine.getRenderWidth(), engine.getRenderHeight())
+        );
+
+        // Met à jour position et taille HTML
+        container.style.left = `${center.x - width / 2.5}px`;
+        container.style.top = `${center.y - height / 4}px`;
+        container.style.width = `${width * 0.8}px`;
+        container.style.height = `${height * 0.7}px`;
     }
 
     private updateCanvas(
@@ -287,32 +374,7 @@ export class DataFriendUI
             container.appendChild(this.chartCanvas);
         }
 
-        // Calcule la position et la taille du mesh projeté
-        const bbox = mesh.getBoundingInfo().boundingBox;
-        const corners = bbox.vectorsWorld;
-        const projected = corners.map(v => camera ? Vector3.Project(
-            v,
-            Matrix.Identity(),
-            scene.getTransformMatrix(),
-            camera.viewport.toGlobal(engine.getRenderWidth(), engine.getRenderHeight())
-        ) : null).filter(p => p !== null) as Vector3[];
-
-        const xs = projected.map(p => p.x);
-        const ys = projected.map(p => p.y);
-        const width = Math.max(...xs) - Math.min(...xs);
-        const height = Math.max(...ys) - Math.min(...ys);
-        const center = Vector3.Project(
-            mesh.position,
-            Matrix.Identity(),
-            scene.getTransformMatrix(),
-            camera.viewport.toGlobal(engine.getRenderWidth(), engine.getRenderHeight())
-        );
-
-        // Met à jour position et taille HTML
-        container.style.left = `${center.x - width / 2.5}px`;
-        container.style.top = `${center.y - height / 4}px`;
-        container.style.width = `${width * 0.8}px`;
-        container.style.height = `${height * 0.7}px`;
+        this.updateCanvasPosition();
 
         // Dessine le graphique
         const ctx = this.chartCanvas.getContext("2d");
@@ -326,62 +388,131 @@ export class DataFriendUI
                 if (response.success)
                 {
                     const matchs = this.friend.getMatchs;
-                    const username = this.friend.getUsername;
-                    let cumulativeWins = 0;
-                    const percentages: number[] = [];
-                    const labels: string[] = [];
-    
-                    matchs.forEach((match, i) => {
-                        const userIndex = match.participants.indexOf(username);
-                        if (userIndex !== -1 && (value === -1 || i < value)) {
-                            const userScore = match.score[userIndex];
-                            const opponentScore = match.score[1 - userIndex];
-                            if (userScore > opponentScore) cumulativeWins++;
-                            percentages.push((cumulativeWins / (i + 1)) * 100);
-                            labels.push(`${i + 1}`);
-                        }
-                    });
-                    new Chart(ctx, {
-                        type: "line",
-                        data: {
-                            labels,
-                            datasets: [{
-                                label: "Taux de victoire cumulée (%)",
-                                data: percentages,
-                                borderColor: "rgb(75, 192, 192)",
-                                backgroundColor: "rgba(75, 192, 192, 0.2)",
-                                tension: 0.3,
-                                fill: true,
-                                pointRadius: 4
-                            }]
-                        },
-                        options: { responsive: true, maintainAspectRatio: false }
-                    });
+                    if (matchs.length < 1)
+                    {
+                        const text = new TextBlock();
+                        text.width = "800px";
+                        text.height = "300px";
+                        text.color = "white";
+                        text.fontSize = 40;
+                        text.fontFamily = "Arial";
+                        text.text = "Aucun matchs enregistres";
+                        this.containerUI.viewPanel?.addControl(text);
+                    }
+                    else
+                    {
+                        const username = this.friend.getUsername;
+                        let cumulativeWins = 0;
+                        const percentages: number[] = [];
+                        const labels: string[] = [];
+        
+                        matchs.forEach((match, i) => {
+                            const userIndex = match.participants.indexOf(username);
+                            if (userIndex !== -1 && (value === -1 || i < value)) {
+                                const userScore = match.score[userIndex];
+                                const opponentScore = match.score[1 - userIndex];
+                                if (userScore > opponentScore) cumulativeWins++;
+                                percentages.push((cumulativeWins / (i + 1)) * 100);
+                                labels.push(`${i + 1}`);
+                            }
+                        });
+                        new Chart(ctx, {
+                            type: "line",
+                            data: {
+                                labels,
+                                datasets: [{
+                                    label: "Taux de victoire cumulée (%)",
+                                    data: percentages,
+                                    borderColor: "rgba(111, 54, 67, 1)",
+                                    backgroundColor: "rgba(51, 51, 51, 1)",
+                                    tension: 0.3,
+                                    fill: true,
+                                    pointRadius: 4
+                                }]
+                            },
+                            options: { responsive: true, maintainAspectRatio: false }
+                        });
+                    }
                 }
                 else
                 {
                     const msgInfo = new TextBlock();
                     msgInfo.text = response.message;
                     msgInfo.fontSize = 100;
-                    msgInfo.color = "black";
+                    msgInfo.color = "white";
                     msgInfo.fontFamily = "Arial";
                     msgInfo.height = "100px";
                     msgInfo.width = "100%";
-                    this.containerUI.viewPanel.addControl(msgInfo);
+                    this.containerUI.viewPanel!.addControl(msgInfo);
                 }
             })
     }
 
-    private displayStatsGlobals() : void
+    private startLoading(container: StackPanel, msg: string, paddingTop: number)
     {
+
+        const space = new Rectangle();
+        space.thickness = 0;
+        space.height = paddingTop + "px";
+        container.addControl(space);
+
+        const rect = new Rectangle();
+        rect.width = "500px";
+        rect.height = "300px";
+        rect.background = "rgba(51, 51, 51, 1)";
+        rect.thickness = 2;
+        rect.color = "white";
+        container.addControl(rect);
+
+        const panel = new StackPanel();
+        panel.isVertical = true;
+        panel.width = "500px";
+        panel.height = "300px";
+        rect.addControl(panel);
+
+        const spinner = new Image("spinner", "icon/loading.png");
+        spinner.paddingTop = 10;
+        spinner.width = "200px";
+        spinner.height = "200px";
+        spinner.stretch = Image.STRETCH_UNIFORM;
+        panel.addControl(spinner);
+
+        const text = new TextBlock();
+        text.text = msg;
+        text.fontSize = 30;
+        text.height = "100px";
+        text.width = "500px";
+        text.color = "white";
+        text.fontFamily = "Arial";
+        panel.addControl(text);
+
+
+        // Animation simple
+        this.spinnerObserver = this.friendUI.getSceneManager
+            .getScene().onBeforeRenderObservable.add(() => {
+            if (spinner.isVisible) {
+                spinner.rotation -= 0.05;
+            }
+        });
+    }
+
+    private displayChart() : void
+    {
+        const test = new Rectangle();
+        test.thickness = 0;
+        test.width = "1024px";
+        test.paddingTop = 20;
+        test.height = "100px";
+        this.containerUI.viewPanel!.addControl(test);
+
         const line = new StackPanel("lineStatsGlobals");
         line.isVertical = false;
-        line.width = "100%";
-        line.height = "500px";
+        line.width = "1024px";
+        line.height = "100px";
         line.spacing = 10;
         line.horizontalAlignment = Control.HORIZONTAL_ALIGNMENT_CENTER;
         line.verticalAlignment = Control.VERTICAL_ALIGNMENT_CENTER;
-        this.containerUI.viewPanel.addControl(line);
+        test.addControl(line);
 
         const buttons : Rectangle[] = [];
         const self = this;
@@ -392,9 +523,9 @@ export class DataFriendUI
             rect.width = "150px";
             rect.height = "75px";
             if (currValue === value)
-                rect.background = "gray";
+                rect.background = "rgba(24, 61, 69, 1)";
             else
-                rect.background = "white";
+                rect.background = "rgba(51, 51, 51, 1)";
             rect.thickness = 1;
             rect.color = "black";
 
@@ -402,23 +533,23 @@ export class DataFriendUI
 
             rect.onPointerClickObservable.add(() => {
                 buttons.forEach((rect: Rectangle) => {
-                    rect.background = "white";
+                    rect.background = "rgba(51, 51, 51, 1)";
                 })
                 currValue  = value;
-                rect.background = "gray";
+                rect.background = "rgba(24, 61, 69, 1)";
                 self.updateCanvas(value);
             });
 
             rect.onPointerEnterObservable.add(() => {
                 if (value !== currValue )
-                    rect.background = "lightgray";
+                    rect.background = "rgba(111, 54, 67, 1)";
             });
 
             rect.onPointerOutObservable.add(() => {
                 if (value === currValue )
-                    rect.background = "gray";
+                    rect.background = "rgba(24, 61, 69, 1)";
                 else
-                    rect.background = "white";
+                    rect.background = "rgba(51, 51, 51, 1)";
             })
 
             const text = new TextBlock("textButton " + value);
@@ -427,7 +558,7 @@ export class DataFriendUI
             else
                 text.text = value.toString();
             text.fontSize = 40;
-            text.color = "black";
+            text.color = "white";
             text.width = "100%";
             text.height = "100%";
             rect.addControl(text);
@@ -441,20 +572,62 @@ export class DataFriendUI
         line.addControl(createButton(10));
         line.addControl(createButton(15));
         line.addControl(createButton(-1));
+
         this.updateCanvas(currValue);
     }
 
-    private displayHistoric() : void
+    private displayStatsGlobals() : void
     {
-        if (this.friend === null)
-            return ;
-        if (this.containerUI.viewPanel === null)
-            return ;
+        this.startLoading(this.containerUI.viewPanel!, "Chargement des matchs", 200);
+        this.friend.loadMatchs()
+            .then((response) => {
+                this.friendUI.getSceneManager.getScene().onBeforeRenderObservable.remove(this.spinnerObserver);
+                this.containerUI.viewPanel?.clearControls();
+                if (response.success)
+                {
+                    if (this.friend.getMatchs.length > 0)
+                        this.displayChart();
+                    else
+                    {
+                        const space = new Rectangle();
+                        space.height = "300px";
+                        space.thickness = 0;
+                        this.containerUI.viewPanel?.addControl(space);
+
+                        const rect = new Rectangle();
+                        rect.width = "800px";
+                        rect.height = "200px";
+                        rect.cornerRadius = 10;
+                        rect.background = "rgba(51, 51, 51, 1)";
+                        this.containerUI.viewPanel?.addControl(rect);
+
+                        const text = new TextBlock();
+                        text.text = `${this.friend.getUsername} a 0 match enregistre`;
+                        text.fontSize = 50;
+                        text.fontFamily = "Arial";
+                        text.color = "white";
+                        rect.addControl(text);
+                    }
+                }
+                else
+                {
+                    const text = new TextBlock();
+                    text.text = response.message;
+                    text.fontSize = 40;
+                    text.fontFamily = "Arial";
+                    text.color = "white";
+                    this.containerUI.viewPanel?.addControl(text);
+                }
+            });
         
+    }
+
+    private displayHistoric() : void
+    {   
         const rect = new Rectangle();
         rect.thickness = 0;
         rect.height = "150px";
-        this.containerUI.viewPanel.addControl(rect);
+        this.containerUI.viewPanel?.addControl(rect);
 
         const scrollViewer = new ScrollViewer();
         scrollViewer.width = "970px";
@@ -464,7 +637,7 @@ export class DataFriendUI
         scrollViewer.verticalAlignment = Control.VERTICAL_ALIGNMENT_CENTER;
         scrollViewer.barColor = "white";
         scrollViewer.thickness = 0;
-        this.containerUI.viewPanel.addControl(scrollViewer);
+        this.containerUI.viewPanel?.addControl(scrollViewer);
 
         const historicContainer = new StackPanel();
         historicContainer.width = "100%";
@@ -486,7 +659,7 @@ export class DataFriendUI
                         msgInfo.fontFamily = "Arial";
                         msgInfo.height = "100px";
                         msgInfo.width = "100%";
-                        this.containerUI.viewPanel.addControl(msgInfo);
+                        this.containerUI.viewPanel!.addControl(msgInfo);
                     }
                     else
                         this.displayDataMatchs(historicContainer, matchs);
@@ -500,7 +673,7 @@ export class DataFriendUI
                     msgInfo.fontFamily = "Arial";
                     msgInfo.height = "100px";
                     msgInfo.width = "100%";
-                    this.containerUI.viewPanel.addControl(msgInfo);
+                    this.containerUI.viewPanel!.addControl(msgInfo);
                 }
             });
     }

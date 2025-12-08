@@ -73,6 +73,10 @@ export class UserX
     /*              Friends            */
     /***********************************/
 
+    async loadDataFriends() : Promise<{success: boolean, message: string}>
+    {
+        return (await this.friendManager.loadData());
+    }
 
     async sendFriendInvite(
         username: string
@@ -81,7 +85,7 @@ export class UserX
         return (await this.friendManager.sendInvitation(username));
     }
 
-    async deleteFriend(friend: Friend) : Promise<boolean>
+    async deleteFriend(friend: Friend) : Promise<{success: boolean, message: string}>
     {
         return (await this.friendManager.deleteFriend(friend))
     }
@@ -92,6 +96,20 @@ export class UserX
     ) : Promise<PromiseUpdateResponse>
     {
         return (await this.friendManager.updateInvitation(invitation, param));
+    }
+
+    async deleteInvitation(
+        invitation: FriendInvitation
+    ) : Promise<PromiseUpdateResponse>
+    {
+        return (await this.friendManager.deleteInvitation(invitation));
+    }
+
+    async deleteBlocked(
+        username: string
+    ) : Promise<PromiseUpdateResponse>
+    {
+        return (await this.friendManager.deleteBlocked(username));
     }
 
     /***********************************/
@@ -181,7 +199,7 @@ export class UserX
         sceneManager: SceneManager
     ) : boolean
     {
-        return (t.playMatch(m, this.user.id, sceneManager));
+        return (t.playMatch(m, this.user!.id, sceneManager));
     }
     
 

@@ -7,7 +7,9 @@ import {
     StatusInvitation,
     PromiseUpdateResponse,
     getInfoFriend,
-    sendFriendInvitation
+    sendFriendInvitation,
+    removeBlocked,
+    PromiseGetInfoFriendResponse
 } from "./api/friends.api";
 import { UserX } from "../UserX";
 
@@ -46,16 +48,70 @@ export class FriendManager
     {
         const response = await sendFriendInvitation(username);
         if (response.success)
+        {
+            this.invitations.sent.push(
+                new FriendInvitation(
+                    [ response.data.fromUserUsername, response.data.toUserUsername ],
+                    new Date(response.data.createdAt),
+                    StatusInvitation.PENDING
+                )
+            );
             return ({success: true, data: response.data});
+        }
         else
             return ({success: false, message: response.message});
     }
 
-    public async deleteFriend(friend: Friend) : Promise<boolean>
+    public async deleteInvitation(
+        invitation: FriendInvitation
+    ) : Promise<PromiseUpdateResponse>
     {
-        // CALL API FOR DELETE FRIEND ON BDD
-        // UPDATE TAB WITHOUT FRIEND DELETED
-        return (true);
+        const response : PromiseUpdateResponse = await invitation.delete();
+        if (response.success)
+        {
+            let index = this.invitations.sent.findIndex(
+                (i: FriendInvitation) => i.getUsernames[0] === invitation.getUsernames[0]
+                    && i.getUsernames[1] === invitation.getUsernames[1]);
+            if (index === -1)
+            {
+                console.error("Invitation pas trouvee, tres bizarre");
+                return ({success: false, message: "Invitation non trouvee dans le tableau"});
+            }
+            this.invitations.sent.splice(index, 1);
+            return ({success: true, message: "Invitation supprimee"});
+        }
+        return (response);
+    }
+
+    public async deleteBlocked(
+        username: string
+    ) : Promise<PromiseUpdateResponse>
+    {
+
+        const response : PromiseUpdateResponse = await removeBlocked(username, this.userX.getUser!.username);
+        if (response.success)
+        {
+            let index = this.blockeds.findIndex((i: string) => i === username);
+            if (index === -1)
+                return ({success: false, message: `${username} non trouve dans la liste des bloques`});
+            this.blockeds.splice(index, 1);
+            return ({success: true, message: `${username} a ete retire de la liste des bloques`});
+        }
+        return (response);
+    }
+
+    public async deleteFriend(friend: Friend) : Promise<{success: boolean, message: string}>
+    {
+        const response : PromiseUpdateResponse = await friend.delete(this.userX.getUser!.username);
+        if (response.success)
+        {
+            const index = this.friends.findIndex((f) => f.getUsername === friend.getUsername);
+            if (index === -1)
+                return ({success: false, message: `${friend.getUsername} non trouve dans la liste des amis`});
+            this.friends.splice(index, 1);
+            return ({success: true, message: `${friend.getUsername} n'est plus votre amis`});
+        }
+        return (response);
     }
 
     public async updateInvitation(invitation: FriendInvitation, param: StatusInvitation) : Promise<PromiseUpdateResponse>
@@ -65,18 +121,60 @@ export class FriendManager
         {
             case StatusInvitation.ACCEPTED:
                 response = await invitation.accept();
+                if (response.success)
+                {
+                    let index = this.invitations.received.findIndex(
+                        (i: FriendInvitation) => i.getUsernames[0] === invitation.getUsernames[0]
+                            && i.getUsernames[1] === invitation.getUsernames[1]);
+                    if (index === -1)
+                    {
+                        console.error("Invitation pas trouvee, tres bizarre");
+                        return ({success: false, message: "Invitation non trouvee dans le tableau"});
+                    }
+                    const data : PromiseGetInfoFriendResponse = await getInfoFriend(invitation.getUsernames[0]);
+                    if (data.success)
+                    {
+                        this.invitations.received.splice(index, 1);
+                        this.friends.push(new Friend(invitation.getUsernames[0], data.data!.avatarUrl, data.data!.lastLogin, new Date()));
+                        return ({success: true, message: response.message});
+                    }
+                    else
+                        return ({success: false, message: data.message!});
+                }
                 break;
             case StatusInvitation.BLOCKED:
-                response = {success: false, message: "Pas encore fait"};
+                response = await invitation.block();
+                if (response.success)
+                {
+                    let index = this.invitations.received.findIndex(
+                        (i: FriendInvitation) => i.getUsernames[0] === invitation.getUsernames[0]
+                            && i.getUsernames[1] === invitation.getUsernames[1]);
+                    if (index === -1)
+                    {
+                        console.error("Invitation pas trouvee, tres bizarre");
+                        return ({success: false, message: "Invitation non trouvee dans le tableau"});
+                    }
+                    this.invitations.received.splice(index, 1);
+                    this.blockeds.push(invitation.getUsernames[0]);
+                }
                 break;
             case StatusInvitation.DECLINED:
-                response = {success: false, message: "Pas encore fait"};
-                break;
-            case StatusInvitation.CANCELED:
-                response = {success: false, message: "Pas encore fait"};
+                response = await invitation.delete();
+                if (response.success)
+                {
+                    let index = this.invitations.received.findIndex(
+                        (i: FriendInvitation) => i.getUsernames[0] === invitation.getUsernames[0]
+                            && i.getUsernames[1] === invitation.getUsernames[1]); 
+                    if (index === -1)
+                    {
+                        console.error("Invitation pas trouvee, tres bizarre");
+                        return ({success: false, message: "Invitation non trouvee dans le tableau"});
+                    }
+                    this.invitations.received.splice(index, 1);
+                    response = ({success: true, message: "Invitation refusee"});
+                }
                 break;
         }
-
         return (response);
     }
 
@@ -118,20 +216,21 @@ export class FriendManager
                         ));
                 }
                 // USER BLOCKED //
-                else if (d.status === "BLOCKED")
+                else if (d.status === "BLOCKED" 
+                    && d.toUserUsername === this.userX.getUser.username)
                     this.blockeds.push(username);
                 // INVITATION PENDING //
                 else if (d.status === "PENDING")
                     if (username === d.toUserUsername)
                         this.invitations.sent.push(new FriendInvitation(
                             [ d.fromUserUsername, d.toUserUsername ],
-                            d.createdAt,
+                            new Date(d.createdAt),
                             StatusInvitation.PENDING
                         ));
                     else
                        this.invitations.received.push(new FriendInvitation(
                             [ d.fromUserUsername, d.toUserUsername ],
-                            d.createdAt,
+                            new Date(d.createdAt),
                             StatusInvitation.PENDING
                         )); 
             }
