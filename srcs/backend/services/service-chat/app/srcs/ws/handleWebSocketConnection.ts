@@ -31,7 +31,7 @@ export function handleWebSocketConnection(
       return;
     }
     // valid jwt token with services users
-    console.log("WebSocket connection with token:", token);
+    console.log("========================================================>WebSocket connection with token:", token);
     // let payload: JwtPayload;
     // try {
     //   payload = jwt.verify(token, process.env.JWT_SECRET!) as JwtPayload;

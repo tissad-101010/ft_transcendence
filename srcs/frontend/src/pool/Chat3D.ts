@@ -25,6 +25,7 @@ export class Chat3D {
     private friend: Friend;
     private lastDate: Date | null;
     private userX: UserX;
+    private websocket: WebSocket;
 
     constructor(
         scene: Scene,
@@ -38,6 +39,15 @@ export class Chat3D {
         this.friend = friend;
         this.lastDate = null;
         this.userX = userX;
+        this.websocket = new WebSocket("wss://localhost:8443/chat/ws");
+        if (this.websocket.readyState === WebSocket.OPEN) {
+            console.log("WebSocket déjà ouvert");
+        }
+        else {
+            this.websocket.onopen = () => {
+                console.log("WebSocket connecté depuis Chat3D");
+            };
+        }
 
         // --- Crée la texture GUI sur le mesh ---
         this.originalMaterial = mesh.material;
@@ -153,6 +163,7 @@ export class Chat3D {
         inputTxt.placeholderText = "Tapez votre message...";
         inputGrid.addControl(inputTxt, 0, 0);
 
+
         // Bouton envoyer
         this.sendBtn = Button.CreateSimpleButton("sendBtn", "Envoyer");
         this.sendBtn.width = "90%";
@@ -168,10 +179,15 @@ export class Chat3D {
             if (message.length === 0) return;
 
             // Utiliser la méthode de la classe pour ajouter le message
+<<<<<<< HEAD
             this.addMessage(this.userX.getUser?.id, message, new Date());
 
             console.log("Message envoyé :", message, this.userX.getUser?.id, this.friend.getUsername);
             console.log("Message envoyé :", message, this.userX.getUser?.username, this.friend.getUsername);
+=======
+            this.addMessage(this.userX.getUser.id, message, new Date());
+            console.log("Message envoyé :", message, this.userX.getUser?.username, this.friend.getLogin);
+>>>>>>> 74990be (auto save)
             try
             {
                 // const conversation = chatApi.startConversation(
@@ -187,6 +203,7 @@ export class Chat3D {
                 // console.log("Message envoyé via chatApi", sended);
                 const token = "123"; // normalement ton vrai JWT
 
+<<<<<<< HEAD
                 const ws = new WebSocket("wss://localhost:8443/chat/ws?token=" + token);
 
                 // Handler pour tous les messages
@@ -201,6 +218,16 @@ export class Chat3D {
 
                 ws.onopen = () => {
                     console.log("WebSocket connecté");
+=======
+
+                this.websocket.onopen = () => {
+                console.log("WebSocket connecté");
+                };
+
+                this.websocket.onmessage = (event) => {
+                const data = JSON.parse(event.data);
+                console.log("MESSAGE REÇU WS:", data);
+>>>>>>> 74990be (auto save)
 
                     ws.send(JSON.stringify({
                         type: "send_message",
@@ -210,6 +237,7 @@ export class Chat3D {
                     }));
                 };
 
+<<<<<<< HEAD
                 ws.onclose = () => {
                     console.log("WebSocket fermé");
                 };
@@ -217,6 +245,22 @@ export class Chat3D {
                 ws.onerror = (err) => {
                     console.error("Erreur WebSocket", err);
                 };
+=======
+                this.websocket.onclose = () => {
+                console.log("WebSocket fermé");
+                };
+
+                this.websocket.onerror = (err) => {
+                console.error("Erreur WebSocket", err);
+                };
+                this.websocket.send(JSON.stringify({
+                    type: "send_message",
+                    from: this.userX.getUser!.username,
+                    to: this.friend.getLogin,
+                    text: message,
+                }));
+                
+>>>>>>> 74990be (auto save)
             } 
             catch (error) {
                 console.error("Erreur lors du démarrage de la conversation :", error);
