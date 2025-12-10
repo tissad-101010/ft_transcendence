@@ -9,6 +9,7 @@ import {
     Image,
     InputText
 } from "@babylonjs/gui";
+import { url } from "inspector";
 
 
 interface SectionTitleOptions {
@@ -75,6 +76,8 @@ export function createButton(options: ButtonOptions): Button {
         button.textBlock.textVerticalAlignment = options.textVerticalAlignment ?? Control.VERTICAL_ALIGNMENT_CENTER;
         button.textBlock.color = options.color ?? "white";
         button.textBlock.fontSize = options.fontSize ?? 24;
+        button.thickness = 1;
+        button.color = "white";
     }
 
     // Event click
@@ -100,16 +103,20 @@ export function create2faButton(options: {
     fontSize?: number,
     width?: string,
     height?: string,
+    urlImg: string,
     cornerRadius?: number,
     onActivate?: () => void
     onDeactivate?: () => void,
 }) {
-    const btn = Button.CreateSimpleButton(options.id, "");
+    const btn = Button.CreateImageButton(options.id, "", options.urlImg);
     btn.height = options.height ?? "50px";
     btn.width = options.width ?? "70%";
     btn.color = "white";
     btn.fontSize = options.fontSize ?? 20;
     btn.cornerRadius = options.cornerRadius ?? 10;
+    (btn.image as Image).width = "42px";
+    (btn.image as Image).height = "42px";
+    (btn.image as Image).paddingLeft = 10;
 
     // Fonction pour mettre à jour le texte et la couleur
     const updateButton = () => {

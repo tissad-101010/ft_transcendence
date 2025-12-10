@@ -56,6 +56,7 @@ import { SceneManager } from "../scene/SceneManager.ts";
 import { UserX } from "../UserX.ts";
 import { use } from "react";
 import { get } from "http";
+import { px } from "framer-motion";
 
 Chart.register(
     LineController,
@@ -74,7 +75,7 @@ Chart.register(
 // =============================================================
 const BG_DARK = "#1a1a1a";
 const TEXT_BRIGHT = "#ffffff";
-const BTN_NORMAL = "#f1aaaeff";
+const BTN_NORMAL = "#00848dff";
 const BTN_ACTIVE = "#007488ff";
 const BTN_BACK = "#1b1b1b";
 
@@ -124,9 +125,10 @@ export class MyProfilUI
         
         const panel2fa = new StackPanel("panel2faApp");
         panel2fa.width = "100%";
-        panel2fa.height = "100%";
+        panel2fa.height = "45%";
         panel2fa.background = BG_DARK;
         panel2fa.isVertical = true;
+        panel2fa.paddingBottom = "10px";
         panel2fa.paddingTop = "10px";
         panel2fa.paddingLeft = "20px";
         panel2fa.paddingRight = "20px";
@@ -135,8 +137,8 @@ export class MyProfilUI
 
         const stackElements1 = new StackPanel("stackElements1");
         stackElements1.paddingTop = 15;
-        stackElements1.height = "30%";
-        stackElements1.background = "#222";
+        stackElements1.height = "60%";
+        stackElements1.background = BG_DARK;
         stackElements1.spacing = 10;
         stackElements1.isVertical = true;
         panel2fa.addControl(stackElements1);
@@ -155,16 +157,15 @@ export class MyProfilUI
         qrImgRec.width = "200px";
         qrImgRec.height = "200px";
         qrImgRec.thickness = 0;
-        qrImgRec.background = "#333";
         stackElements1.addControl(qrImgRec);
 
-        // const qrImg = new Image("mailImg", "mail.png");
-        // qrImg.width = 1;
-        // qrImg.height = 1;
-        // qrImgRec.addControl(qrImg);
+        const qrImg = new Image("mailImg", "/icon/mail.png");
+        qrImg.width = 1;
+        qrImg.height = 1;
+        qrImgRec.addControl(qrImg);
 
         const stackElements2 = new StackPanel("stackElements2");
-        stackElements2.height = "70px";
+        stackElements2.height = "20%";
         stackElements2.width = "50%";
         stackElements2.isVertical = false;
         stackElements2.paddingLeft = 0;
@@ -207,18 +208,19 @@ export class MyProfilUI
     private enable2FaAppInterface(qrCodeUrl?: any){
         const panel2fa = new StackPanel("panel2faApp");
         panel2fa.width = "100%";
-        panel2fa.height = "100%";
+        panel2fa.height = "45%";
         panel2fa.background = BG_DARK;
         panel2fa.isVertical = true;
         panel2fa.paddingTop = "10px";
+        panel2fa.paddingBottom = "10px";
         panel2fa.paddingLeft = "20px";
         panel2fa.paddingRight = "20px";
         panel2fa.spacing = 10;
         this.panel.addControl(panel2fa);
 
         const stackElements1 = new StackPanel("stackElements1");
-        stackElements1.height = "30%";
-        stackElements1.background = "#222";
+        stackElements1.height = "60%";
+        stackElements1.background = BG_DARK;
         stackElements1.spacing = 10;
         stackElements1.isVertical = true;
         panel2fa.addControl(stackElements1);
@@ -235,7 +237,6 @@ export class MyProfilUI
         qrImgRec.width = "200px";
         qrImgRec.height = "200px";
         qrImgRec.thickness = 0;
-        qrImgRec.background = "#333";
         stackElements1.addControl(qrImgRec);
         console.log("QR Code URL:", qrCodeUrl.qrCodeUrl);
         const qrImg = new Image("qrImgImg", qrCodeUrl.qrCodeUrl);
@@ -244,7 +245,7 @@ export class MyProfilUI
         qrImgRec.addControl(qrImg);
 
         const stackElements2 = new StackPanel("stackElements2");
-        stackElements2.height = "70px";
+        stackElements2.height = "20%";
         stackElements2.width = "50%";
         stackElements2.isVertical = false;
         stackElements2.paddingLeft = 0;
@@ -289,22 +290,15 @@ export class MyProfilUI
     private changePwdInterface() : void {
         const panelPwd = new StackPanel("panelPwd");
         panelPwd.width = "100%";
-        panelPwd.height = "100%";
+        panelPwd.height = "45%";
         panelPwd.background = BG_DARK;
         panelPwd.isVertical = true;
-        panelPwd.paddingTop = "60px";
+        panelPwd.paddingTop = "10px";
+        panelPwd.paddingBottom = "10px";
         panelPwd.paddingLeft = "20px";
         panelPwd.paddingRight = "20px";
         panelPwd.spacing = 10;
         this.panel.addControl(panelPwd);
-        const { textBlock: title } = createMsgInfo({
-            parent: panelPwd,
-            text: "Changer le mot de passe 🔒" ,
-            height: "50px",
-            fontSize: 25,
-            color: TEXT_BRIGHT,
-
-        });
 
         const { textBlock: infoMsg } = createMsgInfo({
             parent: panelPwd,
@@ -355,90 +349,6 @@ export class MyProfilUI
         panelPwd.addControl(changePwdBtn);
     }
 
-    // change avatar interface
-    // private changeAvatarInterface() : void {
-    //     // set panelAvatar
-    //     const panelAvatar = new StackPanel("panelAvatar");
-    //     panelAvatar.width = "100%";
-    //     panelAvatar.height = "100%";
-    //     panelAvatar.background = BG_DARK;
-    //     panelAvatar.isVertical = true;
-    //     panelAvatar.paddingTop = "60px";
-    //     panelAvatar.paddingLeft = "20px";
-    //     panelAvatar.paddingRight = "20px";
-    //     panelAvatar.spacing = 10;
-    //     this.panel.addControl(panelAvatar);
-    //     const { textBlock: title } = createMsgInfo({
-    //         parent: panelAvatar,
-    //         text: "Changer l'avatar 🖼️",
-    //         height: "50px",
-    //         fontSize: 25,
-    //         color: TEXT_BRIGHT,
-    //     });
-    //             const avatarContainer = new Rectangle("avatarContainer");
-    //     avatarContainer.width = "200px";
-    //     avatarContainer.height = "200px";
-    //     avatarContainer.cornerRadius = 120;
-    //     avatarContainer.thickness = 0;
-    //     avatarContainer.background = "#000";
-    //     avatarContainer.horizontalAlignment = Control.HORIZONTAL_ALIGNMENT_CENTER;
-    //     avatarContainer.verticalAlignment = Control.VERTICAL_ALIGNMENT_TOP;
-    //     panelAvatar.addControl(avatarContainer);
-
-    //     let path = this.userX.getUser?.avatarUrl && this.userX.getUser?.avatarUrl !== "" ?
-    //         this.userX.getUser?.avatarUrl : "logoPink.png";
-        
-    //     const avatarCircle = new Rectangle("avatarCircle");
-    //     avatarCircle.width = 1;
-    //     avatarCircle.height = 1;
-    //     avatarCircle.cornerRadius = 30;
-    //     avatarCircle.thickness = 0;
-    //     avatarCircle.background = "transparent";
-    //     avatarContainer.addControl(avatarCircle);
-    //     avatarCircle.horizontalAlignment = Control.HORIZONTAL_ALIGNMENT_CENTER;
-    //     avatarCircle.verticalAlignment = Control.VERTICAL_ALIGNMENT_TOP;
-    //     const avatar = new Image("avatarImg", path);
-    //     avatar.width = "100%";
-    //     avatar.height = "100%";
-    //     avatar.stretch = Image.STRETCH_UNIFORM;
-    //     avatarCircle.addControl(avatar);
-
-    //     const changeAvatarBtn = createButton({
-    //         id: "changeAvatarBtn",
-    //         width: "150px",
-    //         height: "80px",
-    //         txt: "Changer avatar",
-    //         background: BTN_NORMAL,
-    //         fontSize: 20,
-    //         color: TEXT_BRIGHT,
-    //         cornerRadius: 10,
-    //         onClick: () => {
-    //             const input = document.createElement("input");
-    //             input.type = "file";
-    //             input.accept = "image/*";
-
-    //             input.onchange = (e) => {
-    //                 const file = (e.target as HTMLInputElement).files?.[0];
-    //                 if (!file) return;
-
-    //                 const reader = new FileReader();
-    //                 reader.onload = () => {
-    //                     avatar.source = reader.result as string;
-    //                 };
-    //                 reader.readAsDataURL(file);
-    //             };
-
-    //             input.click();
-    //             this.flag = true;
-    //         }
-    //     });
-
-    //     changeAvatarBtn.verticalAlignment = Control.VERTICAL_ALIGNMENT_BOTTOM;
-    //     changeAvatarBtn.paddingBottom = "25px";
-
-    //    panelAvatar.addControl(changeAvatarBtn);
-    // }
-
     // =============================================================
     //  CAT 3 (SECURITY)
     // =============================================================
@@ -456,7 +366,7 @@ export class MyProfilUI
             height: "50px",
             fontSize: 25,
             color: TEXT_BRIGHT,
-            background: "#2d2d2d",
+            background: "#4b4b4bff",
             iconName: "security",
             textHorizontalAlignment: Control.HORIZONTAL_ALIGNMENT_LEFT
         });
@@ -466,7 +376,7 @@ export class MyProfilUI
             width: "70%",
             height: "50px",
             txt: "Changer mot de passe",
-            background: BTN_NORMAL,
+            background: BTN_ACTIVE,
             fontSize: 20,
             color: TEXT_BRIGHT,
             cornerRadius: 10,
@@ -512,8 +422,9 @@ export class MyProfilUI
             id: "enable2FAApp",
             stateVar: () => this.enable2faApp,
             setStateVar: (val) => this.enable2faApp = val,
-            activeText: "Activer 2FA 📱",
-            inactiveText: "Désactiver 2FA 📱",
+            activeText: "Activer 2FA",
+            inactiveText: "Désactiver 2FA",
+            urlImg: "/icon/app.png",
             activeColor: BTN_ACTIVE,
             inactiveColor: BTN_NORMAL,
             onActivate: () => {
@@ -548,8 +459,9 @@ export class MyProfilUI
             id: "enable2FAMail",
             stateVar: () => this.enable2faMail,
             setStateVar: (val) => this.enable2faMail = val,
-            activeText: "Activer 2FA ✉️",
-            inactiveText: "Désactiver 2FA ✉️",
+            activeText: "Activer 2FA ",
+            inactiveText: "Désactiver 2FA ",
+            urlImg: "/icon/email.png",
             activeColor: BTN_ACTIVE,
             inactiveColor: BTN_NORMAL,
             onActivate: async () => {
@@ -574,7 +486,7 @@ export class MyProfilUI
     private displayMainCat2() : void {
         const centerPanel = new StackPanel();
         centerPanel.isVertical = true;
-        centerPanel.background = "#242424";
+        centerPanel.background = "#ccccccff";
         centerPanel.paddingTop = 0;
         centerPanel.spacing = 30;
         centerPanel.width = "300px";
@@ -626,7 +538,7 @@ export class MyProfilUI
             width: "150px",
             height: "80px",
             txt: "Changer avatar",
-            background: BTN_NORMAL,
+            background: BTN_ACTIVE,
             fontSize: 20,
             color: TEXT_BRIGHT,
             cornerRadius: 10,
@@ -726,8 +638,13 @@ export class MyProfilUI
         recSection2.background = "#444";
         leftPanel.addControl(recSection2);
 
+        const img = new Image("icon", "/icon/graphic.png");
+        img.width = "25px";
+        img.height = "25px";
+        recSection2.addControl(img);
+
         const titleSection2 = new TextBlock();
-        titleSection2.text = "Statistiques 📊";
+        titleSection2.text = "Statistiques";
         titleSection2.height = "100px";
         titleSection2.fontSize = 25;
         titleSection2.color = TEXT_BRIGHT;
@@ -737,7 +654,7 @@ export class MyProfilUI
         recSection2.addControl(titleSection2);
 
         const gamePlayed = new TextBlock();
-        gamePlayed.text = "🕹️ Total: " + this.userX.getUser?.gamesPlayed;
+        gamePlayed.text = "Total: " + this.userX.getUser?.gamesPlayed;
         gamePlayed.height = "40px";
         gamePlayed.paddingLeft = "5px";
         gamePlayed.fontSize = 19;
@@ -748,7 +665,7 @@ export class MyProfilUI
         leftPanel.addControl(gamePlayed);
 
         const win = new TextBlock();
-        win.text = "🏅 Victoires: " + this.userX.getUser?.wins;
+        win.text = "Victoires: " + this.userX.getUser?.wins;
         win.height = "25px";
         win.fontSize = 19;
         win.paddingLeft = "5px";
@@ -759,7 +676,7 @@ export class MyProfilUI
         leftPanel.addControl(win);
 
         const loss = new TextBlock();
-        loss.text = "💩 Défaites: " + this.userX.getUser?.loss;
+        loss.text = "Défaites: " + this.userX.getUser?.loss;
         loss.height = "40px";
         loss.fontSize = 19;
         loss.paddingLeft = "5px";
@@ -779,19 +696,20 @@ export class MyProfilUI
         this.panel.height = "1024px";
         this.panel.isVertical = true;
         this.panel.spacing = 0;
-        this.panel.background = BG_DARK;
+        this.panel.background = "#ffffffff";
         this.container.addControl(this.panel);
 
         const titlePanel = new Rectangle("titlepanel");
         titlePanel.width = "100%";
         titlePanel.height = "300px";
         titlePanel.thickness = 0;
-        titlePanel.background = "#111";
+        titlePanel.background = "#fab5b4";
         this.panel.addControl(titlePanel);
 
         const horizontalLayout = new StackPanel();
         horizontalLayout.isVertical = false;
         horizontalLayout.width = "100%";
+        horizontalLayout.background = "#fab5b4";
         horizontalLayout.height = "100%";
         titlePanel.addControl(horizontalLayout);
 
@@ -803,7 +721,7 @@ export class MyProfilUI
                 txt: "←",
                 paddingLeft: "10px",
                 paddingTop: "210px",
-                background: BTN_BACK,
+                background: "transparent",
                 fontSize: 100,
                 color: TEXT_BRIGHT,
                 cornerRadius: 0,
@@ -822,8 +740,6 @@ export class MyProfilUI
         title.width = this.flag ? "600px" : "1000px";
         title.color = TEXT_BRIGHT;
         title.fontSize = 45;
-        title.shadowBlur = 8;
-        title.shadowColor = "#000";
         title.textHorizontalAlignment = Control.HORIZONTAL_ALIGNMENT_CENTER;
         title.textVerticalAlignment = Control.VERTICAL_ALIGNMENT_BOTTOM;
         horizontalLayout.addControl(title);
@@ -850,10 +766,10 @@ export class MyProfilUI
 
             const logoutBtn = createButton({
                 id: "logout",
-                width: "100%",
+                width: "96.2%",
                 height: "50px",
                 txt: "Se déconnecter",
-                background: BTN_NORMAL,
+                background: "#fab5b4",
                 fontSize: 30,
                 color: TEXT_BRIGHT,
                 cornerRadius: 0,

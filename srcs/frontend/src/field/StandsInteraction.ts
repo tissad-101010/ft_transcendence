@@ -97,7 +97,7 @@ export class StandsInteraction implements SpecificInteraction {
 }
 
 
-    private handleFriendsProfile(
+    public handleFriendsProfile(
         mesh: AbstractMesh,
         buttonMeshes: AbstractMesh[]
     ): void 
@@ -143,6 +143,12 @@ export class StandsInteraction implements SpecificInteraction {
         this.buttonHighlightLayer.removeAllMeshes();
         this.sceneInteractor.getHighlightLayer().removeAllMeshes();
     }
+
+
+    get getFriendUI()
+    {
+        return (this.friendUI);
+    }
     
     
     /**************************************************
@@ -172,7 +178,7 @@ export class StandsInteraction implements SpecificInteraction {
         mesh: AbstractMesh
     ): void 
     {
-        console.log(mesh.name);
+        console.log(mesh);
         if (!this.sceneInteractor.areInteractionsEnabled()) return;
         const pickedMesh = mesh;
         if (!pickedMesh)return;

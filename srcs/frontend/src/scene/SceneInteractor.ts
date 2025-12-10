@@ -195,6 +195,11 @@ export class SceneInteractor {
    public getHighlightLayer(): HighlightLayer {
        return this.highlightLayer;
     }
+
+    public getCurrSpecificInteraction(): SpecificInteraction | null
+    {
+        return (this.currSpecificInteraction);
+    }
     
     public areInteractionsEnabled(): boolean {
         return this.interactionsEnabled;

@@ -136,7 +136,14 @@ export class PoolInteraction implements SpecificInteraction {
                 if (index >= this.userX.getFriends.length)
                     return ;
                 if (this.chat === null)
-                    this.chat = new Chat3D(this.scene, buttonMeshes[2], this.userX.getFriends[index], this.userX);
+                    this.chat = new Chat3D(
+                        this.scene,
+                        buttonMeshes[2],
+                        this.userX.getFriends[index],
+                        this.userX,
+                        this.sceneManager,
+                        this
+                    );
                 else
                     this.chat.updateChat(this.userX.getFriends[index]);
             }
