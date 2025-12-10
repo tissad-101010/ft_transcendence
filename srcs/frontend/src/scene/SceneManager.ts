@@ -11,6 +11,7 @@ import {
   FreeCameraMouseInput,
   Texture,
   ParticleSystem,
+  CubeTexture,
   Mesh
 } from '@babylonjs/core';
 import "@babylonjs/inspector";
@@ -148,14 +149,8 @@ export class SceneManager {
     {
         const hdrTexture = new HDRCubeTexture("env.hdr", this.scene, 2048);
         this.scene.environmentTexture = hdrTexture;
-
-        const hdrSkyDome = new PhotoDome(
-        "skyDome",
-        "env.hdr",
-        { resolution: 64, size: 1000 },
-        this.scene
-        );
-        this.scene.imageProcessingConfiguration.exposure = 1.5;
+        const skybox = this.scene.createDefaultSkybox(hdrTexture, true, 2500, 0);
+        this.scene.imageProcessingConfiguration.exposure = 0.9;
     }
 
     private createClouds(): void

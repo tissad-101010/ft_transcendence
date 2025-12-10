@@ -74,13 +74,8 @@ Chart.register(
 // =============================================================
 const BG_DARK = "#1a1a1a";
 const TEXT_BRIGHT = "#ffffff";
-
-
-const BTN_NORMAL = "#f5989d";
-
-
-const BTN_ACTIVE = "#2c4f53";
-
+const BTN_NORMAL = "#f1aaaeff";
+const BTN_ACTIVE = "#007488ff";
 const BTN_BACK = "#1b1b1b";
 
 
@@ -457,11 +452,12 @@ export class MyProfilUI
 
         createSectionTitle({
             parent: rightPanel,
-            text: "Sécurité & Auth 🔒",
+            text: "Sécurité & Auth",
             height: "50px",
             fontSize: 25,
             color: TEXT_BRIGHT,
             background: "#2d2d2d",
+            iconName: "security",
             textHorizontalAlignment: Control.HORIZONTAL_ALIGNMENT_LEFT
         });
 
@@ -587,12 +583,13 @@ export class MyProfilUI
 
         createSectionTitle({
             parent: centerPanel,
-            text: "Personnelles 👤",
+            text: "Personnelles",
             height: "50px",
             fontSize: 25,
             color: TEXT_BRIGHT,
             background: "#333",
             paddingLeft: "5px",
+            iconName: "user",
             textHorizontalAlignment: Control.HORIZONTAL_ALIGNMENT_LEFT
         });
 

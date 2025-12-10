@@ -21,6 +21,7 @@ interface SectionTitleOptions {
     textHorizontalAlignment?: number;
     textVerticalAlignment?: number;
     paddingLeft?: string;
+    iconName?: "mail" | "security" | "user"; // ajouter toutes les icônes possibles
 }
 
 interface MsgInfoOptions {
@@ -216,6 +217,30 @@ export function createSectionTitle(options: SectionTitleOptions): Rectangle {
     if (options.paddingLeft) txt.paddingLeft = options.paddingLeft;
     rect.addControl(txt);
 
+    // Icône
+    if (options.iconName) {
+        const iconMap: Record<string, string> = {
+            user: "/icon/user.png",
+            mail: "/icon/mail.png",
+            security: "/icon/security.png"
+        };
+        const imgPath = iconMap[options.iconName];
+        if (imgPath) {
+            const img = new Image("icon", imgPath);
+            img.width = "25px";
+            img.height = "25px";
+            img.horizontalAlignment = Control.HORIZONTAL_ALIGNMENT_CENTER;
+            img.verticalAlignment = Control.VERTICAL_ALIGNMENT_CENTER;
+
+            const rectImg = new Rectangle();
+            rectImg.height = options.height ?? "50px";
+            rectImg.width = "75px";
+            rectImg.thickness = 0;
+            rectImg.paddingLeft = 40;
+            rectImg.addControl(img);
+            rect.addControl(rectImg);
+        }
+    }
     return rect;
 }
 
