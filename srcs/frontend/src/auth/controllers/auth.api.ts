@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   auth.api.ts                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
+/*   By: issad <issad@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/18 19:09:22 by tissad            #+#    #+#             */
-/*   Updated: 2025/12/08 17:54:12 by tissad           ###   ########.fr       */
+/*   Updated: 2025/12/09 20:23:28 by issad            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -87,7 +87,7 @@ export async function fetchUserProfile(): Promise<{ success: boolean; data?: any
             },
             credentials: "include", // envoie les cookies si backend les utilise
         };
-        const response = await authFetch("https://localhost:8443/api/user/profile", requestOptions);
+        const response = await fetch("https://localhost:8443/api/user/profile", requestOptions);
         const data = await response.json(); 
         if (response.ok) {
             return { success: true, data: data};

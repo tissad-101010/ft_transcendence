@@ -11,14 +11,14 @@ import "./styles/authPage.css";
 const AuthPage: React.FC = () => {
   const { user, pending2FA, loading } = useAuth();
   const [showRegister, setShowRegister] = useState(false);
-  const [currentRoute, setCurrentRoute] = useState(window.location.pathname);
+  // const [currentRoute, setCurrentRoute] = useState(window.location.pathname);
   
-  // Écoute des changements de "route" pour simuler navigation sans React Router
-  useEffect(() => {
-    const handlePop = () => setCurrentRoute(window.location.pathname);
-    window.addEventListener("popstate", handlePop);
-    return () => window.removeEventListener("popstate", handlePop);
-  }, []);
+  // // Écoute des changements de "route" pour simuler navigation sans React Router
+  // useEffect(() => {
+  //   const handlePop = () => setCurrentRoute(window.location.pathname);
+  //   window.addEventListener("popstate", handlePop);
+  //   return () => window.removeEventListener("popstate", handlePop);
+  // }, []);
 
   // Si l'utilisateur est connecté ou en train de charger → ne rien afficher
   if (user || loading) return null;

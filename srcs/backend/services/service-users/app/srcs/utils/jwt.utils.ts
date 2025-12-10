@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   jwt.utils.ts                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
+/*   By: issad <issad@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/27 14:02:23 by tissad            #+#    #+#             */
-/*   Updated: 2025/12/08 17:48:23 by tissad           ###   ########.fr       */
+/*   Updated: 2025/12/09 17:30:12 by issad            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,7 @@ import jwt, { JwtPayload } from 'jsonwebtoken';
 /***********************************/
 
 export class JwtUtils {
+    
     // Placeholder for JWT utility methods
     static generateToken(payload: Record<string, any>, secret: string, expiresIn: string): string {
         return jwt.sign(

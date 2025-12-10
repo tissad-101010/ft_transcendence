@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   auth.controllers.ts                                :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
+/*   By: issad <issad@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/27 11:44:30 by tissad            #+#    #+#             */
-/*   Updated: 2025/12/08 18:07:24 by tissad           ###   ########.fr       */
+/*   Updated: 2025/12/09 19:55:20 by issad            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -161,8 +161,8 @@ export async function getProfileController(
     reply: FastifyReply
 ) {
     
-    JwtMiddleware(request, reply);
-    return; // ensure middleware is executed before proceeding
+    // JwtMiddleware(request, reply);
+    // return; // ensure middleware is executed before proceeding
     console.log('[Profile Controller] Received profile request');
     const redisClient = request.server.redis;
     const authService = new AuthService(request.server);
