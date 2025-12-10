@@ -183,6 +183,30 @@ fi
   ALTER ROLE "$CHAT_SERVICE_DB_USER" CREATEDB;
   -- ========================================
 
+  -- ========================================
+  -- 🔹 CHAT SERVICE
+  -- ========================================
+
+  SELECT 'CREATE DATABASE ' || quote_ident('$FRIENDS_SERVICE_DB_NAME') || ' OWNER admin'
+  WHERE NOT EXISTS (
+      SELECT FROM pg_database WHERE datname = '$FRIENDS_SERVICE_DB_NAME'
+  )\gexec
+
+  \connect $FRIENDS_SERVICE_DB_NAME;
+
+  DO \$\$
+  BEGIN
+    IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = '$FRIENDS_SERVICE_DB_USER') THEN
+        CREATE ROLE "$FRIENDS_SERVICE_DB_USER" WITH LOGIN PASSWORD '$FRIENDS_SERVICE_DB_PASSWORD';
+    END IF;
+  END
+  \$\$;
+
+  GRANT CONNECT ON DATABASE "$FRIENDS_SERVICE_DB_NAME" TO "$FRIENDS_SERVICE_DB_USER";
+  GRANT ALL PRIVILEGES ON SCHEMA public TO "$FRIENDS_SERVICE_DB_USER";
+  ALTER ROLE "$FRIENDS_SERVICE_DB_USER" CREATEDB;
+  -- ========================================
+
 
 EOF
 #******************************************************************************#
@@ -217,7 +241,7 @@ wait "$PG_PID"
 #******************************************************************************#
 
 
-
+chmod 750 "$DATA_DIR"
 
 
 # Create the init.sql script that will be executed on the first run

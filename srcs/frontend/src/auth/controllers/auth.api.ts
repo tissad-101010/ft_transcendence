@@ -1,3 +1,17 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   auth.api.ts                                        :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/11/18 19:09:22 by tissad            #+#    #+#             */
+/*   Updated: 2025/12/01 17:05:10 by tissad           ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+import { authFetch } from '../authFetch';
+
 export async function registerUser(
   username: string,
   email: string,
@@ -64,15 +78,15 @@ export async function loginUser(
 
 export async function fetchUserProfile(): Promise<{ success: boolean; data?: any; message?: string }> {
     try {
-        const response = await fetch("https://localhost:8443/api/user/profile", {
+        const requestOptions: RequestInit = {
             method: "GET",
             headers: {
                 "Content-Type": "application/json",
                 Accept: "application/json",
             },
             credentials: "include", // envoie les cookies si backend les utilise
-        });
-        
+        };
+        const response = await authFetch("https://localhost:8443/api/user/profile", requestOptions);
         const data = await response.json(); 
         if (response.ok) {
             return { success: true, data: data};
@@ -112,4 +126,30 @@ export async function logoutUser(): Promise<{ success: boolean; message?: string
         console.error(err);
         return { success: false, message: "An error occurred during logout" };
     }
+}
+
+// change password
+export async function changePassword(currentPassword: string, newPassword: string): Promise<{ success: boolean; message?: string }> {
+  try {
+    const response = await authFetch("https://localhost:8443/api/user/change-password", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+      credentials: "include",
+      body: JSON.stringify({ currentPassword, newPassword }),
+    });
+
+    const data = await response.json();
+
+    if (response.ok) {
+      return { success: true, message: data.message || "Password changed successfully" };
+    } else {
+      return { success: false, message: data.message || "Password change failed" };
+    }
+  } catch (err) {
+    console.error(err);
+    return { success: false, message: "An error occurred during password change" };
+  }
 }

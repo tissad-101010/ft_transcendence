@@ -1,0 +1,33 @@
+// Prisma schema file
+
+// =====================
+// Generator
+// =====================
+generator client {
+  provider = "prisma-client"
+  output = "./generated/client"
+}
+
+// =====================
+// Datasource
+// =====================
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// =====================
+// Friend Invitation
+// =====================
+model FriendInvitation {
+  id Int @id @default(autoincrement())
+  fromUserId String
+  toUserId String
+  fromUserUsername String
+  toUserUsername String
+  status String @default("PENDING")
+  createdAt DateTime @default(now())
+  responsedAt DateTime?
+
+  @@unique([fromUserId, toUserId])
+}

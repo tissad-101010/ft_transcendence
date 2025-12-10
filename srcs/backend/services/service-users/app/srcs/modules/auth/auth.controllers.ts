@@ -3,16 +3,17 @@
 /*                                                        :::      ::::::::   */
 /*   auth.controllers.ts                                :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: glions <glions@student.42.fr>              +#+  +:+       +#+        */
+/*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/27 11:44:30 by tissad            #+#    #+#             */
-/*   Updated: 2025/11/14 15:42:38 by glions           ###   ########.fr       */
+/*   Updated: 2025/12/01 11:52:56 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 // this file receives the request from the frontend and call userservice 
 // to handle the request response
 
+import path from "path";
 import { FastifyReply, FastifyRequest } from 'fastify';
 
 import { SignupUserDTO,
@@ -25,6 +26,9 @@ import { CredentialUtils } from '../../utils/credential.utils';
 import { AuthService } from './auth.services';
 import { CryptUtils } from '../../utils/crypt.utils';
 import { JwtUtils } from '../../utils/jwt.utils';
+import { TwoFactorType } from '../../prisma/prisma/generated/client/browser';
+
+
 /***********************************/
 /*     Auth Controllers            */
 /***********************************/
@@ -102,6 +106,7 @@ export async function signinController(
   request: FastifyRequest,  
   reply: FastifyReply 
 ) { 
+    
     console.log('[Signin Controller] Received signin request');
     const inputData = request.body as LoginUserDTO;
     const authService = new AuthService(request.server);
@@ -132,10 +137,11 @@ export async function signinController(
         // no 2FA required, set JWT cookies
         console.log('[Signin Controller] No 2FA required, setting JWT cookies');
         // set JWT cookies
-        JwtUtils.setAccessTokenCookie(reply, loginResponse.accessToken!);
         JwtUtils.setRefreshTokenCookie(reply, loginResponse.refreshToken!);
+        JwtUtils.setAccessTokenCookie(reply, loginResponse.accessToken!);
+        
         console.log('[Signin Controller] JWT cookies set successfully');
-        console.log('[Signin Controller] reponseData:', responseData);
+        console.log('[Signin Controller] responseData:', responseData);
         return reply.code(200).send(responseData);
 
         
@@ -154,26 +160,225 @@ export async function getProfileController(
     request: FastifyRequest,
     reply: FastifyReply
 ) {
+    
     console.log('[Profile Controller] Received profile request');
+    const redisClient = request.server.redis;
     const authService = new AuthService(request.server);
-    // extract user from cookies from header request
-    const user = JwtUtils.extractUserFromRequest(request);
+    const cookies = JwtUtils.extractCookiesFromRequest(request);
+    const access_token = JwtUtils.extractTokenFromCookies(cookies, 'access_token');
+    // check if access token is valid in redis cache
+    if (access_token) {
+        const cachedToken = await redisClient.get(`access_token:${JwtUtils.verifyAccessToken(access_token)?.id}`);
+        if (!cachedToken || cachedToken !== access_token) {
+            console.error('[Profile Controller] Unauthorized: Access token not found or mismatch in cache');
+            return reply.code(401).send({ message: 'Unauthorized ❌' });
+        }
+        else {
+            console.log('======================✅ [Profile Controller] Access token validated from cache');
+        }
+    }
+    const user = JwtUtils.extractUserFromAccessToken(access_token);
     if (!user) {
         console.error('[Profile Controller] Unauthorized: No valid user found in request');
         return reply.code(401).send({ message: 'Unauthorized ❌' });
     }
     try {
-        const userProfile = await authService.getUserProfile(user.userId);
-        if (!userProfile) {
-            console.error('[Profile Controller] User profile not found for user ID:', user.userId);
-            return reply.code(404).send({ message: 'User profile not found ❌' });
+        // check if user profile is cached in redis
+        const cachedProfile = await redisClient.get(`user_profile:${user.userId}`);
+        if (cachedProfile) {
+            console.log('[Profile Controller] User profile retrieved from cache for user ID:', user.userId);
+            return reply.code(200).send( JSON.parse(cachedProfile) );
+        }else {
+            console.log('[Profile Controller] No cached profile found, fetching from database for user ID:', user.userId);
+            const userProfile = await authService.getUserProfile(user.userId);
+            if (!userProfile) {
+                console.error('[Profile Controller] User profile not found for user ID:', user.userId);
+                return reply.code(404).send({ message: 'User profile not found ❌' });
+            }
+            // store user profile in redis cache (optional) 
+            await redisClient.set(
+                `user_profile:${user.userId}`,
+                JSON.stringify(userProfile),
+                'EX',
+                15 * 60 // 15 minutes expiration
+            );
+            console.log('[Profile Controller] User profile retrieved successfully for user ID:', user.userId);
+            return reply.code(200).send(userProfile);
         }
-        console.log('[Profile Controller] User profile retrieved successfully for user ID:', user.userId);
-        return reply.code(200).send(userProfile);
     } catch (error) {
         console.error('[Profile Controller] Error retrieving user profile:', error);
         return reply.code(500).send({ message: 'Internal server error ❌' });
     }
 }
+
+/* ************************************************************************** */
+
+// refresh token controller to handle refresh token requests
+export async function refreshTokenController(
+    request: FastifyRequest,
+    reply: FastifyReply
+) {
+    const redisClient = request.server.redis;
+    console.log('[Refresh Token Controller] Received refresh token request');
+    const authService = new AuthService(request.server);
+    const incomingCookies = JwtUtils.extractCookiesFromRequest(request);
+    // const incomingTempToken = JwtUtils.extractTokenFromCookies(incomingCookies, 'temp_token');
+    // if (incomingTempToken) {
+    //     const user = JwtUtils.extractUserFromTempToken(incomingTempToken);
+    //     if (user) {
+    //         console.error(`[Refresh Token Controller] Temp token belongs to user ID: ${user.userId}`);
+    //         //test for refreshing tokens using temp token when user connect with oauth and 2fa is enabled
+    //         return reply.send( { signinComplete: true,
+    //           message?: "Tokens refreshed successfully",
+    //           twoFactorRequired: true
+    //           methodsEnabled?:
+    //           accessToken?: string;
+    //           refreshToken?: string;
+    //           tempToken?: string;);
+    //     } else {
+    //         console.error('[Refresh Token Controller] Invalid temp token provided');
+    //     }
+    //     return reply.code(401).send({ message: 'Unauthorized ❌' }); 
+    // }
+    const incomingRefreshToken = JwtUtils.extractTokenFromCookies(incomingCookies, 'refresh_token');
+    const incomingUserId = JwtUtils.extractUserFromRefreshToken(incomingRefreshToken)?.userId;
+    if (!incomingRefreshToken || !incomingUserId) {
+        console.error('[Refresh Token Controller] No refresh token found in request cookies');
+        return reply.code(401).send({ message: 'Unauthorized ❌' });
+    }
+    try {
+        // check if refresh token is valid in redis cache
+        const userId = await redisClient.get(`refresh_token:${incomingRefreshToken}`);
+
+        // const cachedToken = await redisClient.get(`refresh_token:${JwtUtils.verifyRefreshToken(refresh_token)?.id}`);
+        
+        if (!userId) {
+            console.error('[Refresh Token Controller] Unauthorized: Refresh token not found or mismatch in cache');
+            return reply.code(401).send({ message: 'Unauthorized ❌' });
+        }else {
+            console.log('======================✅ [Refresh Token Controller] Refresh token validated from cache');
+        }
+        
+        // refresh the tokens
+        const tokenResponse = await authService.refreshTokens(incomingUserId);
+        if (!tokenResponse.refreshComplete) {
+            console.error('[Refresh Token Controller] Refresh token invalid or expired');
+            return reply.code(401).send(tokenResponse);
+        }
+        console.log('[Refresh Token Controller] Tokens refreshed successfully, setting new cookies');
+        // set new JWT cookies
+        JwtUtils.setRefreshTokenCookie(reply, tokenResponse.refreshToken!);
+        JwtUtils.setAccessTokenCookie(reply, tokenResponse.accessToken!);  
+        console.log('[Refresh Token Controller] New JWT cookies set successfully');
+        return reply.code(200).send({
+            message: tokenResponse.message,
+            refreshComplete: tokenResponse.refreshComplete,
+        });
+    } catch (error) {
+        console.error('[Refresh Token Controller] Error during token refresh:', error);
+        return reply.code(500).send({
+            message: 'Internal server error during token refresh',
+            refreshComplete: false,
+        });
+    }
+}
+// change password controller
+export async function changePasswordController(
+    request: FastifyRequest,
+    reply: FastifyReply
+) {
+    console.log('[Change Password Controller] Received change password request');
+    const authService = new AuthService(request.server);
+    const cookies = JwtUtils.extractCookiesFromRequest(request);
+    const access_token = JwtUtils.extractTokenFromCookies(cookies, 'access_token');
+    const user = JwtUtils.extractUserFromAccessToken(access_token);
+    if (!user) {
+        console.error('[Change Password Controller] Unauthorized: No valid user found in request');
+        return reply.code(401).send({ message: 'Unauthorized ❌' });
+    }
+    const { currentPassword, newPassword } = request.body as { currentPassword: string; newPassword: string };
+    if (!currentPassword || !newPassword) {
+        console.error('[Change Password Controller] Bad Request: Missing current or new password');
+        return reply.code(400).send({ message: 'Bad Request: Missing current or new password',
+            passwordChangeComplete: false
+         });
+    }
+    try {
+        const changeResult = await authService.changeUserPassword(user.userId, currentPassword, newPassword);
+        if (!changeResult.passwordChangeComplete) {
+            console.error('[Change Password Controller] Password change failed:', changeResult.message);
+            return reply.code(400).send(changeResult);
+        }
+        console.log('[Change Password Controller] Password changed successfully for user ID:', user.userId);
+        return reply.code(200).send(changeResult);
+    } catch (error) {
+        console.error('[Change Password Controller] Error during password change:', error);
+        return reply.code(500).send({
+            message: 'Internal server error during password change',
+            passwordChangeComplete: false,
+        });
+    }
+}
+
+import { uploadAvatar} from "../../utils/storage.utils";
+
+
+// upload avatar controller
+export async function uploadAvatarController(
+    request: FastifyRequest,
+    reply: FastifyReply
+) {
+    console.log('[Upload Avatar Controller] START');
+    const authService = new AuthService(request.server);
+    // extract user from access token
+    const cookies = JwtUtils.extractCookiesFromRequest(request);
+    const access_token = JwtUtils.extractTokenFromCookies(cookies, 'access_token');
+    const user = JwtUtils.extractUserFromAccessToken(access_token);
+
+    if (!user) {
+        return reply.code(401).send({ message: 'Unauthorized ❌' });
+    }
+
+    try {
+        const data = await request.body as any;
+        const file = data.avatar;
+        console.log('[Upload Avatar Controller] File received:', file);
+        console.log('[Upload Avatar Controller] File name:', file.filename);
+        if (!file) {
+            return reply.code(400).send({ message: 'No avatar file provided', uploadComplete: false });
+        }
+        // new unique file name to avoid conflicts
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+        const fileExtension = path.extname(file.filename);
+        const newFileName = `avatar-${user.userId}-${uniqueSuffix}${fileExtension}`;
+        console.log('[Upload Avatar Controller] New file name:', newFileName);
+        // read file buffer
+        const buffer = await file.toBuffer();
+        console.log('[Upload Avatar Controller] File buffer size:', buffer.length);
+        // upload to GCP Storage
+        /****************************************************** */
+        const filePath = await uploadAvatar(buffer, newFileName, file.mimetype);
+        // const signedUrl = await generateSignedUrl(newFileName, 24 * 3600); // URL valide 24h
+        //****************************************************** */
+        console.log('[Upload Avatar Controller] File saved successfully:', filePath);
+        console.log('[Upload Avatar Controller] basename:', path.basename(filePath));
+        // console.log('[Upload Avatar Controller] signedUrl:', signedUrl);
+        const avatarUrl = filePath; // use direct GCP URL
+        console.log('[Upload Avatar Controller] avatarUrl:', avatarUrl);
+        
+        // update user url avatar in database
+        const result = await authService.uploadUserAvatar(user.userId, avatarUrl);
+        return reply.code(200).send(result);
+
+    } catch (error) {
+        console.error("[Upload Avatar Controller] ERROR:", error);
+
+        return reply.code(500).send({
+            message: "Internal server error during avatar upload",
+            uploadComplete: false,
+        });
+    }
+}
+
 
 /* ************************************************************************** */

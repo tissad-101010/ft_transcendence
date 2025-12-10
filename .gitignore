@@ -16,3 +16,7 @@
 *.pid.lock
 *data
 *secrets
+*generated
+*.env.local
+*.glb
+*.hdr

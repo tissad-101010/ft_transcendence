@@ -6,8 +6,6 @@ start : local
 build :
 	docker compose -f $(COMPOSE) build
 
-
-
 down : 
 	docker compose -f $(COMPOSE) down -v
 
@@ -37,13 +35,26 @@ local:
 	mkdir -p ./srcs/backend/postgresql/data
 	mkdir -p ./srcs/backend/services/service-users/data
 	mkdir -p ./srcs/backend/services/service-game/data
+	mkdir -p ./srcs/backend/services/service-friends/data
 	cp ./srcs/.env ~/.env.local
+<<<<<<< HEAD
 
 npm_cache_clean:
 	npm cache clean --force
 	rm -rf node_modules
 	rm -f package-lock.json
 
+=======
+	cp ~/sgoinfre/local/env.hdr ./srcs/frontend/public/env.hdr
+	cp ~/sgoinfre/local/strucLocker.glb srcs/frontend/public/lockerRoom/strucLocker.glb
+	cp ~/sgoinfre/local/strucPool.glb srcs/frontend/public/pool/strucPool.glb
+	cp ~/sgoinfre/local/strucField.glb srcs/frontend/public/field/strucField.glb
+	
+npm_cache_clean:
+	npm cache clean --force
+friends:
+	docker compose -f srcs/docker-compose.yml up service-friends --build
+>>>>>>> main
 postgresql:
 	docker compose -f srcs/docker-compose.yml up postgreSQL --build
 chat:

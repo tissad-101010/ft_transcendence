@@ -3,24 +3,45 @@
 /*                                                        :::      ::::::::   */
 /*   api.ts                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
+/*   By: glions <glions@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/23 15:58:35 by tissad            #+#    #+#             */
-/*   Updated: 2025/10/10 17:51:46 by tissad           ###   ########.fr       */
+/*   Updated: 2025/12/03 10:52:06 by glions           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-// Friend service
-
 import Fastify from 'fastify';
 import cors from '@fastify/cors';
+import fastifyCookie from '@fastify/cookie';
 
+
+
+// import routes
+import { friendsRoutes } from './routes/friends.routes';
+
+// import plugins
+import redisPlugin from './plugins/redis.plugin';
+import { prismaPlugin } from './plugins/prisma.plugin';
 
 
 /* ************************************************************************** */
 
-// Import the Fastify framework
+// register the Fastify framework
 const app = Fastify({ logger: true });
+
+// Register cookie plugin
+app.register(fastifyCookie, {
+  secret: process.env.COOKIE_SECRET || 'supersecret', // optionnel (pour signer les cookies)
+});
+
+
+// Register plugins (database, redis, etc.)
+// app.register(dbPlugin);
+app.register(redisPlugin);
+app.register(prismaPlugin);
+
+// Register routes
+app.register(friendsRoutes);
 
 
 
@@ -30,8 +51,9 @@ const start = async () => {
     // Register CORS plugin to allow cross-origin requests  
     // need more testing/!\
     await app.register(cors, {
-      origin: 'https://localhost:8443', // Allow specific origins
-      methods: ['GET', 'POST'], // Allow specific methods
+      // reel origin is 'https://localhost:8443'
+      origin: ['http://localhost:3000', 'https://localhost:8443'],
+      methods: ['GET', 'POST', 'PATCH', 'DELETE'], // Allow specific methods
       credentials: true, // Allow credentials
     });
 
@@ -43,7 +65,8 @@ const start = async () => {
     });
     
     await app.listen({ port: 4003, host: '0.0.0.0' });
-    console.log('🚀Friend  server is running at http://localhost:4003');
+    console.log('🚀 Server is running');
+
   } catch (err) {
     app.log.error(err);
     process.exit(1);

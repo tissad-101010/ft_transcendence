@@ -12,11 +12,12 @@ PBRMaterial,
 Material
 } from '@babylonjs/core';
 
-import {ZoneName} from '../config.ts';
+import { ZoneName } from '../config.ts';
 import {getCurrentGroup, setCurrentGroup, getTotalGroups, displayFriendsWithEmpty} from '../utils.ts';
 import { FriendUI } from './FriendUI.ts';
 import { MyProfilUI } from './MyProfilUI.ts';
-import { Friend } from '../Friend.ts';
+import { Friend } from '../friends/Friend.ts';
+import { navigateToZone } from '../CameraHistory.ts';
 
 
 export class StandsInteraction implements SpecificInteraction {
@@ -81,17 +82,20 @@ export class StandsInteraction implements SpecificInteraction {
             this.handleButtonField(buttonMeshes[1], current < total - 1);
     }
 
+    private handleMyProfile(): void {
+    this.sceneInteractor.disableInteractions();
+    navigateToZone(this.sceneManager, ZoneName.ARBITRATOR, () => {
+        this.clicArbitrator = true;
+        this.sceneInteractor.enableInteractions();
 
-    private handleMyProfile() : void 
-    {
-        this.sceneInteractor.disableInteractions();
-        this.sceneManager.moveCameraTo(ZoneName.ARBITRATOR, () => {
-            this.clicArbitrator = true;
-            this.sceneInteractor.enableInteractions();
-            if (this.myProfilUI === null)
-                this.myProfilUI = new MyProfilUI(this.sceneManager, this.sceneManager.getUserX);
-        });
-    }
+        if (this.myProfilUI === null)
+            this.myProfilUI = new MyProfilUI(
+                this.sceneManager,
+                this.sceneManager.getUserX
+            );
+    });
+}
+
 
     private handleFriendsProfile(
         mesh: AbstractMesh,
@@ -100,7 +104,7 @@ export class StandsInteraction implements SpecificInteraction {
     {
         this.sceneInteractor.getHighlightLayer().removeAllMeshes();
         this.sceneInteractor.disableInteractions();
-        this.sceneManager.moveCameraTo(ZoneName.SEAT, () => {
+        navigateToZone(this.sceneManager, ZoneName.SEAT, () => {
             this.clicSeat = true;
             displayFriendsWithEmpty(this.scene, this.sceneManager.getUserX.getFriends, this.sceneManager.getChair);
             this.updateButtons(buttonMeshes);
@@ -109,14 +113,13 @@ export class StandsInteraction implements SpecificInteraction {
             {
                 this.friendUI = new FriendUI(   
                                     this.sceneManager,
-                                    null,
                                     this.updateChair.bind(this),
                                     buttonMeshes,
                                     this
                                 );
             }
             else
-                this.friendUI.update(null);
+                this.friendUI.leaveFriend();
         });
     }
 
@@ -169,6 +172,7 @@ export class StandsInteraction implements SpecificInteraction {
         mesh: AbstractMesh
     ): void 
     {
+        console.log(mesh.name);
         if (!this.sceneInteractor.areInteractionsEnabled()) return;
         const pickedMesh = mesh;
         if (!pickedMesh)return;
@@ -183,16 +187,17 @@ export class StandsInteraction implements SpecificInteraction {
             {
                 const nb = parseInt(pickedMesh.name[pickedMesh.name.length - 1]);
                 const index = (getCurrentGroup(ZoneName.SEAT) * 4) + nb;
+                console.log("valeur de index ->", index);
+                if (index >= this.sceneManager.getUserX.getFriends.length || (!index && index !== 0))
+                    return ;
                 if (!this.friendUI)
                     this.friendUI = new FriendUI(   
-                                                    this.sceneManager,
-                                                    this.sceneManager.getUserX.getFriends[index],
-                                                    this.updateChair.bind(this),
-                                                    buttonMeshes,
-                                                    this
-                                                );
-                else
-                    this.friendUI.update(this.sceneManager.getUserX.getFriends[index]);
+                        this.sceneManager,
+                        this.updateChair.bind(this),
+                        buttonMeshes,
+                        this
+                    );
+                this.friendUI.displayFriend(this.sceneManager.getUserX.getFriends[index]);
             } else if (arbitratorMeshes.includes(pickedMesh)) {
                 this.handleMyProfile();
             } else if (spectatorMeshes.includes(pickedMesh)) {
@@ -209,19 +214,19 @@ export class StandsInteraction implements SpecificInteraction {
                 }
                 else if (pickedMesh === buttonMeshes[2] || (pickedMesh === buttonMeshes[3] && this.clicArbitrator)){
                     this.sceneInteractor.disableInteractions();
-                    if (this.friendUI)
-                    {
-                        this.friendUI.switchOff();
-                        this.friendUI = null;
-                        this.resetMaterialForScoreboard();
-                    }
-                    this.resetState(buttonMeshes);
-                    this.sceneManager.moveCameraTo(ZoneName.STANDS, () => {
-                            if (pickedMesh === buttonMeshes[2]){
-                                this.clicSeat = false;
-                                this.test = false;
+                    navigateToZone(this.sceneManager, ZoneName.STANDS, () => {
+                        if (pickedMesh === buttonMeshes[2]){
+                            this.clicSeat = false;
+                            this.test = false;
+                                if (this.friendUI)
+                                {
+                                    this.friendUI.switchOff();
+                                    this.friendUI = null;
+                                    this.resetMaterialForScoreboard();
+                                }
+                                this.resetState(buttonMeshes);
                             }
-                            else if (pickedMesh === buttonMeshes[3])
+                            if (pickedMesh === buttonMeshes[3])
                             {
                                 if (this.myProfilUI)
                                 {
@@ -232,7 +237,7 @@ export class StandsInteraction implements SpecificInteraction {
                                 this.clicArbitrator = false;
                             }
                             this.sceneInteractor.enableInteractions();
-                        });
+                        }, this.sceneInteractor);
                 }
             }
         } else {

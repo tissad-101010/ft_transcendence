@@ -3,32 +3,40 @@
 /*                                                        :::      ::::::::   */
 /*   api.ts                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: glions <glions@student.42.fr>              +#+  +:+       +#+        */
+/*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/23 15:58:35 by tissad            #+#    #+#             */
-/*   Updated: 2025/11/14 15:56:16 by glions           ###   ########.fr       */
+/*   Updated: 2025/12/01 11:51:23 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 import Fastify from 'fastify';
+import fastifyMultipart from '@fastify/multipart';
 import cors from '@fastify/cors';
 import fastifyCookie from '@fastify/cookie';
-
-
-
+import path from "path";
+import fastifyStatic from "@fastify/static";
 // import routes
-import { authRoutes,
-          oauthRoutes,
+import {  authRoutes,
           userRoutes
- } from './modules/auth/auth.routes';
-// import { TwoFactorAuth } from './routes/TwoFactorAuth.routes';
+        } from './modules/auth/auth.routes';
+import { oauthRoutes } from './modules/oauth/routes/oauth.routes';
+import { signoutRoutes } from './modules/signout/signout.routes';
+import { TwoFactorAuth } from './modules/twoFactor/twoFactor.routes';
+// internal services routes responsible for internal communications between services
 // import { githubRoutes } from './routes/OauthGithub.routes';
 // // import { googleRoutes } from './routes/OauthGoogle.routes';
 // import { oauth42Routes } from './routes/Oauth42.routes';
 
+// internal services routes 
+import { internalVerifyTokenRoutes } from "./internal-services-routes/internal-routes/internalVerifyToken.routes";
+import { internalSelectUserRoutes } from './internal-services-routes/internal-routes/internalSelectUser.routes';
+ 
+
 // import plugins
 import redisPlugin from './plugins/redis.plugin';
 import { prismaPlugin } from './plugins/prisma.plugin';
+import { infoFriendRoute } from './modules/users/users.routes';
 
 
 
@@ -43,26 +51,45 @@ app.register(fastifyCookie, {
   secret: process.env.COOKIE_SECRET || 'supersecret', // optionnel (pour signer les cookies)
 });
 
-
 // Register plugins (database, redis, etc.)
 // app.register(dbPlugin);
 app.register(redisPlugin);
 app.register(prismaPlugin);
 
+app.register(fastifyMultipart, {
+  limits: {
+    fileSize: 10 * 1024 * 1024, // 10 MB
+    files: 1, // Maximum number of files
+  },
+  attachFieldsToBody: true,
+});
+
+// Serve static files from the "uploads" directory
+app.register(fastifyStatic, {
+  root: path.join(process.cwd(), 'uploads'),
+  prefix: '/uploads/',
+});
 
 
 // Register routes
 app.register(authRoutes, { prefix: '/user/auth' });
 app.register(oauthRoutes, { prefix: '/user/oauth' });
 app.register(userRoutes, { prefix: '/user' });
+app.register(signoutRoutes, { prefix: '/user/auth' });
+app.register(TwoFactorAuth, { prefix: '/user/2fa' });
+// app.register(internalServicesRoutes, { prefix: '/internal' }); warnning mergre conflict
 
-// app.register(TwoFactorAuth, { prefix: '/two-factor' });
+// Register internals routes
+app.register(internalVerifyTokenRoutes, { prefix: '/internal' });
+app.register(internalSelectUserRoutes, { prefix: '/internalUser'});
+
+app.register(infoFriendRoute);
+
 // app.register(githubRoutes, { prefix: '/auth' });
 // app.register(googleRoutes, { prefix: '/auth' });
 // app.register(oauth42Routes, { prefix: '/auth' });
 
-
-
+// Serve static files from the "uploads" directory
 
 
 // Start the Fastify server
@@ -72,12 +99,12 @@ const start = async () => {
     // need more testing/!\
     await app.register(cors, {
       // reel origin is 'https://localhost:8443'
-      origin: ['http://localhost:3000', 'https://localhost:8443'],
+      origin: ['http://localhost:3000', 'https://localhost:8443'], // Allow specific origins
       methods: ['GET', 'POST'], // Allow specific methods
       credentials: true, // Allow credentials
     });
 
-    app.addHook('onRequest', async (req, reply) => {
+    app.addHook('onRequest', async (req) => {
       console.log('Origin reçue :', req.headers.origin);
       console.log('Méthode reçue :', req.method);
       console.log('URL de la requête :', req.url);

@@ -20,6 +20,7 @@ import { UIData } from './utils.ts';
 import { menuCreate } from './scoreboardUI/menuCreate.ts';
 import { menuTournament } from './scoreboardUI/menuTournament.ts';
 import { myClearControls } from '../utils.ts';
+import { navigateToZone } from '../CameraHistory.ts';
 
 interface Interval
 {
@@ -41,7 +42,7 @@ export class ScoreboardHandler {
     private page: Rectangle | null;
     private interval: Interval;
     private originalMaterial: Material | null = null;
-    private scoreboardMesh : AbstractMesh;
+    private scoreboardMesh : AbstractMesh | null = null;
     private playMatch: boolean = false;
 
     /**************************************************
@@ -95,6 +96,7 @@ export class ScoreboardHandler {
      **************************************************/
     public selectMenu(mesh: AbstractMesh)
     {
+        console.log("---------------> entree dans selectne");
         this.scoreboardMesh = mesh;
         if (!this.originalMaterial) {
             this.originalMaterial = mesh.material;
@@ -165,10 +167,9 @@ export class ScoreboardHandler {
 
     public handle(pickedMesh : AbstractMesh, scoreMeshes: AbstractMesh[]) : void{
         if (!pickedMesh) return;
-        console.log("Etat de clicScoreboard", this.clicScoreboard);
         if (pickedMesh === scoreMeshes[0] && this.clicScoreboard === false){
             this.sceneInteractor.disableInteractions();
-            this.sceneManager.moveCameraTo(ZoneName.SCOREBOARD, () => {
+            navigateToZone(this.sceneManager, ZoneName.SCOREBOARD, () => {
                 this.sceneInteractor.getHighlightLayer().removeMesh(pickedMesh);
                 if (!this.playMatch)
                     this.selectMenu(scoreMeshes[0]);
@@ -184,7 +185,7 @@ export class ScoreboardHandler {
                     clearInterval(this.interval.id);
                 this.leaveMenu();
                 this.sceneInteractor.disableInteractions();
-                this.sceneManager.moveCameraTo(ZoneName.LOCKER_ROOM, () => {
+                navigateToZone(this.sceneManager, ZoneName.LOCKER_ROOM, () => {
                     this.sceneManager.setSpecificMesh(false);
                     this.sceneInteractor.getHighlightLayer().removeMesh(scoreMeshes[1]); //lolo
                     this.clicScoreboard = false;

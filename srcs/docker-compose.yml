@@ -11,6 +11,7 @@ services:
     container_name: proxy
     depends_on:
       - service-users
+      - service-friends
     environment:
       - SSL_CERT=/etc/nginx/ssl/server.crt
       - SSL_CERT_KEY=/etc/nginx/ssl/server.key
@@ -122,49 +123,51 @@ services:
       - REFRESH_TOKEN_SECRET=${REFRESH_TOKEN_SECRET}
       - ACCESS_TOKEN_EXPIRATION=${ACCESS_TOKEN_EXPIRATION}
       - REFRESH_TOKEN_EXPIRATION=${REFRESH_TOKEN_EXPIRATION}
+      - TEMP_TOKEN_EXPIRATION=${TEMP_TOKEN_EXPIRATION}
+      - TEMP_TOKEN_SECRET=${TEMP_TOKEN_SECRET}
+      - INTERNAL_API_KEY=${INTERNAL_API_KEY}
+      - GCP_STORAGE_KEY_PATH=${GCP_STORAGE_KEY_PATH}
     restart: unless-stopped
   #********************************************************************************#
 
-  
-  
   
   #********************************************************************************#
   #                            GAME SERVICE                                        #
   #********************************************************************************#
   # Game service for managing game sessions, matchmaking, and real-time interactions
 
-  service-game:
-    image: service-game
-    build:
-      context: ./backend/services/service-game
-      dockerfile: Dockerfile
-    container_name: service-game
-    volumes:
-      - ./backend/services/service-game/app:/app
-      - /app/node_modules
-      - DataUserService:/data
-    networks:
-      - global-net
-      - security-net
-    depends_on:
-      # - hashicorp_vault
-      - postgreSQL
-      - redis
-    ports:
-      - "4001:4001"
-    environment:
-      - NODE_ENV=production
-      - VAULT_ADDR=http://hashicorp_vault:8200
-      - GLOBAL_DB_ADMIN_PASSWORD=${GLOBAL_DB_ADMIN_PASSWORD}
-      - DB_HOST=${GAME_SERVICE_DB_HOST}
-      - DB_NAME=${GAME_SERVICE_DB_NAME}
-      - DB_USER=${GAME_SERVICE_DB_USER}
-      - DB_PASSWORD=${GAME_SERVICE_DB_PASSWORD}
-      - DB_ROOT_PASSWORD=${GAME_SERVICE_DB_ROOT_PASSWORD}
-      - DB_PORT=${GAME_SERVICE_DB_PORT}
-      - DB_SAMPLE_NAME=${GAME_SERVICE_DB_SAMPLE_NAME}
-      - GAME_SERVICE_DATABASE_URL=${GAME_SERVICE_DATABASE_URL}
-    restart: unless-stopped
+  # service-game:
+  #   image: service-game
+  #   build:
+  #     context: ./backend/services/service-game
+  #     dockerfile: Dockerfile
+  #   container_name: service-game
+  #   volumes:
+  #     - ./backend/services/service-game/app:/app
+  #     - /app/node_modules
+  #     - DataUserService:/data
+  #   networks:
+  #     - global-net
+  #     - security-net
+  #   depends_on:
+  #     # - hashicorp_vault
+  #     - postgreSQL
+  #     - redis
+  #   ports:
+  #     - "4001:4001"
+  #   environment:
+  #     - NODE_ENV=production
+  #     - VAULT_ADDR=http://hashicorp_vault:8200
+  #     - GLOBAL_DB_ADMIN_PASSWORD=${GLOBAL_DB_ADMIN_PASSWORD}
+  #     - DB_HOST=${GAME_SERVICE_DB_HOST}
+  #     - DB_NAME=${GAME_SERVICE_DB_NAME}
+  #     - DB_USER=${GAME_SERVICE_DB_USER}
+  #     - DB_PASSWORD=${GAME_SERVICE_DB_PASSWORD}
+  #     - DB_ROOT_PASSWORD=${GAME_SERVICE_DB_ROOT_PASSWORD}
+  #     - DB_PORT=${GAME_SERVICE_DB_PORT}
+  #     - DB_SAMPLE_NAME=${GAME_SERVICE_DB_SAMPLE_NAME}
+  #     - GAME_SERVICE_DATABASE_URL=${GAME_SERVICE_DATABASE_URL}
+  #   restart: unless-stopped
   
 
   #********************************************************************************#
@@ -226,18 +229,25 @@ services:
       - global-net
       - security-net
     depends_on:
-      # - hashicorp_vault
+      - redis
       - postgreSQL
     ports:
       - "4003:4003"
     environment:
       - NODE_ENV=production
       - VAULT_ADDR=http://hashicorp_vault:8200
+      - GLOBAL_DB_ADMIN_PASSWORD=${GLOBAL_DB_ADMIN_PASSWORD}
+      - DB_HOST=${FRIENDS_SERVICE_DB_HOST}
+      - DB_NAME=${FRIENDS_SERVICE_DB_NAME}
+      - DB_USER=${FRIENDS_SERVICE_DB_USER}
+      - DB_PASSWORD=${FRIENDS_SERVICE_DB_PASSWORD}
+      - DB_ROOT_PASSWORD=${FRIENDS_SERVICE_DB_ROOT_PASSWORD}
+      - DB_PORT=${FRIENDS_SERVICE_DB_PORT}
+      - DB_SAMPLE_NAME=${FRIENDS_SERVICE_DB_SAMPLE_NAME}
+      - DATABASE_URL=${FRIENDS_SERVICE_DATABASE_URL}
+      - USER_SERVICE_URL=http://service-users:4000
+      - INTERNAL_API_KEY=${INTERNAL_API_KEY}
     restart: unless-stopped
-
-
-
-
 
   #********************************************************************************#
   #                            POSTGRES SERVICE                                    #
@@ -281,6 +291,13 @@ services:
       - CHAT_SERVICE_DB_ROOT_PASSWORD=${CHAT_SERVICE_DB_ROOT_PASSWORD}
       - CHAT_SERVICE_DB_PORT=${CHAT_SERVICE_DB_PORT}
       - CHAT_SERVICE_DB_SAMPLE_NAME=${CHAT_SERVICE_DB_SAMPLE_NAME}
+      - FRIENDS_SERVICE_DB_HOST=${FRIENDS_SERVICE_DB_HOST}
+      - FRIENDS_SERVICE_DB_NAME=${FRIENDS_SERVICE_DB_NAME}
+      - FRIENDS_SERVICE_DB_USER=${FRIENDS_SERVICE_DB_USER}
+      - FRIENDS_SERVICE_DB_PASSWORD=${FRIENDS_SERVICE_DB_PASSWORD}
+      - FRIENDS_SERVICE_DB_ROOT_PASSWORD=${FRIENDS_SERVICE_DB_ROOT_PASSWORD}
+      - FRIENDS_SERVICE_DB_PORT=${FRIENDS_SERVICE_DB_PORT}
+      - FRIENDS_SERVICE_DB_SAMPLE_NAME=${FRIENDS_SERVICE_DB_SAMPLE_NAME}
     ports:
       - "5432:5432"
   #********************************************************************************#      

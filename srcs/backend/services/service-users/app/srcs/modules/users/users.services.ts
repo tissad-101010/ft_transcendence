@@ -3,14 +3,31 @@
 /*                                                        :::      ::::::::   */
 /*   users.services.ts                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: glions <glions@student.42.fr>              +#+  +:+       +#+        */
+/*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/27 11:51:29 by tissad            #+#    #+#             */
-/*   Updated: 2025/11/14 15:57:18 by glions           ###   ########.fr       */
+/*   Updated: 2025/12/01 11:54:26 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+
 import { OAuthProvider, OAuthProviderType } from "../../types/user.types";
+import { DataBaseConnectionError, UserNotFoundError } from "../../errors/users.error";
+
+
+async function safePrisma<T>(fn: () => Promise<T>) : Promise<T>
+{
+  try
+  {
+    return await fn();
+  } catch (err: any)
+  {
+    if (err.code === "P1001" || err.code === "P1002")
+      throw new DataBaseConnectionError();
+    throw err;
+  }
+}
+
 /***********************************/
 /*       Users Service Class       */
 /***********************************/
@@ -21,17 +38,33 @@ export class UsersService {
     constructor(prismaClient: any) {
         this.prismaClient = prismaClient;
     }
-    
+
     async createUser(data: any) {
         return this.prismaClient.user.create({
             data,
         });
     }
         
-    async getUserById(userId: string) {
-        return this.prismaClient.user.findUnique({
-            where: { id: userId },
+    async getUserById(id: string) {
+      try
+      {
+        // CALL BDD
+        const user = await this.prismaClient.user.findUnique({
+          where: { id },
         });
+        // SUCCESS
+        return user;
+      } catch (error: any)
+      {
+        // DATABASE ERROR
+        if (error.code === "P1001" || error.code === "P1002")
+          throw new DataBaseConnectionError();
+        // USER NOT FOUND (NOT NECESSARY)
+        if (error instanceof UserNotFoundError)
+          throw error;
+        // OTHER ERROR
+        throw new Error("Unknown database error");
+      }
     }
     
     async getUserByEmail(email: string) { 
@@ -41,10 +74,25 @@ export class UsersService {
     }
 
     async getUserByUsername(username: string) {
-      console.log("====================>username ", username);
-        return this.prismaClient.user.findUnique({
-            where: { username },
+      try
+      {
+        // CALL BDD
+        const user = await this.prismaClient.user.findUnique({
+          where: { username },
         });
+        // SUCCESS
+        return user;
+      } catch (error: any)
+      {
+        // DATABASE ERROR
+        if (error.code === "P1001" || error.code === "P1002")
+          throw new DataBaseConnectionError();
+        // USER NOT FOUND (NOT NECESSARY)
+        if (error instanceof UserNotFoundError)
+          throw error;
+        // OTHER ERROR
+        throw new Error("Unknown database error");
+      }
     }
     
     // find user by OAuth provider and provider ID
@@ -136,7 +184,7 @@ export class UsersService {
     /*                       2FA Methods                      */
     /**********************************************************/
     // add 2FA method to user
-    async addUserTwoFactorMethod(userId: number, method: string) {
+    async addUserTwoFactorMethod(userId: string, method: string) {
       return this.prismaClient.twoFactorMethod.create({
         data: {
           type: method,
@@ -150,7 +198,7 @@ export class UsersService {
 
     
     // Get enabled 2FA methods for a user
-    async getUserTwoFactorMethods(userId: number): Promise<any[]> {
+    async getUserTwoFactorMethods(userId: string): Promise<any[]> {
       const userWith2FA = await this.prismaClient.user.findUnique({
         where: { id: userId },
         include: {
@@ -158,5 +206,55 @@ export class UsersService {
         },
       });
       return userWith2FA?.twoFactorMethods || [];
+    }
+    // remove 2FA method from user
+    async removeUserTwoFactorMethod(userId: string, method: string) {
+      return this.prismaClient.twoFactorMethod.deleteMany({
+        where: {
+          userId,
+          type: method,
+        },
+      });
+    }
+
+  /**********************************************************/
+  /*               update user password method              */
+  /**********************************************************/
+  async updateUserPassword(userId: string, newHashedPassword: string) {
+    return this.prismaClient.user.update({
+      where: { id: userId },
+      data: { passwordHash: newHashedPassword },
+    });
+  }
+  async uploadUserAvatar(userId: string, avatarUrl:string): Promise<boolean> {
+    try {
+      await this.prismaClient.user.update({
+        where: { id: userId },
+        data: { avatarUrl },
+      });
+      return true;
+    } catch (error) {
+      console.error("❌ [users.services.ts] Error updating avatar for user ID:", userId, error);
+      return false;
+    }
+  }
+
+    /**********************************************************/
+    /*                       INFO FRIEND                      */
+    /**********************************************************/
+    
+    async getInfoFriendService(
+      username: string
+    ): Promise<{lastLogin: Date, avatarUrl: string}>
+    {
+      return (await safePrisma(() =>
+        this.prismaClient.user.findUnique({
+          where: { username: username },
+          select: {
+            lastLogin: true,
+            avatarUrl: true
+          }
+        })
+      ));
     }
 }

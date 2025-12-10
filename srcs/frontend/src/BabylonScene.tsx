@@ -1,10 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
 import { SceneManager } from './scene/SceneManager';
 import { useAuth } from "./auth/context";
+import {handlePopState} from './CameraHistory';
 
 const BabylonScene = () => {
-  const { user, isLoading } = useAuth();
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const { user, isAuthenticated, pending2FA,  } = useAuth();
+  const canvasRef = useRef(null);
   const managerRef = useRef<SceneManager | null>(null);
   const [managerReady, setManagerReady] = useState(false);
 
@@ -37,12 +38,28 @@ const BabylonScene = () => {
 
   // Propagation de l'utilisateur courant vers UserX quand prêt ET session chargée
   useEffect(() => {
-    if (!managerReady || !managerRef.current || isLoading) {
-      return;
+    if (isAuthenticated && user && managerRef.current) {
+      managerRef.current.setUser = user;
+      console.log("User updated in SceneManager:", user);
+      console.log("2FA pending status:", pending2FA);
+      console.log("Is authenticated:", isAuthenticated);
+      console.log("Current user in SceneManager:", managerRef.current.getUserX);
     }
     console.log("BabylonScene: propagation de l'utilisateur vers UserX:", user);
     managerRef.current.setUser = user;
   }, [user, managerReady, isLoading]);
+
+// Gestion back/forward navigateur
+useEffect(() => {
+  const handlePop = (event: PopStateEvent) => {
+    handlePopState(managerRef.current!, event.state);
+  };
+
+  window.addEventListener("popstate", handlePop);
+  return () => window.removeEventListener("popstate", handlePop);
+}, []);
+
+
 
   return (
     <canvas
@@ -53,3 +70,4 @@ const BabylonScene = () => {
 };
 
 export default BabylonScene;
+

@@ -27,8 +27,8 @@ export * from "./enums"
  * @example
  * ```
  * const prisma = new PrismaClient()
- * // Fetch zero or more Chats
- * const chats = await prisma.chat.findMany()
+ * // Fetch zero or more Users
+ * const users = await prisma.user.findMany()
  * ```
  * 
  * Read more in our [docs](https://www.prisma.io/docs/reference/tools-and-interfaces/prisma-client).
@@ -43,7 +43,27 @@ path.join(__dirname, "libquery_engine-linux-arm64-openssl-3.0.x.so.node")
 path.join(process.cwd(), "srcs/prisma/prisma/generated/client/libquery_engine-linux-arm64-openssl-3.0.x.so.node")
 
 /**
- * Model Chat
+ * Model User
  * 
  */
-export type Chat = Prisma.ChatModel
+export type User = Prisma.UserModel
+/**
+ * Model Conversation
+ * 
+ */
+export type Conversation = Prisma.ConversationModel
+/**
+ * Model ConversationParticipant
+ * 
+ */
+export type ConversationParticipant = Prisma.ConversationParticipantModel
+/**
+ * Model Message
+ * 
+ */
+export type Message = Prisma.MessageModel
+/**
+ * Model Block
+ * 
+ */
+export type Block = Prisma.BlockModel

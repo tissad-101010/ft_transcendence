@@ -11,17 +11,19 @@ import {
   FreeCameraMouseInput,
   Texture,
   ParticleSystem,
+  Mesh
 } from '@babylonjs/core';
 import "@babylonjs/inspector";
-import { SceneInteractor } from './SceneInteractor.ts';
 import { AdvancedDynamicTexture, TextBlock } from "@babylonjs/gui";
+
+import { SceneInteractor } from './SceneInteractor.ts';
 import { CAMERA_CONFIGS, ZoneName, meshNamesByZone } from "../config.ts";
+
 import { 
 normalizeRotation,
 displayPlayers, 
 groupConfigs,
-Player,
-Friend
+Player
  } from '../utils.ts';
 
 import { UserX } from '../UserX.ts';
@@ -46,6 +48,17 @@ const poolMeshNames = [
     ...meshNamesByZone.pool.lounge,
     ...meshNamesByZone.pool.buttonsPool,
 ];
+
+//NE PAS TOUCHER!
+const meshNamesZones = ["stands", "furniture", "chair03"];
+
+interface CameraState {
+  position: Vector3;
+  rotation: Vector3;
+  zone?: ZoneName;
+}
+
+
 export class SceneManager {
     /**************************************************
      *           PRIVATE ATTRIBUTES                   *
@@ -60,54 +73,12 @@ export class SceneManager {
     private loadedMeshes: {[zone: string]: AbstractMesh[]} = {};
     private meshMap: Record<string, AbstractMesh> = {};
     private _specificMesh : boolean = false;
-
-private players: Player[] = [
-    { id: 1, login: "RetroKid" },
-    { id: 2, login: "SpaceAce" },
-    { id: 3, login: "PixelQueen" },
-    { id: 4, login: "NeoPong" },
-    { id: 5, login: "LoLMaster" },
-    { id: 6, login: "FastFingers" },
-    { id: 0, login: "Nostag" },
-    { id: 8, login: "Tissad" },
-    { id: 9, login: "CyberSam" },
-    { id: 10, login: "GlitchGuru" },
-    { id: 11, login: "PixelKnight" },
-    { id: 12, login: "MegaMage" },
-    { id: 13, login: "RocketRex" },
-    { id: 14, login: "ShadowFox" },
-    { id: 15, login: "TurboTiger" },
-    { id: 16, login: "QuantumQuill" },
-    { id: 17, login: "BlazeWolf" },
-    { id: 18, login: "CrystalCat" },
-    { id: 19, login: "NovaNinja" },
-    { id: 20, login: "PixelPilot" },
-    { id: 21, login: "LunarLion" },
-    { id: 22, login: "StarStriker" },
-    { id: 23, login: "FrostFalcon" },
-    { id: 24, login: "VortexViper" },
-    { id: 25, login: "EchoEagle" },
-    { id: 26, login: "MysticMoth" },
-];
-
-    private friends: Friend[] = [
-    { login: "Bestie1" },
-    { login: "Bestie2" },
-    { login: "Bestie3" },
-    { login: "Bestie4" },
-    { login: "Bestie5" },
-    { login: "Bestie6" },
-    { login: "Bestie7" },
-    { login: "Bestie8" },
-
-
-    ];
     private _tshirtMeshes: AbstractMesh[] = [];
     private _chairMeshes: AbstractMesh[] = [];
     private _loungeMeshes: AbstractMesh[] = [];
     // private lightInteractor : LightInteractor;
     private lightInteractor! : LightInteractor;
-
+    private cameraHistory: CameraState[] = [];
     private userX: UserX;
 
     /**************************************************
@@ -147,13 +118,14 @@ private players: Player[] = [
     /**************************************************
      *               PRIVATE METHODS                  *
      **************************************************/
+
     private onResize = () => {
         this.engine.resize();
     }
 
     private buildMeshMap(): void {
         this.meshMap = {};
-        this.scene.meshes.forEach(mesh => {
+        this.scene.meshes.forEach((mesh : Mesh) => {
             this.meshMap[mesh.name] = mesh as AbstractMesh;
         });
     }
@@ -162,12 +134,12 @@ private players: Player[] = [
     {
         this.scene.debugLayer.show();
         console.table(
-            this.scene.meshes.map(m => ({
+            this.scene.meshes.map((m : Mesh) => ({
                 name: m.name,
                 indices: m.getTotalIndices(),
                 vertices: m.getTotalVertices(),
                 triangles: m.getTotalIndices() / 3
-            })).sort((a, b) => b.indices - a.indices).slice(0, 10)); 
+            })).sort((a : Mesh, b : Mesh) => b.indices - a.indices).slice(0, 10)); 
         this.scene.debugLayer.showBoundingBoxes = true;
     }
 
@@ -299,6 +271,21 @@ private players: Player[] = [
         const mouseInput = new FreeCameraMouseInput();
         this.freeCamera.inputs.add(mouseInput);
     }
+private resetInteractions(): void {
+    // Si tu as un SceneInteractor
+    if (this.sceneInteractor) {
+        this.sceneInteractor.disableInteractions(); // désactive tout
+        this.sceneInteractor.enableInteractionScene();  // réactive pour la nouvelle caméra
+    }
+    
+    // Optionnel : réattacher la caméra au canvas
+    this.freeCamera.detachControl();
+    this.freeCamera.attachControl(this.canvas, true);
+    
+    // Si tu limites la rotation
+    if (this.limitCameraRotation) this.enableRotationOnly();
+}
+
 
     /**************************************************
      *                PUBLIC METHODS                  *
@@ -308,9 +295,6 @@ private players: Player[] = [
         onArrived?: () => void
     ) 
     {
-        //  if (zoneName === ZoneName.POOL || zoneName === ZoneName.SCREEN_TV ||
-        //     zoneName === ZoneName.SCOREBOARD || zoneName.includes(ZoneName.TSHIRT))
-        //     this.limitCameraRotation = false;
         const config = CAMERA_CONFIGS[zoneName];
         if (!config) return;
 
@@ -374,9 +358,10 @@ private players: Player[] = [
     }
 
     public async setupEnvironment(): Promise<void> {
-        //this.setupHDR();
+        // this.setupHDR();
         await this.setupMeshes(); // attendre les GLB
         this.advancedTexture = AdvancedDynamicTexture.CreateFullscreenUI("UI", true, this.scene);
+        // this.createCoordinateLabels();
     }
 
     public startRenderLoop(): void
@@ -417,16 +402,6 @@ private players: Player[] = [
         return this.freeCamera;
     }
 
-    public get getPlayers() : Player[] 
-    {
-        return this.players;
-    }
-
-    public get getFriends(): Friend[] 
-    {
-        return this.friends;
-    }
-
     public get getChair(): AbstractMesh[] 
     {
         return this._chairMeshes;
@@ -461,6 +436,7 @@ private players: Player[] = [
     {
         return (this.lightInteractor);
     }
+
     // /**************************************************
     //  *                    SETTERS                     *
     //  **************************************************/
@@ -498,5 +474,4 @@ private players: Player[] = [
     {
         this.userX.setUser = user;
     }
-
 }
