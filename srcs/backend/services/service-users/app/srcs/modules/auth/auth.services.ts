@@ -6,7 +6,7 @@
 /*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/27 11:44:27 by tissad            #+#    #+#             */
-/*   Updated: 2025/11/26 19:21:02 by tissad           ###   ########.fr       */
+/*   Updated: 2025/12/10 14:31:51 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -188,38 +188,7 @@ export class AuthService {
         return this.userService.getUserById(userId);
     }
 
-    async refreshTokens(userId: string): Promise<responseRefreshTokens> {
-        const user = await this.userService.getUserById(userId);
-        if (!user) {
-            return { accessToken: null,
-                    refreshToken: null,
-                    refreshComplete: false,
-                    message: 'User not found' 
-                };
-        }
-        // generate new tokens
-        const newAccessToken = JwtUtils.generateAccessToken({ id: user.id, email: user.email });    
-        const newRefreshToken = JwtUtils.generateRefreshToken({ id: user.id, email: user.email });
-        
-        // store refresh token in redis cache
-        await this.redisClient.set(
-            `refresh_token:${newRefreshToken}`,
-            user.id,
-            'EX',
-            60 * 60 * 24 * 7
-        );
-        await this.redisClient.set(
-            `access_token:${user.id}`,
-            newAccessToken,
-            'EX',
-            this.accessTimeout // 15 minutes expiration
-        );
-        return { accessToken: newAccessToken,
-                 refreshToken: newRefreshToken,
-                 refreshComplete: true,
-                 message: "refresh successful"
-        };
-    } 
+
     // change user password
     async changeUserPassword(userId: string, currentPassword: string, newPassword: string): Promise<{passwordChangeComplete: boolean, message: string}> {
         const user = await this.userService.getUserById(userId);

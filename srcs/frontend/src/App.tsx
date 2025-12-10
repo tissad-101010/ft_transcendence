@@ -2,7 +2,8 @@ import React from "react";
 import BabylonScene from "./BabylonScene.tsx";
 import AuthPage from "./auth/authPage.tsx";
 import { AuthProvider, useAuth } from "./auth/context.tsx";
-
+import { Routes, Route } from "react-router-dom";
+import OAuthCallback from "./OAuthCallback.tsx";
 function MainApp() {
   const { isAuthenticated } = useAuth();
 
@@ -43,8 +44,15 @@ function MainApp() {
 
 export default function App() {
   return (
-    <AuthProvider>
-      <MainApp />
-    </AuthProvider>
+
+    <Routes>
+
+      {/* Page principale : ton layout actuel */}
+      <Route path="/" element={      <AuthProvider><MainApp /> </AuthProvider>} />
+
+      {/* Callback OAuth: pas d’overlay, pas de Babylon, juste le flow OAuth */}
+      <Route path="/oauth/callback" element={<AuthProvider><OAuthCallback /></AuthProvider>} />
+
+    </Routes>
   );
 }

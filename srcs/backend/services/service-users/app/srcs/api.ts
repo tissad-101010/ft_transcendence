@@ -6,7 +6,7 @@
 /*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/23 15:58:35 by tissad            #+#    #+#             */
-/*   Updated: 2025/12/08 17:06:01 by tissad           ###   ########.fr       */
+/*   Updated: 2025/12/10 14:39:00 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,6 +24,7 @@ import {  authRoutes,
 import { oauthRoutes } from './modules/oauth/routes/oauth.routes';
 import { signoutRoutes } from './modules/signout/signout.routes';
 import { TwoFactorAuth } from './modules/twoFactor/twoFactor.routes';
+import { refreshRoutes } from './modules/refresh/refresh.routes';
 
 // internal services routes responsible for internal communications between services
 import { internalVerifyTokenRoutes } from "./internal-services-routes/internal-routes/internalVerifyToken.routes";
@@ -67,6 +68,7 @@ app.register(fastifyStatic, {
 // Register routes
 app.register(authRoutes, { prefix: '/user/auth' });
 app.register(oauthRoutes, { prefix: '/user/oauth' });
+app.register(refreshRoutes, { prefix: '/user/auth' });
 app.register(userRoutes, { prefix: '/user' });
 app.register(signoutRoutes, { prefix: '/user/auth' });
 app.register(TwoFactorAuth, { prefix: '/user/2fa' });

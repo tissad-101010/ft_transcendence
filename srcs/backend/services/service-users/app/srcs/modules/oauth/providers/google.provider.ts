@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   google.ts                                          :+:      :+:    :+:   */
+/*   google.provider.ts                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/27 12:12:09 by tissad            #+#    #+#             */
-/*   Updated: 2025/10/30 14:12:02 by tissad           ###   ########.fr       */
+/*   Updated: 2025/12/10 15:12:35 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -114,7 +114,16 @@ export class GoogleOAuthProvider {
             try {
                 await this.userService.linkOAuthProviderToUser(user.id, DB_provider);
                 console.log("[google.service] Successfully linked Google OAuth provider to user:", user.id);
-                return user;
+                const twoFactorMethods = await this.userService.getUserTwoFactorMethods(user.id);
+                const isTwoFactorEnabled = twoFactorMethods.length > 0;
+                return ({
+                    username: user.username,
+                    email: user.email,
+                    id: user.id,
+                    avatarUrl: user.avatarUrl,
+                    isTwoFactorEnabled : isTwoFactorEnabled,
+                    twoFactorMethods: twoFactorMethods,
+                });
             } catch (error) {
                 console.log("[google.service] Error linking OAuth provider to user:", error);
                 return null;
