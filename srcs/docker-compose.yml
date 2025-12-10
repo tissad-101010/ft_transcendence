@@ -17,8 +17,7 @@ services:
       - SSL_CERT_KEY=/etc/nginx/ssl/server.key
     volumes:
       # Nginx HTML files
-      - ./frontend/build:/usr/share/nginx/html
-      # Nginx SSL certificates
+      - ./frontend/build:/usr/share/nginx/htmtificates
       - ./proxy/nginx/certs/server.crt:/etc/nginx/ssl/server.crt:ro
       - ./proxy/nginx/certs/server.key:/etc/nginx/ssl/server.key:ro
       # Nginx configuration files
