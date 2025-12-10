@@ -17,3 +17,6 @@
 *data
 *secrets
 *generated
+*.env.local
+*.glb
+*.hdr
