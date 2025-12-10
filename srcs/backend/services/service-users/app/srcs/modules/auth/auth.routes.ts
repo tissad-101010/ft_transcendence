@@ -6,7 +6,7 @@
 /*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/27 12:12:38 by tissad            #+#    #+#             */
-/*   Updated: 2025/12/08 15:55:14 by tissad           ###   ########.fr       */
+/*   Updated: 2025/12/10 11:39:54 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,6 @@ import {  FastifyInstance } from 'fastify';
 import {    signupController,
             signinController,
             getProfileController,
-            refreshTokenController,
             changePasswordController,
             uploadAvatarController
         } from './auth.controllers';
@@ -33,7 +32,6 @@ export async function authRoutes(server: FastifyInstance)
     // Register the POST route for user signup
     server.post<{ Body: SignupUserDTO }>('/signup', signupController);
     server.post<{ Body: LoginUserDTO }>('/signin', signinController);
-    server.post('/refresh', refreshTokenController);
 }
 
 // user routes
