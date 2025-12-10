@@ -26,27 +26,6 @@ type AuthContextType = {
   loading: boolean;
 };
 
-
-export function silentRefreshLoop() {
-  async function refresh() {
-    try {
-      await fetch("https://localhost:8443/api/user/auth/refresh", {
-        method: "POST",
-        credentials: "include", // nécessaire pour envoyer le cookie HttpOnly
-      });
-    } catch (err) {
-      console.error("Silent refresh failed:", err);
-    }
-  }
-
-  // Premier appel immédiat (optionnel)
-  refresh();
-
-  // Toutes les 10 minutes (ou moins)
-  setInterval(refresh, 1 * 60 * 1000);// 1 minute
-}
-
-
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
@@ -68,21 +47,21 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   useEffect(() => {
-    // const initializeAuth = async () => {
-    //   try {
-    //     const profile = await fetchUserProfile();
-    //     if (profile.success && profile.data) {
-    //       setUser(profile.data);
-    //       return;
-    //     }
-    //   } catch (err) {
-    //     console.error("Failed to fetch user profile on init:", err);
-    //   } finally {
-    //     setLoading(false);
-    //   }
-    // };
-    // initializeAuth();
-    silentRefreshLoop();
+    const initializeAuth = async () => {
+      try {
+        const profile = await fetchUserProfile();
+        if (profile.success && profile.data) {
+          setUser(profile.data);
+          return;
+        }
+      } catch (err) {
+        console.error("Failed to fetch user profile on init:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    initializeAuth();
+   
   }, []);
 
   // 🔥 AJOUT : écoute du logout externe
