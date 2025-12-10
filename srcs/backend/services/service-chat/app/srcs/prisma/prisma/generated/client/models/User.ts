@@ -191,44 +191,20 @@ export type UserWhereInput = {
   OR?: Prisma.UserWhereInput[]
   NOT?: Prisma.UserWhereInput | Prisma.UserWhereInput[]
   id?: Prisma.IntFilter<"User"> | number
-<<<<<<< HEAD:srcs/backend/services/service-game/app/srcs/prisma/prisma/generated/client/models/User.ts
-  login?: Prisma.StringFilter<"User"> | string
-  email?: Prisma.StringFilter<"User"> | string
-  password?: Prisma.StringFilter<"User"> | string
-  createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
-  gamesAsP1?: Prisma.GameListRelationFilter
-  gamesAsP2?: Prisma.GameListRelationFilter
-  tournamentParticipations?: Prisma.TournamentParticipantListRelationFilter
-  friendlyMatchesAsP1?: Prisma.FriendlyMatchListRelationFilter
-  friendlyMatchesAsP2?: Prisma.FriendlyMatchListRelationFilter
-=======
   username?: Prisma.StringFilter<"User"> | string
   messages?: Prisma.MessageListRelationFilter
   blocksByMe?: Prisma.BlockListRelationFilter
   blocksToMe?: Prisma.BlockListRelationFilter
   participants?: Prisma.ConversationParticipantListRelationFilter
->>>>>>> main:srcs/backend/services/service-chat/app/srcs/prisma/prisma/generated/client/models/User.ts
 }
 
 export type UserOrderByWithRelationInput = {
   id?: Prisma.SortOrder
-<<<<<<< HEAD:srcs/backend/services/service-game/app/srcs/prisma/prisma/generated/client/models/User.ts
-  login?: Prisma.SortOrder
-  email?: Prisma.SortOrder
-  password?: Prisma.SortOrder
-  createdAt?: Prisma.SortOrder
-  gamesAsP1?: Prisma.GameOrderByRelationAggregateInput
-  gamesAsP2?: Prisma.GameOrderByRelationAggregateInput
-  tournamentParticipations?: Prisma.TournamentParticipantOrderByRelationAggregateInput
-  friendlyMatchesAsP1?: Prisma.FriendlyMatchOrderByRelationAggregateInput
-  friendlyMatchesAsP2?: Prisma.FriendlyMatchOrderByRelationAggregateInput
-=======
   username?: Prisma.SortOrder
   messages?: Prisma.MessageOrderByRelationAggregateInput
   blocksByMe?: Prisma.BlockOrderByRelationAggregateInput
   blocksToMe?: Prisma.BlockOrderByRelationAggregateInput
   participants?: Prisma.ConversationParticipantOrderByRelationAggregateInput
->>>>>>> main:srcs/backend/services/service-chat/app/srcs/prisma/prisma/generated/client/models/User.ts
 }
 
 export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -237,22 +213,11 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   AND?: Prisma.UserWhereInput | Prisma.UserWhereInput[]
   OR?: Prisma.UserWhereInput[]
   NOT?: Prisma.UserWhereInput | Prisma.UserWhereInput[]
-<<<<<<< HEAD:srcs/backend/services/service-game/app/srcs/prisma/prisma/generated/client/models/User.ts
-  password?: Prisma.StringFilter<"User"> | string
-  createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
-  gamesAsP1?: Prisma.GameListRelationFilter
-  gamesAsP2?: Prisma.GameListRelationFilter
-  tournamentParticipations?: Prisma.TournamentParticipantListRelationFilter
-  friendlyMatchesAsP1?: Prisma.FriendlyMatchListRelationFilter
-  friendlyMatchesAsP2?: Prisma.FriendlyMatchListRelationFilter
-}, "id" | "login" | "email">
-=======
   messages?: Prisma.MessageListRelationFilter
   blocksByMe?: Prisma.BlockListRelationFilter
   blocksToMe?: Prisma.BlockListRelationFilter
   participants?: Prisma.ConversationParticipantListRelationFilter
 }, "id" | "username">
->>>>>>> main:srcs/backend/services/service-chat/app/srcs/prisma/prisma/generated/client/models/User.ts
 
 export type UserOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
@@ -273,50 +238,15 @@ export type UserScalarWhereWithAggregatesInput = {
 }
 
 export type UserCreateInput = {
-<<<<<<< HEAD:srcs/backend/services/service-game/app/srcs/prisma/prisma/generated/client/models/User.ts
-  login: string
-  email: string
-  password: string
-  createdAt?: Date | string
-  gamesAsP1?: Prisma.GameCreateNestedManyWithoutPlayer1Input
-  gamesAsP2?: Prisma.GameCreateNestedManyWithoutPlayer2Input
-  tournamentParticipations?: Prisma.TournamentParticipantCreateNestedManyWithoutUserInput
-  friendlyMatchesAsP1?: Prisma.FriendlyMatchCreateNestedManyWithoutPlayer1Input
-  friendlyMatchesAsP2?: Prisma.FriendlyMatchCreateNestedManyWithoutPlayer2Input
-=======
   username: string
   messages?: Prisma.MessageCreateNestedManyWithoutSenderInput
   blocksByMe?: Prisma.BlockCreateNestedManyWithoutBlockerInput
   blocksToMe?: Prisma.BlockCreateNestedManyWithoutBlockedInput
   participants?: Prisma.ConversationParticipantCreateNestedManyWithoutUserInput
->>>>>>> main:srcs/backend/services/service-chat/app/srcs/prisma/prisma/generated/client/models/User.ts
 }
 
 export type UserUncheckedCreateInput = {
   id?: number
-<<<<<<< HEAD:srcs/backend/services/service-game/app/srcs/prisma/prisma/generated/client/models/User.ts
-  login: string
-  email: string
-  password: string
-  createdAt?: Date | string
-  gamesAsP1?: Prisma.GameUncheckedCreateNestedManyWithoutPlayer1Input
-  gamesAsP2?: Prisma.GameUncheckedCreateNestedManyWithoutPlayer2Input
-  tournamentParticipations?: Prisma.TournamentParticipantUncheckedCreateNestedManyWithoutUserInput
-  friendlyMatchesAsP1?: Prisma.FriendlyMatchUncheckedCreateNestedManyWithoutPlayer1Input
-  friendlyMatchesAsP2?: Prisma.FriendlyMatchUncheckedCreateNestedManyWithoutPlayer2Input
-}
-
-export type UserUpdateInput = {
-  login?: Prisma.StringFieldUpdateOperationsInput | string
-  email?: Prisma.StringFieldUpdateOperationsInput | string
-  password?: Prisma.StringFieldUpdateOperationsInput | string
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  gamesAsP1?: Prisma.GameUpdateManyWithoutPlayer1NestedInput
-  gamesAsP2?: Prisma.GameUpdateManyWithoutPlayer2NestedInput
-  tournamentParticipations?: Prisma.TournamentParticipantUpdateManyWithoutUserNestedInput
-  friendlyMatchesAsP1?: Prisma.FriendlyMatchUpdateManyWithoutPlayer1NestedInput
-  friendlyMatchesAsP2?: Prisma.FriendlyMatchUpdateManyWithoutPlayer2NestedInput
-=======
   username: string
   messages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
   blocksByMe?: Prisma.BlockUncheckedCreateNestedManyWithoutBlockerInput
@@ -330,28 +260,15 @@ export type UserUpdateInput = {
   blocksByMe?: Prisma.BlockUpdateManyWithoutBlockerNestedInput
   blocksToMe?: Prisma.BlockUpdateManyWithoutBlockedNestedInput
   participants?: Prisma.ConversationParticipantUpdateManyWithoutUserNestedInput
->>>>>>> main:srcs/backend/services/service-chat/app/srcs/prisma/prisma/generated/client/models/User.ts
 }
 
 export type UserUncheckedUpdateInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
-<<<<<<< HEAD:srcs/backend/services/service-game/app/srcs/prisma/prisma/generated/client/models/User.ts
-  login?: Prisma.StringFieldUpdateOperationsInput | string
-  email?: Prisma.StringFieldUpdateOperationsInput | string
-  password?: Prisma.StringFieldUpdateOperationsInput | string
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  gamesAsP1?: Prisma.GameUncheckedUpdateManyWithoutPlayer1NestedInput
-  gamesAsP2?: Prisma.GameUncheckedUpdateManyWithoutPlayer2NestedInput
-  tournamentParticipations?: Prisma.TournamentParticipantUncheckedUpdateManyWithoutUserNestedInput
-  friendlyMatchesAsP1?: Prisma.FriendlyMatchUncheckedUpdateManyWithoutPlayer1NestedInput
-  friendlyMatchesAsP2?: Prisma.FriendlyMatchUncheckedUpdateManyWithoutPlayer2NestedInput
-=======
   username?: Prisma.StringFieldUpdateOperationsInput | string
   messages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
   blocksByMe?: Prisma.BlockUncheckedUpdateManyWithoutBlockerNestedInput
   blocksToMe?: Prisma.BlockUncheckedUpdateManyWithoutBlockedNestedInput
   participants?: Prisma.ConversationParticipantUncheckedUpdateManyWithoutUserNestedInput
->>>>>>> main:srcs/backend/services/service-chat/app/srcs/prisma/prisma/generated/client/models/User.ts
 }
 
 export type UserCreateManyInput = {
@@ -400,11 +317,6 @@ export type StringFieldUpdateOperationsInput = {
   set?: string
 }
 
-export type UserScalarRelationFilter = {
-  is?: Prisma.UserWhereInput
-  isNot?: Prisma.UserWhereInput
-}
-
 export type IntFieldUpdateOperationsInput = {
   set?: number
   increment?: number
@@ -447,66 +359,10 @@ export type UserCreateNestedOneWithoutBlocksByMeInput = {
   connect?: Prisma.UserWhereUniqueInput
 }
 
-<<<<<<< HEAD:srcs/backend/services/service-game/app/srcs/prisma/prisma/generated/client/models/User.ts
-export type UserCreateNestedOneWithoutTournamentParticipationsInput = {
-  create?: Prisma.XOR<Prisma.UserCreateWithoutTournamentParticipationsInput, Prisma.UserUncheckedCreateWithoutTournamentParticipationsInput>
-  connectOrCreate?: Prisma.UserCreateOrConnectWithoutTournamentParticipationsInput
-  connect?: Prisma.UserWhereUniqueInput
-}
-
-export type UserUpdateOneRequiredWithoutTournamentParticipationsNestedInput = {
-  create?: Prisma.XOR<Prisma.UserCreateWithoutTournamentParticipationsInput, Prisma.UserUncheckedCreateWithoutTournamentParticipationsInput>
-  connectOrCreate?: Prisma.UserCreateOrConnectWithoutTournamentParticipationsInput
-  upsert?: Prisma.UserUpsertWithoutTournamentParticipationsInput
-  connect?: Prisma.UserWhereUniqueInput
-  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutTournamentParticipationsInput, Prisma.UserUpdateWithoutTournamentParticipationsInput>, Prisma.UserUncheckedUpdateWithoutTournamentParticipationsInput>
-}
-
-export type UserCreateNestedOneWithoutFriendlyMatchesAsP1Input = {
-  create?: Prisma.XOR<Prisma.UserCreateWithoutFriendlyMatchesAsP1Input, Prisma.UserUncheckedCreateWithoutFriendlyMatchesAsP1Input>
-  connectOrCreate?: Prisma.UserCreateOrConnectWithoutFriendlyMatchesAsP1Input
-  connect?: Prisma.UserWhereUniqueInput
-}
-
-export type UserCreateNestedOneWithoutFriendlyMatchesAsP2Input = {
-  create?: Prisma.XOR<Prisma.UserCreateWithoutFriendlyMatchesAsP2Input, Prisma.UserUncheckedCreateWithoutFriendlyMatchesAsP2Input>
-  connectOrCreate?: Prisma.UserCreateOrConnectWithoutFriendlyMatchesAsP2Input
-  connect?: Prisma.UserWhereUniqueInput
-}
-
-export type UserUpdateOneRequiredWithoutFriendlyMatchesAsP1NestedInput = {
-  create?: Prisma.XOR<Prisma.UserCreateWithoutFriendlyMatchesAsP1Input, Prisma.UserUncheckedCreateWithoutFriendlyMatchesAsP1Input>
-  connectOrCreate?: Prisma.UserCreateOrConnectWithoutFriendlyMatchesAsP1Input
-  upsert?: Prisma.UserUpsertWithoutFriendlyMatchesAsP1Input
-  connect?: Prisma.UserWhereUniqueInput
-  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutFriendlyMatchesAsP1Input, Prisma.UserUpdateWithoutFriendlyMatchesAsP1Input>, Prisma.UserUncheckedUpdateWithoutFriendlyMatchesAsP1Input>
-}
-
-export type UserUpdateOneWithoutFriendlyMatchesAsP2NestedInput = {
-  create?: Prisma.XOR<Prisma.UserCreateWithoutFriendlyMatchesAsP2Input, Prisma.UserUncheckedCreateWithoutFriendlyMatchesAsP2Input>
-  connectOrCreate?: Prisma.UserCreateOrConnectWithoutFriendlyMatchesAsP2Input
-  upsert?: Prisma.UserUpsertWithoutFriendlyMatchesAsP2Input
-  disconnect?: Prisma.UserWhereInput | boolean
-  delete?: Prisma.UserWhereInput | boolean
-  connect?: Prisma.UserWhereUniqueInput
-  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutFriendlyMatchesAsP2Input, Prisma.UserUpdateWithoutFriendlyMatchesAsP2Input>, Prisma.UserUncheckedUpdateWithoutFriendlyMatchesAsP2Input>
-}
-
-export type UserCreateWithoutGamesAsP1Input = {
-  login: string
-  email: string
-  password: string
-  createdAt?: Date | string
-  gamesAsP2?: Prisma.GameCreateNestedManyWithoutPlayer2Input
-  tournamentParticipations?: Prisma.TournamentParticipantCreateNestedManyWithoutUserInput
-  friendlyMatchesAsP1?: Prisma.FriendlyMatchCreateNestedManyWithoutPlayer1Input
-  friendlyMatchesAsP2?: Prisma.FriendlyMatchCreateNestedManyWithoutPlayer2Input
-=======
 export type UserCreateNestedOneWithoutBlocksToMeInput = {
   create?: Prisma.XOR<Prisma.UserCreateWithoutBlocksToMeInput, Prisma.UserUncheckedCreateWithoutBlocksToMeInput>
   connectOrCreate?: Prisma.UserCreateOrConnectWithoutBlocksToMeInput
   connect?: Prisma.UserWhereUniqueInput
->>>>>>> main:srcs/backend/services/service-chat/app/srcs/prisma/prisma/generated/client/models/User.ts
 }
 
 export type UserUpdateOneRequiredWithoutBlocksByMeNestedInput = {
@@ -534,21 +390,10 @@ export type UserCreateWithoutParticipantsInput = {
 
 export type UserUncheckedCreateWithoutParticipantsInput = {
   id?: number
-<<<<<<< HEAD:srcs/backend/services/service-game/app/srcs/prisma/prisma/generated/client/models/User.ts
-  login: string
-  email: string
-  password: string
-  createdAt?: Date | string
-  gamesAsP2?: Prisma.GameUncheckedCreateNestedManyWithoutPlayer2Input
-  tournamentParticipations?: Prisma.TournamentParticipantUncheckedCreateNestedManyWithoutUserInput
-  friendlyMatchesAsP1?: Prisma.FriendlyMatchUncheckedCreateNestedManyWithoutPlayer1Input
-  friendlyMatchesAsP2?: Prisma.FriendlyMatchUncheckedCreateNestedManyWithoutPlayer2Input
-=======
   username: string
   messages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
   blocksByMe?: Prisma.BlockUncheckedCreateNestedManyWithoutBlockerInput
   blocksToMe?: Prisma.BlockUncheckedCreateNestedManyWithoutBlockedInput
->>>>>>> main:srcs/backend/services/service-chat/app/srcs/prisma/prisma/generated/client/models/User.ts
 }
 
 export type UserCreateOrConnectWithoutParticipantsInput = {
@@ -556,22 +401,10 @@ export type UserCreateOrConnectWithoutParticipantsInput = {
   create: Prisma.XOR<Prisma.UserCreateWithoutParticipantsInput, Prisma.UserUncheckedCreateWithoutParticipantsInput>
 }
 
-<<<<<<< HEAD:srcs/backend/services/service-game/app/srcs/prisma/prisma/generated/client/models/User.ts
-export type UserCreateWithoutGamesAsP2Input = {
-  login: string
-  email: string
-  password: string
-  createdAt?: Date | string
-  gamesAsP1?: Prisma.GameCreateNestedManyWithoutPlayer1Input
-  tournamentParticipations?: Prisma.TournamentParticipantCreateNestedManyWithoutUserInput
-  friendlyMatchesAsP1?: Prisma.FriendlyMatchCreateNestedManyWithoutPlayer1Input
-  friendlyMatchesAsP2?: Prisma.FriendlyMatchCreateNestedManyWithoutPlayer2Input
-=======
 export type UserUpsertWithoutParticipantsInput = {
   update: Prisma.XOR<Prisma.UserUpdateWithoutParticipantsInput, Prisma.UserUncheckedUpdateWithoutParticipantsInput>
   create: Prisma.XOR<Prisma.UserCreateWithoutParticipantsInput, Prisma.UserUncheckedCreateWithoutParticipantsInput>
   where?: Prisma.UserWhereInput
->>>>>>> main:srcs/backend/services/service-chat/app/srcs/prisma/prisma/generated/client/models/User.ts
 }
 
 export type UserUpdateToOneWithWhereWithoutParticipantsInput = {
@@ -603,21 +436,10 @@ export type UserCreateWithoutMessagesInput = {
 
 export type UserUncheckedCreateWithoutMessagesInput = {
   id?: number
-<<<<<<< HEAD:srcs/backend/services/service-game/app/srcs/prisma/prisma/generated/client/models/User.ts
-  login: string
-  email: string
-  password: string
-  createdAt?: Date | string
-  gamesAsP1?: Prisma.GameUncheckedCreateNestedManyWithoutPlayer1Input
-  tournamentParticipations?: Prisma.TournamentParticipantUncheckedCreateNestedManyWithoutUserInput
-  friendlyMatchesAsP1?: Prisma.FriendlyMatchUncheckedCreateNestedManyWithoutPlayer1Input
-  friendlyMatchesAsP2?: Prisma.FriendlyMatchUncheckedCreateNestedManyWithoutPlayer2Input
-=======
   username: string
   blocksByMe?: Prisma.BlockUncheckedCreateNestedManyWithoutBlockerInput
   blocksToMe?: Prisma.BlockUncheckedCreateNestedManyWithoutBlockedInput
   participants?: Prisma.ConversationParticipantUncheckedCreateNestedManyWithoutUserInput
->>>>>>> main:srcs/backend/services/service-chat/app/srcs/prisma/prisma/generated/client/models/User.ts
 }
 
 export type UserCreateOrConnectWithoutMessagesInput = {
@@ -636,42 +458,19 @@ export type UserUpdateToOneWithWhereWithoutMessagesInput = {
   data: Prisma.XOR<Prisma.UserUpdateWithoutMessagesInput, Prisma.UserUncheckedUpdateWithoutMessagesInput>
 }
 
-<<<<<<< HEAD:srcs/backend/services/service-game/app/srcs/prisma/prisma/generated/client/models/User.ts
-export type UserUpdateWithoutGamesAsP1Input = {
-  login?: Prisma.StringFieldUpdateOperationsInput | string
-  email?: Prisma.StringFieldUpdateOperationsInput | string
-  password?: Prisma.StringFieldUpdateOperationsInput | string
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  gamesAsP2?: Prisma.GameUpdateManyWithoutPlayer2NestedInput
-  tournamentParticipations?: Prisma.TournamentParticipantUpdateManyWithoutUserNestedInput
-  friendlyMatchesAsP1?: Prisma.FriendlyMatchUpdateManyWithoutPlayer1NestedInput
-  friendlyMatchesAsP2?: Prisma.FriendlyMatchUpdateManyWithoutPlayer2NestedInput
-=======
 export type UserUpdateWithoutMessagesInput = {
   username?: Prisma.StringFieldUpdateOperationsInput | string
   blocksByMe?: Prisma.BlockUpdateManyWithoutBlockerNestedInput
   blocksToMe?: Prisma.BlockUpdateManyWithoutBlockedNestedInput
   participants?: Prisma.ConversationParticipantUpdateManyWithoutUserNestedInput
->>>>>>> main:srcs/backend/services/service-chat/app/srcs/prisma/prisma/generated/client/models/User.ts
 }
 
 export type UserUncheckedUpdateWithoutMessagesInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
-<<<<<<< HEAD:srcs/backend/services/service-game/app/srcs/prisma/prisma/generated/client/models/User.ts
-  login?: Prisma.StringFieldUpdateOperationsInput | string
-  email?: Prisma.StringFieldUpdateOperationsInput | string
-  password?: Prisma.StringFieldUpdateOperationsInput | string
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  gamesAsP2?: Prisma.GameUncheckedUpdateManyWithoutPlayer2NestedInput
-  tournamentParticipations?: Prisma.TournamentParticipantUncheckedUpdateManyWithoutUserNestedInput
-  friendlyMatchesAsP1?: Prisma.FriendlyMatchUncheckedUpdateManyWithoutPlayer1NestedInput
-  friendlyMatchesAsP2?: Prisma.FriendlyMatchUncheckedUpdateManyWithoutPlayer2NestedInput
-=======
   username?: Prisma.StringFieldUpdateOperationsInput | string
   blocksByMe?: Prisma.BlockUncheckedUpdateManyWithoutBlockerNestedInput
   blocksToMe?: Prisma.BlockUncheckedUpdateManyWithoutBlockedNestedInput
   participants?: Prisma.ConversationParticipantUncheckedUpdateManyWithoutUserNestedInput
->>>>>>> main:srcs/backend/services/service-chat/app/srcs/prisma/prisma/generated/client/models/User.ts
 }
 
 export type UserCreateWithoutBlocksByMeInput = {
@@ -725,223 +524,15 @@ export type UserUpdateToOneWithWhereWithoutBlocksByMeInput = {
   data: Prisma.XOR<Prisma.UserUpdateWithoutBlocksByMeInput, Prisma.UserUncheckedUpdateWithoutBlocksByMeInput>
 }
 
-<<<<<<< HEAD:srcs/backend/services/service-game/app/srcs/prisma/prisma/generated/client/models/User.ts
-export type UserUpdateWithoutGamesAsP2Input = {
-  login?: Prisma.StringFieldUpdateOperationsInput | string
-  email?: Prisma.StringFieldUpdateOperationsInput | string
-  password?: Prisma.StringFieldUpdateOperationsInput | string
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  gamesAsP1?: Prisma.GameUpdateManyWithoutPlayer1NestedInput
-  tournamentParticipations?: Prisma.TournamentParticipantUpdateManyWithoutUserNestedInput
-  friendlyMatchesAsP1?: Prisma.FriendlyMatchUpdateManyWithoutPlayer1NestedInput
-  friendlyMatchesAsP2?: Prisma.FriendlyMatchUpdateManyWithoutPlayer2NestedInput
-=======
 export type UserUpdateWithoutBlocksByMeInput = {
   username?: Prisma.StringFieldUpdateOperationsInput | string
   messages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
   blocksToMe?: Prisma.BlockUpdateManyWithoutBlockedNestedInput
   participants?: Prisma.ConversationParticipantUpdateManyWithoutUserNestedInput
->>>>>>> main:srcs/backend/services/service-chat/app/srcs/prisma/prisma/generated/client/models/User.ts
 }
 
 export type UserUncheckedUpdateWithoutBlocksByMeInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
-<<<<<<< HEAD:srcs/backend/services/service-game/app/srcs/prisma/prisma/generated/client/models/User.ts
-  login?: Prisma.StringFieldUpdateOperationsInput | string
-  email?: Prisma.StringFieldUpdateOperationsInput | string
-  password?: Prisma.StringFieldUpdateOperationsInput | string
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  gamesAsP1?: Prisma.GameUncheckedUpdateManyWithoutPlayer1NestedInput
-  tournamentParticipations?: Prisma.TournamentParticipantUncheckedUpdateManyWithoutUserNestedInput
-  friendlyMatchesAsP1?: Prisma.FriendlyMatchUncheckedUpdateManyWithoutPlayer1NestedInput
-  friendlyMatchesAsP2?: Prisma.FriendlyMatchUncheckedUpdateManyWithoutPlayer2NestedInput
-}
-
-export type UserCreateWithoutTournamentParticipationsInput = {
-  login: string
-  email: string
-  password: string
-  createdAt?: Date | string
-  gamesAsP1?: Prisma.GameCreateNestedManyWithoutPlayer1Input
-  gamesAsP2?: Prisma.GameCreateNestedManyWithoutPlayer2Input
-  friendlyMatchesAsP1?: Prisma.FriendlyMatchCreateNestedManyWithoutPlayer1Input
-  friendlyMatchesAsP2?: Prisma.FriendlyMatchCreateNestedManyWithoutPlayer2Input
-}
-
-export type UserUncheckedCreateWithoutTournamentParticipationsInput = {
-  id?: number
-  login: string
-  email: string
-  password: string
-  createdAt?: Date | string
-  gamesAsP1?: Prisma.GameUncheckedCreateNestedManyWithoutPlayer1Input
-  gamesAsP2?: Prisma.GameUncheckedCreateNestedManyWithoutPlayer2Input
-  friendlyMatchesAsP1?: Prisma.FriendlyMatchUncheckedCreateNestedManyWithoutPlayer1Input
-  friendlyMatchesAsP2?: Prisma.FriendlyMatchUncheckedCreateNestedManyWithoutPlayer2Input
-}
-
-export type UserCreateOrConnectWithoutTournamentParticipationsInput = {
-  where: Prisma.UserWhereUniqueInput
-  create: Prisma.XOR<Prisma.UserCreateWithoutTournamentParticipationsInput, Prisma.UserUncheckedCreateWithoutTournamentParticipationsInput>
-}
-
-export type UserUpsertWithoutTournamentParticipationsInput = {
-  update: Prisma.XOR<Prisma.UserUpdateWithoutTournamentParticipationsInput, Prisma.UserUncheckedUpdateWithoutTournamentParticipationsInput>
-  create: Prisma.XOR<Prisma.UserCreateWithoutTournamentParticipationsInput, Prisma.UserUncheckedCreateWithoutTournamentParticipationsInput>
-  where?: Prisma.UserWhereInput
-}
-
-export type UserUpdateToOneWithWhereWithoutTournamentParticipationsInput = {
-  where?: Prisma.UserWhereInput
-  data: Prisma.XOR<Prisma.UserUpdateWithoutTournamentParticipationsInput, Prisma.UserUncheckedUpdateWithoutTournamentParticipationsInput>
-}
-
-export type UserUpdateWithoutTournamentParticipationsInput = {
-  login?: Prisma.StringFieldUpdateOperationsInput | string
-  email?: Prisma.StringFieldUpdateOperationsInput | string
-  password?: Prisma.StringFieldUpdateOperationsInput | string
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  gamesAsP1?: Prisma.GameUpdateManyWithoutPlayer1NestedInput
-  gamesAsP2?: Prisma.GameUpdateManyWithoutPlayer2NestedInput
-  friendlyMatchesAsP1?: Prisma.FriendlyMatchUpdateManyWithoutPlayer1NestedInput
-  friendlyMatchesAsP2?: Prisma.FriendlyMatchUpdateManyWithoutPlayer2NestedInput
-}
-
-export type UserUncheckedUpdateWithoutTournamentParticipationsInput = {
-  id?: Prisma.IntFieldUpdateOperationsInput | number
-  login?: Prisma.StringFieldUpdateOperationsInput | string
-  email?: Prisma.StringFieldUpdateOperationsInput | string
-  password?: Prisma.StringFieldUpdateOperationsInput | string
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  gamesAsP1?: Prisma.GameUncheckedUpdateManyWithoutPlayer1NestedInput
-  gamesAsP2?: Prisma.GameUncheckedUpdateManyWithoutPlayer2NestedInput
-  friendlyMatchesAsP1?: Prisma.FriendlyMatchUncheckedUpdateManyWithoutPlayer1NestedInput
-  friendlyMatchesAsP2?: Prisma.FriendlyMatchUncheckedUpdateManyWithoutPlayer2NestedInput
-}
-
-export type UserCreateWithoutFriendlyMatchesAsP1Input = {
-  login: string
-  email: string
-  password: string
-  createdAt?: Date | string
-  gamesAsP1?: Prisma.GameCreateNestedManyWithoutPlayer1Input
-  gamesAsP2?: Prisma.GameCreateNestedManyWithoutPlayer2Input
-  tournamentParticipations?: Prisma.TournamentParticipantCreateNestedManyWithoutUserInput
-  friendlyMatchesAsP2?: Prisma.FriendlyMatchCreateNestedManyWithoutPlayer2Input
-}
-
-export type UserUncheckedCreateWithoutFriendlyMatchesAsP1Input = {
-  id?: number
-  login: string
-  email: string
-  password: string
-  createdAt?: Date | string
-  gamesAsP1?: Prisma.GameUncheckedCreateNestedManyWithoutPlayer1Input
-  gamesAsP2?: Prisma.GameUncheckedCreateNestedManyWithoutPlayer2Input
-  tournamentParticipations?: Prisma.TournamentParticipantUncheckedCreateNestedManyWithoutUserInput
-  friendlyMatchesAsP2?: Prisma.FriendlyMatchUncheckedCreateNestedManyWithoutPlayer2Input
-}
-
-export type UserCreateOrConnectWithoutFriendlyMatchesAsP1Input = {
-  where: Prisma.UserWhereUniqueInput
-  create: Prisma.XOR<Prisma.UserCreateWithoutFriendlyMatchesAsP1Input, Prisma.UserUncheckedCreateWithoutFriendlyMatchesAsP1Input>
-}
-
-export type UserCreateWithoutFriendlyMatchesAsP2Input = {
-  login: string
-  email: string
-  password: string
-  createdAt?: Date | string
-  gamesAsP1?: Prisma.GameCreateNestedManyWithoutPlayer1Input
-  gamesAsP2?: Prisma.GameCreateNestedManyWithoutPlayer2Input
-  tournamentParticipations?: Prisma.TournamentParticipantCreateNestedManyWithoutUserInput
-  friendlyMatchesAsP1?: Prisma.FriendlyMatchCreateNestedManyWithoutPlayer1Input
-}
-
-export type UserUncheckedCreateWithoutFriendlyMatchesAsP2Input = {
-  id?: number
-  login: string
-  email: string
-  password: string
-  createdAt?: Date | string
-  gamesAsP1?: Prisma.GameUncheckedCreateNestedManyWithoutPlayer1Input
-  gamesAsP2?: Prisma.GameUncheckedCreateNestedManyWithoutPlayer2Input
-  tournamentParticipations?: Prisma.TournamentParticipantUncheckedCreateNestedManyWithoutUserInput
-  friendlyMatchesAsP1?: Prisma.FriendlyMatchUncheckedCreateNestedManyWithoutPlayer1Input
-}
-
-export type UserCreateOrConnectWithoutFriendlyMatchesAsP2Input = {
-  where: Prisma.UserWhereUniqueInput
-  create: Prisma.XOR<Prisma.UserCreateWithoutFriendlyMatchesAsP2Input, Prisma.UserUncheckedCreateWithoutFriendlyMatchesAsP2Input>
-}
-
-export type UserUpsertWithoutFriendlyMatchesAsP1Input = {
-  update: Prisma.XOR<Prisma.UserUpdateWithoutFriendlyMatchesAsP1Input, Prisma.UserUncheckedUpdateWithoutFriendlyMatchesAsP1Input>
-  create: Prisma.XOR<Prisma.UserCreateWithoutFriendlyMatchesAsP1Input, Prisma.UserUncheckedCreateWithoutFriendlyMatchesAsP1Input>
-  where?: Prisma.UserWhereInput
-}
-
-export type UserUpdateToOneWithWhereWithoutFriendlyMatchesAsP1Input = {
-  where?: Prisma.UserWhereInput
-  data: Prisma.XOR<Prisma.UserUpdateWithoutFriendlyMatchesAsP1Input, Prisma.UserUncheckedUpdateWithoutFriendlyMatchesAsP1Input>
-}
-
-export type UserUpdateWithoutFriendlyMatchesAsP1Input = {
-  login?: Prisma.StringFieldUpdateOperationsInput | string
-  email?: Prisma.StringFieldUpdateOperationsInput | string
-  password?: Prisma.StringFieldUpdateOperationsInput | string
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  gamesAsP1?: Prisma.GameUpdateManyWithoutPlayer1NestedInput
-  gamesAsP2?: Prisma.GameUpdateManyWithoutPlayer2NestedInput
-  tournamentParticipations?: Prisma.TournamentParticipantUpdateManyWithoutUserNestedInput
-  friendlyMatchesAsP2?: Prisma.FriendlyMatchUpdateManyWithoutPlayer2NestedInput
-}
-
-export type UserUncheckedUpdateWithoutFriendlyMatchesAsP1Input = {
-  id?: Prisma.IntFieldUpdateOperationsInput | number
-  login?: Prisma.StringFieldUpdateOperationsInput | string
-  email?: Prisma.StringFieldUpdateOperationsInput | string
-  password?: Prisma.StringFieldUpdateOperationsInput | string
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  gamesAsP1?: Prisma.GameUncheckedUpdateManyWithoutPlayer1NestedInput
-  gamesAsP2?: Prisma.GameUncheckedUpdateManyWithoutPlayer2NestedInput
-  tournamentParticipations?: Prisma.TournamentParticipantUncheckedUpdateManyWithoutUserNestedInput
-  friendlyMatchesAsP2?: Prisma.FriendlyMatchUncheckedUpdateManyWithoutPlayer2NestedInput
-}
-
-export type UserUpsertWithoutFriendlyMatchesAsP2Input = {
-  update: Prisma.XOR<Prisma.UserUpdateWithoutFriendlyMatchesAsP2Input, Prisma.UserUncheckedUpdateWithoutFriendlyMatchesAsP2Input>
-  create: Prisma.XOR<Prisma.UserCreateWithoutFriendlyMatchesAsP2Input, Prisma.UserUncheckedCreateWithoutFriendlyMatchesAsP2Input>
-  where?: Prisma.UserWhereInput
-}
-
-export type UserUpdateToOneWithWhereWithoutFriendlyMatchesAsP2Input = {
-  where?: Prisma.UserWhereInput
-  data: Prisma.XOR<Prisma.UserUpdateWithoutFriendlyMatchesAsP2Input, Prisma.UserUncheckedUpdateWithoutFriendlyMatchesAsP2Input>
-}
-
-export type UserUpdateWithoutFriendlyMatchesAsP2Input = {
-  login?: Prisma.StringFieldUpdateOperationsInput | string
-  email?: Prisma.StringFieldUpdateOperationsInput | string
-  password?: Prisma.StringFieldUpdateOperationsInput | string
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  gamesAsP1?: Prisma.GameUpdateManyWithoutPlayer1NestedInput
-  gamesAsP2?: Prisma.GameUpdateManyWithoutPlayer2NestedInput
-  tournamentParticipations?: Prisma.TournamentParticipantUpdateManyWithoutUserNestedInput
-  friendlyMatchesAsP1?: Prisma.FriendlyMatchUpdateManyWithoutPlayer1NestedInput
-}
-
-export type UserUncheckedUpdateWithoutFriendlyMatchesAsP2Input = {
-  id?: Prisma.IntFieldUpdateOperationsInput | number
-  login?: Prisma.StringFieldUpdateOperationsInput | string
-  email?: Prisma.StringFieldUpdateOperationsInput | string
-  password?: Prisma.StringFieldUpdateOperationsInput | string
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  gamesAsP1?: Prisma.GameUncheckedUpdateManyWithoutPlayer1NestedInput
-  gamesAsP2?: Prisma.GameUncheckedUpdateManyWithoutPlayer2NestedInput
-  tournamentParticipations?: Prisma.TournamentParticipantUncheckedUpdateManyWithoutUserNestedInput
-  friendlyMatchesAsP1?: Prisma.FriendlyMatchUncheckedUpdateManyWithoutPlayer1NestedInput
-=======
   username?: Prisma.StringFieldUpdateOperationsInput | string
   messages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
   blocksToMe?: Prisma.BlockUncheckedUpdateManyWithoutBlockedNestedInput
@@ -972,7 +563,6 @@ export type UserUncheckedUpdateWithoutBlocksToMeInput = {
   messages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
   blocksByMe?: Prisma.BlockUncheckedUpdateManyWithoutBlockerNestedInput
   participants?: Prisma.ConversationParticipantUncheckedUpdateManyWithoutUserNestedInput
->>>>>>> main:srcs/backend/services/service-chat/app/srcs/prisma/prisma/generated/client/models/User.ts
 }
 
 
@@ -981,21 +571,6 @@ export type UserUncheckedUpdateWithoutBlocksToMeInput = {
  */
 
 export type UserCountOutputType = {
-<<<<<<< HEAD:srcs/backend/services/service-game/app/srcs/prisma/prisma/generated/client/models/User.ts
-  gamesAsP1: number
-  gamesAsP2: number
-  tournamentParticipations: number
-  friendlyMatchesAsP1: number
-  friendlyMatchesAsP2: number
-}
-
-export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  gamesAsP1?: boolean | UserCountOutputTypeCountGamesAsP1Args
-  gamesAsP2?: boolean | UserCountOutputTypeCountGamesAsP2Args
-  tournamentParticipations?: boolean | UserCountOutputTypeCountTournamentParticipationsArgs
-  friendlyMatchesAsP1?: boolean | UserCountOutputTypeCountFriendlyMatchesAsP1Args
-  friendlyMatchesAsP2?: boolean | UserCountOutputTypeCountFriendlyMatchesAsP2Args
-=======
   messages: number
   blocksByMe: number
   blocksToMe: number
@@ -1007,7 +582,6 @@ export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.I
   blocksByMe?: boolean | UserCountOutputTypeCountBlocksByMeArgs
   blocksToMe?: boolean | UserCountOutputTypeCountBlocksToMeArgs
   participants?: boolean | UserCountOutputTypeCountParticipantsArgs
->>>>>>> main:srcs/backend/services/service-chat/app/srcs/prisma/prisma/generated/client/models/User.ts
 }
 
 /**
@@ -1048,47 +622,14 @@ export type UserCountOutputTypeCountParticipantsArgs<ExtArgs extends runtime.Typ
   where?: Prisma.ConversationParticipantWhereInput
 }
 
-/**
- * UserCountOutputType without action
- */
-export type UserCountOutputTypeCountTournamentParticipationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  where?: Prisma.TournamentParticipantWhereInput
-}
-
-/**
- * UserCountOutputType without action
- */
-export type UserCountOutputTypeCountFriendlyMatchesAsP1Args<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  where?: Prisma.FriendlyMatchWhereInput
-}
-
-/**
- * UserCountOutputType without action
- */
-export type UserCountOutputTypeCountFriendlyMatchesAsP2Args<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  where?: Prisma.FriendlyMatchWhereInput
-}
-
 
 export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
-<<<<<<< HEAD:srcs/backend/services/service-game/app/srcs/prisma/prisma/generated/client/models/User.ts
-  login?: boolean
-  email?: boolean
-  password?: boolean
-  createdAt?: boolean
-  gamesAsP1?: boolean | Prisma.User$gamesAsP1Args<ExtArgs>
-  gamesAsP2?: boolean | Prisma.User$gamesAsP2Args<ExtArgs>
-  tournamentParticipations?: boolean | Prisma.User$tournamentParticipationsArgs<ExtArgs>
-  friendlyMatchesAsP1?: boolean | Prisma.User$friendlyMatchesAsP1Args<ExtArgs>
-  friendlyMatchesAsP2?: boolean | Prisma.User$friendlyMatchesAsP2Args<ExtArgs>
-=======
   username?: boolean
   messages?: boolean | Prisma.User$messagesArgs<ExtArgs>
   blocksByMe?: boolean | Prisma.User$blocksByMeArgs<ExtArgs>
   blocksToMe?: boolean | Prisma.User$blocksToMeArgs<ExtArgs>
   participants?: boolean | Prisma.User$participantsArgs<ExtArgs>
->>>>>>> main:srcs/backend/services/service-chat/app/srcs/prisma/prisma/generated/client/models/User.ts
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
@@ -1109,18 +650,10 @@ export type UserSelectScalar = {
 
 export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "username", ExtArgs["result"]["user"]>
 export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-<<<<<<< HEAD:srcs/backend/services/service-game/app/srcs/prisma/prisma/generated/client/models/User.ts
-  gamesAsP1?: boolean | Prisma.User$gamesAsP1Args<ExtArgs>
-  gamesAsP2?: boolean | Prisma.User$gamesAsP2Args<ExtArgs>
-  tournamentParticipations?: boolean | Prisma.User$tournamentParticipationsArgs<ExtArgs>
-  friendlyMatchesAsP1?: boolean | Prisma.User$friendlyMatchesAsP1Args<ExtArgs>
-  friendlyMatchesAsP2?: boolean | Prisma.User$friendlyMatchesAsP2Args<ExtArgs>
-=======
   messages?: boolean | Prisma.User$messagesArgs<ExtArgs>
   blocksByMe?: boolean | Prisma.User$blocksByMeArgs<ExtArgs>
   blocksToMe?: boolean | Prisma.User$blocksToMeArgs<ExtArgs>
   participants?: boolean | Prisma.User$participantsArgs<ExtArgs>
->>>>>>> main:srcs/backend/services/service-chat/app/srcs/prisma/prisma/generated/client/models/User.ts
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type UserIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -1129,18 +662,10 @@ export type UserIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensi
 export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "User"
   objects: {
-<<<<<<< HEAD:srcs/backend/services/service-game/app/srcs/prisma/prisma/generated/client/models/User.ts
-    gamesAsP1: Prisma.$GamePayload<ExtArgs>[]
-    gamesAsP2: Prisma.$GamePayload<ExtArgs>[]
-    tournamentParticipations: Prisma.$TournamentParticipantPayload<ExtArgs>[]
-    friendlyMatchesAsP1: Prisma.$FriendlyMatchPayload<ExtArgs>[]
-    friendlyMatchesAsP2: Prisma.$FriendlyMatchPayload<ExtArgs>[]
-=======
     messages: Prisma.$MessagePayload<ExtArgs>[]
     blocksByMe: Prisma.$BlockPayload<ExtArgs>[]
     blocksToMe: Prisma.$BlockPayload<ExtArgs>[]
     participants: Prisma.$ConversationParticipantPayload<ExtArgs>[]
->>>>>>> main:srcs/backend/services/service-chat/app/srcs/prisma/prisma/generated/client/models/User.ts
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: number
@@ -1539,18 +1064,10 @@ readonly fields: UserFieldRefs;
  */
 export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
-<<<<<<< HEAD:srcs/backend/services/service-game/app/srcs/prisma/prisma/generated/client/models/User.ts
-  gamesAsP1<T extends Prisma.User$gamesAsP1Args<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$gamesAsP1Args<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$GamePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-  gamesAsP2<T extends Prisma.User$gamesAsP2Args<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$gamesAsP2Args<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$GamePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-  tournamentParticipations<T extends Prisma.User$tournamentParticipationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$tournamentParticipationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TournamentParticipantPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-  friendlyMatchesAsP1<T extends Prisma.User$friendlyMatchesAsP1Args<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$friendlyMatchesAsP1Args<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$FriendlyMatchPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-  friendlyMatchesAsP2<T extends Prisma.User$friendlyMatchesAsP2Args<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$friendlyMatchesAsP2Args<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$FriendlyMatchPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-=======
   messages<T extends Prisma.User$messagesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$messagesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$MessagePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   blocksByMe<T extends Prisma.User$blocksByMeArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$blocksByMeArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$BlockPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   blocksToMe<T extends Prisma.User$blocksToMeArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$blocksToMeArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$BlockPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   participants<T extends Prisma.User$participantsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$participantsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ConversationParticipantPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
->>>>>>> main:srcs/backend/services/service-chat/app/srcs/prisma/prisma/generated/client/models/User.ts
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2063,78 +1580,6 @@ export type User$participantsArgs<ExtArgs extends runtime.Types.Extensions.Inter
   take?: number
   skip?: number
   distinct?: Prisma.ConversationParticipantScalarFieldEnum | Prisma.ConversationParticipantScalarFieldEnum[]
-}
-
-/**
- * User.tournamentParticipations
- */
-export type User$tournamentParticipationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the TournamentParticipant
-   */
-  select?: Prisma.TournamentParticipantSelect<ExtArgs> | null
-  /**
-   * Omit specific fields from the TournamentParticipant
-   */
-  omit?: Prisma.TournamentParticipantOmit<ExtArgs> | null
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.TournamentParticipantInclude<ExtArgs> | null
-  where?: Prisma.TournamentParticipantWhereInput
-  orderBy?: Prisma.TournamentParticipantOrderByWithRelationInput | Prisma.TournamentParticipantOrderByWithRelationInput[]
-  cursor?: Prisma.TournamentParticipantWhereUniqueInput
-  take?: number
-  skip?: number
-  distinct?: Prisma.TournamentParticipantScalarFieldEnum | Prisma.TournamentParticipantScalarFieldEnum[]
-}
-
-/**
- * User.friendlyMatchesAsP1
- */
-export type User$friendlyMatchesAsP1Args<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the FriendlyMatch
-   */
-  select?: Prisma.FriendlyMatchSelect<ExtArgs> | null
-  /**
-   * Omit specific fields from the FriendlyMatch
-   */
-  omit?: Prisma.FriendlyMatchOmit<ExtArgs> | null
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.FriendlyMatchInclude<ExtArgs> | null
-  where?: Prisma.FriendlyMatchWhereInput
-  orderBy?: Prisma.FriendlyMatchOrderByWithRelationInput | Prisma.FriendlyMatchOrderByWithRelationInput[]
-  cursor?: Prisma.FriendlyMatchWhereUniqueInput
-  take?: number
-  skip?: number
-  distinct?: Prisma.FriendlyMatchScalarFieldEnum | Prisma.FriendlyMatchScalarFieldEnum[]
-}
-
-/**
- * User.friendlyMatchesAsP2
- */
-export type User$friendlyMatchesAsP2Args<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the FriendlyMatch
-   */
-  select?: Prisma.FriendlyMatchSelect<ExtArgs> | null
-  /**
-   * Omit specific fields from the FriendlyMatch
-   */
-  omit?: Prisma.FriendlyMatchOmit<ExtArgs> | null
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.FriendlyMatchInclude<ExtArgs> | null
-  where?: Prisma.FriendlyMatchWhereInput
-  orderBy?: Prisma.FriendlyMatchOrderByWithRelationInput | Prisma.FriendlyMatchOrderByWithRelationInput[]
-  cursor?: Prisma.FriendlyMatchWhereUniqueInput
-  take?: number
-  skip?: number
-  distinct?: Prisma.FriendlyMatchScalarFieldEnum | Prisma.FriendlyMatchScalarFieldEnum[]
 }
 
 /**

@@ -7,16 +7,16 @@ import GameLogic from "./gameplay/GameLogic.ts";
 import { Tournament } from './Tournament.ts';
 import { SceneManager } from './scene/SceneManager.ts';
 
-// Import des types centralisés
-import { 
+// Import des types centralisés (type-only pour éviter les exports runtime)
+import type {
     MatchParticipant,
     MatchRules,
     MatchTournament,
     MatchFriendly
 } from './types.ts';
 
-// Ré-exporter les types pour la compatibilité avec les imports existants
-export { MatchParticipant, MatchRules, MatchTournament, MatchFriendly };
+// Ré-exporter uniquement les types pour conserver la compatibilité
+export type { MatchParticipant, MatchRules, MatchTournament, MatchFriendly } from './types.ts';
 
 interface IGame
 {

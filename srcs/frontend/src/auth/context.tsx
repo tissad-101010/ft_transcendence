@@ -83,7 +83,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         user,
         isAuthenticated: !!user,
         pending2FA,
-        isLoading,
+        // Expose a single loading flag under both names for compatibility
+        isLoading: loading,
         login,
         logout,
         setPending2FA,

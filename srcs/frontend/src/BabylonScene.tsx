@@ -4,7 +4,7 @@ import { useAuth } from "./auth/context";
 import {handlePopState} from './CameraHistory';
 
 const BabylonScene = () => {
-  const { user, isAuthenticated, pending2FA,  } = useAuth();
+  const { user, isAuthenticated, pending2FA, isLoading } = useAuth();
   const canvasRef = useRef(null);
   const managerRef = useRef<SceneManager | null>(null);
   const [managerReady, setManagerReady] = useState(false);
@@ -46,7 +46,9 @@ const BabylonScene = () => {
       console.log("Current user in SceneManager:", managerRef.current.getUserX);
     }
     console.log("BabylonScene: propagation de l'utilisateur vers UserX:", user);
-    managerRef.current.setUser = user;
+    if (managerRef.current) {
+      managerRef.current.setUser = user;
+    }
   }, [user, managerReady, isLoading]);
 
 // Gestion back/forward navigateur

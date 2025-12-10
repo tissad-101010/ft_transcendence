@@ -1,51 +1,19 @@
-import {
-  Scene,
-} from '@babylonjs/core';
-
-import { SceneManager } from './scene/SceneManager.ts';
 import { ZoneName } from "./config.ts";
-
-import {
-    TournamentParticipant,
-    Tournament 
-} from "./Tournament.ts";
-import {
-    Match,
-    MatchRules
-} from "./Match.ts";
-import { MatchFriendlyOnline } from './Match/MatchFriendlyOnLine.ts';
-import { Env } from './lockerRoom/scoreboardUI/menuCreate.ts';
-
+import { TournamentParticipant, Tournament } from "./Tournament.ts";
+import { Match, MatchRules, MatchParticipant } from "./Match.ts";
+import { MatchFriendlyOnline } from "./Match/MatchFriendlyOnLine.ts";
+import { Env } from "./lockerRoom/scoreboardUI/menuCreate.ts";
+import { SceneManager } from "./scene/SceneManager.ts";
 
 import {
     FriendManager,
     FriendInvitationsI
-} from './friends/FriendsManager.ts';
-import { Friend } from './friends/Friend.ts';
-import { FriendInvitation } from './friends/FriendInvitation.ts';
-import { PromiseUpdateResponse, StatusInvitation } from './friends/api/friends.api.ts';
+} from "./friends/FriendsManager.ts";
+import { Friend } from "./friends/Friend.ts";
+import { FriendInvitation } from "./friends/FriendInvitation.ts";
+import { PromiseUpdateResponse, StatusInvitation } from "./friends/api/friends.api.ts";
 
-import { userToBackendFormat } from './types.ts';
-
-interface TwoFactorMethods
-{
-    type: string,
-    enabled: boolean    
-}
-
-interface User
-{
-    login?: string,
-    username?: string,
-    id?: number,
-    email?: string,
-    phone?: string,
-    gamesPlayed?: number,
-    wins?: number,
-    loss?: number,
-    avatarUrl?: string
-    twoFactorMethods?: TwoFactorMethods[],
-}
+import { User, userToBackendFormat } from "./types.ts";
 
 /*
     Classe permettant de gérer les actions de l'utilisateur, lieu où seront stockées les données
@@ -67,6 +35,7 @@ export class UserX
     {
         this.sceneManager = sceneManager;
         this.friendManager = new FriendManager(this);
+        console.log("UserX initialisé, en attente de l'utilisateur depuis le contexte React");
     }
 
 
@@ -117,7 +86,7 @@ export class UserX
     /*       Tournament / Matchs       */
     /***********************************/
 
-        private extractNumericId(value: any): number
+    private extractNumericId(value: any): number
     {
         if (typeof value === "number" && Number.isFinite(value))
             return value;
@@ -144,7 +113,7 @@ export class UserX
             id: this.extractNumericId(payload.id ?? payload.userId ?? payload.playerId ?? payload.gameId),
             username,
             email: payload.email,
-            avatarUrl: payload.avatar || payload.avatarUrl,
+            avatar: payload.avatar || payload.avatarUrl,
         };
     }
 
@@ -174,20 +143,7 @@ export class UserX
         }
         return false;
     }
-        /* Juste garder le parametre login une fois le backend ajoute*/
-    // public addFriend(
-    //     login: string,
-    // ) : number
-    // {
-    //     const test = this.friends.find((f) => f.getLogin === login)
-    //     if (test !== undefined)
-    //     {
-    //         console.log("Amis deja ajoute -> " + login);
-    //         return (1);
-    //     }
-    //     this.friends.push(new Friend(1, login, true));
-    //     return (0);
-    // }
+    
     async createTournament(a: string) : Promise<boolean>
     {
         if (this.user === null)
@@ -340,6 +296,8 @@ export class UserX
                 this.user = {
                     username: data.match.player1.login || this.user.username,
                     id: data.match.player1.id,
+                    email: this.user.email,
+                    avatar: this.user.avatar,
                 };
                 console.log("Synchronisation de l'utilisateur créateur avec la DB du service game:", {
                     oldUser,
@@ -411,6 +369,8 @@ export class UserX
                 this.user = {
                     username: data.match.player1.login || this.user.username,
                     id: data.match.player1.id,
+                    email: this.user.email,
+                    avatar: this.user.avatar,
                 };
                 console.log("Synchronisation (player1) avec la DB du service game dans joinFriendlyMatch:", {
                     oldUser,
@@ -421,6 +381,8 @@ export class UserX
                 this.user = {
                     username: data.match.player2.login || this.user.username,
                     id: data.match.player2.id,
+                    email: this.user.email,
+                    avatar: this.user.avatar,
                 };
                 console.log("Synchronisation (player2) avec la DB du service game dans joinFriendlyMatch:", {
                     oldUser,
@@ -473,8 +435,8 @@ export class UserX
             // Second joueur (player2) → droite (p[1])
             // Ce comportement s'applique aussi pour les matchs en ligne : premier arrivé = gauche, second = droite.
             players = [
-                { alias: player1Login || loginOpp || "Player1", id: player1Id || idOpp || null, ready: false, me: false },
-                { alias: player2Login || loginOpp || "Player2", id: player2Id || idOpp || null, ready: false, me: false }
+                { alias: player1Login || loginOpp || "Player1", id: player1Id ?? idOpp ?? 0, ready: false, me: false },
+                { alias: player2Login || loginOpp || "Player2", id: player2Id ?? idOpp ?? 0, ready: false, me: false }
             ];
 
             // Marquer "me" selon l'ID utilisateur
@@ -527,15 +489,7 @@ export class UserX
         }
     }
     
-    // async deleteFriend(
-    //     f: Friend
-    // ) : void
-    // {
-    //     this.friends.splice(this.friends.findIndex(
-    //         (e) => e.getId === f.getId),
-    //         1
-    //     );
-    // }
+    
 
     deleteTournament() : void
     {
@@ -666,9 +620,15 @@ export class UserX
         user: any
     )
     {
-        this.user = user;
-        this.friendManager.loadData();
-        console.log("user vaut mtn", this.user);
+        const normalized = this.normalizeUserPayload(user);
+        if (normalized) {
+            this.user = normalized;
+            this.friendManager.loadData();
+            console.log("Utilisateur authentifié défini dans UserX:", this.user);
+        } else {
+            console.warn("Aucun utilisateur authentifié exploitable fourni à UserX, réinitialisation du contexte utilisateur.");
+            this.user = null;
+        }
     }
     clearUser() : void
     {
