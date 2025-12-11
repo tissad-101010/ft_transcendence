@@ -32,7 +32,7 @@ tls_gen:
 local:
 	mkdir -p ./srcs/frontend/build
 	mkdir -p ./srcs/frontend/data
-	mkdir -p ./srcs/backend/vault/data
+	mkdir -p ~/data/vault
 	mkdir -p ./srcs/backend/postgresql/data
 	mkdir -p ./srcs/backend/services/service-users/data
 	mkdir -p ./srcs/backend/services/service-game/data

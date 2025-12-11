@@ -52,7 +52,7 @@ app.register(chatRoutes);
 // Start the Fastify server
 const start = async () => {
   try {
-    const originURL = process.env.ORIGIN_URL;
+    const originURL = `${process.env.ORIGIN_URL}`;
     // Register CORS plugin to allow cross-origin requests  
     // need more testing/!\
     await app.register(cors, {

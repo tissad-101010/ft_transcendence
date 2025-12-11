@@ -86,7 +86,7 @@ services:
       - global-net
       - security-net
     depends_on:
-      # - hashicorp_vault
+      - hashicorp_vault
       - redis
       - postgreSQL
     ports:
@@ -129,6 +129,9 @@ services:
       - INTERNAL_API_KEY=${INTERNAL_API_KEY}
       - GCP_STORAGE_KEY_PATH=${GCP_STORAGE_KEY_PATH}
       - ORIGIN_URL=${ORIGIN_URL}
+      - VAULT_ADDR=${VAULT_ADDR}
+      - VAULT_TOKEN=${VAULT_TOKEN}
+      - UNSEAL_KEY=${UNSEAL_KEY}
 
     restart: unless-stopped
   #********************************************************************************#
@@ -329,8 +332,10 @@ services:
       - ./backend/vault/certs/vault.key:/vault/certs/vault.key:ro
     cap_add:
       - IPC_LOCK
-    # environment:
-    #   - VAULT_ADDR=http://localhost:8200
+    environment:
+      - VAULT_ADDR=${VAULT_ADDR}
+      - VAULT_TOKEN=${VAULT_TOKEN}
+      - UNSEAL_KEY=${UNSEAL_KEY}
     ports:
       - "8200:8200"
       - "8201:8201"
@@ -386,7 +391,7 @@ volumes:
     driver: local
     driver_opts:
       type: none
-      device: ./backend/vault/data
+      device: ~/data/vault
       o: bind
   #*******************************************************************************#
   # Local volume for frontend build artifacts
