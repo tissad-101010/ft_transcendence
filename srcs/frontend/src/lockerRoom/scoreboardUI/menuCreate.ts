@@ -668,6 +668,8 @@ export function menuCreate(
     button1.onPointerUpObservable.add(async () => {
         // Utiliser le login de l'utilisateur connecté comme alias
         const userLogin = env.userX.getUser?.login || "Player";
+        // Nettoyer un éventuel tournoi brouillon déjà créé côté serveur
+        await env.userX.deleteTournament();
         await env.userX.createTournament(userLogin);
         if (env.userX.getTournament)
             env.tournament = env.userX.getTournament;

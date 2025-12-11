@@ -204,12 +204,16 @@ export function startButton(
     });
 }
 
-export function backButton(
+export async function backButton(
     env: Env, fn: (e: Env) => void
-) : void
+) : Promise<void>
 {
     if (env.page !== null)
         env.page.dispose();
     env.page = null;
+
+    // Si un tournoi est en cours de création côté serveur (statut waiting), le nettoyer
+    await env.userX.deleteTournament();
+
     fn(env);
 }

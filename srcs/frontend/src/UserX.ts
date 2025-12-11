@@ -491,13 +491,39 @@ export class UserX
     
     
 
-    deleteTournament() : void
+    async deleteTournament() : Promise<boolean>
     {
         /*
             Si le tournoi créer des timestamp ou appels réseaux etc
             les arrêter avant de mettre à NULL
         */
+        const tournamentId = this.tournament?.getDbTournamentId ?? null;
+
+        if (tournamentId !== null) {
+            try {
+                const response = await fetch(`https://localhost:8443/api/tournament/${tournamentId}`, {
+                    method: "DELETE",
+                    // Pas de body => ne pas envoyer Content-Type pour éviter FST_ERR_CTP_EMPTY_JSON_BODY
+                    headers: {
+                        Accept: "application/json",
+                    },
+                    credentials: "include",
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    console.error("Erreur lors de la suppression du tournoi:", errorData);
+                    // On remet quand même à null côté front pour éviter les fuites d'état locales
+                } else {
+                    console.log("Tournoi supprimé côté serveur:", tournamentId);
+                }
+            } catch (error) {
+                console.error("Erreur réseau lors de la suppression du tournoi:", error);
+            }
+        }
+
         this.tournament = null;
+        return true;
     }
     
     async deleteFriendlyMatch(

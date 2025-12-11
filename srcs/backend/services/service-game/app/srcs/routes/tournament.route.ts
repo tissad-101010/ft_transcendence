@@ -661,6 +661,64 @@ export async function tournamentRoutes(fastify: FastifyInstance) {
       });
     }
   });
+
+  // Supprimer un tournoi (uniquement s'il est encore en attente)
+  fastify.delete('/api/tournament/:tournamentId', async (request: any, reply: any) => {
+    try {
+      const { tournamentId } = request.params as { tournamentId: string };
+      const id = parseInt(tournamentId, 10);
+
+      if (Number.isNaN(id)) {
+        return reply.code(400).send({
+          success: false,
+          message: 'Identifiant de tournoi invalide',
+        });
+      }
+
+      const tournament = await (fastify.prisma as any).tournament.findUnique({
+        where: { id },
+        select: { status: true },
+      });
+
+      if (!tournament) {
+        return reply.code(404).send({
+          success: false,
+          message: 'Tournoi non trouvé',
+        });
+      }
+
+      if (tournament.status !== 'waiting') {
+        return reply.code(400).send({
+          success: false,
+          message: 'Le tournoi ne peut plus être supprimé (déjà démarré ou terminé)',
+        });
+      }
+
+      await (fastify.prisma as any).$transaction([
+        (fastify.prisma as any).tournamentMatch.deleteMany({
+          where: { tournamentId: id },
+        }),
+        (fastify.prisma as any).tournamentParticipant.deleteMany({
+          where: { tournamentId: id },
+        }),
+        (fastify.prisma as any).tournament.delete({
+          where: { id },
+        }),
+      ]);
+
+      return reply.code(200).send({
+        success: true,
+        message: 'Tournoi supprimé avec succès',
+      });
+    } catch (error: unknown) {
+      fastify.log.error(error, 'Erreur suppression tournoi');
+      const normalizedError = error instanceof Error ? error : new Error(String(error));
+      return reply.code(500).send({
+        success: false,
+        message: normalizedError.message || 'Erreur lors de la suppression du tournoi',
+      });
+    }
+  });
 }
 
 
