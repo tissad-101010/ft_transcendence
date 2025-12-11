@@ -44,10 +44,7 @@ export async function getUserByUsername(username: string)
     {
       // USER NOT FOUND
       if (res.status === 404)
-      {
-        console.error(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>JE RECUPERE BIEN CETTE ERREUR")
         throw new UserNotFoundError(username);
-      }
       // SERVICE USER ERROR
       if (res.status === 503)
         throw new RemoteServiceUnavailableError();

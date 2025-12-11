@@ -1,5 +1,13 @@
 import { FastifyInstance } from 'fastify';
 
+type UserInfo = {
+    id: string;
+    username: string;
+    lastLogin: Date;
+    avatarUrl: string;
+    createdAt: string;
+}
+
 // =====================
 // Friendly Match Routes
 // =====================
@@ -181,22 +189,27 @@ export async function friendlyRoutes(fastify: FastifyInstance) {
   });
 
   // Récupérer tous les matchs (amicaux + tournois) joués par un utilisateur
-  fastify.get('/api/matches/user/:userId', async (request: any, reply: any) => {
-    const { userId: rawUserId } = request.params as { userId: string };
-    const userId = parseInt(rawUserId, 10);
+  fastify.get('/api/matches/user/:username', async (request: any, reply: any) => {
 
-    if (Number.isNaN(userId)) {
-      return reply.code(400).send({
-        success: false,
-        message: 'userId invalide',
-      });
-    }
-
+    const { username } = request.params;
+    console.log("MATCHS ENREGISTRES : ", await fastify.prisma.friendlyMatch.findMany());
+    console.log("Username ->", username);
     try {
-      // Matches amicaux
+      const call = await (fastify.prisma as any).user.findMany({
+        where: {
+          login: username
+        }
+      });
+
+      if (!call)
+        return ({success: false, message: "User non trouve"});
+
+      const user = call[0];
+
+        // Matches amicaux
       const friendlyMatches = await (fastify.prisma as any).friendlyMatch.findMany({
         where: {
-          OR: [{ player1Id: userId }, { player2Id: userId }],
+          OR: [{ player1Id: user.id }, { player2Id: user.id }],
         },
         include: {
           player1: { select: { id: true, login: true } },
@@ -205,58 +218,10 @@ export async function friendlyRoutes(fastify: FastifyInstance) {
         orderBy: { createdAt: 'desc' },
       });
 
-      // Participants de tournois pour cet utilisateur
-      const participants = await (fastify.prisma as any).tournamentParticipant.findMany({
-        where: { userId },
-        select: {
-          id: true,
-          alias: true,
-          tournamentId: true,
-          tournament: { select: { id: true, name: true } },
-          user: { select: { id: true, login: true } },
-        },
-      });
+      console.log("USER RECUPERE -> ", user);
+      console.log("Type de l'id -> ", typeof user.id)
+      console.log("MATCH AMICAUX RECUPERES : ", friendlyMatches)
 
-      const participantIds = participants.map((p: any) => p.id);
-      let tournamentMatches: any[] = [];
-
-      if (participantIds.length > 0) {
-        tournamentMatches = await (fastify.prisma as any).tournamentMatch.findMany({
-          where: {
-            OR: [
-              { player1Id: { in: participantIds } },
-              { player2Id: { in: participantIds } },
-            ],
-          },
-          include: {
-            tournament: { select: { id: true, name: true } },
-            player1: {
-              select: {
-                id: true,
-                alias: true,
-                user: { select: { id: true, login: true } },
-              },
-            },
-            player2: {
-              select: {
-                id: true,
-                alias: true,
-                user: { select: { id: true, login: true } },
-              },
-            },
-            winner: {
-              select: {
-                id: true,
-                alias: true,
-                user: { select: { id: true, login: true } },
-              },
-            },
-          },
-          orderBy: { createdAt: 'desc' },
-        });
-      }
-
-      // Normalisation des données
       const friendly = friendlyMatches.map((m: any) => ({
         type: 'friendly',
         id: m.id,
@@ -270,51 +235,14 @@ export async function friendlyRoutes(fastify: FastifyInstance) {
         player2: m.player2 ? { id: m.player2.id, login: m.player2.login } : null,
       }));
 
-      const tournaments = tournamentMatches.map((m: any) => ({
-        type: 'tournament',
-        id: m.id,
-        tournament: m.tournament ? { id: m.tournament.id, name: m.tournament.name } : null,
-        round: m.round,
-        matchNumber: m.matchNumber,
-        status: m.status,
-        score1: m.score1,
-        score2: m.score2,
-        createdAt: m.createdAt,
-        finishedAt: m.finishedAt,
-        player1: m.player1
-          ? {
-              participantId: m.player1.id,
-              alias: m.player1.alias,
-              user: m.player1.user ? { id: m.player1.user.id, login: m.player1.user.login } : null,
-            }
-          : null,
-        player2: m.player2
-          ? {
-              participantId: m.player2.id,
-              alias: m.player2.alias,
-              user: m.player2.user ? { id: m.player2.user.id, login: m.player2.user.login } : null,
-            }
-          : null,
-        winner: m.winner
-          ? {
-              participantId: m.winner.id,
-              alias: m.winner.alias,
-              user: m.winner.user ? { id: m.winner.user.id, login: m.winner.user.login } : null,
-            }
-          : null,
-      }));
-
-      // Fusion et tri par date décroissante
-      const allMatches = [...friendly, ...tournaments].sort(
+      const allMatches = [...friendly].sort(
         (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
       );
 
       return reply.code(200).send({
         success: true,
-        userId,
         counts: {
           friendly: friendly.length,
-          tournament: tournaments.length,
           total: allMatches.length,
         },
         matches: allMatches,
