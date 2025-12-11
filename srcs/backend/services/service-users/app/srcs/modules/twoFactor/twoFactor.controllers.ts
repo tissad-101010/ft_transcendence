@@ -6,7 +6,7 @@
 /*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/27 11:48:33 by tissad            #+#    #+#             */
-/*   Updated: 2025/11/26 11:51:55 by tissad           ###   ########.fr       */
+/*   Updated: 2025/12/11 12:26:23 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -343,6 +343,7 @@ export class TwoFactorAuthController {
     req: FastifyRequest,
     reply: FastifyReply
   ) => {
+    const redisClient = req.server.redis;
     const cookies = JwtUtils.extractCookiesFromRequest(req);
     const tempToken = JwtUtils.extractTokenFromCookies(cookies, 'temp_token');
     const user = JwtUtils.extractUserFromTempToken(tempToken);
@@ -356,13 +357,44 @@ export class TwoFactorAuthController {
       return reply.status(401).send({ message: "Unauthorized ❌" });
     }
     const userId  = user.userId;
+    const email   = user.email;
+    console.log("[2fa.controller.ts] Verifying TFA TOTP for user ID:", userId, "email:", email);
     const { code } = req.body as { code: string };
     try {
         const isValid = await this.twoFactorAuthService.verifyTotpToken(userId, code);
         if (!isValid) {
           return reply.status(400).send({ message: "Invalid TFA token ❌" });
         } else {
-          return reply.code(200).send({ success:true,  message: "TFA token verified successfully ✅" });
+          const loginResponse: AuthenticatedUserDTO = {
+              id: userId,
+              email: email,
+          };
+          // generate access and refresh tokens
+          const accessToken = JwtUtils.generateAccessToken(loginResponse);
+          const refreshToken = JwtUtils.generateRefreshToken(loginResponse);
+          // store refresh token in redis cache
+            // store refresh token in redis cache
+            await this.redisClient.set(
+                `refresh_token:${refreshToken}`,
+                userId,
+                'EX',
+                60 * 60 * 24 * 7
+            );
+
+            // store access token in redis cache (optional)
+            await this.redisClient.set(
+                `access_token:${userId}`,
+                accessToken,
+                'EX',
+                60 * 15// 15 minutes
+            );
+          JwtUtils.setTempTokenCookie(reply, ''); // clear temp token cookie
+          JwtUtils.setAccessTokenCookie(reply, accessToken); 
+          JwtUtils.setRefreshTokenCookie(reply, refreshToken);
+          return reply.code(200).send({
+            success: true, 
+            message: "OTP verified successfully ✅" 
+          });
         }
       } catch (error: any) {
         console.error("❌ [2fa.controller.ts] Error verifying TFA token for user ID:", userId, error);

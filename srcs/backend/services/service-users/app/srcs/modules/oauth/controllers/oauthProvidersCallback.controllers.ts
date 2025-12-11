@@ -6,7 +6,7 @@
 /*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/18 15:31:26 by tissad            #+#    #+#             */
-/*   Updated: 2025/12/10 18:40:23 by tissad           ###   ########.fr       */
+/*   Updated: 2025/12/11 12:07:21 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,29 +46,29 @@ export async function googleOAuthControllerCallback(
             }
             // Successful authentication
             // generate JWT tokens
-            // console.log("Google OAuth successful for user ID:", user.id);
-            // const accessToken = JwtUtils.generateAccessToken({ id: user.id, email: user.email });
-            // const refreshToken = JwtUtils.generateRefreshToken({ id: user.id, email: user.email });
-            // // store tokens in redis cache
-            //         // store refresh token in redis cache
-            // await redisClient.set(
-            //     `refresh_token:${refreshToken}`,
-            //     user.id,
-            //     'EX',
-            //     60 * 60 * 24 * 7// 7 days
-            // );
+            console.log("Google OAuth successful for user ID:", user.id);
+            const accessToken = JwtUtils.generateAccessToken({ id: user.id, email: user.email });
+            const refreshToken = JwtUtils.generateRefreshToken({ id: user.id, email: user.email });
+            // store tokens in redis cache
+                    // store refresh token in redis cache
+            await redisClient.set(
+                `refresh_token:${refreshToken}`,
+                user.id,
+                'EX',
+                60 * 60 * 24 * 7// 7 days
+            );
 
-            // // store access token in redis cache (optional)
-            // await redisClient.set(
-            //     `access_token:${user.id}`,
-            //     accessToken,
-            //     'EX',
-            //     60 * 15// 15 minutes
-            // );
-            // // set cookies
-            // JwtUtils.setAccessTokenCookie(reply, accessToken);
-            // JwtUtils.setRefreshTokenCookie(reply, refreshToken);
-            return reply.redirect(`https://localhost:8443/oauth/callback`);
+            // store access token in redis cache (optional)
+            await redisClient.set(
+                `access_token:${user.id}`,
+                accessToken,
+                'EX',
+                60 * 15// 15 minutes
+            );
+            // set cookies
+            JwtUtils.setAccessTokenCookie(reply, accessToken);
+            JwtUtils.setRefreshTokenCookie(reply, refreshToken);
+            return reply.redirect(`https://localhost:8443`);
             // return reply.redirect(process.env.FRONTEND_URL || '/');
         }
     }
@@ -98,10 +98,7 @@ export async function githubOAuthControllerCallback(
                 console.log("User has 2FA enabled, redirecting to 2FA page");
                 const temp_token = JwtUtils.generateTwoFactorTempToken({ id: user.id, email: user.email });
                 JwtUtils.setTempTokenCookie(reply, temp_token);
-                // reply.send({
-                //     message: "GitHub OAuth successful t2fa required",
-                // });
-                return reply.redirect(`https://localhost:8443`);
+                return reply.redirect(`https://localhost:8443/oauth/callback`);
             }
             // Successful authentication
             console.log("GitHub OAuth successful for user ID:", user.id);
@@ -157,7 +154,7 @@ export async function fortyTwoOAuthControllerCallback(
                 console.log("User has 2FA enabled, redirecting to 2FA page");   
                 const temp_token = JwtUtils.generateTwoFactorTempToken({ id: user.id, email: user.email });
                 JwtUtils.setTempTokenCookie(reply, temp_token);
-                 return reply.redirect(`https://localhost:8443`);
+                 return reply.redirect(`https://localhost:8443/oauth/callback`);
             }
             // Successful authentication
             console.log("42 OAuth successful for user ID:", user.id);

@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "./auth/context.tsx";
+import { fetchUserProfile } from "./auth/controllers/auth.api.ts";
 
 export default function OAuthCallback() {
   const navigate = useNavigate();
@@ -9,18 +10,18 @@ export default function OAuthCallback() {
   useEffect(() => {
     const fetchOAuthData = async () => {
       try {
-        const url = new URL(window.location.href);
-        const code = url.searchParams.get("code");
-        const provider = url.searchParams.get("provider");
+        // const url = new URL(window.location.href);
+        // const code = url.searchParams.get("code");
+        // const provider = url.searchParams.get("provider");
 
-        if (!code || !provider) {
-          console.error("Missing OAuth callback params");
-          navigate("/login");
-          return;
-        }
+        // if (!code || !provider) {
+        //   console.error("Missing OAuth callback params");
+        //   // navigate("/login");
+        //   return;
+        // }
 
         const response = await fetch(
-          `https://localhost:8443/api/user/oauth/callback?code=${code}&provider=${provider}`,
+          `https://localhost:8443/api/user/oauth/callback`,
           {
             method: "GET",
             credentials: "include", // important to include cookies
@@ -37,12 +38,8 @@ export default function OAuthCallback() {
               required: true,
               methods: data.methodsEnabled || [],
             });
-            navigate("/2fa"); // Redirige vers la page 2FA
-          } else {
-            // Si aucune 2FA n'est nécessaire, on termine le login
-            login(data.user);
-            navigate("/dashboard"); // Redirige vers le dashboard
-          }
+            navigate("/"); // Redirige vers la page 2FA
+          } 
         } else {
           console.error("OAuth callback failed");
           navigate("/login"); // Redirige vers la page de login en cas d'erreur
