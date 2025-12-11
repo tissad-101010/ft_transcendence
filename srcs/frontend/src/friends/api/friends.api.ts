@@ -29,7 +29,7 @@ export enum StatusInvitation
     PENDING
 }
 
-const serviceUrl = "https://localhost:8443";
+const serviceUrl = window.__ENV__.BACKEND_URL;
 
 export async function getInfoFriend(username: string): Promise<PromiseGetInfoFriendResponse>
 {

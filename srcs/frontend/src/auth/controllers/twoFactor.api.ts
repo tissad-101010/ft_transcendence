@@ -6,9 +6,10 @@
 /*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/22 12:58:29 by issad             #+#    #+#             */
-/*   Updated: 2025/11/27 19:11:08 by tissad           ###   ########.fr       */
+/*   Updated: 2025/12/11 19:15:59 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
+
 
 
 
@@ -17,7 +18,10 @@
 import { authFetch } from '../authFetch';
 import { fetchUserProfile } from './auth.api';
 // src/auth/controllers/twoFactor.api.ts
-const BASE_URL = "https://localhost:8443/api/user/2fa";
+
+
+const API_URL = window.__ENV__.BACKEND_URL;
+const BASE_URL = `${API_URL}/api/user/2fa`;
 
 /**
  * Send OTP to enable 2FA via email

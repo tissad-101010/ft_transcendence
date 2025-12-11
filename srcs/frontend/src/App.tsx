@@ -1,4 +1,16 @@
-import React from "react";
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   App.tsx                                            :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/12/11 17:53:50 by tissad            #+#    #+#             */
+/*   Updated: 2025/12/11 17:53:51 by tissad           ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+
 import BabylonScene from "./BabylonScene.tsx";
 import AuthPage from "./auth/authPage.tsx";
 import { AuthProvider, useAuth } from "./auth/context.tsx";
@@ -48,7 +60,7 @@ export default function App() {
     <Routes>
 
       {/* Page principale : ton layout actuel */}
-      <Route path="/" element={      <AuthProvider><MainApp /> </AuthProvider>} />
+      <Route path="/" element={  <AuthProvider><MainApp /> </AuthProvider>} />
 
       {/* Callback OAuth: pas d’overlay, pas de Babylon, juste le flow OAuth */}
       <Route path="/oauth/callback" element={<AuthProvider><OAuthCallback /></AuthProvider>} />

@@ -59,6 +59,7 @@ services:
       - "3000:3000"
     environment:
      - RECAPTCHA_SITE_KEY=${RECAPTCHA_SITE_KEY}
+     - BACKEND_API_URL=${BACKEND_URL}
     restart: unless-stopped
   #********************************************************************************#
 
@@ -127,6 +128,8 @@ services:
       - TEMP_TOKEN_SECRET=${TEMP_TOKEN_SECRET}
       - INTERNAL_API_KEY=${INTERNAL_API_KEY}
       - GCP_STORAGE_KEY_PATH=${GCP_STORAGE_KEY_PATH}
+      - ORIGIN_URL=${ORIGIN_URL}
+
     restart: unless-stopped
   #********************************************************************************#
 
@@ -206,6 +209,7 @@ services:
       - DB_PORT=${CHAT_SERVICE_DB_PORT}
       - DB_SAMPLE_NAME=${CHAT_SERVICE_DB_SAMPLE_NAME}
       - DATABASE_URL=${CHAT_SERVICE_DATABASE_URL}
+      - ORIGIN_URL=${ORIGIN_URL}
     restart: unless-stopped
 
 
@@ -247,6 +251,7 @@ services:
       - DATABASE_URL=${FRIENDS_SERVICE_DATABASE_URL}
       - USER_SERVICE_URL=http://service-users:4000
       - INTERNAL_API_KEY=${INTERNAL_API_KEY}
+      - ORIGIN_URL=${ORIGIN_URL}
     restart: unless-stopped
 
   #********************************************************************************#

@@ -54,8 +54,7 @@ import {
 } from "./utilsUI.ts";
 import { SceneManager } from "../scene/SceneManager.ts";
 import { UserX } from "../UserX.ts";
-import { use } from "react";
-import { get } from "http";
+const API_URL = window.__ENV__.BACKEND_URL;
 
 Chart.register(
     LineController,
@@ -653,7 +652,7 @@ export class MyProfilUI
                     const formData = new FormData();
                     formData.append("avatar", file);  // OBLIGATOIRE : "avatar"
     
-                    const res = await fetch("https://localhost:8443/api/user/upload-avatar", {
+                    const res = await fetch(`${API_URL}/api/user/upload-avatar`, {
                         method: "POST",
                         body: formData,
                         credentials: "include"

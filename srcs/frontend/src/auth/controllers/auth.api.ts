@@ -6,11 +6,13 @@
 /*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/18 19:09:22 by tissad            #+#    #+#             */
-/*   Updated: 2025/12/10 10:31:47 by tissad           ###   ########.fr       */
+/*   Updated: 2025/12/11 19:07:05 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 import { authFetch } from '../authFetch';
+
+const API_URL = window.__ENV__.BACKEND_URL;
 
 export async function registerUser(
   username: string,
@@ -21,7 +23,7 @@ export async function registerUser(
   console.log("email ", email);
   console.log("password ", password);
   try {
-    const response = await fetch("https://localhost:8443/api/user/auth/signup", {
+    const response = await fetch(`${API_URL}/api/user/auth/signup`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -52,7 +54,7 @@ export async function loginUser(
     console.log("password ", password);
 
     try {
-        const response = await fetch("https://localhost:8443/api/user/auth/signin", {
+        const response = await fetch(`${API_URL}/api/user/auth/signin`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -87,7 +89,7 @@ export async function fetchUserProfile(): Promise<{ success: boolean; data?: any
             },
             credentials: "include", // envoie les cookies si backend les utilise
         };
-        const response = await authFetch("https://localhost:8443/api/user/profile", requestOptions);
+        const response = await authFetch(`${API_URL}/api/user/profile`, requestOptions);
         const data = await response.json(); 
         if (response.ok) {
             return { success: true, data: data};
@@ -107,7 +109,7 @@ export async function fetchUserProfile(): Promise<{ success: boolean; data?: any
 
 export async function logoutUser(): Promise<{ success: boolean; message?: string }> {
     try {
-        const response = await fetch("https://localhost:8443/api/user/auth/signout", {
+        const response = await fetch(`${API_URL}/api/user/auth/signout`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -132,7 +134,7 @@ export async function logoutUser(): Promise<{ success: boolean; message?: string
 // change password
 export async function changePassword(currentPassword: string, newPassword: string): Promise<{ success: boolean; message?: string }> {
   try {
-    const response = await authFetch("https://localhost:8443/api/user/change-password", {
+    const response = await authFetch(`${API_URL}/api/user/change-password`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

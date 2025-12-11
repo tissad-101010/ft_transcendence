@@ -6,22 +6,23 @@
 /*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/20 12:26:37 by tissad            #+#    #+#             */
-/*   Updated: 2025/11/27 19:11:08 by tissad           ###   ########.fr       */
+/*   Updated: 2025/12/11 19:15:12 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 // src/utils/logoutUser.ts
-
-
 import { authFetch } from "../authFetch";
 
-export async function logoutUser() {
+
+const API_URL = window.__ENV__.BACKEND_URL;
+
+export async function logoutUser() : Promise<boolean> {
   try {
     const requestOptions: RequestInit = {
       method: "POST",
       credentials: "include", // indispensable pour les cookies
     };
-    const response = await authFetch("https://localhost:8443/api/user/auth/logout", requestOptions);
+    const response = await authFetch(`${API_URL}/api/user/auth/logout`, requestOptions);
 
 
     if (!response.ok) {

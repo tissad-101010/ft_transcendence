@@ -12,6 +12,7 @@
 
 import { authFetch } from "../auth/authFetch";
 
+const API_URL = window.__ENV__.BACKEND_URL;
 
 export class ChatApi {
     //start of chat api methods
@@ -21,7 +22,7 @@ export class ChatApi {
             receiverUsername
         };
 
-        const response = await authFetch('https://localhost:8443/chat/conversation/start-conversation', {
+        const response = await authFetch(`${API_URL}/chat/conversation/start-conversation`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -33,7 +34,7 @@ export class ChatApi {
     
     // GET USER CONVERSATIONS
     async getUserConversations(username: string): Promise<any> {
-        const response = await authFetch(`https://localhost:8443/chat/conversation/get-user-conversations?username=${encodeURIComponent(username)}`, {
+        const response = await authFetch(`${API_URL}/chat/conversation/get-user-conversations?username=${encodeURIComponent(username)}`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -54,7 +55,7 @@ export class ChatApi {
             content,
         };
 
-        authFetch('https://localhost:8443/chat/message/send-message', {
+        authFetch(`${API_URL}/chat/message/send-message`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
