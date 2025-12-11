@@ -114,6 +114,21 @@ export default class GameLogic
             this.winner = 2;
     };
 
+    /**
+     * Force la fin de partie avec un gagnant (utile pour les abandons).
+     * team: 1 pour la gauche, 2 pour la droite.
+     */
+    forceEndWithWinner(team: number): void
+    {
+        if (team !== 1 && team !== 2)
+            return;
+        this.winner = team;
+        this.state = 3;
+        this.countDownGoal.active = false;
+        if (this.countDownGoal.id)
+            clearInterval(this.countDownGoal.id);
+    }
+
     // Methode qui met a jour l'etat de la partie a chaque appel de window.requestAnimationFrame
     update(keys: Set<string>) : void
     {

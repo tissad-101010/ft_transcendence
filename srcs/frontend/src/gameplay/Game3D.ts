@@ -566,10 +566,11 @@ export default class Game3D
 
         setTimeout(() => clearInterval(interval), 10000);
 
-        this.showWinnerUI(
-            this.game?.logic.getPlayers[this.game?.logic.getWinner - 1].getAlias,
-            shouldReturnToMainMenu
-        );
+        const winnerIdx = Math.max(0, (this.game?.logic.getWinner ?? 1) - 1);
+        const winnerName =
+            this.game?.logic.getPlayers[winnerIdx]?.getAlias ?? "Victoire par forfait";
+
+        this.showWinnerUI(winnerName, shouldReturnToMainMenu);
     }
 
     showWinnerUI(winnerName, shouldReturnToMainMenu: boolean = false) {

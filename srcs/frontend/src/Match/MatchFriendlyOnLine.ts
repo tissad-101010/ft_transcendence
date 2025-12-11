@@ -357,6 +357,12 @@ export class MatchFriendlyOnline extends MatchBase
             this.winner = winnerParticipant;
         }
 
+        // Forcer la fin de partie côté logique pour permettre l'affichage du vainqueur
+        const winnerSlot = this.participants.findIndex((p) => p.id === winnerParticipant?.id);
+        if (winnerSlot !== -1 && this.game?.logic) {
+            this.game.logic.forceEndWithWinner(winnerSlot + 1);
+        }
+
         const scoreSnapshot = {
             score1: this.game.logic.getScore1,
             score2: this.game.logic.getScore2,
