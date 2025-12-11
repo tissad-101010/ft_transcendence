@@ -6,7 +6,7 @@
 /*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/23 15:58:35 by tissad            #+#    #+#             */
-/*   Updated: 2025/12/10 14:39:00 by tissad           ###   ########.fr       */
+/*   Updated: 2025/12/11 20:18:19 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -84,9 +84,10 @@ const start = async () => {
   try {
     // Register CORS plugin to allow cross-origin requests  
     // need more testing/!\
+    const originURL = process.env.ORIGIN_URL;
     await app.register(cors, {
-      // reel origin is 'https://localhost:8443'
-      origin: ['http://localhost:3000', 'https://localhost:8443'], // Allow specific origins
+      // reel origin is originURL
+      origin: [originURL, 'http://localhost:3000'], // Allow specific origins
       methods: ['GET', 'POST'], // Allow specific methods
       credentials: true, // Allow credentials
     });

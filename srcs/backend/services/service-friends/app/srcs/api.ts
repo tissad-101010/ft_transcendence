@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   api.ts                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: glions <glions@student.42.fr>              +#+  +:+       +#+        */
+/*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/23 15:58:35 by tissad            #+#    #+#             */
-/*   Updated: 2025/12/03 10:52:06 by glions           ###   ########.fr       */
+/*   Updated: 2025/12/11 20:18:20 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,9 +50,10 @@ const start = async () => {
   try {
     // Register CORS plugin to allow cross-origin requests  
     // need more testing/!\
+    const originURL = process.env.ORIGIN_URL;
     await app.register(cors, {
-      // reel origin is 'https://localhost:8443'
-      origin: ['http://localhost:3000', 'https://localhost:8443'],
+      // reel origin is originURL
+      origin: [originURL, 'http://localhost:3000',],
       methods: ['GET', 'POST', 'PATCH', 'DELETE'], // Allow specific methods
       credentials: true, // Allow credentials
     });

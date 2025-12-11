@@ -6,7 +6,7 @@
 /*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/18 15:31:26 by tissad            #+#    #+#             */
-/*   Updated: 2025/12/11 12:07:21 by tissad           ###   ########.fr       */
+/*   Updated: 2025/12/11 20:18:40 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,8 @@ import { FastifyReply, FastifyRequest } from "fastify";
 import { OauthService } from "../services/oauth.services";
 import { JwtUtils } from "../../../utils/jwt.utils";
 import {LoginResponseDTO} from "../../../types/user.types";
+
+const originUrl = process.env.ORIGIN_URL;
 
 // Google OAuth callback handler
 export async function googleOAuthControllerCallback(
@@ -42,7 +44,7 @@ export async function googleOAuthControllerCallback(
   
                 
                 // redirect to 2FA page
-                return reply.redirect(`https://localhost:8443/oauth/callback`);
+                return reply.redirect(`${originUrl}/oauth/callback`);
             }
             // Successful authentication
             // generate JWT tokens
@@ -68,7 +70,7 @@ export async function googleOAuthControllerCallback(
             // set cookies
             JwtUtils.setAccessTokenCookie(reply, accessToken);
             JwtUtils.setRefreshTokenCookie(reply, refreshToken);
-            return reply.redirect(`https://localhost:8443`);
+            return reply.redirect(originUrl);
             // return reply.redirect(process.env.FRONTEND_URL || '/');
         }
     }
@@ -98,7 +100,7 @@ export async function githubOAuthControllerCallback(
                 console.log("User has 2FA enabled, redirecting to 2FA page");
                 const temp_token = JwtUtils.generateTwoFactorTempToken({ id: user.id, email: user.email });
                 JwtUtils.setTempTokenCookie(reply, temp_token);
-                return reply.redirect(`https://localhost:8443/oauth/callback`);
+                return reply.redirect(`${originUrl}/oauth/callback`);
             }
             // Successful authentication
             console.log("GitHub OAuth successful for user ID:", user.id);
@@ -123,7 +125,7 @@ export async function githubOAuthControllerCallback(
                 'EX',
                 60 * 15// 15 minutes
             );
-            return reply.redirect(`https://localhost:8443`);
+            return reply.redirect(originUrl);
         }
     }
     catch (error) {
@@ -154,7 +156,7 @@ export async function fortyTwoOAuthControllerCallback(
                 console.log("User has 2FA enabled, redirecting to 2FA page");   
                 const temp_token = JwtUtils.generateTwoFactorTempToken({ id: user.id, email: user.email });
                 JwtUtils.setTempTokenCookie(reply, temp_token);
-                 return reply.redirect(`https://localhost:8443/oauth/callback`);
+                 return reply.redirect(`${originUrl}/oauth/callback`);
             }
             // Successful authentication
             console.log("42 OAuth successful for user ID:", user.id);
@@ -178,7 +180,7 @@ export async function fortyTwoOAuthControllerCallback(
                 'EX',
                 60 * 15// 15 minutes
             );
-             return reply.redirect(`https://localhost:8443`);
+             return reply.redirect(originUrl);
         }   
     }
     catch (error) {
