@@ -161,13 +161,13 @@ export class InvitationUI
                 else
                 {
                     this.textLog!.text = res.message || "error";
-                    this.textLog!.color = "rgba(212, 146, 185, 1)";
+                    this.textLog!.color = "#ce8a8d";
                 }
             })
             .catch ((err: any) => {
                 console.error("Problème lors de l'appel à sendFriendInvite", err);
                 this.textLog!.text = err.message;
-                this.textLog!.color = "rgba(212, 146, 185, 1)";
+                this.textLog!.color = "#ce8a8d";
             });
         });
 
@@ -227,7 +227,7 @@ export class InvitationUI
                     if (response.success)
                         this.textLog!.color = "rgba(0, 124, 155, 1)";
                     else
-                        this.textLog!.color = "rgba(226, 140, 169, 1)";
+                        this.textLog!.color = "#ce8a8d";
                     this.displayContainerR();
                 });
         });
@@ -336,9 +336,9 @@ export class InvitationUI
                             .then((response : PromiseUpdateResponse) => {
                                 this.textLog!.text = response.message;
                                 if (response.success)
-                                    this.textLog!.color = "rgba(63, 124, 173, 1)";
+                                    this.textLog!.color = "#3f8b95";
                                 else
-                                    this.textLog!.color = "rgba(212, 146, 185, 1)";
+                                    this.textLog!.color = "#ce8a8d";
                                 this.displayContainerR();
                             }
                     )
@@ -350,14 +350,14 @@ export class InvitationUI
                             .then((response : PromiseUpdateResponse) => {
                                 this.textLog!.text = response.message;
                                 if (response.success)
-                                    this.textLog!.color = "rgba(63, 124, 173, 1)";
+                                    this.textLog!.color = "#3f8b95";
                                 else
-                                    this.textLog!.color = "rgba(212, 146, 185, 1)";
+                                    this.textLog!.color = "#ce8a8d";
                                 this.displayContainerR();
                             }
                     )
                 });
-            applyStyle("rgba(177, 67, 168, 1)", cancel);
+            applyStyle("#ce8a8d", cancel);
             b.push(cancel);
         }
         else if (this.currView === Page.RECEIVED)
@@ -369,9 +369,9 @@ export class InvitationUI
                         .then((response) => {
                             this.textLog!.text = response.message;
                                 if (response.success)
-                                    this.textLog!.color = "rgba(63, 124, 173, 1)";
+                                    this.textLog!.color = "#3f8b95";
                                 else
-                                    this.textLog!.color = "rgba(247, 149, 186, 1)";
+                                    this.textLog!.color = "#ce8a8d";
                                 this.friendUI.getUpdateChair(this.friendUI.getButtonMeshes);
                                 this.friendUI.leaveFriend();
                         })
@@ -384,9 +384,9 @@ export class InvitationUI
                         .then((response) => {
                             this.textLog!.text = response.message;
                                 if (response.success)
-                                    this.textLog!.color = "rgba(63, 124, 173, 1)";
+                                    this.textLog!.color = "#3f8b95";
                                 else
-                                    this.textLog!.color = "rgba(212, 146, 185, 1)";
+                                    this.textLog!.color = "#ce8a8d";
                             this.displayContainerR();
                         })
             });
@@ -398,9 +398,9 @@ export class InvitationUI
                         .then((response) => {
                             this.textLog!.text = response.message;
                                 if (response.success)
-                                    this.textLog!.color = "rgba(63, 124, 173, 1)";
+                                    this.textLog!.color = "#3f8b95";
                                 else
-                                    this.textLog!.color = "rgba(212, 146, 185, 1)";
+                                    this.textLog!.color = "#ce8a8d";
                             this.displayContainerR();
                         })
             });

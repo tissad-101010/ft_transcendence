@@ -75,8 +75,8 @@ Chart.register(
 // =============================================================
 const BG_DARK = "#1a1a1a";
 const TEXT_BRIGHT = "#ffffff";
-const BTN_NORMAL = "#00848dff";
-const BTN_ACTIVE = "#007488ff";
+const BTN_NORMAL = "#3f8b95";
+const BTN_ACTIVE = "#3f8b95";
 const BTN_BACK = "#1b1b1b";
 
 
@@ -703,13 +703,13 @@ export class MyProfilUI
         titlePanel.width = "100%";
         titlePanel.height = "300px";
         titlePanel.thickness = 0;
-        titlePanel.background = "#fab5b4";
+        titlePanel.background = "#ce8a8d";
         this.panel.addControl(titlePanel);
 
         const horizontalLayout = new StackPanel();
         horizontalLayout.isVertical = false;
         horizontalLayout.width = "100%";
-        horizontalLayout.background = "#fab5b4";
+        horizontalLayout.background = "#ce8a8d";
         horizontalLayout.height = "100%";
         titlePanel.addControl(horizontalLayout);
 
@@ -769,7 +769,7 @@ export class MyProfilUI
                 width: "96.2%",
                 height: "50px",
                 txt: "Se déconnecter",
-                background: "#fab5b4",
+                background: "#ce8a8d",
                 fontSize: 30,
                 color: TEXT_BRIGHT,
                 cornerRadius: 0,

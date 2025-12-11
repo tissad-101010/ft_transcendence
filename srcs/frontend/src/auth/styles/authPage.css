@@ -11,7 +11,7 @@
 .authPage-window {
   width: 600px;
   padding: 40px 20px;
-  background-color: rgba(221, 101, 161, 1);
+  background-color: #ce8a8d;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -72,7 +72,7 @@
 }
 
 .authPage-input-container input:focus {
-  outline: 2px solid #089cc9;
+  outline: 2px solid #3f8b95;
   box-shadow: 0 0 5px rgba(255, 105, 180, 0.5);
 }
 
@@ -82,14 +82,14 @@
   margin-top: 20px;
   border-radius: 8px;
   border: none;
-  background-color: #2a9ecc;
+  background-color: #3f8b95;
   color: white;
   cursor: pointer;
   font-size: 16px;
 }
 
 .authPage-button:hover {
-  background-color: #0084d1;
+  background-color: #3f8b95;
 }
 
 .authPage-logos {
@@ -119,7 +119,7 @@
 }
 
 .Register a {
-  color: #009ccc;
+  color: #3f8b95;
   text-decoration: none;
 }
 

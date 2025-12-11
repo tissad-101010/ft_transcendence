@@ -28,6 +28,7 @@ import { SceneInteractor } from '../scene/SceneInteractor.ts';
 import { SceneManager } from '../scene/SceneManager.ts';
 import { getCurrentGroup, getTotalGroups, setCurrentGroup } from '../utils.ts';
 import { TournamentParticipant } from '../Tournament.ts';
+import { navigateToZone } from '../CameraHistory.ts';
 
 
 
@@ -188,7 +189,7 @@ export class TshirtHandler {
         }
         else
         {
-            this.sceneManager.moveCameraTo(ZoneName.TSHIRT, () => {
+            navigateToZone(this.sceneManager, ZoneName.TSHIRT, () => {
                 this.clicTshirt = true;
                 this.turnOnExit(tshirtMeshes[12]);
                 this.displayProfilePlayer(players[index]);
@@ -213,7 +214,7 @@ export class TshirtHandler {
         this.sceneInteractor.getHighlightLayer().removeMesh(pickedMesh);
 
         this.sceneInteractor.disableInteractions();
-        this.sceneManager.moveCameraTo(ZoneName.LOCKER_ROOM, () => {
+        navigateToZone(this.sceneManager, ZoneName.LOCKER_ROOM, () => {
             this.resetState(tshirtMeshes);
             this.clicTshirt = false;
             this.sceneInteractor.enableInteractions();

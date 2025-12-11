@@ -63,7 +63,7 @@ export class StandsInteraction implements SpecificInteraction {
     {
         if (active) {
             mesh.isPickable = true;
-            this.buttonHighlightLayer.addMesh(mesh, new Color3(0.53, 0.81, 0.92)); // bleu ciel
+            this.buttonHighlightLayer.addMesh(mesh, new Color3(63, 139, 149)); // bleu ciel
         } else {
             mesh.isPickable = false;
             this.buttonHighlightLayer.removeMesh(mesh);
@@ -250,24 +250,24 @@ export class StandsInteraction implements SpecificInteraction {
             this.sceneInteractor.getHighlightLayer().removeAllMeshes();
             if (spectatorMeshes.includes(pickedMesh) && !this.clicSeat){
                 spectatorMeshes.forEach((mesh: AbstractMesh) => {
-                    this.sceneInteractor.getHighlightLayer().addMesh(mesh, new Color3(1, 0.75, 0.8));
+                    this.sceneInteractor.getHighlightLayer().addMesh(mesh, new Color3(0.807, 0.541, 0.553));
                 });
             }
             if (arbitratorMeshes.includes(pickedMesh))
             {
-                this.sceneInteractor.getHighlightLayer().addMesh(pickedMesh, new Color3(1, 0.75, 0.8));
+                this.sceneInteractor.getHighlightLayer().addMesh(pickedMesh, new Color3(63/255, 139/255, 149/255));
             }
             if (friendMeshes.includes(pickedMesh) && this.clicSeat)
             {
-                this.sceneInteractor.getHighlightLayer().addMesh(pickedMesh, new Color3(1, 0.75, 0.8));
+                this.sceneInteractor.getHighlightLayer().addMesh(pickedMesh, new Color3(0.807, 0.541, 0.553));
             }
             if (pickedMesh === buttonMeshes[2] && this.clicSeat)
             {
-                this.sceneInteractor.getHighlightLayer().addMesh(buttonMeshes[2], new Color3(1, 0.75, 0.8));
+                this.sceneInteractor.getHighlightLayer().addMesh(buttonMeshes[2], new Color3(0.807, 0.541, 0.553));
             }
             if (pickedMesh === buttonMeshes[3] && this.clicArbitrator) 
             {
-                this.sceneInteractor.getHighlightLayer().addMesh(buttonMeshes[3], new Color3(1, 0.75, 0.8));
+                this.sceneInteractor.getHighlightLayer().addMesh(buttonMeshes[3], new Color3(63/255, 139/255, 149/255));
             }
         }
     }
