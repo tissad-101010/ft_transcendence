@@ -18,6 +18,7 @@ export interface Match
     score: number[];
     // duration: number;
     date: Date;
+    startedAt: Date;
 }
 
 export class Friend
@@ -59,7 +60,6 @@ export class Friend
 
     public async loadMatchs() : Promise<{success: boolean, message: string}>
     {
-        // APPEL API POUR RECUPERER LES MATCHS PRESENTS DANS SERVICE-GAME
         this.matchs = [];
         const response = await listMatch(this.username);
         if (response.success)
@@ -69,7 +69,8 @@ export class Friend
                     id: m.id,
                     score: [m.score1, m.score2],
                     participants: [m.player1.login, m.player2.login],
-                    date: m.finishedAt
+                    date: new Date(m.finishedAt),
+                    startedAt: new Date(m.startedAt)
                 });
             });
             console.log("Etat des matchs: ", this.matchs);

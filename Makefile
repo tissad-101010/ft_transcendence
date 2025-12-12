@@ -37,10 +37,10 @@ local:
 	mkdir -p ./srcs/backend/services/service-game/data
 	mkdir -p ./srcs/backend/services/service-friends/data
 	cp ./srcs/.env ~/.env.local
-	cp /home/debian/sgoinfre/env.hdr ./srcs/frontend/public/env.hdr
-	cp /home/debian/sgoinfre/strucLocker.glb ./srcs/frontend/public/lockerRoom/strucLocker.glb
-	cp /home/debian/sgoinfre/strucPool.glb ./srcs/frontend/public/pool/strucPool.glb
-	cp /home/debian/sgoinfre/strucField.glb ./srcs/frontend/public/field/strucField.glb
+# 	cp /home/debian/sgoinfre/env.hdr ./srcs/frontend/public/env.hdr
+# 	cp /home/debian/sgoinfre/strucLocker.glb ./srcs/frontend/public/lockerRoom/strucLocker.glb
+# 	cp /home/debian/sgoinfre/strucPool.glb ./srcs/frontend/public/pool/strucPool.glb
+# 	cp /home/debian/sgoinfre/strucField.glb ./srcs/frontend/public/field/strucField.glb
 npm_cache_clean:
 	npm cache clean --force
 	rm -rf node_modules

@@ -231,6 +231,7 @@ export async function friendlyRoutes(fastify: FastifyInstance) {
         winnerId: m.winnerId,
         createdAt: m.createdAt,
         finishedAt: m.finishedAt,
+        startedAt: m.startedAt,
         player1: m.player1 ? { id: m.player1.id, login: m.player1.login } : null,
         player2: m.player2 ? { id: m.player2.id, login: m.player2.login } : null,
       }));
