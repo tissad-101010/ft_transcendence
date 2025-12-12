@@ -19,6 +19,35 @@ DATA_DIR="/var/lib/postgresql/data"
 # Define the configuration directory
 CONF_DIR="/etc/postgresql"
 
+VAULT_ADDR=https://hashicorp_vault:8200
+VAULT_PATH="secret/backend"
+
+echo "⏳ Waiting for Vault to be unsealed..."
+
+while true; do
+  STATUS=$(curl -k https://hashicorp_vault:8200/v1/sys/health | sed -n 's/.*"sealed":\([a-z]*\).*/\1/p')
+  echo "Vault sealed status: $STATUS"
+  if [ "$STATUS" = "false" ]; then
+    echo "✅ Vault is unsealed!"
+    break
+  fi
+
+  echo "🔒 Vault still sealed... retrying"
+  sleep 2
+done
+
+
+echo "🚀 Loading secrets from Vault path: $VAULT_PATH"
+
+# Récupérer secrets KV v2 et exporter en variables d'environnement
+RES=$(vault kv get -tls-skip-verify -address=$VAULT_ADDR -format=json -field=data $VAULT_PATH)
+echo "$RES" | jq -r 'to_entries|map("export " + .key + "=" + (.value|tostring))|.[]' > /tmp/.vault_env
+cat /tmp/.vault_env
+# Charger les variables dans le shell actuel
+. /tmp/.vault_env
+
+
+
 # Create the data directory if it does not exist
 if [ ! -d "$DATA_DIR" ]; then
   echo "📂 Creating PostgreSQL data directory..."

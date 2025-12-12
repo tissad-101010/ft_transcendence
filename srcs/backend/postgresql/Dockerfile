@@ -6,7 +6,7 @@
 #    By: tissad <tissad@student.42.fr>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/07/31 14:24:00 by tissad            #+#    #+#              #
-#    Updated: 2025/08/04 14:40:42 by tissad           ###   ########.fr        #
+#    Updated: 2025/12/12 18:07:03 by tissad           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -19,8 +19,14 @@ RUN apk update && apk add --no-cache \
     bash \
     postgresql16 \
     postgresql16-contrib \
-    tzdata
-
+    tzdata \
+    sed \
+    curl
+RUN apk add curl unzip bash jq \
+    && curl -fsSL https://releases.hashicorp.com/vault/1.12.2/vault_1.12.2_linux_amd64.zip -o vault.zip \
+    && unzip vault.zip \
+    && mv vault /usr/local/bin/ \
+    && rm vault.zip
 
 # Set the repository for PostgreSQL data
 RUN mkdir -p /var/lib/postgresql /var/run/postgresql && \

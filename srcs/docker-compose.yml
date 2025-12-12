@@ -58,7 +58,6 @@ services:
     ports:
       - "3000:3000"
     environment:
-     - RECAPTCHA_SITE_KEY=${RECAPTCHA_SITE_KEY}
      - BACKEND_API_URL=${BACKEND_URL}
     restart: unless-stopped
   #********************************************************************************#
@@ -94,39 +93,22 @@ services:
     environment:
       - NODE_ENV=production
       - VAULT_ADDR=http://hashicorp_vault:8200
-      - GLOBAL_DB_ADMIN_PASSWORD=${GLOBAL_DB_ADMIN_PASSWORD}
-      - DATABASE_URL=${USER_SERVICE_DATABASE_URL}
       - DB_HOST=${USER_SERVICE_DB_HOST}
       - DB_NAME=${USER_SERVICE_DB_NAME}
       - DB_USER=${USER_SERVICE_DB_USER}
-      - DB_PASSWORD=${USER_SERVICE_DB_PASSWORD}
-      - DB_ROOT_PASSWORD=${USER_SERVICE_DB_ROOT_PASSWORD}
       - DB_PORT=${USER_SERVICE_DB_PORT}
-      - DB_SAMPLE_NAME=${USER_SERVICE_DB_SAMPLE_NAME}
       - DB_MAX_CLIENTS=${USER_SERVICE_DB_MAX_CLIENTS}
       - DB_IDLE_TIMEOUT=${USER_SERVICE_DB_IDLE_TIMEOUT}
       - DB_CONNECTION_TIMEOUT=${USER_SERVICE_DB_CONNECTION_TIMEOUT}
       - EMAIL_USER=${EMAIL_USER}
-      - GMAIL_APP_PASSWORD=${GMAIL_APP_PASSWORD}
       - EMAIL_HOST=${EMAIL_HOST}
       - EMAIL_PORT=${EMAIL_PORT}
-      - REKAPTCHA_API_KEY=${REKAPTCHA_API_KEY}
-      - GITHUB_CLIENT_ID=${GITHUB_CLIENT_ID}
-      - GITHUB_CLIENT_SECRET=${GITHUB_CLIENT_SECRET}
       - GITHUB_REDIRECT_URI=${GITHUB_REDIRECT_URI}
-      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
-      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
       - GOOGLE_REDIRECT_URI=${GOOGLE_REDIRECT_URI}
-      - FORTYTWO_CLIENT_ID=${FORTYTWO_CLIENT_ID}
-      - FORTYTWO_CLIENT_SECRET=${FORTYTWO_CLIENT_SECRET}
       - FORTYTWO_REDIRECT_URI=${FORTYTWO_REDIRECT_URI}
-      - ACCESS_TOKEN_SECRET=${ACCESS_TOKEN_SECRET}
-      - REFRESH_TOKEN_SECRET=${REFRESH_TOKEN_SECRET}
       - ACCESS_TOKEN_EXPIRATION=${ACCESS_TOKEN_EXPIRATION}
       - REFRESH_TOKEN_EXPIRATION=${REFRESH_TOKEN_EXPIRATION}
       - TEMP_TOKEN_EXPIRATION=${TEMP_TOKEN_EXPIRATION}
-      - TEMP_TOKEN_SECRET=${TEMP_TOKEN_SECRET}
-      - INTERNAL_API_KEY=${INTERNAL_API_KEY}
       - GCP_STORAGE_KEY_PATH=${GCP_STORAGE_KEY_PATH}
       - ORIGIN_URL=${ORIGIN_URL}
       - VAULT_ADDR=${VAULT_ADDR}
@@ -164,7 +146,6 @@ services:
   #   environment:
   #     - NODE_ENV=production
   #     - VAULT_ADDR=http://hashicorp_vault:8200
-  #     - GLOBAL_DB_ADMIN_PASSWORD=${GLOBAL_DB_ADMIN_PASSWORD}
   #     - DB_HOST=${GAME_SERVICE_DB_HOST}
   #     - DB_NAME=${GAME_SERVICE_DB_NAME}
   #     - DB_USER=${GAME_SERVICE_DB_USER}
@@ -195,7 +176,7 @@ services:
       - global-net
       - security-net
     depends_on:
-      # - hashicorp_vault
+      - hashicorp_vault
       - redis
       - postgreSQL
     ports:
@@ -203,15 +184,10 @@ services:
     environment:
       - NODE_ENV=production
       - VAULT_ADDR=http://hashicorp_vault:8200
-      - GLOBAL_DB_ADMIN_PASSWORD=${GLOBAL_DB_ADMIN_PASSWORD}
       - DB_HOST=${CHAT_SERVICE_DB_HOST}
       - DB_NAME=${CHAT_SERVICE_DB_NAME}
       - DB_USER=${CHAT_SERVICE_DB_USER}
-      - DB_PASSWORD=${CHAT_SERVICE_DB_PASSWORD}
-      - DB_ROOT_PASSWORD=${CHAT_SERVICE_DB_ROOT_PASSWORD}
       - DB_PORT=${CHAT_SERVICE_DB_PORT}
-      - DB_SAMPLE_NAME=${CHAT_SERVICE_DB_SAMPLE_NAME}
-      - DATABASE_URL=${CHAT_SERVICE_DATABASE_URL}
       - ORIGIN_URL=${ORIGIN_URL}
     restart: unless-stopped
 
@@ -243,17 +219,11 @@ services:
     environment:
       - NODE_ENV=production
       - VAULT_ADDR=http://hashicorp_vault:8200
-      - GLOBAL_DB_ADMIN_PASSWORD=${GLOBAL_DB_ADMIN_PASSWORD}
       - DB_HOST=${FRIENDS_SERVICE_DB_HOST}
       - DB_NAME=${FRIENDS_SERVICE_DB_NAME}
       - DB_USER=${FRIENDS_SERVICE_DB_USER}
-      - DB_PASSWORD=${FRIENDS_SERVICE_DB_PASSWORD}
-      - DB_ROOT_PASSWORD=${FRIENDS_SERVICE_DB_ROOT_PASSWORD}
       - DB_PORT=${FRIENDS_SERVICE_DB_PORT}
-      - DB_SAMPLE_NAME=${FRIENDS_SERVICE_DB_SAMPLE_NAME}
-      - DATABASE_URL=${FRIENDS_SERVICE_DATABASE_URL}
       - USER_SERVICE_URL=http://service-users:4000
-      - INTERNAL_API_KEY=${INTERNAL_API_KEY}
       - ORIGIN_URL=${ORIGIN_URL}
     restart: unless-stopped
 
@@ -267,6 +237,8 @@ services:
       context: ./backend/postgresql
       dockerfile: Dockerfile
     container_name: postgreSQL
+    depends_on:
+      - hashicorp_vault
     volumes:
       - PostgresData:/var/lib/postgresql/data
       - ./backend/postgresql/config/postgresql.conf:/etc/postgresql/postgresql.conf:ro
@@ -276,36 +248,23 @@ services:
       - security-net
     restart: unless-stopped
     environment:
-      - GLOBAL_DB_ADMIN_PASSWORD=${GLOBAL_DB_ADMIN_PASSWORD}
       - USER_SERVICE_DB_HOST=${USER_SERVICE_DB_HOST}
       - USER_SERVICE_DB_NAME=${USER_SERVICE_DB_NAME}
       - USER_SERVICE_DB_USER=${USER_SERVICE_DB_USER}
-      - USER_SERVICE_DB_PASSWORD=${USER_SERVICE_DB_PASSWORD}
-      - USER_SERVICE_DB_ROOT_PASSWORD=${USER_SERVICE_DB_ROOT_PASSWORD}
       - USER_SERVICE_DB_PORT=${USER_SERVICE_DB_PORT}
-      - USER_SERVICE_DB_SAMPLE_NAME=${USER_SERVICE_DB_SAMPLE_NAME}
       - USER_SERVICE_DB_MAX_CLIENTS=${USER_SERVICE_DB_MAX_CLIENTS}
       - GAME_SERVICE_DB_HOST=${GAME_SERVICE_DB_HOST}
       - GAME_SERVICE_DB_NAME=${GAME_SERVICE_DB_NAME}
       - GAME_SERVICE_DB_USER=${GAME_SERVICE_DB_USER}
-      - GAME_SERVICE_DB_PASSWORD=${GAME_SERVICE_DB_PASSWORD}
-      - GAME_SERVICE_DB_ROOT_PASSWORD=${GAME_SERVICE_DB_ROOT_PASSWORD}
       - GAME_SERVICE_DB_PORT=${GAME_SERVICE_DB_PORT}
-      - GAME_SERVICE_DB_SAMPLE_NAME=${GAME_SERVICE_DB_SAMPLE_NAME}
       - CHAT_SERVICE_DB_HOST=${CHAT_SERVICE_DB_HOST}
       - CHAT_SERVICE_DB_NAME=${CHAT_SERVICE_DB_NAME}
       - CHAT_SERVICE_DB_USER=${CHAT_SERVICE_DB_USER}
-      - CHAT_SERVICE_DB_PASSWORD=${CHAT_SERVICE_DB_PASSWORD}
-      - CHAT_SERVICE_DB_ROOT_PASSWORD=${CHAT_SERVICE_DB_ROOT_PASSWORD}
       - CHAT_SERVICE_DB_PORT=${CHAT_SERVICE_DB_PORT}
-      - CHAT_SERVICE_DB_SAMPLE_NAME=${CHAT_SERVICE_DB_SAMPLE_NAME}
       - FRIENDS_SERVICE_DB_HOST=${FRIENDS_SERVICE_DB_HOST}
       - FRIENDS_SERVICE_DB_NAME=${FRIENDS_SERVICE_DB_NAME}
       - FRIENDS_SERVICE_DB_USER=${FRIENDS_SERVICE_DB_USER}
-      - FRIENDS_SERVICE_DB_PASSWORD=${FRIENDS_SERVICE_DB_PASSWORD}
-      - FRIENDS_SERVICE_DB_ROOT_PASSWORD=${FRIENDS_SERVICE_DB_ROOT_PASSWORD}
       - FRIENDS_SERVICE_DB_PORT=${FRIENDS_SERVICE_DB_PORT}
-      - FRIENDS_SERVICE_DB_SAMPLE_NAME=${FRIENDS_SERVICE_DB_SAMPLE_NAME}
     ports:
       - "5432:5432"
   #********************************************************************************#      
@@ -332,15 +291,14 @@ services:
       - ./backend/vault/certs/vault.key:/vault/certs/vault.key:ro
     cap_add:
       - IPC_LOCK
-    environment:
-      - VAULT_ADDR=${VAULT_ADDR}
-      - VAULT_TOKEN=${VAULT_TOKEN}
-      - UNSEAL_KEY=${UNSEAL_KEY}
+    # environment:
+    #   - VAULT_ADDR=${VAULT_ADDR}
+    #   - VAULT_TOKEN=${VAULT_TOKEN}
+    #   - UNSEAL_KEY=${UNSEAL_KEY}
     ports:
       - "8200:8200"
       - "8201:8201"
     networks:
-      - global-net
       - security-net
     restart: unless-stopped
   #********************************************************************************#

@@ -28,6 +28,7 @@
 // export { loadSecretsToEnv };
 
 import { FastifyPluginAsync } from "fastify";
+import fp from "fastify-plugin";
 import Vault from "node-vault";
 
 const vaultPlugin: FastifyPluginAsync = async (fastify) => {
@@ -48,17 +49,31 @@ const vaultPlugin: FastifyPluginAsync = async (fastify) => {
     const result = await vault.read("secret/data/backend"); // KV v2
     const secrets = result.data.data;
 
-    // Copier dans process.env pour que tout le code continue de lire process.env
     for (const [key, value] of Object.entries(secrets)) {
       process.env[key] = value as string;
     }
 
-    console.log("✅ Vault secrets loaded successfully");
-    console.log('🚀 Loading secrets from Vault...', process.env.TOTO, process.env.ACCESS_TOKEN_SECRET);
+    fastify.log.info("✅ Vault secrets loaded successfully");
+
+    // 🔧 Reconstruire DATABASE_URL pour Prisma
+    process.env.DATABASE_URL =
+      `postgresql://${process.env.DB_USER}` +
+      `:${process.env.DB_PASSWORD}` +
+      `@${process.env.DB_HOST}` +
+      `:${process.env.DB_PORT}` +
+      `/${process.env.DB_NAME}`;
+
+    fastify.log.info(`🔌 DATABASE_URL ready: ${process.env.DATABASE_URL}`);
+
   } catch (err: any) {
-    fastify.log.error("❌ Failed to load secrets from Vault", err);
-    throw err; // Stop Fastify startup
+    fastify.log.error("❌ Failed to load secrets from Vault");
+    fastify.log.error(err);
+    throw err;
   }
 };
 
-export default vaultPlugin;
+// ⬇️ Le plugin Fastify exporté avec nom
+export default fp(vaultPlugin, {
+  name: "vault-plugin",
+});
+
