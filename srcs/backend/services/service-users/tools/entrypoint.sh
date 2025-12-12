@@ -14,9 +14,8 @@
 set -e
 
 
-# echo "🔄 Generating Prisma client..."
+echo "🔄 Generating Prisma client..."
 # npx prisma generate
-
 until pg_isready -h postgreSQL -p $DB_PORT -U admin; do
   # echo "connecting to PostgreSQL at $DB_HOST:$DB_PORT as $DB_USER..."
   echo "🔄 Waiting for PostgreSQL to be ready..."

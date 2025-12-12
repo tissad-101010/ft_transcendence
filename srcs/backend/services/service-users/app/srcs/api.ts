@@ -6,7 +6,7 @@
 /*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/23 15:58:35 by tissad            #+#    #+#             */
-/*   Updated: 2025/12/12 11:06:56 by tissad           ###   ########.fr       */
+/*   Updated: 2025/12/12 13:39:47 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,7 +35,7 @@ import { infoFriendRoute } from './modules/users/users.routes';
 import redisPlugin from './plugins/redis.plugin';
 import { prismaPlugin } from './plugins/prisma.plugin';
 import requestLoggerPlugin from "./plugins/requestLogger.plugin";
-import { loadSecretsToEnv } from './utils/getVaultSecrets';
+import vaultPlugin from  './plugins/vault.plugin';
 /* ************************************************************************** */
 
 
@@ -46,14 +46,6 @@ import { loadSecretsToEnv } from './utils/getVaultSecrets';
 
 const app = Fastify({ logger: true });
 
-// Load secrets from Vault into process.env
-
-// async function initializeApp() {
-//   await loadSecretsToEnv();
-// } 
-// initializeApp();
-
-// console.log('🚀 Loading secrets from Vault...', process.env);
 // // Register cookie plugin
 app.register(fastifyCookie, {
   secret: process.env.COOKIE_SECRET || 'supersecret', // optionnel (pour signer les cookies)
@@ -64,6 +56,7 @@ app.register(fastifyCookie, {
 // Register plugins (database, redis, etc.)
 app.register(redisPlugin);
 app.register(prismaPlugin);
+app.register(vaultPlugin);
 app.register(requestLoggerPlugin);
 
 app.register(fastifyMultipart, {
@@ -81,6 +74,10 @@ app.register(fastifyStatic, {
 });
 
 
+
+
+
+console.log('🚀 Loading secrets from Vault...', process.env.TOTO);
 // Register routes
 app.register(authRoutes, { prefix: '/user/auth' });
 app.register(oauthRoutes, { prefix: '/user/oauth' });
