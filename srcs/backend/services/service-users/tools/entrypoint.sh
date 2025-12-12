@@ -22,6 +22,23 @@ until pg_isready -h postgreSQL -p $DB_PORT -U admin; do
   echo "🔄 Waiting for PostgreSQL to be ready..."
   sleep 2
 done
+
+VAULT_ADDR=http://hashicorp_vault:8200
+
+echo "⏳ Waiting for Vault to be unsealed..."
+
+while true; do
+  STATUS=$(curl -k https://hashicorp_vault:8200/v1/sys/health | sed -n 's/.*"sealed":\([a-z]*\).*/\1/p')
+  echo "Vault sealed status: $STATUS"
+  if [ "$STATUS" = "false" ]; then
+    echo "✅ Vault is unsealed!"
+    break
+  fi
+
+  echo "🔒 Vault still sealed... retrying"
+  sleep 2
+done
+
 # echo "pg_isready -h postgreSQL -p $DB_PORT -U admin: PostgreSQL is ready!"
 echo "🚀 Starting service-users app..."
 npm run prisma:generate

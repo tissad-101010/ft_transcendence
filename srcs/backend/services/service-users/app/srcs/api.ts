@@ -6,7 +6,7 @@
 /*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/23 15:58:35 by tissad            #+#    #+#             */
-/*   Updated: 2025/12/11 22:03:28 by tissad           ###   ########.fr       */
+/*   Updated: 2025/12/12 11:06:56 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,15 +37,24 @@ import { prismaPlugin } from './plugins/prisma.plugin';
 import requestLoggerPlugin from "./plugins/requestLogger.plugin";
 import { loadSecretsToEnv } from './utils/getVaultSecrets';
 /* ************************************************************************** */
+
+
+
 // register the Fastify framework
+
+
+
 const app = Fastify({ logger: true });
 
 // Load secrets from Vault into process.env
-loadSecretsToEnv();
 
-console.log('🚀 Loading secrets from Vault...', process.env);
+// async function initializeApp() {
+//   await loadSecretsToEnv();
+// } 
+// initializeApp();
 
-// Register cookie plugin
+// console.log('🚀 Loading secrets from Vault...', process.env);
+// // Register cookie plugin
 app.register(fastifyCookie, {
   secret: process.env.COOKIE_SECRET || 'supersecret', // optionnel (pour signer les cookies)
 });

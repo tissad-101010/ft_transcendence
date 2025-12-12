@@ -21,32 +21,26 @@ if [ -z "$UNSEAL_KEY" ]; then
   exit 1
 fi
 
-# Attendre que Vault soit prêt
-echo "🔄 Waiting for Vault to be ready... "
-status=""
-status=$(vault status -tls-skip-verify  -address=$VAULT_ADDR 2>/dev/null || echo "")
-until [ "$status" != "" ]; do
-    status=$(vault status -tls-skip-verify  -address=$VAULT_ADDR 2>/dev/null || echo "")
-  sleep 2
-
-done
-echo "✅ Vault is ready!"
 
 
 
-# Vérifier si Vault est scellé
-SEALED=$(vault status -address=$VAULT_ADDR -format=json | jq -r .sealed)
+# check Vault sealed status
+SEALED=$(vault status -tls-skip-verify -format=json | jq -r .sealed)
 echo "Vault sealed status: $SEALED"
 
-if [ "$SEALED" = "true" ]; then
+until [ "$SEALED" = "false" ]; do
   echo "🔓 Vault is sealed, unsealing..."
-  vault operator unseal -tls-skip-verify  -address=$VAULT_ADDR $UNSEAL_KEY
-else
-  echo "✅ Vault is already unsealed"
-fi
+  vault operator unseal -tls-skip-verify $UNSEAL_KEY
+  SEALED=$(vault status -tls-skip-verify -format=json | jq -r .sealed)
+  if [ "$SEALED" = "false" ]; then
+    echo "✅ Vault is now unsealed!"
+    break
+  fi
+  echo "🔒 Vault still sealed, retrying..."
+  sleep 2
+done
 
 
-echo "✅ Vault is initialized and unsealed"
-
-# Attendre que Vault se termine (pid 1)
+# wait for Vault process to finish
 wait $VAULT_PID
+
