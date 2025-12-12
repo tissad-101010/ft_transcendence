@@ -68,7 +68,7 @@ export class LockerInteraction implements SpecificInteraction {
                 this.tvHandler.handle(pickedMesh, tvMeshes);
             else if (scoreMeshes.includes(pickedMesh))
                 this.scoreboardHandler.handle(pickedMesh, scoreMeshes);
-            else if (lockMeshes.includes(pickedMesh)){
+            else if (lockMeshes.includes(pickedMesh))
                 this.tshirtHandler.handle(pickedMesh, lockMeshes);
         } else {
             this.sceneInteractor.getHighlightLayer().removeAllMeshes();

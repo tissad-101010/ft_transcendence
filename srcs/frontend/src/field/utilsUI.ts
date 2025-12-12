@@ -184,16 +184,18 @@ export function createInputFieldPwd(placeholderText: string, panelPwd : StackPan
 
   export function createInputField2fa(parent: StackPanel): InputText {
     const input = new InputText();
-    input.width = "300px";
-    input.height = "100%";
-    input.color = "red";
-    input.fontSize = 20;
+    input.width = "600px";
+    input.height = "85%";
+    input.color = "#ce8a8d";
+    input.fontSize = 35;
     input.thickness = 0;
     input.background = "white";
     input.focusedBackground = "white";
-    input.placeholderText = "code de verification";
+    input.placeholderText = "Verification code";
     input.placeholderColor = "gray";
-    input.paddingLeft = 100;
+    input.horizontalAlignment = Control.HORIZONTAL_ALIGNMENT_CENTER;
+    input.verticalAlignment = Control.VERTICAL_ALIGNMENT_CENTER;
+    input.paddingLeft = 300;
     input.onTextChangedObservable.add(() => {
         if (input.text.length > 6) {
             input.text = input.text.slice(0, 6);
@@ -243,7 +245,10 @@ export function createSectionTitle(options: SectionTitleOptions): Rectangle {
             rectImg.height = options.height ?? "50px";
             rectImg.width = "75px";
             rectImg.thickness = 0;
-            rectImg.paddingLeft = 40;
+            if (options.iconName === "security")
+                rectImg.paddingLeft = 260;
+            else
+                rectImg.paddingLeft = 20;
             rectImg.addControl(img);
             rect.addControl(rectImg);
         }
