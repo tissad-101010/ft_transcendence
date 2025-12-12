@@ -74,10 +74,10 @@ export class DataFriendUI
         this.friendUI.resetHeader();
         const login = new TextBlock("textUsername");
         login.text = this.friend.getUsername;
-        login.color = "black";
+        login.color = "white";
         login.fontSize = 100;
         login.width = "700px";
-        login.paddingTop = 100;
+        login.paddingTop = 120;
         login.fontFamily = "Arial";
         login.horizontalAlignment = Control.HORIZONTAL_ALIGNMENT_CENTER;
         login.verticalAlignment = Control.VERTICAL_ALIGNMENT_CENTER;
@@ -88,8 +88,9 @@ export class DataFriendUI
             avatar = new Image("imgAvatar", this.friend.getAvatarUrl);
         else
             avatar = new Image("imgAvatar", "icon/user.png");
+        avatar.paddingTop = 100;
         avatar.width = "175px";
-        avatar.height = "175px";
+        avatar.height = "250px";
         avatar.horizontalAlignment = Control.HORIZONTAL_ALIGNMENT_CENTER;
         avatar.verticalAlignment = Control.VERTICAL_ALIGNMENT_CENTER;
         this.containerUI.headerPanel!.addControl(avatar);
