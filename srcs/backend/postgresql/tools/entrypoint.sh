@@ -15,12 +15,14 @@ set -e
 #******************************************************************************#
 
 # Define the data directory
-DATA_DIR="/var/lib/postgresql/data"
+DATA_DIR="/var/lib/postgresql/data/postgresql/data"
 # Define the configuration directory
 CONF_DIR="/etc/postgresql"
+chown -R postgres:postgres "$DATA_DIR"
+chmod 750 "$DATA_DIR"
 
 VAULT_ADDR=https://hashicorp_vault:8200
-VAULT_PATH="secret/backend"
+VAULT_PATH="secret/postgresql"
 
 echo "⏳ Waiting for Vault to be unsealed..."
 
@@ -36,15 +38,30 @@ while true; do
   sleep 2
 done
 
+echo "🚀 Starting Vault Agent to fetch PostgreSQL secrets..."
+rm -rf /vault/secrets/*
+mkdir -p /vault/secrets/
+chmod 750 /vault/secrets/
+
+
+
+vault agent -config=/tmp/vault_agent.hcl &
+VAULT_PID=$!
 
 echo "🚀 Loading secrets from Vault path: $VAULT_PATH"
+# attendre que Vault Agent écrive les secrets
+while [ ! -f /var/lib/postgresql/data/postgresql/vault_agent/secrets.env ]; do
+  echo "⏳ Waiting for Vault Agent..."
+  sleep 1
+done
 
-# Récupérer secrets KV v2 et exporter en variables d'environnement
-RES=$(vault kv get -tls-skip-verify -address=$VAULT_ADDR -format=json -field=data $VAULT_PATH)
-echo "$RES" | jq -r 'to_entries|map("export " + .key + "=" + (.value|tostring))|.[]' > /tmp/.vault_env
-cat /tmp/.vault_env
-# Charger les variables dans le shell actuel
-. /tmp/.vault_env
+set -a
+. /var/lib/postgresql/data/postgresql/vault_agent/secrets.env 
+set +a
+
+echo "✅ Vault Agent has fetched the secrets."
+
+# exec tail -f /dev/null 
 
 
 
@@ -54,7 +71,7 @@ if [ ! -d "$DATA_DIR" ]; then
   mkdir -p "$DATA_DIR"
 fi
 chown -R postgres:postgres "$DATA_DIR"
-chmod 700 "$DATA_DIR"
+chmod 750 "$DATA_DIR"
 
 
 # Create the configuration directory if it does not exist
@@ -249,7 +266,7 @@ echo "▶️   Starting PostgreSQL temporarily."
 su-exec postgres postgres -D "$DATA_DIR"   &
 PG_PID=$!
 
-# 
+# /var/lib/postgresql/data
 until su-exec postgres pg_isready -q   ; do 
   echo "⏳  Waiting for PostgreSQL to be ready..."
   sleep 1  
@@ -302,7 +319,7 @@ exec su-exec postgres postgres -D "$DATA_DIR"
 #     phone_verified BOOLEAN DEFAULT FALSE,
 #     vault_token VARCHAR(255),
 #     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-#     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+#     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMPDATA_DIR
 # );
 
 # -- 8. Grant privileges to $DB_USER

@@ -6,7 +6,7 @@
 #    By: tissad <tissad@student.42.fr>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/07/31 14:24:00 by tissad            #+#    #+#              #
-#    Updated: 2025/12/12 18:07:03 by tissad           ###   ########.fr        #
+#    Updated: 2025/12/15 13:36:38 by tissad           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -33,7 +33,10 @@ RUN mkdir -p /var/lib/postgresql /var/run/postgresql && \
     chown -R postgres:postgres /var/lib/postgresql /var/run/postgresql
 
 # copy the entrypoint script
+
+COPY ./config/vault_agent.hcl /tmp/vault_agent.hcl
 COPY ./tools/entrypoint.sh /usr/local/bin/entrypoint.sh
+
 RUN chmod +x /usr/local/bin/entrypoint.sh
     
 # Set working directory

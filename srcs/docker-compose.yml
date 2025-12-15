@@ -39,6 +39,17 @@ services:
   #********************************************************************************#
 
 
+  #********************************************************************************#
+  #                              VAULT INIT SERVICE                                #
+  #********************************************************************************#
+  vault-init:
+    build: ./backend/vault_init
+    environment:
+      VAULT_ADDR: https://hashicorp_vault:8200
+    networks:
+      - vault_shared-network
+      - global-net
+    restart: "no"
 
 
   #********************************************************************************#
@@ -85,7 +96,6 @@ services:
       - global-net
       - security-net
     depends_on:
-      - hashicorp_vault
       - redis
       - postgreSQL
     ports:
@@ -176,7 +186,6 @@ services:
       - global-net
       - security-net
     depends_on:
-      - hashicorp_vault
       - redis
       - postgreSQL
     ports:
@@ -238,14 +247,17 @@ services:
       dockerfile: Dockerfile
     container_name: postgreSQL
     depends_on:
-      - hashicorp_vault
+      vault-init:
+        condition: service_completed_successfully
     volumes:
-      - PostgresData:/var/lib/postgresql/data
+      - PostgresData:/var/lib/postgresql/data/postgresql
       - ./backend/postgresql/config/postgresql.conf:/etc/postgresql/postgresql.conf:ro
       - ./backend/postgresql/config/pg_hba.conf:/etc/postgresql/pg_hba.conf:ro
       - ./backend/postgresql/config/pg_ident.conf:/etc/postgresql/pg_ident.conf:ro
+    
     networks:
       - security-net
+      - vault_shared-network
     restart: unless-stopped
     environment:
       - USER_SERVICE_DB_HOST=${USER_SERVICE_DB_HOST}
@@ -271,37 +283,6 @@ services:
   #********************************************************************************#
 
 
-
-
-
-  #********************************************************************************#
-  #                               HASHICORP VAULT                                  #
-  #********************************************************************************#
-  # HashiCorp Vault service for managing secrets and sensitive data
-  hashicorp_vault:
-    image: hashicorp_vault
-    build:
-      context: ./backend/vault
-      dockerfile: Dockerfile
-    container_name: hashicorp_vault
-    volumes:
-      - LocalVaultData:/vault/data
-      - ./backend/vault/config/vault.hcl:/vault/config/vault.hcl:ro
-      - ./backend/vault/certs/vault.crt:/vault/certs/vault.crt:ro
-      - ./backend/vault/certs/vault.key:/vault/certs/vault.key:ro
-    cap_add:
-      - IPC_LOCK
-    # environment:
-    #   - VAULT_ADDR=${VAULT_ADDR}
-    #   - VAULT_TOKEN=${VAULT_TOKEN}
-    #   - UNSEAL_KEY=${UNSEAL_KEY}
-    ports:
-      - "8200:8200"
-      - "8201:8201"
-    networks:
-      - security-net
-    restart: unless-stopped
-  #********************************************************************************#
 
   #****************************************************************************#
   #                                  REDIS                                     #
@@ -338,6 +319,9 @@ networks:
   # Security network for sensitive services
     security-net:
       driver: bridge
+
+    vault_shared-network:
+      external: true
 #********************************************************************************#
 #                              VOLUMES                                           #
 #********************************************************************************# 
@@ -381,6 +365,6 @@ volumes:
     driver: local
     driver_opts: 
       type: none
-      device: ./backend/postgresql/data
+      device: ~/data/postgresql
       o: bind
   #*******************************************************************************#

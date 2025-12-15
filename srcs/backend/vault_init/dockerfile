@@ -1,0 +1,8 @@
+FROM alpine:3.19
+
+RUN apk add --no-cache curl jq
+
+COPY vault-init.sh /vault-init.sh
+RUN chmod +x /vault-init.sh
+
+ENTRYPOINT ["/vault-init.sh"]
