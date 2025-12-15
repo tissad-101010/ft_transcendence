@@ -1,6 +1,6 @@
-import { SceneInteractor } from './scene/SceneInteractor.ts';
-import { SceneManager } from './scene/SceneManager.ts';
-import { SpecificInteraction } from './scene/SpecificInteraction.ts';
+import { SceneInteractor } from '../scene/SceneInteractor.ts';
+import { SceneManager } from '../scene/SceneManager.ts';
+import { SpecificInteraction } from '../scene/SpecificInteraction.ts';
 import { 
 PointerInfo, 
 Scene,
@@ -151,7 +151,7 @@ export class PoolInteraction implements SpecificInteraction {
          else {
             this.sceneInteractor.getHighlightLayer().removeAllMeshes();
             if (loungeMeshes.includes(pickedMesh) && index < this.userX.getFriends.length)
-                    this.sceneInteractor.getHighlightLayer().addMesh(pickedMesh, new Color3(1, 0.75, 0.8));
+                    this.sceneInteractor.getHighlightLayer().addMesh((pickedMesh as Mesh), new Color3(1, 0.75, 0.8));
         }
     }
 

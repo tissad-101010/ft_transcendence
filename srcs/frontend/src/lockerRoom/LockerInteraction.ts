@@ -9,7 +9,6 @@ AbstractMesh,
 Mesh,
 PointLight
 } from '@babylonjs/core';
-import { TvHandler } from "./TvHandler.ts";
 import { ScoreboardHandler } from "./ScoreboardHandler.ts";
 import { TshirtHandler } from "./TshirtHandler.ts";
 
@@ -29,7 +28,6 @@ export class LockerInteraction implements SpecificInteraction {
     private sceneInteractor: SceneInteractor;
 
     //Sous-classes
-    private tvHandler: TvHandler;
     private scoreboardHandler : ScoreboardHandler;
     private tshirtHandler : TshirtHandler;
 
@@ -41,7 +39,6 @@ export class LockerInteraction implements SpecificInteraction {
         this.sceneManager = sceneManager;
         this.sceneInteractor = sceneInteractor;
 
-        this.tvHandler = new TvHandler(scene, sceneManager, sceneInteractor);
         this.scoreboardHandler = new ScoreboardHandler(scene, sceneManager, sceneInteractor);
         this.tshirtHandler = new TshirtHandler(scene, sceneManager, sceneInteractor);
     }
@@ -64,34 +61,34 @@ export class LockerInteraction implements SpecificInteraction {
         const lockMeshes = this.sceneManager.getLoadedMeshes["locker"];
 
         if (isClick) {
-            if (tvMeshes.includes(pickedMesh))
-                this.tvHandler.handle(pickedMesh, tvMeshes);
-            else if (scoreMeshes.includes(pickedMesh))
+            // if (tvMeshes.includes(pickedMesh))
+                // this.tvHandler.handle(pickedMesh, tvMeshes);
+            if (scoreMeshes.includes(pickedMesh))
                 this.scoreboardHandler.handle(pickedMesh, scoreMeshes);
             else if (lockMeshes.includes(pickedMesh))
                 this.tshirtHandler.handle(pickedMesh, lockMeshes);
         } else {
             this.sceneInteractor.getHighlightLayer().removeAllMeshes();
             //Tv
-            if (tvMeshes.includes(pickedMesh) && !this.tvHandler.getClicTv){
-                this.sceneInteractor.getHighlightLayer().addMesh(tvMeshes[0], new Color3(255, 255, 255));
-            }
+            // if (tvMeshes.includes(pickedMesh) && !this.tvHandler.getClicTv){
+                // this.sceneInteractor.getHighlightLayer().addMesh((tvMeshes[0] as Mesh), new Color3(255, 255, 255));
+            // }
             //Scoreboard
             if (scoreMeshes.includes(pickedMesh) && !this.scoreboardHandler.getClicScoreboard &&
                 pickedMesh !== scoreMeshes[1])
-                this.sceneInteractor.getHighlightLayer().addMesh(scoreMeshes[0], new Color3(255, 255, 255));
+                this.sceneInteractor.getHighlightLayer().addMesh((scoreMeshes[0] as Mesh), new Color3(255, 255, 255));
             else if (scoreMeshes.includes(pickedMesh) && this.scoreboardHandler.getClicScoreboard
                 && pickedMesh !== scoreMeshes[0])
-                this.sceneInteractor.getHighlightLayer().addMesh(scoreMeshes[1], new Color3(1, 1, 0.4)); //lolo 1
+                this.sceneInteractor.getHighlightLayer().addMesh((scoreMeshes[1] as Mesh), new Color3(1, 1, 0.4)); //lolo 1
             //Vestiaire
             if (lockMeshes.includes(pickedMesh) && !pickedMesh.name.includes("button") && 
                 pickedMesh !== lockMeshes[12]){
-                this.sceneInteractor.getHighlightLayer().addMesh(pickedMesh, new Color3(63/255, 139/255, 149/255));
+                this.sceneInteractor.getHighlightLayer().addMesh((pickedMesh as Mesh), new Color3(63/255, 139/255, 149/255));
             }
             // //Changer le hightligter de couleur juste pour l'exit de vestiaire
             else if (lockMeshes.includes(pickedMesh) && this.tshirtHandler.getClicTshirt
                 && pickedMesh === lockMeshes[12])
-                this.sceneInteractor.getHighlightLayer().addMesh(pickedMesh, new Color3(0.3, 0.7, 0.6));
+                this.sceneInteractor.getHighlightLayer().addMesh((pickedMesh as Mesh), new Color3(0.3, 0.7, 0.6));
         }
     }
 

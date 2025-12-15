@@ -3,6 +3,7 @@ import {ZoneName} from '../config.ts';
 import {
     Scene,
     AbstractMesh,
+    Mesh,
     Animation,
     Color3,
     HighlightLayer,
@@ -43,7 +44,6 @@ export class TshirtHandler {
     private clicTshirt: boolean;
     private buttonHighlightLayer: HighlightLayer;
     private basePositions = new Map<AbstractMesh, number>();
-    private frame: AdvancedDynamicTexture | null = null;
 
     /**************************************************
      *                  CONSTRUCTOR                   *
@@ -59,25 +59,6 @@ export class TshirtHandler {
     /**************************************************
      *               PRIVATE METHODS                 *
      **************************************************/
-    private displayProfilePlayer(player: TournamentParticipant): void {
-        if (this.frame)
-            this.frame.dispose();
-        this.frame = AdvancedDynamicTexture.CreateForMesh(this.sceneManager.getScene().getMeshByName("frame"));
-        const rect = new Rectangle();
-        rect.background = "red";
-        rect.width = "100%";
-        rect.height = "100%";
-        this.frame.addControl(rect);
-
-        const login = new TextBlock();
-        login.text = player.login;
-        login.color = "black";
-        login.width = "100%";
-        login.height = "100%";
-        login.fontSize = 300;
-        rect.addControl(login);
-    }
-
     private animateButtonLocker(mesh: AbstractMesh): void {
         // Stop animation precedente
         this.scene.stopAnimation(mesh);
@@ -116,11 +97,11 @@ export class TshirtHandler {
     private handleButtonLocker(mesh: AbstractMesh, active: boolean): void {
         if (active) {
             mesh.isPickable = true;
-            this.buttonHighlightLayer.addMesh(mesh, new Color3(0.53, 0.81, 0.92)); // bleu ciel
+            this.buttonHighlightLayer.addMesh((mesh as Mesh), new Color3(0.53, 0.81, 0.92)); // bleu ciel
             this.animateButtonLocker(mesh);
         } else {
             mesh.isPickable = false;
-            this.buttonHighlightLayer.removeMesh(mesh);
+            this.buttonHighlightLayer.removeMesh((mesh as Mesh));
             this.stopButtonAnimation(mesh);
         }
     }
@@ -175,6 +156,14 @@ export class TshirtHandler {
     if (!players)
         return ;
    
+
+    /*****
+     * 
+     * 
+     *  A REVOIR 
+     * 
+     * 
+     */
     // Clic sur un t-shirt
     if (pickedMesh.name.includes(ZoneName.TSHIRT)) {
         console.log("----------------->0")
@@ -186,7 +175,6 @@ export class TshirtHandler {
         if (this.clicTshirt)
         {
             console.log("-------------------------_>1")
-            this.displayProfilePlayer(players[index]);
             this.sceneInteractor.enableInteractions();
         }
         else
@@ -195,7 +183,6 @@ export class TshirtHandler {
             navigateToZone(this.sceneManager, ZoneName.TSHIRT, () => {
                 this.clicTshirt = true;
                 this.turnOnExit(tshirtMeshes[12]);
-                this.displayProfilePlayer(players[index]);
                 this.sceneInteractor.enableInteractions();
             });
         }
@@ -214,7 +201,7 @@ export class TshirtHandler {
     // Clic sur exit
     if (pickedMesh === tshirtMeshes[12] && this.clicTshirt) {
         this.turnOffExit(pickedMesh);
-        this.sceneInteractor.getHighlightLayer().removeMesh(pickedMesh);
+        this.sceneInteractor.getHighlightLayer().removeMesh((pickedMesh as Mesh));
 
         this.sceneInteractor.disableInteractions();
         navigateToZone(this.sceneManager, ZoneName.LOCKER_ROOM, () => {

@@ -1,7 +1,3 @@
-import {
-  Scene,
-} from '@babylonjs/core';
-
 import { SceneManager } from './scene/SceneManager.ts';
 import { ZoneName } from "./config.ts";
 
@@ -9,11 +5,14 @@ import {
     TournamentParticipant,
     Tournament 
 } from "./Tournament.ts";
+
 import {
     Match,
     MatchRules
 } from "./Match.ts";
+
 import { MatchFriendlyOnline } from './Match/MatchFriendlyOnLine.ts';
+
 import { Env } from './lockerRoom/scoreboardUI/menuCreate.ts';
 
 
@@ -21,9 +20,15 @@ import {
     FriendManager,
     FriendInvitationsI
 } from './friends/FriendsManager.ts';
+
 import { Friend } from './friends/Friend.ts';
+
 import { FriendInvitation } from './friends/FriendInvitation.ts';
-import { PromiseUpdateResponse, StatusInvitation } from './friends/api/friends.api.ts';
+
+import { 
+    PromiseUpdateResponse,
+    StatusInvitation 
+} from './friends/api/friends.api.ts';
 
 
 interface TwoFactorMethods

@@ -6,8 +6,6 @@ import {
     StandardMaterial,
     DynamicTexture,
     Color3,
-    Material,
-    VertexBuffer,
     Vector3,
     CubicEase,
     EasingFunction,

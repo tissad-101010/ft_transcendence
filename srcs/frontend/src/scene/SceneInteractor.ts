@@ -44,8 +44,6 @@ export class SceneInteractor {
             ZoneName.LOCKER_ROOM,
             ZoneName.STANDS,
         ];
-        // if (zone)
-        //     this.zone = zone;
     }
 
 
@@ -53,7 +51,6 @@ export class SceneInteractor {
      *               PRIVATE METHODS                 *
      **************************************************/
      private handlePointer(pointerInfo: PointerInfo, isClick: boolean) : void {
-        // console.log("entree dans handlePointeur de sceneinteractr");
         if (!this.interactionsEnabled)
         {
             return;
@@ -89,12 +86,9 @@ export class SceneInteractor {
     addToHistory: boolean = true
     ) : void {
         if (this.currSpecificInteraction) {
-            console.log("SceneInteractor: Entree dans handleMainZoneClick, currentZone existe->dispose");
             this.currSpecificInteraction.dispose();
             this.currSpecificInteraction = null;
-        } else {
-            console.log("SceneInteractor: Entree dans handleMainZoneClick, curr n'existe pas");
-        }
+        } 
 
         this.highlightLayer.removeAllMeshes();
         if (this.lastHoveredMesh && this.lastHoveredMesh !== pickedMesh)
@@ -107,7 +101,6 @@ export class SceneInteractor {
         if (Object.values(ZoneName).includes(zoneName)) {
             this.disableInteractions();
             navigateToZone(this.sceneManager, zoneName, () => {
-                console.log("SceneInteractor: Addmove Creation instance: ", zoneName);
                 this.enableInteractions();
                 switch (zoneName) {
                     case ZoneName.POOL:
@@ -245,9 +238,9 @@ export class SceneInteractor {
             ZoneName.LOCKER_ROOM,
             ZoneName.STANDS,
         ];
-    // 6. Réactiver tous les événements
-    this.enableInteractions();
-}
+        // 6. Réactiver tous les événements
+        this.enableInteractions();
+    }
 
 }
 

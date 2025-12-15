@@ -1,6 +1,5 @@
 
 import {
-    AdvancedDynamicTexture,
     StackPanel,
     TextBlock,
     Control,
@@ -9,7 +8,6 @@ import {
     Image,
     InputText
 } from "@babylonjs/gui";
-import { url } from "inspector";
 
 
 interface SectionTitleOptions {

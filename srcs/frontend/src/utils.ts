@@ -4,8 +4,13 @@ Scene,
 PBRMaterial, 
 DynamicTexture, 
 Color3, 
+AbstractMesh 
+} from '@babylonjs/core';
+
+import {
 Container,
-AbstractMesh } from '@babylonjs/core';
+} from "@babylonjs/gui";
+
 
 import { ZoneName } from './config.ts';
 import { TournamentParticipant } from './Tournament.ts';
