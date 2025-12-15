@@ -316,28 +316,28 @@ services:
   #                               HASHICORP VAULT                                  #
   #********************************************************************************#
   # HashiCorp Vault service for managing secrets and sensitive data
-  hashicorp_vault:
-    image: hashicorp_vault
-    build:
-      context: ./backend/vault
-      dockerfile: Dockerfile
-    container_name: hashicorp_vault
-    volumes:
-      - LocalVaultData:/vault/data
-      - ./backend/vault/config/vault.hcl:/vault/config/vault.hcl:ro
-      - ./backend/vault/certs/vault.crt:/vault/certs/vault.crt:ro
-      - ./backend/vault/certs/vault.key:/vault/certs/vault.key:ro
-    cap_add:
-      - IPC_LOCK
-    # environment:
-    #   - VAULT_ADDR=http://localhost:8200
-    ports:
-      - "8200:8200"
-      - "8201:8201"
-    networks:
-      - global-net
-      - security-net
-    restart: unless-stopped
+  # hashicorp_vault:
+  #   image: hashicorp_vault
+  #   build:
+  #     context: ./backend/vault
+  #     dockerfile: Dockerfile
+  #   container_name: hashicorp_vault
+  #   volumes:
+  #     - LocalVaultData:/vault/data
+  #     - ./backend/vault/config/vault.hcl:/vault/config/vault.hcl:ro
+  #     - ./backend/vault/certs/vault.crt:/vault/certs/vault.crt:ro
+  #     - ./backend/vault/certs/vault.key:/vault/certs/vault.key:ro
+  #   cap_add:
+  #     - IPC_LOCK
+  #   # environment:
+  #   #   - VAULT_ADDR=http://localhost:8200
+  #   ports:
+  #     - "8200:8200"
+  #     - "8201:8201"
+  #   networks:
+  #     - global-net
+  #     - security-net
+  #   restart: unless-stopped
   #********************************************************************************#
 
   #****************************************************************************#

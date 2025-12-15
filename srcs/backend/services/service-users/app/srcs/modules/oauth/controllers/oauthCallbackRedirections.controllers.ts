@@ -6,7 +6,7 @@
 /*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/10 17:57:40 by tissad            #+#    #+#             */
-/*   Updated: 2025/12/11 20:16:47 by tissad           ###   ########.fr       */
+/*   Updated: 2025/12/15 16:48:35 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,7 @@ import { JwtUtils } from "../../../utils/jwt.utils";
 import { UsersService } from "../../users/users.services";
 import {LoginResponseDTO} from "../../../types/user.types";
 
-const originUrl = process.env.ORIGIN_URL;
+const originUrl = `${process.env.ORIGIN_URL}`;
 // OAuth callback redirection handler
 export async function oauthCallbackRedirectionController(   
     request: FastifyRequest,

@@ -6,7 +6,7 @@
 /*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/18 15:31:26 by tissad            #+#    #+#             */
-/*   Updated: 2025/12/11 20:18:40 by tissad           ###   ########.fr       */
+/*   Updated: 2025/12/15 16:48:44 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,7 @@ import { OauthService } from "../services/oauth.services";
 import { JwtUtils } from "../../../utils/jwt.utils";
 import {LoginResponseDTO} from "../../../types/user.types";
 
-const originUrl = process.env.ORIGIN_URL;
+const originUrl = `${process.env.ORIGIN_URL}`;
 
 // Google OAuth callback handler
 export async function googleOAuthControllerCallback(
