@@ -1,9 +1,25 @@
-import { Scene, AbstractMesh, StandardMaterial, Nullable, Material, Mesh, PointerInfo, PointerEventTypes, PickingInfo } from "@babylonjs/core";
-import { AdvancedDynamicTexture, ScrollViewer, StackPanel, TextBlock, Control, Rectangle, Grid, Ellipse, Button, InputTextArea } from "@babylonjs/gui";
+import { 
+    Scene,
+    AbstractMesh,
+    Nullable,
+    Material 
+} from "@babylonjs/core";
+
+import { 
+    AdvancedDynamicTexture,
+    ScrollViewer,
+    StackPanel,
+    TextBlock,
+    Control,
+    Rectangle,
+    Grid,
+    Ellipse,
+    Button,
+    InputTextArea
+} from "@babylonjs/gui";
 
 import { UserX } from "../UserX.ts";
 import { Friend } from "../friends/Friend.ts";
-import { Message } from "../friends/Friend.ts";
 
 import WebSocket from "isomorphic-ws";
 import { chatApi } from "../chatApi/chat.api.ts";
@@ -64,7 +80,7 @@ export class Chat3D {
         const loginRect = new Rectangle();
         loginRect.width = "800px";
         loginRect.height = "100%";
-        loginRect.background = "#026379AA";
+        loginRect.background = "#ceb5b3ff";
         loginRect.thickness = 0;
         mainGrid.addControl(loginRect, 0, 0);
 
@@ -88,7 +104,7 @@ export class Chat3D {
         this.onlineIcon = new Ellipse();
         this.onlineIcon.width = "26px";
         this.onlineIcon.height = "26px";
-        this.onlineIcon.background = friend.getOnline ? "#53d6d0ff" : "#ca0e4fff";
+        this.onlineIcon.background = friend.getOnline ? "#1f9e69ff" : "#cc6475ff";
         this.onlineIcon.thickness = 2;
         this.onlineIcon.verticalAlignment = Control.VERTICAL_ALIGNMENT_CENTER;
         headerGrid.addControl(this.onlineIcon, 0, 1);
@@ -96,7 +112,7 @@ export class Chat3D {
         const msgContainer = new Rectangle();
         msgContainer.width = "100%";
         msgContainer.height = "100%";
-        msgContainer.background = "#2a2a2aAA";
+        msgContainer.background = "#02505ac4";
         msgContainer.thickness = 0;
         msgContainer.clipChildren = true;
         mainGrid.addControl(msgContainer, 1, 0);
@@ -106,7 +122,7 @@ export class Chat3D {
         this.scrollViewer.height = "100%";
         this.scrollViewer.background = "transparent";
         this.scrollViewer.thickness = 0;
-        this.scrollViewer.horizontalBarVisible = false;
+        // this.scrollViewer.horizontalBarVisible = false;
         msgContainer.addControl(this.scrollViewer);
 
         this.chatContainer = new StackPanel("chatcontainer");
@@ -129,14 +145,14 @@ export class Chat3D {
         inputTxt.color = "white";
         inputTxt.fontSize = 25;
         inputTxt.background = "#444444AA";
-        inputTxt.placeholderText = "Tapez votre message...";
+        inputTxt.placeholderText = "Enter a message...";
         inputGrid.addControl(inputTxt, 0, 0);
 
-        this.sendBtn = Button.CreateSimpleButton("sendBtn", "Envoyer");
+        this.sendBtn = Button.CreateSimpleButton("sendBtn", "Send");
         this.sendBtn.width = "90%";
         this.sendBtn.height = "80%";
         this.sendBtn.color = "white";
-        this.sendBtn.background = "#026379AA";
+        this.sendBtn.background = "#caaba8";
         this.sendBtn.fontSize = 25;
         this.sendBtn.cornerRadius = 10;
         inputGrid.addControl(this.sendBtn, 0, 1);
@@ -148,7 +164,7 @@ export class Chat3D {
             this.addMessage(this.userX.getUser!.username, message, new Date());
 
             if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
-                console.error("WebSocket non connecté.");
+                console.error("WebSocket not connected.");
                 return;
             }
             this.ws.send(JSON.stringify({
@@ -170,27 +186,37 @@ export class Chat3D {
         optionsGrid.height = "100%";
         optionsGrid.background = "#1f1f1fAA";
         optionsGrid.addColumnDefinition(0.33);
-        optionsGrid.addColumnDefinition(0.33);
         optionsGrid.addColumnDefinition(0.34);
         mainGrid.addControl(optionsGrid, 3, 0);
 
-        const blockBtn = Button.CreateSimpleButton("blockBtn", "Bloquer");
+        const blockBtn = Button.CreateSimpleButton("blockBtn", "Block");
         blockBtn.width = "90%";
         blockBtn.height = "70%";
         blockBtn.color = "white";
-        blockBtn.background = "#c0392b";
+        blockBtn.background = "#c06e7cff";
         blockBtn.fontSize = 22;
         blockBtn.cornerRadius = 10;
-        optionsGrid.addControl(blockBtn, 0, 1);
+        optionsGrid.addControl(blockBtn, 0, 0);
 
-        const profileBtn = Button.CreateSimpleButton("profileBtn", "Profil");
+        blockBtn.onPointerClickObservable.add(() => {
+            this.userX.blockFriend(this.friend).then((response) => {
+                // METTRE A JOUR L"AFFICHAGE SELON REPONSE
+                if (response.success)
+                    console.log("OKKKKKKKKKKKKKKKKKK");
+                else
+                    console.log(response.message);
+            }
+            );
+        });
+
+        const profileBtn = Button.CreateSimpleButton("profileBtn", "Profile");
         profileBtn.width = "90%";
         profileBtn.height = "70%";
         profileBtn.color = "white";
-        profileBtn.background = "#ff91b6ff";
+        profileBtn.background = "#3f8b95";
         profileBtn.fontSize = 22;
         profileBtn.cornerRadius = 10;
-        optionsGrid.addControl(profileBtn, 0, 2);
+        optionsGrid.addControl(profileBtn, 0, 1);
 
         profileBtn.onPointerClickObservable.add(() => {
             const mesh = this.sceneManager.getScene().getMeshByName(ZoneName.STANDS)!;
@@ -241,16 +267,6 @@ export class Chat3D {
         };
     }
 
-    smoothScrollTo(scrollViewer: ScrollViewer, target: number, speed: number = 10): void {
-        const step = () => {
-            const diff = target - scrollViewer.scrollTop;
-            if (Math.abs(diff) < 1) return;
-            scrollViewer.scrollTop += diff / speed;
-            requestAnimationFrame(step);
-        };
-        step();
-    }
-
     areMessagesOnDifferentDays(date: Date): boolean {
         return (
             !this.lastDate ||
@@ -261,32 +277,33 @@ export class Chat3D {
     }
 
     displayDate(date: Date): void {
+        const day = String(date.getDate()).padStart(2, "0");
+        const month = String(date.getMonth() + 1).padStart(2, "0");
+        const year = date.getFullYear();
+
         const dateText = new TextBlock();
-        dateText.text = date.toLocaleDateString("fr-FR", {
-            weekday: "long",
-            day: "numeric",
-            month: "long"
-        });
+        dateText.text = `${day}/${month}/${year}`; // 👈 FORMAT ICI
         dateText.color = "white";
         dateText.fontSize = 18;
         dateText.width = "100%";
         dateText.height = "40px";
         dateText.textHorizontalAlignment = Control.HORIZONTAL_ALIGNMENT_CENTER;
         dateText.textVerticalAlignment = Control.VERTICAL_ALIGNMENT_CENTER;
+
         this.chatContainer.addControl(dateText);
         this.lastDate = date;
     }
+
 
     async displayHistory(): Promise<void> {
         const msgs = await this.friend.loadMessages(this.userX.getUser!.username);
         if (msgs.length === 0) {
             if (chatApi.startConversation(this.userX.getUser!.username, this.friend.getUsername) === null) {
-                console.error("Erreur lors du démarrage de la conversation.");
+                console.error("Error start conversation");
                 return;
             }
             return;
         }
-
         msgs.forEach((msg) => {
             this.addMessage(msg.senderUsername, msg.content, new Date(msg.sentAt));
         });
@@ -294,7 +311,7 @@ export class Chat3D {
 
     updateChat(friend: Friend): void {
         this.loginText.text = friend.getUsername;
-        this.onlineIcon.background = friend.getOnline ? "#128354ff" : "#e58ab8ff";
+        this.onlineIcon.background = friend.getOnline ? "#1f9e69ff" : "#cc6475ff";
         this.chatContainer.clearControls();
         this.friend = friend;
         this.displayHistory();
@@ -304,7 +321,6 @@ export class Chat3D {
     private readonly FONT_SIZE = 24;
     private readonly LINE_HEIGHT = 1.3;
     private readonly FONT_FAMILY = "Arial";
-
 
     wrapTextForChat(
         text: string,
@@ -461,7 +477,7 @@ export class Chat3D {
         bubble.thickness = 0;
 
         const isMe = sender !== this.friend.getUsername;
-        bubble.background = isMe ? "#68AEB3" : "#D397A6";
+        bubble.background = isMe ? "#88bcc0ff" : "#c07985ff";
         bubble.horizontalAlignment = isMe
             ? Control.HORIZONTAL_ALIGNMENT_RIGHT
             : Control.HORIZONTAL_ALIGNMENT_LEFT;
@@ -483,8 +499,6 @@ export class Chat3D {
 
         this.scrollViewer.verticalBar.value = this.scrollViewer.verticalBar.maximum;
     }
-
-
 
     public dispose() {
         if (this.advancedTexture) {

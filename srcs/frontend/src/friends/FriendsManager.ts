@@ -74,11 +74,24 @@ export class FriendManager
                     && i.getUsernames[1] === invitation.getUsernames[1]);
             if (index === -1)
             {
-                console.error("Invitation pas trouvee, tres bizarre");
-                return ({success: false, message: "Invitation non trouvee dans le tableau"});
+                return ({success: false, message: "Invitation not found"});
             }
             this.invitations.sent.splice(index, 1);
-            return ({success: true, message: "Invitation supprimee"});
+            return ({success: true, message: "Invitation removed"});
+        }
+        return (response);
+    }
+
+    public async blockFriend(friend: Friend)
+    {
+        const response : PromiseUpdateResponse = await friend.block(this.userX.getUser!.username);
+        if (response.success){
+            let index = this.friends.findIndex((i : Friend) => i === friend);
+            if (index === -1)
+                return ({success: false, message: `${friend.getUsername} not found`});
+            this.friends.splice(index, 1);
+            this.blockeds.push(friend.getUsername);
+            return ({success: true, message: `${friend.getUsername} blocked`});
         }
         return (response);
     }
@@ -93,9 +106,9 @@ export class FriendManager
         {
             let index = this.blockeds.findIndex((i: string) => i === username);
             if (index === -1)
-                return ({success: false, message: `${username} non trouve dans la liste des bloques`});
+                return ({success: false, message: `${username} not found`});
             this.blockeds.splice(index, 1);
-            return ({success: true, message: `${username} a ete retire de la liste des bloques`});
+            return ({success: true, message: `${username} unblocked`});
         }
         return (response);
     }
@@ -107,16 +120,16 @@ export class FriendManager
         {
             const index = this.friends.findIndex((f) => f.getUsername === friend.getUsername);
             if (index === -1)
-                return ({success: false, message: `${friend.getUsername} non trouve dans la liste des amis`});
+                return ({success: false, message: `${friend.getUsername} not found`});
             this.friends.splice(index, 1);
-            return ({success: true, message: `${friend.getUsername} n'est plus votre amis`});
+            return ({success: true, message: `${friend.getUsername} removed`});
         }
         return (response);
     }
 
     public async updateInvitation(invitation: FriendInvitation, param: StatusInvitation) : Promise<PromiseUpdateResponse>
     {
-        let response : PromiseUpdateResponse = {success: false, message: "Parametre invalide"};
+        let response : PromiseUpdateResponse = {success: false, message: "Invalid parameter"};
         switch (param)
         {
             case StatusInvitation.ACCEPTED:
@@ -128,8 +141,7 @@ export class FriendManager
                             && i.getUsernames[1] === invitation.getUsernames[1]);
                     if (index === -1)
                     {
-                        console.error("Invitation pas trouvee, tres bizarre");
-                        return ({success: false, message: "Invitation non trouvee dans le tableau"});
+                        return ({success: false, message: "Invitation not found"});
                     }
                     const data : PromiseGetInfoFriendResponse = await getInfoFriend(invitation.getUsernames[0]);
                     if (data.success)
@@ -151,8 +163,7 @@ export class FriendManager
                             && i.getUsernames[1] === invitation.getUsernames[1]);
                     if (index === -1)
                     {
-                        console.error("Invitation pas trouvee, tres bizarre");
-                        return ({success: false, message: "Invitation non trouvee dans le tableau"});
+                        return ({success: false, message: "Invitation not found"});
                     }
                     this.invitations.received.splice(index, 1);
                     this.blockeds.push(invitation.getUsernames[0]);
@@ -167,11 +178,10 @@ export class FriendManager
                             && i.getUsernames[1] === invitation.getUsernames[1]); 
                     if (index === -1)
                     {
-                        console.error("Invitation pas trouvee, tres bizarre");
-                        return ({success: false, message: "Invitation non trouvee dans le tableau"});
+                        return ({success: false, message: "Invitation not found"});
                     }
                     this.invitations.received.splice(index, 1);
-                    response = ({success: true, message: "Invitation refusee"});
+                    response = ({success: true, message: "Invitation declined"});
                 }
                 break;
         }
@@ -181,7 +191,7 @@ export class FriendManager
     public async loadData() : Promise<{success: boolean, message: string}>
     {
         if (!this.userX.getUser)
-            return ({success: false, message: "Vous n'etes pas connecte"});
+            return ({success: false, message: "You're not online"});
         this.friends = [];
         this.invitations = {sent: [], received: []};
         this.blockeds = [];
@@ -236,13 +246,13 @@ export class FriendManager
             }
             console.log("VALEURS APRES LOADDATA : ", this.friends, this.blockeds, this.invitations);
             // SUCCESS //
-            return ({success: true, message: "Amis, invitations, bloques bien charges"});
+            return ({success: true, message: "Loading complete"});
         }
         else
         {
             // ERROR //
             console.error(call.message);
-            return ({success: false, message: call.message || "erreur inconnue"});
+            return ({success: false, message: call.message || "unknown error"});
         }
     } 
 

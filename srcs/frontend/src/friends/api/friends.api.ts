@@ -1,6 +1,5 @@
 import { FriendInvitation } from "../FriendInvitation";
 
-
 export interface PromiseUpdateResponse
 {
     success: boolean;
@@ -110,6 +109,33 @@ export async function removeBlocked(
   }
 }
 
+export async function blockFriend(user1: string, user2: string)
+{
+  try
+  {
+    const call = await fetch(`${serviceUrl}/friend/invite/block`, {
+      method: "POST",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        user1: user1,
+        user2: user2
+      })
+    });
+    const response = await call.json();
+   if (response.success)
+      return ({success: true, message: "Request acknowledged"});
+    else
+      return ({success: false, message: response.message || "Server error"});
+  } catch (err: any)
+  {
+    console.error('Error update friend invitation', err);
+    return ({success: false, message: 'Network or unexpected error'});
+  }
+}
+
 export async function updateInvitation(param: StatusInvitation, invitation: FriendInvitation) : Promise<PromiseUpdateResponse>
 {
   try
@@ -140,7 +166,7 @@ export async function updateInvitation(param: StatusInvitation, invitation: Frie
     });
     const response = await call.json();
     if (response.success)
-      return ({success: true, message: "Demande prise en compte"});
+      return ({success: true, message: "Request acknowledged"});
     else
       return ({success: false, message: response.message || "Server error"});
   } catch (err: any)
