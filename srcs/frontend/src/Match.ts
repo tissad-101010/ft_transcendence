@@ -7,47 +7,21 @@ import GameLogic from "./gameplay/GameLogic.ts";
 import { Tournament } from './Tournament.ts';
 import { SceneManager } from './scene/SceneManager.ts';
 
+// Import des types centralisés (type-only pour éviter les exports runtime)
+import type {
+    MatchParticipant,
+    MatchRules,
+    MatchTournament,
+    MatchFriendly
+} from './types.ts';
 
-export interface MatchParticipant
-{
-    alias: string;
-    id: number;
-    ready: boolean;
-    me: boolean;
-}
-
-export interface MatchRules
-{
-    speed: string,
-    timeBefore: string,
-    score: string
-}
+// Ré-exporter uniquement les types pour conserver la compatibilité
+export type { MatchParticipant, MatchRules, MatchTournament, MatchFriendly } from './types.ts';
 
 interface IGame
 {
     interface: Game3D,
     logic: GameLogic
-}
-
-/*
-    Status : 0 (en attente) 1 (en cours) 2(termine)
-*/
-export interface MatchTournament
-{
-    sloatA: MatchParticipant | null;
-    sloatB: MatchParticipant | null;
-    round: number | undefined;
-    nextMatchId: number | undefined;
-    nextMatchSlot: number | undefined;
-    tournament: Tournament | undefined;
-    type: "tournament";
-}
-
-export interface MatchFriendly
-{
-    sloatA: MatchParticipant | null;
-    sloatB: MatchParticipant | null;
-    type: "friendly";
 }
 
 enum MatchStatus
@@ -72,6 +46,7 @@ export class Match
     private keys: Set<string>;
     private scene: Scene;
     private status: MatchStatus;
+    private isFinishing: boolean = false;
     constructor(r: MatchRules, m: string, id: number, sceneManager : SceneManager)
     {
         this.sceneManager = sceneManager;
@@ -139,7 +114,9 @@ export class Match
                     countDownGoalTime: parseInt(this.rules.timeBefore),
                     allowPause: false
                 },
-                [this.matchInfo.sloatA, this.matchInfo.sloatB]),
+                [this.matchInfo.sloatA, this.matchInfo.sloatB],
+                0  // mode: 0 pour créer les joueurs (mode local)
+            ),
             interface: new Game3D(sceneManager)
         };
 
@@ -183,30 +160,20 @@ export class Match
             this.renderObserver = sceneManager.getScene().onBeforeRenderObservable.add(() => {
                 if (this.game && this.game.logic.getState !== 3)
                     this.game.interface.update(this.keys);
-                else if (this.game && this.game.logic.getState === 3)
+                else if (this.game && this.game.logic.getState === 3 && !this.isFinishing)
                 {
                     if (!this.matchInfo || !this.matchInfo.sloatA
                         || !this.matchInfo.sloatB)
                         return ;
-                    this.game.interface.getPlayers.forEach((p) => {
-                        p.mesh.dispose();
+                    
+                    // Marquer que le match est en train de se terminer pour éviter les appels multiples
+                    this.isFinishing = true;
+                    
+                    // Appeler la fonction async pour gérer la fin du match
+                    this.handleMatchFinish(sceneManager).catch((error) => {
+                        console.error("Erreur lors de la gestion de la fin du match:", error);
+                        this.isFinishing = false; // Réinitialiser en cas d'erreur
                     });
-                    this.score[0] = this.game.logic.getScore1;
-                    this.score[1] = this.game.logic.getScore2;
-                    if (this.score[0] > this.score[1])
-                        this.winner = this.matchInfo.sloatA;
-                    else
-                        this.winner = this.matchInfo.sloatB;
-                    this.status = 2;
-                    this.game = null;
-                    if (this.matchInfo && this.matchInfo.type === "tournament" && this.matchInfo.tournament)
-                        this.matchInfo.tournament.matchFinish(this);
-                    else if (this.matchInfo && this.matchInfo.type === "friendly")
-                        console.log("Pas encore gere");
-                    window.removeEventListener("keydown", this.keyDownHandler);
-                    window.removeEventListener("keyup", this.keyUpHandler);
-                    sceneManager.getScene().onBeforeRenderObservable.remove(this.renderObserver);
-                    return (true);
                 }
             })
         }
@@ -235,6 +202,48 @@ export class Match
         if (!this.matchInfo)
             return (null);
         return (this.matchInfo.sloatB);
+    }
+
+    private async handleMatchFinish(sceneManager: SceneManager): Promise<void> {
+        if (!this.game || !this.matchInfo || !this.matchInfo.sloatA || !this.matchInfo.sloatB)
+            return;
+        
+        this.game.interface.getPlayers.forEach((p) => {
+            p.mesh.dispose();
+        });
+        this.score[0] = this.game.logic.getScore1;
+        this.score[1] = this.game.logic.getScore2;
+        if (this.score[0] > this.score[1])
+            this.winner = this.matchInfo.sloatA;
+        else
+            this.winner = this.matchInfo.sloatB;
+        this.status = 2;
+        
+        let isTournamentFinished = false;
+        let isFriendlyMatch = false;
+        
+        if (this.matchInfo && this.matchInfo.type === "tournament" && this.matchInfo.tournament) {
+            try {
+                isTournamentFinished = await this.matchInfo.tournament.matchFinish(this);
+            } catch (error) {
+                console.error("Erreur lors de la fin du match:", error);
+            }
+        } else if (this.matchInfo && this.matchInfo.type === "friendly") {
+            isFriendlyMatch = true;
+            console.log("Match amical terminé");
+        }
+        
+        window.removeEventListener("keydown", this.keyDownHandler);
+        window.removeEventListener("keyup", this.keyUpHandler);
+        sceneManager.getScene().onBeforeRenderObservable.remove(this.renderObserver);
+        
+        // Passer l'information à showWinner pour redirection (avant de mettre game à null)
+        if (this.game && this.game.interface) {
+            this.game.interface.showWinner(isTournamentFinished || isFriendlyMatch);
+        }
+        
+        // Nettoyer le game après avoir appelé showWinner
+        this.game = null;
     }
 
     get getStatus() : number | undefined

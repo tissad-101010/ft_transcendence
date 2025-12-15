@@ -3,12 +3,14 @@
 /*                                                        :::      ::::::::   */
 /*   api.ts                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: tissad <issad@student.42.fr>                +#+  +:+       +#+        */
+/*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/07/23 15:58:35 by tissad            #+#    #+#             */
-/*   Updated: 2025/11/28 11:50:30 by tissad            ###   ########.fr       */
+/*   Created: 2025/12/15 17:38:00 by tissad            #+#    #+#             */
+/*   Updated: 2025/12/15 17:41:23 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
+
+
 
 // Chat service
 
@@ -19,8 +21,6 @@ import cors from '@fastify/cors';
 
 import websocketPlugin from "@fastify/websocket";
 
-
-/* ************************************************************************** */
 
 // Import the Fastify framework
 const app = Fastify({ logger: true });

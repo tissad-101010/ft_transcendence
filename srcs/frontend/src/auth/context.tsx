@@ -5,7 +5,7 @@ import { fetchUserProfile } from "./controllers/auth.api";
 type User = {
   id: number;
   username: string;
-  email: string;
+  email?: string;
   avatar?: string;
 };
 
@@ -19,7 +19,8 @@ type AuthContextType = {
   user: User | null;
   isAuthenticated: boolean;
   pending2FA: Pending2FA | null;
-  login: (user: User) => void;
+  isLoading: boolean;
+  login: (user: any) => void;
   logout: () => void;
   setPending2FA: (data: Pending2FA | null) => void;
   resetPending2FA: () => void;
@@ -84,6 +85,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         user,
         isAuthenticated: !!user,
         pending2FA,
+        // Expose a single loading flag under both names for compatibility
+        isLoading: loading,
         login,
         logout,
         setPending2FA,

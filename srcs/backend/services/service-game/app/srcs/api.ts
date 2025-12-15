@@ -6,7 +6,7 @@
 /*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/23 15:58:35 by tissad            #+#    #+#             */
-/*   Updated: 2025/12/15 16:48:26 by tissad           ###   ########.fr       */
+/*   Updated: 2025/12/15 17:41:09 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,8 +25,9 @@ import { prismaPlugin } from './plugins/prisma.plugin';
 
 // import route
 import {gameRoutes, setupWebSocketRoute} from './routes/game.route'; // rp import game routes and websocket setup
+import {tournamentRoutes} from './routes/tournament.route'; // rp import tournament routes
+import {friendlyRoutes} from './routes/friendly.route'; // rp import friendly match routes
 
-/* ************************************************************************** */
 
 // register the Fastify framework
 const app = Fastify({ logger: true });
@@ -42,23 +43,21 @@ app.register(redisPlugin);
 app.register(prismaPlugin);
 app.register(websocket); // rp : register websocket plugin
 
-
-
-// Register routes
-app.register(gameRoutes); // rp : register function with all REST game routes
-
-
 // Start the Fastify server
 const start = async () => {
   try {
     // Register CORS plugin to allow cross-origin requests  
-    // need more testing/!\
     const originURL = `${process.env.ORIGIN_URL}`;
     await app.register(cors, {
       origin: [originURL, 'http://localhost:3000'],  // Allow specific origins
       methods: ['GET', 'POST','PUT', 'DELETE', 'OPTIONS'], // Allow specific methods
       credentials: true, // Allow credentials
     });
+
+    // Register routes AFTER plugins are loaded
+    await app.register(gameRoutes); // rp : register function with all REST game routes
+    await app.register(tournamentRoutes); // rp : register function with all REST tournament routes
+    await app.register(friendlyRoutes); // rp : register function with all REST friendly match routes
 
     app.addHook('onRequest', async (req, reply) => {
       console.log('Origin reçue :', req.headers.origin);

@@ -74,10 +74,10 @@ export class DataFriendUI
         this.friendUI.resetHeader();
         const login = new TextBlock("textUsername");
         login.text = this.friend.getUsername;
-        login.color = "black";
+        login.color = "white";
         login.fontSize = 100;
         login.width = "700px";
-        login.paddingTop = 100;
+        login.paddingTop = 120;
         login.fontFamily = "Arial";
         login.horizontalAlignment = Control.HORIZONTAL_ALIGNMENT_CENTER;
         login.verticalAlignment = Control.VERTICAL_ALIGNMENT_CENTER;
@@ -88,8 +88,9 @@ export class DataFriendUI
             avatar = new Image("imgAvatar", this.friend.getAvatarUrl);
         else
             avatar = new Image("imgAvatar", "icon/user.png");
+        avatar.paddingTop = 100;
         avatar.width = "175px";
-        avatar.height = "175px";
+        avatar.height = "250px";
         avatar.horizontalAlignment = Control.HORIZONTAL_ALIGNMENT_CENTER;
         avatar.verticalAlignment = Control.VERTICAL_ALIGNMENT_CENTER;
         this.containerUI.headerPanel!.addControl(avatar);
@@ -424,7 +425,7 @@ export class DataFriendUI
                                     label: "Taux de victoire cumulée (%)",
                                     data: percentages,
                                     borderColor: "rgba(111, 54, 67, 1)",
-                                    backgroundColor: "rgba(51, 51, 51, 1)",
+                                    backgroundColor: "rgba(63, 124, 173, 1)",
                                     tension: 0.3,
                                     fill: true,
                                     pointRadius: 4
@@ -626,16 +627,17 @@ export class DataFriendUI
     {   
         const rect = new Rectangle();
         rect.thickness = 0;
-        rect.height = "150px";
+        rect.height = "20px";
         this.containerUI.viewPanel?.addControl(rect);
 
         const scrollViewer = new ScrollViewer();
+        scrollViewer.paddingLeft= 10;
         scrollViewer.width = "970px";
-        scrollViewer.height = "735px";
+        scrollViewer.height = "700px";
         scrollViewer.background = "transparent";
         scrollViewer.horizontalAlignment = Control.HORIZONTAL_ALIGNMENT_CENTER;
         scrollViewer.verticalAlignment = Control.VERTICAL_ALIGNMENT_CENTER;
-        scrollViewer.barColor = "white";
+        scrollViewer.barColor = "rgba(63, 124, 173, 1)";
         scrollViewer.thickness = 0;
         this.containerUI.viewPanel?.addControl(scrollViewer);
 
@@ -692,9 +694,9 @@ export class DataFriendUI
             const rect = new Rectangle();
             rect.width = "100%";
             rect.height = "200px";
-            rect.background = "white";
-            rect.color = "black";
-            rect.thickness = 3;
+            rect.background = "rgba(51, 51, 51, 1)";
+            rect.color = "white";
+            rect.thickness = 2;
             container.addControl(rect);
 
             const line = new StackPanel();
@@ -705,14 +707,14 @@ export class DataFriendUI
             const date = new TextBlock();
             date.text = matchs[i].date.toLocaleDateString('fr-FR');
             date.fontSize = 35;
-            date.color = "black";
+            date.color = "white";
             date.width = "200px";
             line.addControl(date);
 
             const p1 = new TextBlock();
             p1.text = matchs[i].participants[0].toString();
             p1.fontSize = 40;
-            p1.color = "black";
+            p1.color = "white";
             p1.width = "200px";
             line.addControl(p1);
 
@@ -720,9 +722,9 @@ export class DataFriendUI
             sc1.text = matchs[i].score[0].toString();
             sc1.fontSize = 35;
             if (matchs[i].score[0] > matchs[i].score[1])
-                sc1.color = "green";
+                sc1.color = "rgba(177, 67, 168, 1)";
             else
-                sc1.color = "black";
+                sc1.color = "white";
             sc1.width = "50px";
             sc1.fontWeight = "bold";
             line.addControl(sc1);
@@ -730,9 +732,9 @@ export class DataFriendUI
             const sc2 = new TextBlock();
             sc2.text = matchs[i].score[1].toString();
             if (matchs[i].score[1] > matchs[i].score[0])
-                sc2.color = "green";
+                sc2.color = "rgba(177, 67, 168, 1)";
             else
-                sc2.color = "black";
+                sc2.color = "white";
             sc2.fontSize = 35;
             sc2.width = "50px";
             sc2.fontWeight = "bold";
@@ -741,14 +743,14 @@ export class DataFriendUI
             const p2 = new TextBlock();
             p2.text = matchs[i].participants[1].toString();
             p2.fontSize = 40;
-            p2.color = "black";
+            p2.color = "white";
             p2.width = "200px";
             line.addControl(p2);
 
             const dur = new TextBlock();
-            dur.text = formatDuration(matchs[i].duration);
+            dur.text = formatDuration(matchs[i].date.getTime() - matchs[i].startedAt.getTime());
             dur.fontSize = 35;
-            dur.color = "black";
+            dur.color = "white";
             dur.width = "100px";
             line.addControl(dur);
         }

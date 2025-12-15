@@ -62,7 +62,8 @@ export interface DataMatchBlock
     controlButtons: Button[],
     currPage: string,
     mode: number,
-    errorMsg?: TextBlock | null
+    errorMsg?: TextBlock | null,
+    onCreateMatch?: (rules: MatchRules) => Promise<boolean> | void
 }
 
 function genRowSpeed(env: DataMatchBlock) : StackPanel
@@ -428,28 +429,86 @@ export function genRulesMatchBlock(env: DataMatchBlock, selectMode: boolean) : R
 
         env.errorMsg = null;
     
-        button.onPointerClickObservable.add(() => {
-            console.log("Verifier form pour creation de match amical a faire", env);
+        button.onPointerClickObservable.add(async () => {
+            console.log("🔄 Vérification du formulaire pour création de match amical...", env);
             if (isValid(env, panel))
             {
-                console.log("OK");
-                // try {
-                //     log('📤 Tentative de création de partie...');
-                // const response = await fetch(`${apiBase}/api/game/create`, { // rp hit create endpoint relative to base
-                //     method: 'POST',
-                //     headers: {
-                //         'Content-Type': 'application/json'
-                //     },
-                //     body: JSON.stringify({
-                //         player1_id: 1
-                //     })
-                // });
-                // }
-
-                // La creation du match peut se faire
+                console.log("✅ Formulaire valide, création du match amical...");
+                
+                const rules: MatchRules = {
+                    speed: env.data.speed || "1",
+                    score: env.data.score || "5",
+                    timeBefore: env.data.timeBefore || "3"
+                };
+                
+                console.log("📋 Règles du match à créer:", rules);
+                
+                // Appeler le callback de création si disponible
+                if (env.onCreateMatch) {
+                    try {
+                        const result = await env.onCreateMatch(rules);
+                        if (result === true || result === undefined) {
+                            console.log("✅ Match amical créé avec succès");
+                            if (env.errorMsg) {
+                                env.errorMsg.dispose();
+                                env.errorMsg = null;
+                            }
+                            // Afficher un message de succès
+                            const successMsg = new TextBlock();
+                            successMsg.text = "Match créé avec succès !";
+                            successMsg.color = "green";
+                            successMsg.fontSize = env.graph.text.fontSize;
+                            successMsg.fontFamily = env.graph.text.fontFamily;
+                            successMsg.width = "100%";
+                            successMsg.height = "50px";
+                            panel.addControl(successMsg);
+                            setTimeout(() => {
+                                successMsg.dispose();
+                            }, 2000);
+                        } else {
+                            console.error("❌ Échec de la création du match amical");
+                            if (!env.errorMsg) {
+                                env.errorMsg = new TextBlock();
+                                panel.addControl(env.errorMsg);
+                            }
+                            env.errorMsg.text = "Erreur lors de la création du match";
+                            env.errorMsg.color = "red";
+                            env.errorMsg.fontSize = env.graph.text.fontSize;
+                            env.errorMsg.fontFamily = env.graph.text.fontFamily;
+                            env.errorMsg.width = "100%";
+                            env.errorMsg.height = "50px";
+                        }
+                    } catch (error) {
+                        console.error("❌ Erreur lors de la création du match amical:", error);
+                        if (!env.errorMsg) {
+                            env.errorMsg = new TextBlock();
+                            panel.addControl(env.errorMsg);
+                        }
+                        env.errorMsg.text = "Erreur: " + (error instanceof Error ? error.message : String(error));
+                        env.errorMsg.color = "red";
+                        env.errorMsg.fontSize = env.graph.text.fontSize;
+                        env.errorMsg.fontFamily = env.graph.text.fontFamily;
+                        env.errorMsg.width = "100%";
+                        env.errorMsg.height = "50px";
+                    }
+                } else {
+                    console.warn("⚠️ onCreateMatch callback non défini");
+                    if (!env.errorMsg) {
+                        env.errorMsg = new TextBlock();
+                        panel.addControl(env.errorMsg);
+                    }
+                    env.errorMsg.text = "Erreur: fonction de création non disponible";
+                    env.errorMsg.color = "red";
+                    env.errorMsg.fontSize = env.graph.text.fontSize;
+                    env.errorMsg.fontFamily = env.graph.text.fontFamily;
+                    env.errorMsg.width = "100%";
+                    env.errorMsg.height = "50px";
+                }
             }
             else
-                console.log("KO");
+            {
+                console.log("❌ Formulaire invalide");
+            }
         });
     
         button.onPointerEnterObservable.add(() => {

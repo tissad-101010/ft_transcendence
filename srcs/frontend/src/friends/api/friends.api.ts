@@ -170,6 +170,25 @@ export async function listInvitations() : Promise<{success:boolean; message?: st
   }
 };
 
+export async function listMatch(username: string)
+{
+  try
+  {
+    const call: any = await fetch(`${serviceUrl}/api/matches/user/${username}`, {
+      method: "GET",
+      credentials: "include",
+    });
+    const data = await call.json();
+    if (data.success)
+      return ({success: true, data: data.matches});
+    return ({success: false, message: data.message});
+  } catch (err: any)
+  {
+    console.error("/!\\ ERROR List match /!\\", err);
+    return ({success: false, message: err.message});
+  }
+}
+
 export async function sendFriendInvitation(
   username: string
 ) : Promise <{success: boolean; message?: string; data?: any}>

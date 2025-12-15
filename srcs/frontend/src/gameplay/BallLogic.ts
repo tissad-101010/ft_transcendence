@@ -12,6 +12,7 @@ export default class BallLogic
     private posY: number;
     private posX: number;
     private speed: number;
+    private initialSpeed: number;
     private color: string;
     private directionX : number;
     private directionY: number;
@@ -22,6 +23,7 @@ export default class BallLogic
         this.posY = 0;
         this.posX = 0;
         this.speed = speed;
+        this.initialSpeed = speed;
         this.color = "rgb(255,255,255)";
         this.directionX = 1;
         this.directionY = -1;
@@ -94,10 +96,17 @@ export default class BallLogic
     /*
     * Methode qui permet de reinitialiser la balle apres un but, lance un compteur de 3 secondes pour le coup d'envoi
     */
-    reset() : void
+    reset(scoringTeam: number = 0) : void
     {
         this.posX = 0;
         this.posY = 0;
+        this.speed = this.initialSpeed;
+        if (scoringTeam === 1)
+            this.directionX = 1;
+        else if (scoringTeam === 2)
+            this.directionX = -1;
+        else
+            this.directionX = this.directionX >= 0 ? 1 : -1;
         this.directionY = 0;
     };
 

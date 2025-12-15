@@ -1,4 +1,3 @@
-
 SRCS=./srcs
 COMPOSE=$(SRCS)/docker-compose.yml
 
@@ -51,11 +50,9 @@ postgresql:
 	docker compose -f srcs/docker-compose.yml up postgreSQL --build
 chat:
 	docker compose -f srcs/docker-compose.yml up service-chat --build
+
 game:
 	docker compose -f srcs/docker-compose.yml up service-game --build
-front:
-	docker compose -f srcs/docker-compose.yml up frontend --build
-user:
-	docker compose -f srcs/docker-compose.yml up service-users --build
-
+proxy:
+	docker compose -f srcs/docker-compose.yml up proxy --build
 .PHONY: start down restart up clean prune

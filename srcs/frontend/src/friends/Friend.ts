@@ -1,5 +1,5 @@
 import { chatApi } from "../chatApi/chat.api";
-import { removeFriend } from "./api/friends.api";
+import { listMatch, removeFriend } from "./api/friends.api";
 export interface Message
 {
     id: number;
@@ -16,8 +16,9 @@ export interface Match
     id: number;
     participants: string[];
     score: number[];
-    duration: number;
+    // duration: number;
     date: Date;
+    startedAt: Date;
 }
 
 export class Friend
@@ -59,8 +60,24 @@ export class Friend
 
     public async loadMatchs() : Promise<{success: boolean, message: string}>
     {
-        // APPEL API POUR RECUPERER LES MATCHS PRESENTS DANS SERVICE-GAME
-        return ({success: true, message: "Matchs bien charges"});
+        this.matchs = [];
+        const response = await listMatch(this.username);
+        if (response.success)
+        {
+            response.data.forEach((m: any) => {
+                this.matchs.push({
+                    id: m.id,
+                    score: [m.score1, m.score2],
+                    participants: [m.player1.login, m.player2.login],
+                    date: new Date(m.finishedAt),
+                    startedAt: new Date(m.startedAt)
+                });
+            });
+            console.log("Etat des matchs: ", this.matchs);
+            return ({success: true, message: "Matchs recuperes"});
+        }
+        else
+            return ({success:false, message: response.message});
     }
 
     public async delete(username: string) : Promise<{success: boolean, message: string}>
