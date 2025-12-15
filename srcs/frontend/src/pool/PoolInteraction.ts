@@ -9,7 +9,7 @@ Color3,
 HighlightLayer,
 DynamicTexture,
 PBRMaterial,
-Vector3
+Mesh
 } from '@babylonjs/core';
 import {ZoneName} from '../config.ts';
 
@@ -17,8 +17,6 @@ import { getCurrentGroup, setCurrentGroup, getTotalGroups, displayFriendsWithEmp
 
 import { Chat3D } from './Chat3D.ts';
 import { UserX } from '../UserX.ts';
-import { Friend } from '../friends/Friend.ts';
-import { FriendManager } from '../friends/FriendsManager.ts';
 
 export class PoolInteraction implements SpecificInteraction {
     /**************************************************
@@ -56,18 +54,13 @@ export class PoolInteraction implements SpecificInteraction {
     /**************************************************
     *                PRIVATE METHODS                 *
     **************************************************/
-    // private displayChat() {
-    //     if (!this.chat) return;
-    //     this.chat.addMessage("Test message depuis PoolInteraction");
-    // }
-
     private handleButtonPool(mesh: AbstractMesh, active: boolean): void {
         if (active) {
             mesh.isPickable = true;
-            this.buttonHighlightLayer.addMesh(mesh, new Color3(0.53, 0.81, 0.92)); // bleu ciel
+            this.buttonHighlightLayer.addMesh((mesh as Mesh), new Color3(0.53, 0.81, 0.92)); // bleu ciel
         } else {
             mesh.isPickable = false;
-            this.buttonHighlightLayer.removeMesh(mesh);
+            this.buttonHighlightLayer.removeMesh((mesh as Mesh));
         }
     }
 
@@ -82,17 +75,15 @@ export class PoolInteraction implements SpecificInteraction {
         }
     }
 
-    private handleFriendsProfile(mesh: AbstractMesh, buttonMeshes: AbstractMesh[]): void {
-        displayFriendsWithEmpty(this.scene, this.userX.getFriends, this.sceneManager.getLounge);
-        this.updateButtons(buttonMeshes);
-        this.sceneInteractor.enableInteractions();
-    }
+    // private handleFriendsProfile(mesh: AbstractMesh, buttonMeshes: AbstractMesh[]): void {
+    //     displayFriendsWithEmpty(this.scene, this.userX.getFriends, this.sceneManager.getLounge);
+    //     this.updateButtons(buttonMeshes);
+    //     this.sceneInteractor.enableInteractions();
+    // }
 
     /**************************************************
      *                PUBLIC METHODS                  *
     **************************************************/
-       
-       
     public resetState(buttonMeshes: AbstractMesh[]): void {
         setCurrentGroup(ZoneName.LOUNGE, 0, this.userX.getFriends, this.scene);
         this.sceneManager.getLounge.forEach((mesh : AbstractMesh) => {
@@ -112,10 +103,8 @@ export class PoolInteraction implements SpecificInteraction {
 
     public leave(buttonMeshes: AbstractMesh[])
     {
-        console.log("J'entre ici avec ", buttonMeshes);
         this.resetState(buttonMeshes);
         this.updateButtons(buttonMeshes);
-        // displayFriendsWithEmpty(this.scene, this.sceneManager.getUserX.getFriends, this.sceneManager.getChair);
         this.chat = null;
     }
 
@@ -167,17 +156,11 @@ export class PoolInteraction implements SpecificInteraction {
     }
 
     public dispose(): void {
-        console.log("PoolInteraction: nettoyage en cours");
-
-        // Supprime les highlights
         this.buttonHighlightLayer.removeAllMeshes();
         this.sceneInteractor.getHighlightLayer().removeAllMeshes();
-
         this.buttonHighlightLayer.dispose();
         this.clicLounge = false;        
         this.sceneInteractor.enableInteractions();
-
-        // Ne pas rendre non-pickable les meshes s’ils sont utilisés pour le chat
         const buttonMeshes = this.sceneManager.getLoadedMeshes["buttonsPool"];
         if (buttonMeshes && Array.isArray(buttonMeshes)) {
             buttonMeshes.forEach(mesh => {
@@ -186,7 +169,6 @@ export class PoolInteraction implements SpecificInteraction {
                 }
             });
         }
-
         this.sceneManager.getLounge.forEach((mesh : AbstractMesh) => {
             const mat = mesh.material as PBRMaterial;
             if (!mat) return;
@@ -198,13 +180,10 @@ export class PoolInteraction implements SpecificInteraction {
                 dynTex.update();
             }
         });
-
         if (this.chat) {
             this.chat.dispose();
             this.chat = null;
         }
-
         this.resetState(this.sceneManager.getLoadedMeshes["buttonsPool"]);
-        console.log("PoolInteraction: nettoyage terminé ✅");
     }
 }

@@ -202,7 +202,13 @@ export class Chat3D {
             this.userX.blockFriend(this.friend).then((response) => {
                 // METTRE A JOUR L"AFFICHAGE SELON REPONSE
                 if (response.success)
-                    console.log("OKKKKKKKKKKKKKKKKKK");
+                {
+                    const testRect = new Rectangle();
+                    testRect.width = "50%";
+                    testRect.height = "100%";
+                    testRect.background = "rgba(82, 82, 82, 0.81)";
+                    this.advancedTexture.addControl(testRect);
+                }
                 else
                     console.log(response.message);
             }
@@ -314,6 +320,7 @@ export class Chat3D {
         this.onlineIcon.background = friend.getOnline ? "#1f9e69ff" : "#cc6475ff";
         this.chatContainer.clearControls();
         this.friend = friend;
+        this.lastDate = null;
         this.displayHistory();
     }
 

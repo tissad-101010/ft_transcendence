@@ -2,7 +2,9 @@ import {
   Scene,
   Color3,
   PointLight,
-  AbstractMesh
+  Mesh,
+  StandardMaterial,
+  PBRMaterial
 } from '@babylonjs/core';
 
 export class LightInteractor {
@@ -11,7 +13,7 @@ export class LightInteractor {
      **************************************************/
     private scene: Scene;
     private lights: PointLight[] = [];
-    private meshesBulb: AbstractMesh[] = [];
+    private meshesBulb: Mesh[] = [];
     /**************************************************
     *                 CONSTRUCTOR                     *
     **************************************************/
@@ -28,9 +30,15 @@ export class LightInteractor {
             });
             this.lights = [];
             this.meshesBulb.forEach(mesh =>{
-                if (mesh.material){
-                    mesh.material.emissiveColor = new Color3(0, 0, 0);
-                    mesh.material.disableLighting = false;
+                if (mesh.material)
+                {
+                    if (mesh.material instanceof StandardMaterial)
+                    {
+                        mesh.material.emissiveColor = new Color3(0, 0, 0);
+                        mesh.material.disableLighting = false;
+                    }
+                    else if (mesh.material instanceof PBRMaterial)
+                        mesh.material.emissiveColor = Color3.Black();
                 }
             });
             this.meshesBulb = [];
@@ -45,12 +53,18 @@ export class LightInteractor {
         const mesh = this.scene.getMeshByName("bulb_pool");
         const light = new PointLight(
             "pointLight",
-            mesh.getAbsolutePosition(), // position de la lumière dans la scène
+            mesh!.getAbsolutePosition(), // position de la lumière dans la scène
             this.scene
         );
         this.lights.push(light);
-        mesh.material.emissiveColor = new Color3(0.8, 0.8, 0.8);
-        mesh.material.disableLighting = true;
+        if (mesh!.material instanceof StandardMaterial)
+        {
+            mesh!.material.emissiveColor = new Color3(0.8, 0.8, 0.8);
+            mesh!.material.disableLighting = false;
+        }
+        else if (mesh!.material instanceof PBRMaterial)
+            mesh!.material.emissiveColor = new Color3(0.8, 0.8, 0.8);
+
         const mesh2 = this.scene.getMeshByName("bulb_body_pool");
         this.meshesBulb.push(mesh, mesh2);
         mesh2.material.emissiveColor = new Color3(0.8, 0.8, 0.8);

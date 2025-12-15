@@ -52,7 +52,7 @@ export class UserNotFoundError extends Error
 {
     constructor(username: string)
     {
-        super(username ? `L'utilisateur ${username} n'existe pas` : "Utilisateur introuvable");
+        super(username ? `${username} doesn't exist` : "User unknown");
         this.name = "UserNotFoundError";
     }
 }

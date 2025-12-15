@@ -5,13 +5,11 @@ import {
   Vector3,
   SceneLoader,
   HDRCubeTexture,
-  PhotoDome,
   Animation,
   AbstractMesh,
   FreeCameraMouseInput,
   Texture,
   ParticleSystem,
-  CubeTexture,
   Mesh
 } from '@babylonjs/core';
 import "@babylonjs/inspector";
@@ -50,16 +48,6 @@ const poolMeshNames = [
     ...meshNamesByZone.pool.buttonsPool,
 ];
 
-//NE PAS TOUCHER!
-const meshNamesZones = ["stands", "furniture", "chair03"];
-
-interface CameraState {
-  position: Vector3;
-  rotation: Vector3;
-  zone?: ZoneName;
-}
-
-
 export class SceneManager {
     /**************************************************
      *           PRIVATE ATTRIBUTES                   *
@@ -69,7 +57,6 @@ export class SceneManager {
     private engine: Engine;
     private canvas: HTMLCanvasElement;
     private sceneInteractor: SceneInteractor | null = null;
-    private advancedTexture: AdvancedDynamicTexture;
     private limitCameraRotation: boolean = true;
     private loadedMeshes: {[zone: string]: AbstractMesh[]} = {};
     private meshMap: Record<string, AbstractMesh> = {};
@@ -77,9 +64,8 @@ export class SceneManager {
     private _tshirtMeshes: AbstractMesh[] = [];
     private _chairMeshes: AbstractMesh[] = [];
     private _loungeMeshes: AbstractMesh[] = [];
-    // private lightInteractor : LightInteractor;
     private lightInteractor! : LightInteractor;
-    private cameraHistory: CameraState[] = [];
+    private advancedTexture : AdvancedDynamicTexture | null = null;
     private userX: UserX;
 
     /**************************************************
@@ -91,10 +77,8 @@ export class SceneManager {
     {
         this.canvas = canvas;
         this.engine = new Engine(canvas, true);
-        Engine.MaxSimultaneousLights = 8; // ici, avant de créer la scène ou les materials
         this.scene = new Scene(this.engine);
         this.freeCamera = new FreeCamera("freeCamera", new Vector3(-5, 17, 3), this.scene);
-        // this.lightInteractor = new LightInteractor(this.scene);
         this.userX = new UserX(this);
 
         const degToRad = (deg: number) => deg * Math.PI / 180;
@@ -126,24 +110,10 @@ export class SceneManager {
 
     private buildMeshMap(): void {
         this.meshMap = {};
-        this.scene.meshes.forEach((mesh : Mesh) => {
-            this.meshMap[mesh.name] = mesh as AbstractMesh;
+        this.scene.meshes.forEach((mesh : AbstractMesh) => {
+            this.meshMap[mesh.name] = mesh;
         });
     }
-
-    private debug()
-    {
-        this.scene.debugLayer.show();
-        console.table(
-            this.scene.meshes.map((m : Mesh) => ({
-                name: m.name,
-                indices: m.getTotalIndices(),
-                vertices: m.getTotalVertices(),
-                triangles: m.getTotalIndices() / 3
-            })).sort((a : Mesh, b : Mesh) => b.indices - a.indices).slice(0, 10)); 
-        this.scene.debugLayer.showBoundingBoxes = true;
-    }
-
 
     private setupHDR(): void
     {
@@ -293,7 +263,7 @@ private resetInteractions(): void {
         const config = CAMERA_CONFIGS[zoneName];
         if (!config) return;
 
-        this.freeCamera.detachControl(this.canvas);
+        this.freeCamera.detachControl();
         this.freeCamera.inputs.clear();
 
         Animation.CreateAndStartAnimation(
@@ -328,7 +298,7 @@ private resetInteractions(): void {
                         || zoneName === ZoneName.FIELD || zoneName === ZoneName.WINNERPOV) {
                         // Vue complètement figee
                         this.freeCamera.inputs.clear();
-                        this.freeCamera.detachControl(this.canvas);
+                        this.freeCamera.detachControl();
                     } else {
                         // Vue avec rotation souris uniquement
                         this.limitCameraRotation = true;
@@ -344,11 +314,11 @@ private resetInteractions(): void {
                 zoneName === ZoneName.SCOREBOARD|| zoneName.includes(ZoneName.TSHIRT)
                 || zoneName === ZoneName.SEAT || zoneName === ZoneName.ARBITRATOR || zoneName === ZoneName.FIELD) {
                 this.freeCamera.inputs.clear();
-                this.freeCamera.detachControl(this.canvas);
+                this.freeCamera.detachControl();
             } else
                 this.enableRotationOnly();
-            if (typeof onArrived === "function")
-                console.log("Bien arrive 2");
+            // if (typeof onArrived === "function")
+                // console.log("Bien arrive 2");
         }
     }
 
@@ -356,7 +326,6 @@ private resetInteractions(): void {
         // this.setupHDR();
         await this.setupMeshes(); // attendre les GLB
         this.advancedTexture = AdvancedDynamicTexture.CreateFullscreenUI("UI", true, this.scene);
-        // this.createCoordinateLabels();
     }
 
     public startRenderLoop(): void
@@ -435,31 +404,6 @@ private resetInteractions(): void {
     // /**************************************************
     //  *                    SETTERS                     *
     //  **************************************************/
-    private createCoordinateLabels(): void 
-    {
-        const label = new TextBlock();
-        label.color = "black";
-        label.fontSize = 14;
-        label.left = "10px";
-        label.top = "10px";
-        label.textHorizontalAlignment = TextBlock.HORIZONTAL_ALIGNMENT_LEFT;
-        label.textVerticalAlignment = TextBlock.VERTICAL_ALIGNMENT_TOP;
-
-        this.advancedTexture.addControl(label);
-
-        const radToDeg = (rad: number) => (rad * 180 / Math.PI).toFixed(1);
-
-        this.scene.registerBeforeRender(() => {
-            const pos = this.freeCamera.position;
-            const rot = this.freeCamera.rotation;
-
-            label.text = 
-            `Caméra:\n` +
-            `Pos: x: ${pos.x.toFixed(2)}, y: ${pos.y.toFixed(2)}, z: ${pos.z.toFixed(2)}\n` +
-            `Rot: x: ${radToDeg(rot.x)}°, y: ${radToDeg(rot.y)}°, z: ${radToDeg(rot.z)}°`;
-        });
-    }
-
     public setSpecificMesh(value: boolean): void 
     {
         this._specificMesh = value;
