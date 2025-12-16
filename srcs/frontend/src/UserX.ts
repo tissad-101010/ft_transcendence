@@ -399,21 +399,26 @@ export class UserX
                 { alias: player2Login || loginOpp || "Player2", id: player2Id ?? idOpp ?? 0, ready: false, me: false }
             ];
 
-            // Marquer "me" selon l'ID utilisateur
-            if (player1Id && player1Id === this.user.id) {
+            // Marquer "me" par ID OU par login (robuste aux désynchronisations d'ID entre auth et service game)
+            const isPlayer1Me =
+                (typeof player1Id === "number" && player1Id === this.user.id) ||
+                (player1Login && player1Login === backendLogin);
+            const isPlayer2Me =
+                (typeof player2Id === "number" && player2Id === this.user.id) ||
+                (player2Login && player2Login === backendLogin);
+
+            if (isPlayer1Me) {
                 players[0].me = true;
-                console.log("Utilisateur local est player1 → GAUCHE");
-            } else if (player2Id && player2Id === this.user.id) {
+                console.log("Utilisateur local est player1 → GAUCHE (match local/online)");
+            } else if (isPlayer2Me) {
                 players[1].me = true;
-                console.log("Utilisateur local est player2 → DROITE");
+                console.log("Utilisateur local est player2 → DROITE (match local/online)");
+            } else if (!player2Id && isPlayer1Me) {
+                // Fallback quand player2Id est encore null et que le créateur (player1) rejoint
+                players[0].me = true;
+                console.log("player2 absent mais utilisateur local est créateur → traité comme player1 (GAUCHE)");
             } else {
-                // cas où player2Id peut être absent (match en attente) : si je suis créateur, je suis player1
-                if (!player2Id && player1Id === this.user.id) {
-                    players[0].me = true;
-                    console.log("player2 absent mais utilisateur local est créateur → traité comme player1 (GAUCHE)");
-                } else {
-                    console.log("Utilisateur local n'est pas encore assigné player1/player2 (spectateur ou attente)");
-                }
+                console.log("Utilisateur local n'est pas encore assigné player1/player2 (spectateur ou attente)");
             }
 
             console.log("Tableau players créé:", players.map(p => ({ id: p.id, alias: p.alias, me: p.me })));
