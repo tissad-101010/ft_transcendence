@@ -1,5 +1,9 @@
 import { chatApi } from "../chatApi/chat.api";
-import { listMatch, removeFriend } from "./api/friends.api";
+import { listMatch, 
+         blockFriend,
+         removeFriend 
+        } from "./api/friends.api";
+
 export interface Message
 {
     id: number;
@@ -47,12 +51,8 @@ export class Friend
     public async loadMessages(username:string) : Promise<Message[]>
     {
         // APPEL API POUR RECUPERER LA DISCUSSION EXISTANTE
-        console.log("Chargement des messages pour", this.username);
         const conversations = await chatApi.getUserConversations(username) as { otherUsername: string; messages?: Message[] }[];
-        console.log("Messages reçus :", conversations);
-        
         const conv = conversations.find(c => c.otherUsername === this.username);
-
         this.messages = conv?.messages ?? [];
         
         return (this.messages);
@@ -83,6 +83,11 @@ export class Friend
     public async delete(username: string) : Promise<{success: boolean, message: string}>
     {
         return (await removeFriend(this.username, username));
+    }
+
+    public async block(username: string)
+    {
+        return (await blockFriend(this.username, username));
     }
 
     // PRIVATE METHODS

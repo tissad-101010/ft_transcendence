@@ -1,4 +1,8 @@
-import { AbstractMesh, Scene, Color3, Material} from '@babylonjs/core';
+import { 
+    AbstractMesh,
+    Scene,
+    Material
+} from '@babylonjs/core';
 import { 
   AdvancedDynamicTexture, 
   Rectangle, 

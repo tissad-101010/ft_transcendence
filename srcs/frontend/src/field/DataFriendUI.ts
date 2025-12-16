@@ -1,6 +1,5 @@
 // IMPORTS FOR BABYLON.JS
 import { 
-    AbstractMesh,
     Vector3,
     Matrix,
     Nullable,
@@ -9,16 +8,13 @@ import {
 } from "@babylonjs/core";
 
 import {
-    AdvancedDynamicTexture,
     ScrollViewer,
     StackPanel,
     TextBlock,
     Control,
     Rectangle,
-    InputText,
     Button,
     Image,
-    Ellipse,
 } from "@babylonjs/gui";
 
 // IMPORTS FOR CHART.JS

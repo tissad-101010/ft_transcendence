@@ -16,20 +16,14 @@ import { prisma } from "../models/friends.model";
 
 import { invitationFriend, UserInfo } from "../types/friends.type";
 
-// IMPORT AXIOS
-import axios from "axios";
-
 // IMPORT FRIENDS.ERROR
 import {
   DataBaseConnectionError,
   InvitationError,
-  AuthError,
-  UserNotFoundError,
-  RemoteServiceUnavailableError
+  UserNotFoundError
 } from "../errors/friends.error";
 
 import { getUserById, getUserByUsername } from "../controllers/remote/clients/remoteGetUser.controller";
-
 
 async function safePrisma<T>(fn: () => Promise<T>) : Promise<T>
 {
@@ -82,7 +76,7 @@ export class FriendsService {
   ) : Promise<{count: number}>
   {
     if (!fromUser || !toUser)
-      throw new InvitationError("Parametre invalide");
+      throw new InvitationError("Invalid parameter");
     return (await safePrisma(() => 
       this.prismaClient.friendInvitation.deleteMany({
           where: {
@@ -104,7 +98,7 @@ export class FriendsService {
     const user = await getUserById(fromUserId);
     if (!user) throw new UserNotFoundError(fromUserId);
     // INVITE HIMSELF ?
-    if (user.username === toUserUsername) throw new InvitationError("Tu ne peux pas t'inviter toi-même");
+    if (user.username === toUserUsername) throw new InvitationError("You can't invite yourself");
     // SEARCH "TO USER" FROM BDD
     const other : UserInfo = await getUserByUsername(toUserUsername);
     if (!other) throw new UserNotFoundError(toUserUsername);
@@ -119,7 +113,7 @@ export class FriendsService {
         }
       })
     );
-    if (existing) throw new InvitationError("Invitation déjà existante");
+    if (existing) throw new InvitationError("Invitation already exists");
     // ADD INVITATION ON BDD
     return (await safePrisma(() => 
       this.prismaClient.friendInvitation.create({
@@ -151,7 +145,7 @@ export class FriendsService {
       })
     );
     if (!invitation)
-      throw new InvitationError("Invitation introuvable");
+      throw new InvitationError("Invitation not found");
     
     return (await safePrisma(() =>
       this.prismaClient.friendInvitation.update({
@@ -169,16 +163,25 @@ export class FriendsService {
     const invitation : invitationFriend = await safePrisma(() => 
       this.prismaClient.friendInvitation.findFirst({
         where: {
-          OR: [
-            { fromUserUsername: user1, toUserUsername: user2 },
-            { fromUserUsername: user2, toUserUsername: user1 },
+          AND: [
+            {
+              OR: [
+                { fromUserUsername: user1, toUserUsername: user2 },
+                { fromUserUsername: user2, toUserUsername: user1 },
+              ],
+            },
+            {
+              OR: [
+                { status: "PENDING" },
+                { status: "ACCEPTED" },
+              ],
+            },
           ],
-          status: "PENDING"
-        }
+        },
       })
     );
     if (!invitation)
-      throw new InvitationError("Invitation introuvable");
+      throw new InvitationError("Invitation not found");
     return (await safePrisma(() =>
       this.prismaClient.friendInvitation.update({
         where: { id: invitation.id },

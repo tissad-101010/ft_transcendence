@@ -87,6 +87,11 @@ export class UserX
         return (await this.friendManager.deleteBlocked(username));
     }
 
+    async blockFriend(friend: Friend)
+    {
+        return (await this.friendManager.blockFriend(friend));
+    }
+
     /***********************************/
     /*       Tournament / Matchs       */
     /***********************************/

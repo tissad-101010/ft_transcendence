@@ -20,7 +20,6 @@ clean :
 # 	rm -rf ./srcs/frontend/build
 prune : clean
 	docker system prune -fa
-	npm_cache_clean
 
 test_crs:
 	bash test_tools/test_modsec.sh
@@ -37,10 +36,10 @@ local:
 	mkdir -p ./srcs/backend/services/service-game/data
 	mkdir -p ./srcs/backend/services/service-friends/data
 	cp ./srcs/.env ~/.env.local
-# 	cp ~/sgoinfre/local/env.hdr ./srcs/frontend/public/env.hdr
-# 	cp ~/sgoinfre/local/strucLocker.glb srcs/frontend/public/lockerRoom/strucLocker.glb
-# 	cp ~/sgoinfre/local/strucPool.glb srcs/frontend/public/pool/strucPool.glb
-# 	cp ~/sgoinfre/local/strucField.glb srcs/frontend/public/field/strucField.glb
+	cp ~/sgoinfre/local/env.hdr ./srcs/frontend/public/env.hdr
+	cp ~/sgoinfre/local/strucLocker.glb srcs/frontend/public/lockerRoom/strucLocker.glb
+	cp ~/sgoinfre/local/strucPool.glb srcs/frontend/public/pool/strucPool.glb
+	cp ~/sgoinfre/local/strucField.glb srcs/frontend/public/field/strucField.glb
 	
 npm_cache_clean:
 	npm cache clean --force
