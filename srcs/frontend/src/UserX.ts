@@ -15,6 +15,8 @@ import { PromiseUpdateResponse, StatusInvitation } from "./friends/api/friends.a
 
 import { User, userToBackendFormat } from "./types.ts";
 
+import { API_URL } from "./utils.ts";
+
 /*
     Classe permettant de gérer les actions de l'utilisateur, lieu où seront stockées les données
 */
@@ -138,7 +140,7 @@ export class UserX
         // Créer le tournoi dans la base de données (sans règles pour l'instant, elles seront ajoutées plus tard)
         // Le tournoi sera créé avec les règles par défaut, puis mises à jour quand l'utilisateur les définit
         try {
-            const response = await fetch("https://localhost:8443/api/tournament/create", {
+            const response = await fetch(`${API_URL}/api/tournament/create`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -216,7 +218,7 @@ export class UserX
             };
             console.log("Envoi de la requête POST /api/friendly/create avec:", requestBody);
             
-            const response = await fetch("https://localhost:8443/api/friendly/create", {
+            const response = await fetch(`${API_URL}/api/friendly/create`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -293,7 +295,7 @@ export class UserX
         // Appeler l'API pour rejoindre le match
         const backendUser = userToBackendFormat(this.user);
         try {
-            const response = await fetch(`https://localhost:8443/api/friendly/${idMatch}/join`, {
+            const response = await fetch(`${API_URL}/api/friendly/${idMatch}/join`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -459,7 +461,7 @@ export class UserX
 
         if (tournamentId !== null) {
             try {
-                const response = await fetch(`https://localhost:8443/api/tournament/${tournamentId}`, {
+                const response = await fetch(`${API_URL}/api/tournament/${tournamentId}`, {
                     method: "DELETE",
                     // Pas de body => ne pas envoyer Content-Type pour éviter FST_ERR_CTP_EMPTY_JSON_BODY
                     headers: {
@@ -496,7 +498,7 @@ export class UserX
         console.log("Suppression du match amical:", matchId);
         
         try {
-            const response = await fetch(`https://localhost:8443/api/friendly/${matchId}`, {
+            const response = await fetch(`${API_URL}/api/friendly/${matchId}`, {
                 method: "DELETE",
                 headers: {
                     Accept: "application/json",

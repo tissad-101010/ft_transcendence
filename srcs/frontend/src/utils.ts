@@ -16,6 +16,21 @@ import { ZoneName } from './config.ts';
 import { TournamentParticipant } from './Tournament.ts';
 import { Friend } from './friends/Friend.ts';
 
+export const API_URL = window.__ENV__.BACKEND_URL;
+export const WS_URL = window.__ENV__.WS_URL;
+
+export function getApiUrl()
+{
+    const host = window.location.hostname;
+    let port: string;
+    
+    if (window.location.protocol === 'https:')
+        port = window.location.port || '80';
+    else 
+        port = '8443';
+    return (`${window.location.protocol}//${host}:${port}`);
+}
+
 /***********************
  *       INTERFACES    *
  ***********************/

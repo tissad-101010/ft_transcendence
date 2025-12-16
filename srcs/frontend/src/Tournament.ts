@@ -4,7 +4,7 @@ import {
 
 import { Match } from "./Match.ts"
 import { MatchRules, MatchTournament, MatchParticipant } from "./types.ts";
-import { shuffleArray } from "./utils.ts";
+import { API_URL, shuffleArray } from "./utils.ts";
 
 import { SceneManager } from './scene/SceneManager.ts';
 import { displayPlayers } from './utils.ts';
@@ -84,7 +84,7 @@ export class Tournament
                 const winnerParticipantId = winnerParticipant.dbParticipantId || winnerParticipant.id;
 
                 // Appeler l'API pour sauvegarder les résultats
-                const response = await fetch(`https://localhost:8443/api/tournament/${matchInfo.dbTournamentId}/match/${matchInfo.dbMatchId}/finish`, {
+                const response = await fetch(`${API_URL}/api/tournament/${matchInfo.dbTournamentId}/match/${matchInfo.dbMatchId}/finish`, {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
@@ -324,7 +324,7 @@ export class Tournament
                     ready: p.ready
                 }));
 
-                const response = await fetch(`https://localhost:8443/api/tournament/${this.dbTournamentId}/start`, {
+                const response = await fetch(`${API_URL}/api/tournament/${this.dbTournamentId}/start`, {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",

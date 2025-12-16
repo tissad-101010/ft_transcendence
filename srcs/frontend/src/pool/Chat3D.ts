@@ -28,6 +28,8 @@ import { ZoneName } from "../config.ts";
 import { PoolInteraction } from "./PoolInteraction.ts";
 import { StandsInteraction } from "../field/StandsInteraction.ts";
 
+import { WS_URL } from "../utils.ts";
+
 export class Chat3D {
     private advancedTexture: AdvancedDynamicTexture;
     private mesh: AbstractMesh;
@@ -237,7 +239,7 @@ export class Chat3D {
     }
 
     private initWebSocket() {
-        this.ws = new WebSocket("wss://localhost:8443/chat/ws");
+        this.ws = new WebSocket(`${WS_URL}/chat/ws`);
 
         this.ws.onopen = () => {
             console.log("WebSocket connecté.");

@@ -19,7 +19,7 @@ import { Tournament } from '../../Tournament.ts';
 
 import { backButton, createButton, invitationButton, joinButton, rulesButton, newButton, startButton } from './navigationButton.ts';
 
-import { myClearControls } from "../../utils.ts";
+import { API_URL, myClearControls } from "../../utils.ts";
 import { ScoreboardHandler } from '../ScoreboardHandler.ts';
 
 import { Match } from '../../Match.ts';
@@ -233,7 +233,7 @@ export function genJoinMatch(env: Env) : StackPanel
 
         try {
             console.log("🔄 Tentative de récupération des matchs amicaux...");
-            const response = await fetch("https://localhost:8443/api/friendly/list", {
+            const response = await fetch(`${API_URL}/api/friendly/list`, {
                 method: "GET",
                 headers: {
                     "Content-Type": "application/json",

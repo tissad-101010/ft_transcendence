@@ -5,6 +5,7 @@ import { MatchBase, MatchStatus } from "./MatchBase.ts";
 
 import Game3D from "../gameplay/Game3D.ts";
 import GameLogic from "../gameplay/GameLogic.ts";
+import { API_URL } from "../utils.ts";
 /*
     Classe pour gerer un match amical en ligne (remote players)
     
@@ -407,7 +408,7 @@ export class MatchFriendlyOnline extends MatchBase
             return;
         }
         try {
-            await fetch(`https://localhost:8443/api/friendly/${this.id}/finish`, {
+            await fetch(`${API_URL}/api/friendly/${this.id}/finish`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -458,6 +459,7 @@ export class MatchFriendlyOnline extends MatchBase
         }
         
         const wsUrl = `${wsProtocol}//${host}:${wsPort}/ws`;
+        console.log("------------------ wsurl -> ", wsUrl);
         
         console.log("🔌 Connexion WebSocket à:", wsUrl);
         console.log("🔌 Détails:", { 
@@ -802,7 +804,7 @@ export class MatchFriendlyOnline extends MatchBase
         // Enregistrer le résultat dans la base de données
         if (this.winner) {
             try {
-                const response = await fetch(`https://localhost:8443/api/friendly/${this.id}/finish`, {
+                const response = await fetch(`${API_URL}/api/friendly/${this.id}/finish`, {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
