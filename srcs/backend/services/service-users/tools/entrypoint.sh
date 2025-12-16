@@ -11,6 +11,8 @@
 #                                                                              #
 # **************************************************************************** #
 
+
+## service-users entrypoint script
 set -e
 
 
@@ -36,12 +38,18 @@ done
 echo "🚀 Loading secrets from Vault path: $VAULT_PATH"
 
 # Récupérer secrets KV v2 et exporter en variables d'environnement
-RES=$(vault kv get -tls-skip-verify -address=$VAULT_ADDR -format=json -field=data $VAULT_PATH)
-echo "$RES" | jq -r 'to_entries|map("export " + .key + "=" + (.value|tostring))|.[]' > /tmp/.vault_env
-cat /tmp/.vault_env
-# Charger les variables dans le shell actuel
-. /tmp/.vault_env
+vault agent -config=/app/vault_agent/vault_agent.hcl &
 
+echo "🚀 Loading secrets from Vault path: $VAULT_PATH"
+# attendre que Vault Agent écrive les secrets
+while [ ! -f /data/secrets.env ]; do
+  echo "⏳ Waiting for Vault Agent..."
+  sleep 1
+done
+
+set -a
+. /data/secrets.env 
+set +a
 export DATABASE_URL="postgresql://${DB_USER}:${USER_SERVICE_DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}"
 
 echo "✅ Secrets loaded and environment variables set."

@@ -93,11 +93,17 @@ services:
       - /app/node_modules
       - DataUserService:/data
     networks:
+      - vault_shared-network
       - global-net
       - security-net
     depends_on:
-      - redis
-      - postgreSQL
+      vault-init:
+        condition: service_completed_successfully
+      redis:
+        condition: service_started
+      postgreSQL:
+        condition: service_started
+
     ports:
       - "4000:4000"
     environment:
@@ -145,6 +151,7 @@ services:
   #     - /app/node_modules
   #     - DataUserService:/data
   #   networks:
+  #     - vault_shared-network
   #     - global-net
   #     - security-net
   #   depends_on:
@@ -183,11 +190,16 @@ services:
       - /app/node_modules
       - DataUserService:/data
     networks:
+      - vault_shared-network
       - global-net
       - security-net
     depends_on:
-      - redis
-      - postgreSQL
+      vault-init:
+        condition: service_completed_successfully
+      redis:
+        condition: service_started
+      postgreSQL:
+        condition: service_started
     ports:
       - "4002:4002"
     environment:
@@ -218,11 +230,16 @@ services:
       - /app/node_modules
       - DataUserService:/data
     networks:
+      - vault_shared-network
       - global-net
       - security-net
     depends_on:
-      - redis
-      - postgreSQL
+      vault-init:
+        condition: service_completed_successfully
+      redis:
+        condition: service_started
+      postgreSQL:
+        condition: service_started
     ports:
       - "4003:4003"
     environment:
@@ -356,7 +373,7 @@ volumes:
     driver: local
     driver_opts:
       type: none
-      device: ./backend/services/service-users/data
+      device: ~/data/service-users
       o: bind
   #*******************************************************************************#
   # Local volume for PostgreSQL data

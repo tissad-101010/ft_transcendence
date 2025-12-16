@@ -33,9 +33,10 @@ local:
 	mkdir -p ./srcs/frontend/data
 	mkdir -p ~/data/vault
 	mkdir -p ~/data/postgresql
-	mkdir -p ./srcs/backend/services/service-users/data
-	mkdir -p ./srcs/backend/services/service-game/data
-	mkdir -p ./srcs/backend/services/service-friends/data
+	mkdir -p ~/data/service-users
+	mkdir -p ~/data/service-game
+	mkdir -p ~/data/service-friends
+	mkdir -p ~/data/service-chat
 	cp ./srcs/.env ~/.env.local
 # 	cp ~/sgoinfre/local/env.hdr ./srcs/frontend/public/env.hdr
 # 	cp ~/sgoinfre/local/strucLocker.glb srcs/frontend/public/lockerRoom/strucLocker.glb
