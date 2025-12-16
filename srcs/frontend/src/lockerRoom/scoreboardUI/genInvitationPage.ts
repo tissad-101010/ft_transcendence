@@ -11,13 +11,10 @@ import
   ScrollViewer
 } from "@babylonjs/gui";
 
-import { UIData } from "./utils.ts";
+import { UIData } from "../utils.ts";
 
 import { Friend } from "../../friends/Friend.ts";
 import { UserX } from "../../UserX.ts";
-
-import { myClearControls } from "../../utils.ts";
-
 
 function genFriendList(
     env: UIData,

@@ -1,21 +1,46 @@
+// IMPORT FOR SCENE BABYLON
 import { ZoneName } from "./config.ts";
-import { TournamentParticipant, Tournament } from "./Tournament.ts";
-import { Match, MatchRules, MatchParticipant } from "./Match.ts";
-import { MatchFriendlyOnline } from "./Match/MatchFriendlyOnLine.ts";
-import { Env } from "./lockerRoom/scoreboardUI/menuCreate.ts";
 import { SceneManager } from "./scene/SceneManager.ts";
+import { Env } from "./lockerRoom/scoreboardUI/menuCreate.ts";
 
+// IMPORT FOR TOURNAMENT
+import { 
+    TournamentParticipant,
+    Tournament
+} from "./pong/Tournament.ts";
+
+// IMPORT FOR MATCHS
+import { 
+    Match,
+    MatchRules,
+    MatchParticipant 
+} from "./pong/Match.ts";
+
+import { MatchFriendlyOnline } from "./pong/Match/MatchFriendlyOnLine.ts";
+
+// IMPORT FOR FRIENDS
 import {
     FriendManager,
     FriendInvitationsI
 } from "./friends/FriendsManager.ts";
+
 import { Friend } from "./friends/Friend.ts";
 import { FriendInvitation } from "./friends/FriendInvitation.ts";
-import { PromiseUpdateResponse, StatusInvitation } from "./friends/api/friends.api.ts";
 
-import { User, userToBackendFormat } from "./types.ts";
+// IMPORT FOR CALL API
+import { 
+    PromiseUpdateResponse,
+    StatusInvitation 
+} from "./friends/api/friends.api.ts";
 
 import { API_URL } from "./utils.ts";
+
+// TYPES
+import { 
+    User, 
+    userToBackendFormat 
+} from "./types.ts";
+
 
 /*
     Classe permettant de gérer les actions de l'utilisateur, lieu où seront stockées les données
@@ -23,12 +48,7 @@ import { API_URL } from "./utils.ts";
 
 export class UserX 
 {
-    // PROPS                // this.user = {
-                //     username: data.match.player1.login || this.user.username,
-                //     id: data.match.player1.id,
-                //     email: this.user.email,
-
-                // };
+    // PROPS //
     private currentZone: ZoneName | null = null;
     private sceneManager : SceneManager;
     private user: User | null = null;
@@ -399,21 +419,26 @@ export class UserX
                 { alias: player2Login || loginOpp || "Player2", id: player2Id ?? idOpp ?? 0, ready: false, me: false }
             ];
 
-            // Marquer "me" selon l'ID utilisateur
-            if (player1Id && player1Id === this.user.id) {
+            // Marquer "me" par ID OU par login (robuste aux désynchronisations d'ID entre auth et service game)
+            const isPlayer1Me =
+                (typeof player1Id === "number" && player1Id === this.user.id) ||
+                (player1Login && player1Login === backendLogin);
+            const isPlayer2Me =
+                (typeof player2Id === "number" && player2Id === this.user.id) ||
+                (player2Login && player2Login === backendLogin);
+
+            if (isPlayer1Me) {
                 players[0].me = true;
-                console.log("Utilisateur local est player1 → GAUCHE");
-            } else if (player2Id && player2Id === this.user.id) {
+                console.log("Utilisateur local est player1 → GAUCHE (match local/online)");
+            } else if (isPlayer2Me) {
                 players[1].me = true;
-                console.log("Utilisateur local est player2 → DROITE");
+                console.log("Utilisateur local est player2 → DROITE (match local/online)");
+            } else if (!player2Id && isPlayer1Me) {
+                // Fallback quand player2Id est encore null et que le créateur (player1) rejoint
+                players[0].me = true;
+                console.log("player2 absent mais utilisateur local est créateur → traité comme player1 (GAUCHE)");
             } else {
-                // cas où player2Id peut être absent (match en attente) : si je suis créateur, je suis player1
-                if (!player2Id && player1Id === this.user.id) {
-                    players[0].me = true;
-                    console.log("player2 absent mais utilisateur local est créateur → traité comme player1 (GAUCHE)");
-                } else {
-                    console.log("Utilisateur local n'est pas encore assigné player1/player2 (spectateur ou attente)");
-                }
+                console.log("Utilisateur local n'est pas encore assigné player1/player2 (spectateur ou attente)");
             }
 
             console.log("Tableau players créé:", players.map(p => ({ id: p.id, alias: p.alias, me: p.me })));
@@ -449,8 +474,6 @@ export class UserX
         }
     }
     
-    
-
     async deleteTournament() : Promise<boolean>
     {
         /*

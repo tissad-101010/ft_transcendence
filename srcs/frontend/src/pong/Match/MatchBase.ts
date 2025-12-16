@@ -1,9 +1,9 @@
 import { Scene } from "@babylonjs/core";
 import { Observer } from "@babylonjs/core/Misc/observable";
 
-import { SceneManager } from "../scene/SceneManager.ts";
+import { SceneManager } from "../../scene/SceneManager.ts";
 
-import { MatchParticipant, MatchRules, User } from "../types.ts";
+import { MatchParticipant, MatchRules, User } from "../../types.ts";
 
 import Game3D from "../gameplay/Game3D.ts";
 import GameLogic from "../gameplay/GameLogic.ts";

@@ -1,11 +1,11 @@
 
 import { MatchParticipant, MatchRules } from "../Match.ts";
-import { SceneManager } from "../scene/SceneManager.ts";
+import { SceneManager } from "../../scene/SceneManager.ts";
 import { MatchBase, MatchStatus } from "./MatchBase.ts";
 
 import Game3D from "../gameplay/Game3D.ts";
 import GameLogic from "../gameplay/GameLogic.ts";
-import { API_URL } from "../utils.ts";
+import { API_URL } from "../../utils.ts";
 /*
     Classe pour gerer un match amical en ligne (remote players)
     

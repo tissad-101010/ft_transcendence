@@ -28,7 +28,7 @@ import {
 import { SceneInteractor } from '../scene/SceneInteractor.ts';
 import { SceneManager } from '../scene/SceneManager.ts';
 import { getCurrentGroup, getTotalGroups, setCurrentGroup } from '../utils.ts';
-import { TournamentParticipant } from '../Tournament.ts';
+import { TournamentParticipant } from '../Tournament/Match/Tournament.ts';
 import { navigateToZone } from '../CameraHistory.ts';
 
 

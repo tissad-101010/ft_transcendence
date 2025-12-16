@@ -12,32 +12,18 @@ import {
 
 import { UserX } from '../../UserX.ts';
 
-import { UIData } from '../utils.ts';
-
 import { DataMatchBlock, genRulesMatchBlock } from './genRulesMatch.ts';
-import { Tournament } from '../../Tournament.ts';
+import { Tournament } from '../../pong/Tournament.ts';
 
 import { backButton, createButton, invitationButton, joinButton, rulesButton, newButton, startButton } from './navigationButton.ts';
 
 import { API_URL } from "../../utils.ts";
 import { ScoreboardHandler } from '../ScoreboardHandler.ts';
 
-import { Match } from '../../Match.ts';
+import { Match, MatchRules } from '../../pong/Match.ts';
 
+import { Env, UIData } from '../utils.ts';
 
-export interface Env
-{
-    page: Rectangle | null;
-    menuContainer: Rectangle | null;
-    advancedTexture: AdvancedDynamicTexture | null;
-    meshScoreboard: AbstractMesh;
-    userX: UserX;
-    UIData: UIData;
-    tournament: Tournament;
-    errorMsg: TextBlock | null;
-    control: ScoreboardHandler;
-    scoreboard: ScoreboardHandler;
-}
 
 function buttonNavigation(
     label: string,
@@ -49,27 +35,27 @@ function buttonNavigation(
     const button = new Rectangle();
     button.height = "80px";
     button.width = "140px";
-    button.thickness = env.UIData.button.thickness + 4;
-    button.color = env.UIData.text.color;
+    button.thickness = UIData.button.thickness + 4;
+    button.color = UIData.text.color;
     if (label === settings.currPage)
-        button.background = env.UIData.button.clickedBackground;
+        button.background = UIData.button.clickedBackground;
     else
-        button.background = env.UIData.button.background;
+        button.background = UIData.button.background;
 
     const text = new TextBlock();
     text.text = label;
-    text.color = env.UIData.text.color;
-    text.fontSize = env.UIData.text.fontSize - 2;
-    text.fontFamily = env.UIData.text.fontFamily;
+    text.color = UIData.text.color;
+    text.fontSize = UIData.text.fontSize - 2;
+    text.fontFamily = UIData.text.fontFamily;
     button.addControl(text);
 
     button.onPointerClickObservable.add(() => {
         if (settings.currPage !== label)
         {
             settings.controlButtons.forEach((b) => {
-                b.background = env.UIData.button.background;
+                b.background = UIData.button.background;
             })
-            button.background = env.UIData.button.clickedBackground;
+            button.background = UIData.button.clickedBackground;
         }
         switch (label)
         {
@@ -92,23 +78,20 @@ function buttonNavigation(
                 createButton(env, grid);
                 break;
             case "Lancer" :
-                /***** ***** */
-                /*  A FAIRE  */
-                /***** ***** */
                 startButton(env, settings);
                 console.info("Ce bouton n'est pas encore fonctionnel");
                 break;
         }
     });
     button.onPointerEnterObservable.add(() => {
-        button.background = env.UIData.button.hoveredBackground;
+        button.background = UIData.button.hoveredBackground;
     });
 
     button.onPointerOutObservable.add(() => {
         if (label === settings.currPage)
-            button.background = env.UIData.button.clickedBackground;
+            button.background = UIData.button.clickedBackground;
         else
-            button.background = env.UIData.button.background;
+            button.background = UIData.button.background;
     })
     settings.controlButtons.push(button);
     return (button);
@@ -135,9 +118,9 @@ export function genJoinMatch(env: Env) : StackPanel
 
     const title = new TextBlock();
     title.text = "Rejoindre un match";
-    title.color = env.UIData.title.color;
-    title.fontSize = env.UIData.title.fontSize;
-    title.fontFamily = env.UIData.title.fontFamily;
+    title.color = UIData.title.color;
+    title.fontSize = UIData.title.fontSize;
+    title.fontFamily = UIData.title.fontFamily;
     title.width = "500px";
     title.height = "80px";
     
@@ -147,7 +130,7 @@ export function genJoinMatch(env: Env) : StackPanel
     scrollViewer.width = "100%";
     scrollViewer.height = "300px";
     scrollViewer.background = "transparent";
-    scrollViewer.barColor = env.UIData.text.color;
+    scrollViewer.barColor = UIData.text.color;
     scrollViewer.thickness = 0;
     page.addControl(scrollViewer);
 
@@ -176,8 +159,8 @@ export function genJoinMatch(env: Env) : StackPanel
 
     const headerLogin = new TextBlock();
     headerLogin.text = "Login";
-    headerLogin.fontSize = env.UIData.text.fontSize;
-    headerLogin.fontFamily = env.UIData.text.fontFamily;
+    headerLogin.fontSize = UIData.text.fontSize;
+    headerLogin.fontFamily = UIData.text.fontFamily;
     headerLogin.width = "100px";
     headerLogin.height = "100px";
     headerLogin.color = "black";
@@ -185,8 +168,8 @@ export function genJoinMatch(env: Env) : StackPanel
 
     const headerSpeed = new TextBlock();
     headerSpeed.text = "Vitesse";
-    headerSpeed.fontSize = env.UIData.text.fontSize;
-    headerSpeed.fontFamily = env.UIData.text.fontFamily;
+    headerSpeed.fontSize = UIData.text.fontSize;
+    headerSpeed.fontFamily = UIData.text.fontFamily;
     headerSpeed.width = "100px";
     headerSpeed.height = "100px";
     headerSpeed.color = "black";
@@ -194,8 +177,8 @@ export function genJoinMatch(env: Env) : StackPanel
 
     const headerTime = new TextBlock();
     headerTime.text = "Delai";
-    headerTime.fontSize = env.UIData.text.fontSize;
-    headerTime.fontFamily = env.UIData.text.fontFamily;
+    headerTime.fontSize = UIData.text.fontSize;
+    headerTime.fontFamily = UIData.text.fontFamily;
     headerTime.width = "100px";
     headerTime.height = "100px";
     headerTime.color = "black";
@@ -203,8 +186,8 @@ export function genJoinMatch(env: Env) : StackPanel
 
     const headerScore = new TextBlock();
     headerScore.text = "Score";
-    headerScore.fontSize = env.UIData.text.fontSize;
-    headerScore.fontFamily = env.UIData.text.fontFamily;
+    headerScore.fontSize = UIData.text.fontSize;
+    headerScore.fontFamily = UIData.text.fontFamily;
     headerScore.width = "100px";
     headerScore.height = "100px";
     headerScore.color = "black";
@@ -249,8 +232,8 @@ export function genJoinMatch(env: Env) : StackPanel
                 const errorText = new TextBlock();
                 errorText.text = `Erreur de chargement (${response.status})`;
                 errorText.color = "red";
-                errorText.fontSize = env.UIData.text.fontSize;
-                errorText.fontFamily = env.UIData.text.fontFamily;
+                errorText.fontSize = UIData.text.fontSize;
+                errorText.fontFamily = UIData.text.fontFamily;
                 errorText.width = "500px";
                 errorText.height = "50px";
                 container.addControl(errorText);
@@ -284,9 +267,9 @@ export function genJoinMatch(env: Env) : StackPanel
                 console.log("ℹ️ Aucun match disponible");
                 const noMatchText = new TextBlock();
                 noMatchText.text = "Aucun match disponible";
-                noMatchText.color = env.UIData.text.color;
-                noMatchText.fontSize = env.UIData.text.fontSize;
-                noMatchText.fontFamily = env.UIData.text.fontFamily;
+                noMatchText.color = UIData.text.color;
+                noMatchText.fontSize = UIData.text.fontSize;
+                noMatchText.fontFamily = UIData.text.fontFamily;
                 noMatchText.width = "500px";
                 noMatchText.height = "50px";
                 noMatchText.textHorizontalAlignment = Control.HORIZONTAL_ALIGNMENT_CENTER;
@@ -319,8 +302,8 @@ export function genJoinMatch(env: Env) : StackPanel
                 const login = new TextBlock();
                 // Afficher "R" si le match est en ligne
                 login.text = m.isOnline ? `${m.login} (R)` : m.login;
-                login.fontSize = env.UIData.text.fontSize;
-                login.fontFamily = env.UIData.text.fontFamily;
+                login.fontSize = UIData.text.fontSize;
+                login.fontFamily = UIData.text.fontFamily;
                 login.width = "100px";
                 login.height = "100px";
                 login.color = m.isOnline ? "blue" : "black"; // Bleu pour les matchs en ligne
@@ -328,8 +311,8 @@ export function genJoinMatch(env: Env) : StackPanel
 
                 const speed = new TextBlock();
                 speed.text = m.speed;
-                speed.fontSize = env.UIData.text.fontSize;
-                speed.fontFamily = env.UIData.text.fontFamily;
+                speed.fontSize = UIData.text.fontSize;
+                speed.fontFamily = UIData.text.fontFamily;
                 speed.width = "100px";
                 speed.height = "100px";
                 speed.color = "black";
@@ -337,8 +320,8 @@ export function genJoinMatch(env: Env) : StackPanel
 
                 const time = new TextBlock();
                 time.text = m.time;
-                time.fontSize = env.UIData.text.fontSize;
-                time.fontFamily = env.UIData.text.fontFamily;
+                time.fontSize = UIData.text.fontSize;
+                time.fontFamily = UIData.text.fontFamily;
                 time.width = "100px";
                 time.height = "100px";
                 time.color = "black";
@@ -346,8 +329,8 @@ export function genJoinMatch(env: Env) : StackPanel
 
                 const score = new TextBlock();
                 score.text = m.score;
-                score.fontSize = env.UIData.text.fontSize;
-                score.fontFamily = env.UIData.text.fontFamily;
+                score.fontSize = UIData.text.fontSize;
+                score.fontFamily = UIData.text.fontFamily;
                 score.width = "100px";
                 score.height = "100px";
                 score.color = "black";
@@ -356,16 +339,16 @@ export function genJoinMatch(env: Env) : StackPanel
                 const button = new Rectangle();
                 button.height = "50px";
                 button.width = "80px";
-                button.thickness = env.UIData.button.thickness;
-                button.color = env.UIData.text.color;
-                button.background = env.UIData.button.background;
+                button.thickness = UIData.button.thickness;
+                button.color = UIData.text.color;
+                button.background = UIData.button.background;
                 panel.addControl(button);
 
                 const text = new TextBlock();
                 text.text = "Go";
-                text.color = env.UIData.text.color;
-                text.fontSize = env.UIData.text.fontSize - 4;
-                text.fontFamily = env.UIData.text.fontFamily;
+                text.color = UIData.text.color;
+                text.fontSize = UIData.text.fontSize - 4;
+                text.fontFamily = UIData.text.fontFamily;
                 button.addControl(text);
                 
                 button.onPointerClickObservable.add(() => {
@@ -390,7 +373,7 @@ export function genJoinMatch(env: Env) : StackPanel
                 const deleteButton = new Rectangle();
                 deleteButton.height = "50px";
                 deleteButton.width = "80px";
-                deleteButton.thickness = env.UIData.button.thickness;
+                deleteButton.thickness = UIData.button.thickness;
                 deleteButton.color = "white";
                 deleteButton.background = "red";
                 panel.addControl(deleteButton);
@@ -398,8 +381,8 @@ export function genJoinMatch(env: Env) : StackPanel
                 const deleteText = new TextBlock();
                 deleteText.text = "Supprimer";
                 deleteText.color = "white";
-                deleteText.fontSize = env.UIData.text.fontSize - 6;
-                deleteText.fontFamily = env.UIData.text.fontFamily;
+                deleteText.fontSize = UIData.text.fontSize - 6;
+                deleteText.fontFamily = UIData.text.fontFamily;
                 deleteButton.addControl(deleteText);
                 
                 deleteButton.onPointerClickObservable.add(async () => {
@@ -446,8 +429,8 @@ export function genJoinMatch(env: Env) : StackPanel
             const errorText = new TextBlock();
             errorText.text = `Erreur de connexion: ${errorMessage.substring(0, 50)}`;
             errorText.color = "red";
-            errorText.fontSize = env.UIData.text.fontSize;
-            errorText.fontFamily = env.UIData.text.fontFamily;
+            errorText.fontSize = UIData.text.fontSize;
+            errorText.fontFamily = UIData.text.fontFamily;
             errorText.width = "500px";
             errorText.height = "50px";
             container.addControl(errorText);
@@ -540,9 +523,9 @@ function match(
                 thickness: 1,
                 color: "blue"
             },
-            text : env.UIData.text,
-            button: env.UIData.button,
-            inputText: env.UIData.inputText
+            text : UIData.text,
+            button: UIData.button,
+            inputText: UIData.inputText
         },
         controlButtons: [],
         currPage: "Menu",
@@ -584,9 +567,9 @@ function tournament(
     env: Env
 ) : void
 {
-    env.menuContainer?.clearControls();
+    env.menuContainer!.clearControls();
 
-    if (env.tournament === undefined)
+    if (env.userX.getTournament === undefined)
     {
         console.info("Tournament existe pas");
         return ;
@@ -599,9 +582,9 @@ function tournament(
     grid.addRowDefinition(0.7);
     grid.addRowDefinition(0.1);
     grid.addRowDefinition(0.2);
-    env.menuContainer?.addControl(grid);
+    env.menuContainer!.addControl(grid);
     const settings : DataMatchBlock = {
-        data: env.tournament.getRules,
+        data: env.userX.getTournament!.getRules,
         graph: {
             container: {
                 width: "100%",
@@ -609,9 +592,9 @@ function tournament(
                 thickness: 1,
                 color: "blue"
             },
-            text : env.UIData.text,
-            button: env.UIData.button,
-            inputText: env.UIData.inputText
+            text : UIData.text,
+            button: UIData.button,
+            inputText: UIData.inputText
         },
         controlButtons: [],
         currPage: "Match",
@@ -637,14 +620,14 @@ export function menuCreate(
     env: Env
 ) : void
 {
-    env.menuContainer?.clearControls();
+    env.menuContainer!.clearControls();
     const panel = new StackPanel();
     panel.isVertical = false;
     panel.height = "90%";
     panel.horizontalAlignment = Control.HORIZONTAL_ALIGNMENT_CENTER;
     panel.verticalAlignment = Control.VERTICAL_ALIGNMENT_CENTER;
     panel.spacing = 10;
-    env.menuContainer?.addControl(panel);
+    env.menuContainer!.addControl(panel);
 
     const button1 = Button.CreateImageOnlyButton("tournamentButton", "/lockerRoom/textures/trophy.png");
     button1.width = "200px";
@@ -667,12 +650,10 @@ export function menuCreate(
 
     button1.onPointerUpObservable.add(async () => {
         // Utiliser le login de l'utilisateur connecté comme alias
-        const userLogin = env.userX.getUser?.login || "Player";
+        const userLogin = env.userX.getUser!.username || "Player";
         // Nettoyer un éventuel tournoi brouillon déjà créé côté serveur
         await env.userX.deleteTournament();
         await env.userX.createTournament(userLogin);
-        if (env.userX.getTournament)
-            env.tournament = env.userX.getTournament;
         tournament(env);
     });
 

@@ -18,6 +18,7 @@ up : local
 clean :
 	docker compose -f $(COMPOSE) down --rmi all --volumes --remove-orphans
 # 	rm -rf ./srcs/frontend/build
+
 prune : clean
 	docker system prune -fa
 

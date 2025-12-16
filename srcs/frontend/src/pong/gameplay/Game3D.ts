@@ -10,7 +10,6 @@ import {
   HighlightLayer,
   ParticleSystem,
   Texture,
-  ConeParticleEmitter,
   SphereParticleEmitter,
   Color4,
   PointLight
@@ -25,11 +24,11 @@ import {
 } from "@babylonjs/gui";
 import '@babylonjs/loaders/glTF'; // important : chargeur pour .glb et .gltf
 
-import { ZoneName } from '../config.ts';
+import { ZoneName } from '../../config.ts';
 import GameLogic from './GameLogic.ts';
 import PlayerLogic from './PlayerLogic.ts';
 import BallLogic from './BallLogic.ts';
-import { SceneManager } from '../scene/SceneManager.ts';
+import { SceneManager } from '../../scene/SceneManager.ts';
 
 interface IPlayer
 {

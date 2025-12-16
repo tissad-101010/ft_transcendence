@@ -5,7 +5,7 @@ import
   Grid
 } from "@babylonjs/gui";
 
-import { UIData } from "./utils.ts";
+import { UIData } from "../utils.ts";
 
 export function genMatchPage(env: UIData, grid : Grid) : StackPanel
 {

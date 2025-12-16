@@ -1,7 +1,7 @@
 import { MatchBase, MatchStatus } from "./MatchBase";
-import { MatchTournament, MatchRules, MatchParticipant } from "../types.ts";
+import { MatchTournament, MatchRules, MatchParticipant } from "../../types.ts";
 
-import { SceneManager } from "../scene/SceneManager.ts";
+import { SceneManager } from "../../scene/SceneManager.ts";
 
 import Game3D from "../gameplay/Game3D.ts";
 import GameLogic from "../gameplay/GameLogic.ts";

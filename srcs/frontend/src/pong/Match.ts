@@ -5,7 +5,7 @@ import { Observer } from "@babylonjs/core/Misc/observable";
 import Game3D from "./gameplay/Game3D.ts";
 import GameLogic from "./gameplay/GameLogic.ts";
 import { Tournament } from './Tournament.ts';
-import { SceneManager } from './scene/SceneManager.ts';
+import { SceneManager } from '../scene/SceneManager.ts';
 
 // Import des types centralisés (type-only pour éviter les exports runtime)
 import type {
@@ -13,10 +13,10 @@ import type {
     MatchRules,
     MatchTournament,
     MatchFriendly
-} from './types.ts';
+} from '../types.ts';
 
 // Ré-exporter uniquement les types pour conserver la compatibilité
-export type { MatchParticipant, MatchRules, MatchTournament, MatchFriendly } from './types.ts';
+export type { MatchParticipant, MatchRules, MatchTournament, MatchFriendly } from '../types.ts';
 
 interface IGame
 {

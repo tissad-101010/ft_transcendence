@@ -2,15 +2,13 @@ import { AbstractMesh} from '@babylonjs/core';
 
 import 
 {
-  Rectangle,
   TextBlock,
-  AdvancedDynamicTexture,
   Grid
 } from "@babylonjs/gui";
 
 import { UserX } from "../../UserX.ts";
 import { UIData } from "../utils.ts";
-import { Tournament } from "../../Tournament.ts";
+import { Tournament } from "../../pong/Tournament.ts";
 import { DataMatchBlock, genRulesMatchBlock } from './genRulesMatch.ts';
 import { genInvitationPage } from './genInvitationPage.ts';
 import { ScoreboardHandler } from '../ScoreboardHandler.ts';

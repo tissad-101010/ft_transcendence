@@ -3,11 +3,15 @@ import {
 } from '@babylonjs/core';
 
 import { Match } from "./Match.ts"
-import { MatchRules, MatchTournament, MatchParticipant } from "./types.ts";
-import { API_URL, shuffleArray } from "./utils.ts";
+import { 
+    MatchRules,
+    MatchTournament,
+    MatchParticipant 
+} from "../types.ts";
+import { API_URL, shuffleArray } from "../utils.ts";
 
-import { SceneManager } from './scene/SceneManager.ts';
-import { displayPlayers } from './utils.ts';
+import { SceneManager } from '../scene/SceneManager.ts';
+import { displayPlayers } from '../utils.ts';
 
 export interface TournamentParticipant
 {

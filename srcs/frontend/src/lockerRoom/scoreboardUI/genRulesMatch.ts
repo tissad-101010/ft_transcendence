@@ -12,7 +12,7 @@ import
 
 import { UIData } from "../utils.ts";
 
-import { MatchRules } from "../../Match.ts";
+import { MatchRules } from "../../pong/Match.ts";
 
 export interface DataGraph
 {
@@ -57,7 +57,7 @@ export interface DataMatchBlock
 {
     data: MatchRules,
     graph: DataGraph,
-    controlButtons: Button[],
+    controlButtons: Rectangle[],
     currPage: string,
     mode: number,
     errorMsg?: TextBlock | null,

@@ -1,4 +1,4 @@
-import { Tournament } from './Tournament.ts';
+import { Tournament } from './Tournament/Match/Tournament.ts';
 
 // ─── User Types ─────────────────────────────────────────────────────────
 // Type utilisateur unifié, compatible avec le contexte d'auth et le backend
