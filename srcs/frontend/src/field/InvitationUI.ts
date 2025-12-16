@@ -155,6 +155,7 @@ export class InvitationUI
                 {
                     this.textLog!.text = "Invitation sent";
                     this.textLog!.color = "rgba(40, 80, 112, 1)";
+                    this.displayContainerR();
                 }
                 else
                 {
@@ -227,6 +228,7 @@ export class InvitationUI
                     else
                         this.textLog!.color = "#ce8a8d";
                     this.displayContainerR();
+                    this.friendUI.getUpdateChair(this.friendUI.getButtonMeshes);
                 });
         });
 
@@ -371,7 +373,7 @@ export class InvitationUI
                                 else
                                     this.textLog!.color = "#ce8a8d";
                                 this.friendUI.getUpdateChair(this.friendUI.getButtonMeshes);
-                                this.friendUI.leaveFriend();
+                                this.displayContainerR();
                         })
             });
 

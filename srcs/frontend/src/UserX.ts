@@ -606,13 +606,13 @@ export class UserX
         user:User
     )
     {
+        if (this.user === null)
+        {
             this.user = user;
-        if (this.user !== null) {
-            this.friendManager.loadData();
-            console.log("Utilisateur authentifié défini dans UserX:", this.user);
-        } else {
-            console.warn("Aucun utilisateur authentifié exploitable fourni à UserX, réinitialisation du contexte utilisateur.");
-            this.user = null;
+            if (this.user !== null)
+                this.friendManager.loadData();
+            else 
+                this.user = null;
         }
     }
     clearUser() : void
