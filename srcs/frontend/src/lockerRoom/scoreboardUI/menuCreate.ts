@@ -19,7 +19,7 @@ import { Tournament } from '../../Tournament.ts';
 
 import { backButton, createButton, invitationButton, joinButton, rulesButton, newButton, startButton } from './navigationButton.ts';
 
-import { API_URL, myClearControls } from "../../utils.ts";
+import { API_URL } from "../../utils.ts";
 import { ScoreboardHandler } from '../ScoreboardHandler.ts';
 
 import { Match } from '../../Match.ts';
@@ -517,7 +517,7 @@ function match(
     env: Env,
 ) : void
 {
-    myClearControls(env.menuContainer)
+    env.menuContainer?.clearControls();
 
     const grid = new Grid();
     grid.width = "100%";
@@ -526,7 +526,7 @@ function match(
     grid.addRowDefinition(0.8);
     grid.addRowDefinition(0.05);
     grid.addRowDefinition(0.15);
-    env.menuContainer.addControl(grid);
+    env.menuContainer?.addControl(grid);
     const settings : DataMatchBlock = {
         data: {
             speed: "",
@@ -584,7 +584,7 @@ function tournament(
     env: Env
 ) : void
 {
-    myClearControls(env.menuContainer);
+    env.menuContainer?.clearControls();
 
     if (env.tournament === undefined)
     {
@@ -599,7 +599,7 @@ function tournament(
     grid.addRowDefinition(0.7);
     grid.addRowDefinition(0.1);
     grid.addRowDefinition(0.2);
-    env.menuContainer.addControl(grid);
+    env.menuContainer?.addControl(grid);
     const settings : DataMatchBlock = {
         data: env.tournament.getRules,
         graph: {
@@ -637,14 +637,14 @@ export function menuCreate(
     env: Env
 ) : void
 {
-    myClearControls(env.menuContainer);
+    env.menuContainer?.clearControls();
     const panel = new StackPanel();
     panel.isVertical = false;
     panel.height = "90%";
     panel.horizontalAlignment = Control.HORIZONTAL_ALIGNMENT_CENTER;
     panel.verticalAlignment = Control.VERTICAL_ALIGNMENT_CENTER;
     panel.spacing = 10;
-    env.menuContainer.addControl(panel);
+    env.menuContainer?.addControl(panel);
 
     const button1 = Button.CreateImageOnlyButton("tournamentButton", "/lockerRoom/textures/trophy.png");
     button1.width = "200px";

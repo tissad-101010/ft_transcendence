@@ -1,7 +1,8 @@
 import { 
     AbstractMesh,
     Scene,
-    Material
+    Material,
+    Mesh
 } from '@babylonjs/core';
 import { 
   AdvancedDynamicTexture, 
@@ -23,7 +24,6 @@ import { UIData } from './utils.ts';
 
 import { menuCreate } from './scoreboardUI/menuCreate.ts';
 import { menuTournament } from './scoreboardUI/menuTournament.ts';
-import { myClearControls } from '../utils.ts';
 import { navigateToZone } from '../CameraHistory.ts';
 
 interface Interval
@@ -60,7 +60,6 @@ export class ScoreboardHandler {
         this.clicScoreboard = false;
         this.userX = sceneManager.getUserX;
         this.interval = {id: -1};
-        console.log(this.userX);
         this.UIData = {
             title: {
                 color: "rgba(221, 16, 16, 1)",
@@ -100,7 +99,6 @@ export class ScoreboardHandler {
      **************************************************/
     public selectMenu(mesh: AbstractMesh)
     {
-        console.log("---------------> entree dans selectne");
         this.scoreboardMesh = mesh;
         if (!this.originalMaterial) {
             this.originalMaterial = mesh.material;
@@ -108,7 +106,7 @@ export class ScoreboardHandler {
         if (this.menuContainer === null)
             this.menuContainer = new Rectangle();
         else
-            myClearControls(this.menuContainer);
+            this.menuContainer.clearControls();
         if (this.advancedTexture !== null)
             this.advancedTexture.dispose();
         this.advancedTexture = AdvancedDynamicTexture.CreateForMesh(mesh);
@@ -174,7 +172,7 @@ export class ScoreboardHandler {
         if (pickedMesh === scoreMeshes[0] && this.clicScoreboard === false){
             this.sceneInteractor.disableInteractions();
             navigateToZone(this.sceneManager, ZoneName.SCOREBOARD, () => {
-                this.sceneInteractor.getHighlightLayer().removeMesh(pickedMesh);
+                this.sceneInteractor.getHighlightLayer().removeMesh((pickedMesh as Mesh));
                 if (!this.playMatch)
                     this.selectMenu(scoreMeshes[0]);
                 this.sceneManager.setSpecificMesh(true);
@@ -191,7 +189,7 @@ export class ScoreboardHandler {
                 this.sceneInteractor.disableInteractions();
                 navigateToZone(this.sceneManager, ZoneName.LOCKER_ROOM, () => {
                     this.sceneManager.setSpecificMesh(false);
-                    this.sceneInteractor.getHighlightLayer().removeMesh(scoreMeshes[1]); //lolo
+                    this.sceneInteractor.getHighlightLayer().removeMesh((scoreMeshes[1] as Mesh)); //lolo
                     this.clicScoreboard = false;
                     this.sceneInteractor.enableInteractions();
                 });

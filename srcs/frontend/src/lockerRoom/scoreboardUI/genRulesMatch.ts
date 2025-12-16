@@ -14,8 +14,6 @@ import { UIData } from "../utils.ts";
 
 import { MatchRules } from "../../Match.ts";
 
-import { log } from "../../apiUtils.ts";
-
 export interface DataGraph
 {
     container: {

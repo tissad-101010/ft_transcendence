@@ -69,18 +69,6 @@ export const groupConfigs: Record<ZoneName.TSHIRT | ZoneName.SEAT | ZoneName.LOU
 /***********************
  *   UTILITAIRES       *
  ***********************/
-export function myClearControls(container: Container)
-{
-    if (!container)
-        return;
-    if (container.children !== undefined)
-    {
-        const childs = [...container.children];
-        for (const c of childs)
-            c.dispose();     
-    }
-    container.clearControls();
-}
 
 export function shuffleArray<T>(array: T[]): T[] {
     for (let i = array.length - 1; i > 0; i--) {

@@ -44,7 +44,6 @@ export class Match
     private game: IGame | null;
     private renderObserver: Observer<Scene> | null;
     private keys: Set<string>;
-    private scene: Scene;
     private status: MatchStatus;
     private isFinishing: boolean = false;
     constructor(r: MatchRules, m: string, id: number, sceneManager : SceneManager)

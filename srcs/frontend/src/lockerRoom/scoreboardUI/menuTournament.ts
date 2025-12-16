@@ -14,7 +14,6 @@ import { UserX } from '../../UserX.ts';
 import { UIData } from '../utils.ts';
 import { Tournament } from '../../Tournament.ts';
 
-import { myClearControls } from "../../utils.ts";
 import { Match, MatchParticipant } from "../../Match.ts";
 import { SceneManager } from "../../scene/SceneManager.ts";
 import { ZoneName } from "../../config.ts";
@@ -63,7 +62,7 @@ function rowRound(
         utils.panelRound.spacing = 5;
         container.addControl(utils.panelRound);
     } else
-       myClearControls(utils.panelRound);
+       utils.panelRound.clearControls();
 
     const nbRound = Math.log(utils.tournament.getParticipants.length) / Math.log(2); // Nombre de tour du tournoi
     console.log("Nombre de round pour le tournoi -> ", nbRound);
@@ -169,7 +168,7 @@ function listMatch(
 ) : void
 {
     if (utils.scrollViewerMatch !== null)
-       myClearControls(utils.scrollViewerMatch);
+       utils.scrollViewerMatch.clearControls();
     else
     {
         utils.scrollViewerMatch = new ScrollViewer("scrollViewerMatch");
@@ -178,7 +177,6 @@ function listMatch(
         utils.scrollViewerMatch.background = "transparent";
         utils.scrollViewerMatch.barColor = env.UIData.text.color;
         utils.scrollViewerMatch.thickness = 0;
-        utils.scrollViewerMatch.horizontalBarVisible = false;
         container.addControl(utils.scrollViewerMatch);
     }
 
@@ -213,7 +211,7 @@ function listMatch(
         if (match.getWinner)
         {
             const score = new TextBlock();
-            score.text = match.getScore[0];
+            score.text = match.getScore[0].toString();
             score.color = "black";
             score.fontSize = env.UIData.text.fontSize;
             score.fontFamily = env.UIData.text.fontFamily;
@@ -234,7 +232,7 @@ function listMatch(
         if (match.getWinner)
         {
             const score = new TextBlock();
-            score.text = match.getScore[1];
+            score.text = match.getScore[1].toString();
             score.color = "black";
             score.fontSize = env.UIData.text.fontSize;
             score.fontFamily = env.UIData.text.fontFamily;
@@ -309,12 +307,12 @@ function waitingScreen(
     }
 
     // Mode en ligne : attendre que l'adversaire soit prêt
-    myClearControls(env.menuContainer);
+    env.menuContainer?.clearControls();
     let panel = new StackPanel();
     panel.isVertical = true;
     panel.width = "100%";
     panel.spacing = 5;
-    env.menuContainer.addControl(panel);
+    env.menuContainer?.addControl(panel);
 
     const info = new TextBlock();
     info.color = env.UIData.text.color;
@@ -324,16 +322,16 @@ function waitingScreen(
     info.width = "100%";
     info.height = "100px";
     info.textHorizontalAlignment = Control.HORIZONTAL_ALIGNMENT_LEFT;
-    env.menuContainer.addControl(info);
+    env.menuContainer?.addControl(info);
 
     let i = 0;
     env.waitingInterval.id = setInterval(() => {
         if (i===5)
             i = 0;
         i++;
-        if (match.getSloatA && match.getSloatA.id === env.userX.getUser.id && match.getSloatB)
+        if (match.getSloatA && match.getSloatA.id === env.userX.getUser?.id && match.getSloatB)
             info.text = "En attente de l'adversaire " + match.getSloatB.alias + " .".repeat(i);
-        else if (match.getSloatB && match.getSloatB.id === env.userX.getUser.id && match.getSloatA)
+        else if (match.getSloatB && match.getSloatB.id === env.userX.getUser?.id && match.getSloatA)
             info.text = "En attente de l'adversaire " + match.getSloatA.alias + " .".repeat(i);
         else
         {
@@ -349,7 +347,6 @@ function waitingScreen(
         )
         {
             clearInterval(env.waitingInterval.id);
-            // env.menuContainer.dispose();
             if (!env.userX.playTournamentMatch(utils.tournament, match, env.sceneManager))
                 console.error("Impossible de lancer le match");
             else
@@ -375,12 +372,12 @@ export function menuTournament(
     if (env.userX.getTournament === null)
         return ;
 
-    myClearControls(env.menuContainer);
+    env.menuContainer?.clearControls();
     let panel = new StackPanel();
     panel.isVertical = true;
     panel.width = "100%";
     panel.spacing = 5;
-    env.menuContainer.addControl(panel);
+    env.menuContainer?.addControl(panel);
     if (!refresh && utils === undefined)
     {
         utils = {
