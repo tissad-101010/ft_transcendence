@@ -1,7 +1,3 @@
-import {
-  Scene,
-} from '@babylonjs/core';
-
 import { 
   StackPanel, 
   Rectangle, 
@@ -10,14 +6,11 @@ import {
   ScrollViewer
 } from "@babylonjs/gui";
 
-import { UserX } from '../../UserX.ts';
 import { Env, UIData } from '../utils.ts';
 import { Tournament } from '../../pong/Tournament.ts';
 
 import { Match, MatchParticipant } from "../../pong/Match.ts";
-import { SceneManager } from "../../scene/SceneManager.ts";
 import { ZoneName } from "../../config.ts";
-import { ScoreboardHandler } from '../ScoreboardHandler.ts';
 
 interface Interval
 {
@@ -40,10 +33,8 @@ function rowRound(
 ) : void
 {
     if (utils.tournament === null)
-    {
-        console.error("tournament est null (très très bizarre de déclencher ceci");
         return ;
-    }
+
     if (utils.panelRound === null)
     {
         utils.panelRound = new StackPanel();
@@ -55,7 +46,6 @@ function rowRound(
        utils.panelRound.clearControls();
 
     const nbRound = Math.log(utils.tournament.getParticipants.length) / Math.log(2); // Nombre de tour du tournoi
-    console.log("Nombre de round pour le tournoi -> ", nbRound);
     let nbMatch = utils.nbMatchFirstRound / Math.pow(2, utils.currRound);
     if (utils.currRound !== 0)
     {
@@ -137,7 +127,6 @@ function displayPlayer(
     env: Env
 ) : void
 {
-    console.log("player : ", p);
     const player = new TextBlock();
     if (p)
         player.text = p.alias;
@@ -286,6 +275,7 @@ function waitingScreen(
             console.error("Impossible de lancer le match");
         else
         {
+            env.scoreboard.leaveMenu();
             env.sceneManager.getSceneInteractor?.disableInteractions();
             env.scoreboard.setClic = false;
             env.sceneManager.moveCameraTo(ZoneName.FIELD, () => {
@@ -325,7 +315,6 @@ function waitingScreen(
             info.text = "En attente de l'adversaire " + match.getSloatA.alias + " .".repeat(i);
         else
         {
-            console.error("Bizarre bizarre");
             info.text = "Oupsi quelque chose ne va pas :(";
             return ;
         }

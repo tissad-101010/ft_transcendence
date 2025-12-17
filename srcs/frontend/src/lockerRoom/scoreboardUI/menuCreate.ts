@@ -56,27 +56,26 @@ function buttonNavigation(
         }
         switch (label)
         {
-            case "Retour" :
+            case "Back" :
                 backButton(env, menuCreate)
                 break;
             case "Match" :
                 rulesButton(label, env, settings, grid)
                 break;
-            case "Nouveau" :
+            case "New" :
                 newButton(label, env, settings, grid);
                 break;
-            case "Rejoindre" :
+            case "Join" :
                 joinButton(label, env, settings, grid);
                 break;
             case "Participants" :
                 invitationButton(label, env, settings, grid);
                 break;
-            case "Créer" :
+            case "Create" :
                 createButton(env, grid);
                 break;
-            case "Lancer" :
+            case "Start" :
                 startButton(env, settings);
-                console.info("Ce bouton n'est pas encore fonctionnel");
                 break;
         }
     });
@@ -186,6 +185,10 @@ export function genJoinMatch(env: Env) : Rectangle
     (buttonUpdate.image as Image).verticalAlignment = Control.VERTICAL_ALIGNMENT_CENTER;
     headerPanel.addControl(buttonUpdate);
 
+    buttonUpdate.onPointerClickObservable.add(() => {
+        loadMatches();
+    })
+
     // Fonction pour charger les matchs depuis l'API
     const loadMatches = async () => {
         // Nettoyer le conteneur (garder seulement l'en-tête)
@@ -215,7 +218,6 @@ export function genJoinMatch(env: Env) : Rectangle
                 credentials: "include",
             });
 
-
             if (!response.ok) {
                 console.error("❌ Erreur lors de la récupération des matchs amicaux:", response.status, response.statusText);
                 const errorText = new TextBlock();
@@ -230,14 +232,9 @@ export function genJoinMatch(env: Env) : Rectangle
             }
 
             const data = await response.json();
-            console.log("✅ Données reçues:", data);
-            console.log("📦 Données brutes de l'API:", data);
             
             const matchs = data.matches || [];
             
-            console.log("📋 Matchs récupérés depuis l'API:", matchs);
-            console.log("📊 Nombre de matchs:", matchs.length);
-
             // Réajouter l'en-tête si nécessaire (au cas où il aurait été supprimé)
             let headerExists = false;
             if (container.children) {
@@ -253,9 +250,8 @@ export function genJoinMatch(env: Env) : Rectangle
 
             // Si aucun match, afficher un message
             if (matchs.length === 0) {
-                console.log("ℹ️ Aucun match disponible");
                 const noMatchText = new TextBlock();
-                noMatchText.text = "Aucun match disponible";
+                noMatchText.text = "No match available";
                 noMatchText.color = UIData.text.color;
                 noMatchText.fontSize = UIData.text.fontSize;
                 noMatchText.fontFamily = UIData.text.fontFamily;
@@ -267,9 +263,6 @@ export function genJoinMatch(env: Env) : Rectangle
             }
 
             // Afficher les matchs
-            console.log("✅ Affichage de", matchs.length, "match(s)");
-            console.log("📦 Conteneur avant ajout des matchs:", container.children?.length || 0, "contrôles");
-            
             matchs.forEach((m: any, index: number) => {
                 const rect = new Rectangle();
                 rect.width = "500px";
@@ -346,13 +339,13 @@ export function genJoinMatch(env: Env) : Rectangle
                     };
                     env.userX.joinFriendlyMatch(rules, m.idMatch, m.idUser, m.login, env).then((success) => {
                         if (!success) {
-                            button.background = "red";
+                            button.background = "rgba(172, 76, 100, 1)";
                         } else {
                             env.scoreboard.leaveMenu();
                         }
                     }).catch((error) => {
                         console.error("Erreur lors de la jonction au match:", error);
-                        button.background = "red";
+                        button.background = "rgba(172, 76, 100, 1)";
                     });
                 });
 
@@ -390,18 +383,8 @@ export function genJoinMatch(env: Env) : Rectangle
                         
                         const success = await env.userX.deleteFriendlyMatch(m.idMatch);
                         if (success) {
-                            // Rafraîchir immédiatement la liste des matchs
-                            if ((env as any).refreshJoinMatchList) {
-                                // Appeler immédiatement puis attendre un peu pour un second rafraîchissement
-                                (env as any).refreshJoinMatchList();
-                                setTimeout(() => {
-                                    (env as any).refreshJoinMatchList();
-                                }, 500);
-                            } else {
-                                console.warn("⚠️ refreshJoinMatchList n'est pas défini");
-                            }
+                            loadMatches();
                         } else {
-                            console.error("❌ Échec de la suppression du match");
                             deleteButton.background = UIData.button.hoveredBackground;
                             deleteButton.isEnabled = true;
                             setTimeout(() => {
@@ -424,8 +407,8 @@ export function genJoinMatch(env: Env) : Rectangle
             const errorMessage = error instanceof Error ? error.message : String(error);
             console.error("❌ Détails de l'erreur:", errorMessage);
             const errorText = new TextBlock();
-            errorText.text = `Erreur de connexion: ${errorMessage.substring(0, 50)}`;
-            errorText.color = "red";
+            errorText.text = `Error connection: ${errorMessage.substring(0, 50)}`;
+            errorText.color = "rgba(172, 76, 100, 1)";
             errorText.fontSize = UIData.text.fontSize;
             errorText.fontFamily = UIData.text.fontFamily;
             errorText.width = "500px";
@@ -433,62 +416,6 @@ export function genJoinMatch(env: Env) : Rectangle
             container.addControl(errorText);
         }
     };
-
-    // Ne pas charger les matchs immédiatement, attendre que la page soit ajoutée à la grille
-    // Stocker la fonction de rafraîchissement dans l'environnement pour pouvoir l'appeler depuis l'extérieur
-    (env as any).refreshJoinMatchList = loadMatches;
-    
-    // Charger les matchs après un court délai pour s'assurer que la page est ajoutée à la grille
-    // Vérifier que le container est correctement attaché en vérifiant s'il a un parent
-    const tryLoadMatches = () => {
-        // Vérifier que le container a un parent (signifie qu'il est attaché à la hiérarchie GUI)
-        // Si parent est null, le contrôle n'est plus attaché
-        if (container.parent) {
-            try {
-                loadMatches();
-                
-                // Rafraîchir la liste toutes les 2 secondes pour une meilleure réactivité
-                const refreshInterval = setInterval(() => {
-                    // Vérifier que le container a toujours un parent
-                    // Si parent devient null, cela signifie que le contrôle a été supprimé
-                    if (container.parent) {
-                        try {
-                            loadMatches();
-                        } catch (error) {
-                            console.error("❌ Erreur lors du rafraîchissement des matchs:", error);
-                            // Arrêter l'intervalle en cas d'erreur
-                            clearInterval(refreshInterval);
-                        }
-                    } else {
-                        // Si le container n'est plus attaché (parent est null), arrêter l'intervalle
-                        clearInterval(refreshInterval);
-                    }
-                }, 2000);
-                
-                // Stocker aussi l'intervalle pour pouvoir le nettoyer si nécessaire
-                (env as any).refreshJoinMatchInterval = refreshInterval;
-            } catch (error) {
-                console.error("❌ Erreur lors du chargement initial des matchs:", error);
-            }
-        } else {
-            // Réessayer après un court délai (maximum 10 tentatives pour éviter une boucle infinie)
-            const maxRetries = 10;
-            let retryCount = (env as any).__loadMatchesRetryCount || 0;
-            if (retryCount < maxRetries) {
-                (env as any).__loadMatchesRetryCount = retryCount + 1;
-                setTimeout(tryLoadMatches, 50);
-            } else {
-                console.warn("⚠️ Impossible de charger les matchs après plusieurs tentatives");
-            }
-        }
-    };
-    
-    // Réinitialiser le compteur de tentatives
-    (env as any).__loadMatchesRetryCount = 0;
-    
-    // Démarrer la tentative de chargement après un court délai
-    setTimeout(tryLoadMatches, 100);
-
     return (page);
 }
 
@@ -528,14 +455,10 @@ function match(
         currPage: "Menu",
         mode: -1,
         onCreateMatch: async (rules: MatchRules) => {
-            console.log("🚀 onCreateMatch appelé avec les règles:", rules);
             // mode: 0 = Local, 1 = En ligne
             const isOnline = settings.mode === 1;
-            console.log("🌐 Mode du match:", isOnline ? "En ligne" : "Local");
             const success = await env.userX.createFriendlyMatch(rules, isOnline);
             if (success) {
-                console.log("✅ Match créé, rafraîchissement de la liste...");
-                // Rafraîchir la liste des matchs si on est sur la page "Rejoindre"
                 if ((env as any).refreshJoinMatchList) {
                     setTimeout(() => {
                         (env as any).refreshJoinMatchList();
@@ -555,9 +478,9 @@ function match(
     rowButtons.spacing = 10;
     grid.addControl(rowButtons, 2, 0);
 
-    rowButtons.addControl(buttonNavigation("Nouveau", env, settings, grid));
-    rowButtons.addControl(buttonNavigation("Rejoindre", env, settings, grid));
-    rowButtons.addControl(buttonNavigation("Retour", env, settings, grid));
+    rowButtons.addControl(buttonNavigation("New", env, settings, grid));
+    rowButtons.addControl(buttonNavigation("Join", env, settings, grid));
+    rowButtons.addControl(buttonNavigation("Back", env, settings, grid));
 }
 
 function tournament(
@@ -565,12 +488,6 @@ function tournament(
 ) : void
 {
     env.menuContainer!.clearControls();
-
-    if (env.userX.getTournament === undefined)
-    {
-        console.info("Tournament existe pas");
-        return ;
-    }
 
     const grid = new Grid();
     grid.width = "100%";
@@ -609,8 +526,8 @@ function tournament(
     env.errorMsg = null;
     rowButtons.addControl(buttonNavigation("Match", env, settings, grid));
     rowButtons.addControl(buttonNavigation("Participants", env, settings, grid));
-    rowButtons.addControl(buttonNavigation("Créer", env, settings, grid));
-    rowButtons.addControl(buttonNavigation("Retour", env, settings, grid));
+    rowButtons.addControl(buttonNavigation("Create", env, settings, grid));
+    rowButtons.addControl(buttonNavigation("Back", env, settings, grid));
 }
 
 export function menuCreate(
@@ -646,9 +563,8 @@ export function menuCreate(
     });
 
     button1.onPointerUpObservable.add(async () => {
-        // Nettoyer un éventuel tournoi brouillon déjà créé côté serveur
-        await env.userX.deleteTournament();
-        await env.userX.createTournament(env.userX.getUser!.username);
+        env.userX.deleteTournament();
+        env.userX.createTournament();
         tournament(env);
     });
 

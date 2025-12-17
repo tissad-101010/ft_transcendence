@@ -14,13 +14,13 @@ import {
   Color4,
   PointLight
 } from '@babylonjs/core';
+
 import { 
   AdvancedDynamicTexture, 
   Rectangle, 
   Control,
   TextBlock,
   StackPanel,
-  Button
 } from "@babylonjs/gui";
 import '@babylonjs/loaders/glTF'; // important : chargeur pour .glb et .gltf
 
@@ -466,11 +466,11 @@ export default class Game3D
     // MET A JOUR LA POSITION DE LA BALLE
     updateBall(ball: IBall)
     {
-        ball.mesh.position = new Vector3(ball.logic.getPosX, ball.mesh.position.y, ball.logic.getPosY);
+        ball.mesh!.position = new Vector3(ball.logic.getPosX, ball.mesh!.position.y, ball.logic.getPosY);
         // ball.light.position.copyFrom(ball.mesh.getAbsolutePosition().add(new Vector3(0, 0.1, 0)));
     };
 
-    showWinner(shouldReturnToMainMenu: boolean = false) {
+    showWinner(shouldReturnToMainMenu: boolean = false, mode: number) {
         this.sceneManager.getSceneInteractor?.disableInteractions();
         this.sceneManager.moveCameraTo(ZoneName.WINNERPOV, () => {
             // this.sceneManager.getSceneInteractor?.enableInteractions();
@@ -486,7 +486,7 @@ export default class Game3D
         emitterRight.parent = mesh;
         emitterRight.position = new Vector3(0, 0, 20);
 
-        const createFirework = (startPos, colors) => {
+        const createFirework = (startPos: any, colors: any) => {
             const rocketNode = new TransformNode("rocketNode", this.scene);
             rocketNode.parent = mesh;
             rocketNode.position = startPos.clone();
@@ -508,7 +508,7 @@ export default class Game3D
             trail.start();
 
             const riseTargetY = 10 + Math.random() * 15;
-            const riseDuration = 1000 + Math.random() * 1000;
+            const riseDuration = 100 + Math.random() * 1000;
             const startY = rocketNode.position.y;
             const startTime = performance.now();
 
@@ -540,7 +540,7 @@ export default class Game3D
                         explosion.dispose();
                         trail.dispose();
                         rocketNode.dispose();
-                    }, 2500);
+                    }, 1000);
                 }
             };
             rise();
@@ -561,22 +561,24 @@ export default class Game3D
         const interval = setInterval(() => {
             createFirework(leftPos, leftColors);
             createFirework(rightPos, rightColors);
-        }, 2000);
+        }, 3000);
 
-        setTimeout(() => clearInterval(interval), 10000);
+        setTimeout(() => clearInterval(interval), 3000);
 
         const winnerIdx = Math.max(0, (this.game?.logic.getWinner ?? 1) - 1);
         const winnerName =
             this.game?.logic.getPlayers[winnerIdx]?.getAlias ?? "Victoire par forfait";
 
-        this.showWinnerUI(winnerName, shouldReturnToMainMenu);
+        this.showWinnerUI(winnerName, shouldReturnToMainMenu, mode);
     }
 
-    showWinnerUI(winnerName, shouldReturnToMainMenu: boolean = false) {
+    showWinnerUI(winnerName: string, shouldReturnToMainMenu: boolean = false, mode: number) {
         const ui = AdvancedDynamicTexture.CreateFullscreenUI("WinnerUI", true, this.scene);
 
         const panel = new StackPanel();
         panel.verticalAlignment = Control.VERTICAL_ALIGNMENT_CENTER;
+        panel.width = "400px";
+        panel.height = "400px";
         panel.spacing = 10;
         ui.addControl(panel);
 
@@ -589,36 +591,38 @@ export default class Game3D
         text.outlineWidth = 4;
         panel.addControl(text);
 
-        const returnDelay = shouldReturnToMainMenu ? 4000 : 12000;
+        const returnDelay = shouldReturnToMainMenu ? 4000 : 3000;
         setTimeout(() => {
             if (this.sceneManager.getSceneInteractor)
             {
                 ui.dispose();
                 this.highlights.forEach((h) => h.dispose());
-                this.advancedTLeft.dispose();
-                this.advancedTRight.dispose();
-                this.advancedTTime.dispose();
+                this.advancedTLeft?.dispose();
+                this.advancedTRight?.dispose();
+                this.advancedTTime?.dispose();
                 this.sceneManager.getSceneInteractor.disableInteractions();
                 
                 // Nettoyer les interfaces de tournoi/match amical si nécessaire
                 if (shouldReturnToMainMenu && this.sceneManager.getUserX) {
                     // Nettoyer le tournoi et le match pour éviter les interfaces restantes
-                    this.sceneManager.getUserX.setTournament = null;
-                    this.sceneManager.getUserX.setMatch = null;
+                    if (mode === 0)
+                        this.sceneManager.getUserX.deleteTournament();
+                    else if (mode === 1)
+                        this.sceneManager.getUserX!.setMatch = null;
                 }
                 
                 // Rediriger vers le menu principal si tournoi terminé ou match amical
                 const interactor = this.sceneManager.getSceneInteractor;
                 const lockerMesh = this.scene.getMeshByName(ZoneName.LOCKER_ROOM);
-                if (shouldReturnToMainMenu && lockerMesh && interactor) {
+                if (shouldReturnToMainMenu && lockerMesh && interactor) 
                     interactor.handleMainZoneClick(lockerMesh, true);
-                } else {
+                //  else {
                     this.sceneManager.moveCameraTo(ZoneName.LOCKER_ROOM, () => {
                         this.sceneManager.setSpecificMesh(false);
                         interactor?.enableInteractions();
                         this.sceneManager.getLights().turnOnLights();
                     });
-                }
+                // }
             }
         }, returnDelay);
     }

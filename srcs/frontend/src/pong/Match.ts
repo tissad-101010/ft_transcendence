@@ -4,7 +4,6 @@ import {
 import { Observer } from "@babylonjs/core/Misc/observable";
 import Game3D from "./gameplay/Game3D.ts";
 import GameLogic from "./gameplay/GameLogic.ts";
-import { Tournament } from './Tournament.ts';
 import { SceneManager } from '../scene/SceneManager.ts';
 
 // Import des types centralisés (type-only pour éviter les exports runtime)
@@ -167,12 +166,7 @@ export class Match
                     
                     // Marquer que le match est en train de se terminer pour éviter les appels multiples
                     this.isFinishing = true;
-                    
-                    // Appeler la fonction async pour gérer la fin du match
-                    this.handleMatchFinish(sceneManager).catch((error) => {
-                        console.error("Erreur lors de la gestion de la fin du match:", error);
-                        this.isFinishing = false; // Réinitialiser en cas d'erreur
-                    });
+                    this.handleMatchFinish(sceneManager);
                 }
             })
         }
@@ -203,7 +197,7 @@ export class Match
         return (this.matchInfo.sloatB);
     }
 
-    private async handleMatchFinish(sceneManager: SceneManager): Promise<void> {
+    private handleMatchFinish(sceneManager: SceneManager): void {
         if (!this.game || !this.matchInfo || !this.matchInfo.sloatA || !this.matchInfo.sloatB)
             return;
         
@@ -222,11 +216,7 @@ export class Match
         let isFriendlyMatch = false;
         
         if (this.matchInfo && this.matchInfo.type === "tournament" && this.matchInfo.tournament) {
-            try {
-                isTournamentFinished = await this.matchInfo.tournament.matchFinish(this);
-            } catch (error) {
-                console.error("Erreur lors de la fin du match:", error);
-            }
+            isTournamentFinished = this.matchInfo.tournament.matchFinish(this);
         } else if (this.matchInfo && this.matchInfo.type === "friendly") {
             isFriendlyMatch = true;
             console.log("Match amical terminé");
@@ -238,7 +228,10 @@ export class Match
         
         // Passer l'information à showWinner pour redirection (avant de mettre game à null)
         if (this.game && this.game.interface) {
-            this.game.interface.showWinner(isTournamentFinished || isFriendlyMatch);
+            if (isTournamentFinished)
+                this.game.interface.showWinner(true, 0);
+            else if (isFriendlyMatch)
+                this.game.interface.showWinner(true, 1);
         }
         
         // Nettoyer le game après avoir appelé showWinner

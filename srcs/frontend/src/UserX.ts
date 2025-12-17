@@ -116,87 +116,73 @@ export class UserX
     /***********************************/
     /*       Tournament / Matchs       */
     /***********************************/
-
-    private extractNumericId(value: any): number
+    createTournament() : boolean
     {
-        if (typeof value === "number" && Number.isFinite(value))
-            return value;
-        if (typeof value === "string") {
-            const parsed = parseInt(value, 10);
-            if (!Number.isNaN(parsed))
-                return parsed;
-        }
-        return 0;
-    }
-    
-    async createTournament(a: string) : Promise<boolean>
-    {
-        if (this.user === null)
-        {
-            // update user from profile
-            console.error("Impossible de créer un tournoi: utilisateur non connecté");
-            return (false);
-        }
+        // if (this.user === null)
+        // {
+        //     // update user from profile
+        //     console.error("Impossible de créer un tournoi: utilisateur non connecté");
+        //     return (false);
+        // }
         // Utiliser le username de l'utilisateur comme alias si aucun alias n'est fourni
-        const alias = a || this.user.username;
-        const backendUser = userToBackendFormat(this.user);
+        // const alias = a || this.user.username;
+        // const backendUser = userToBackendFormat(this.user);
         const p : TournamentParticipant = {
-            login: backendUser.login,
-            alias: alias,
+            login: this.user!.username,
+            alias: this.user!.username,
             ready: true,
-            id: this.user.id,
+            id: this.user!.id,
             eliminate: false
         } 
         this.tournament = new Tournament(this.sceneManager);
+
         const result = this.tournament.addParticipant(p);
-        if (result === 0) {
-            console.log(`Utilisateur ${this.user.username} ajouté automatiquement au tournoi`);
-        } else {
-            console.error(`Erreur lors de l'ajout de l'utilisateur ${this.user.username} au tournoi`);
+        if (result !== 0) {
             return (false);
         }
 
         // Créer le tournoi dans la base de données (sans règles pour l'instant, elles seront ajoutées plus tard)
         // Le tournoi sera créé avec les règles par défaut, puis mises à jour quand l'utilisateur les définit
-        try {
-            const response = await fetch(`${API_URL}/api/tournament/create`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    Accept: "application/json",
-                },
-                credentials: "include",
-                body: JSON.stringify({
-                    name: null,
-                    speed: "1", // Valeur par défaut, sera mise à jour
-                    scoreMax: "5", // Valeur par défaut, sera mise à jour
-                    timeBefore: "3", // Valeur par défaut, sera mise à jour
-                    player1_id: this.user.id || 0,
-                    player1_login: backendUser.login, // Envoyer le login pour synchronisation avec le système d'auth
-                }),
-            });
+        // try {
+            // const response = await fetch(`${API_URL}/api/tournament/create`, {
+            //     method: "POST",
+            //     headers: {
+            //         "Content-Type": "application/json",
+            //         Accept: "application/json",
+            //     },
+            //     credentials: "include",
+            //     body: JSON.stringify({
+            //         name: null,
+            //         speed: "1", // Valeur par défaut, sera mise à jour
+            //         scoreMax: "5", // Valeur par défaut, sera mise à jour
+            //         timeBefore: "3", // Valeur par défaut, sera mise à jour
+            //         player1_id: this.user.id || 0,
+            //         player1_login: backendUser.login, // Envoyer le login pour synchronisation avec le système d'auth
+            //     }),
+            // });
 
-            if (response.ok) {
-                const data = await response.json();
-                console.log("Tournoi créé dans la base de données:", data.tournamentId);
-                this.tournament.setDbTournamentId = data.tournamentId;
+        //     if (response.ok) {
+        //         const data = await response.json();
+        //         console.log("Tournoi créé dans la base de données:", data.tournamentId);
+        //         this.tournament.setDbTournamentId = data.tournamentId;
                 
-                // Mettre à jour l'ID du participant dans la base de données
-                if (data.tournament && data.tournament.participants && data.tournament.participants.length > 0) {
-                    p.dbParticipantId = data.tournament.participants[0].id;
-                }
-                
-                return (true);
-            } else {
-                const errorData = await response.json();
-                console.error("Erreur lors de la création du tournoi:", errorData);
-                return (false);
-            }
-        } catch (error) {
-            console.error("Erreur lors de l'appel API pour créer le tournoi:", error);
-            return (false);
-        }
+        //         // Mettre à jour l'ID du participant dans la base de données
+        //         if (data.tournament && data.tournament.participants && data.tournament.participants.length > 0) 
+        //             p.dbParticipantId = data.tournament.participants[0].id;
+        //         return (true);
+        //     } else {
+        //         const errorData = await response.json();
+        //         console.error("Erreur lors de la création du tournoi:", errorData);
+        //         return (false);
+        //     }
+        // } catch (error) {
+        //     console.error("Erreur lors de l'appel API pour créer le tournoi:", error);
+        //     return (false);
+        // }
+        return (true);
     }
+
+
     playTournamentMatch(
         t: Tournament,
         m: Match,
@@ -473,37 +459,36 @@ export class UserX
         }
     }
     
-    async deleteTournament() : Promise<boolean>
+    deleteTournament() : boolean
     {
         /*
             Si le tournoi créer des timestamp ou appels réseaux etc
             les arrêter avant de mettre à NULL
         */
-        const tournamentId = this.tournament?.getDbTournamentId ?? null;
+        // const tournamentId = this.tournament?.getDbTournamentId ?? null;
 
-        if (tournamentId !== null) {
-            try {
-                const response = await fetch(`${API_URL}/api/tournament/${tournamentId}`, {
-                    method: "DELETE",
-                    // Pas de body => ne pas envoyer Content-Type pour éviter FST_ERR_CTP_EMPTY_JSON_BODY
-                    headers: {
-                        Accept: "application/json",
-                    },
-                    credentials: "include",
-                });
+        // if (tournamentId !== null) {
+        //     // try {
+        //         // const response = await fetch(`${API_URL}/api/tournament/${tournamentId}`, {
+        //             // method: "DELETE",
+        //             // Pas de body => ne pas envoyer Content-Type pour éviter FST_ERR_CTP_EMPTY_JSON_BODY
+        //             // headers: {
+        //                 // Accept: "application/json",
+        //             // },
+        //             // credentials: "include",
+        //         // });
 
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    console.error("Erreur lors de la suppression du tournoi:", errorData);
-                    // On remet quand même à null côté front pour éviter les fuites d'état locales
-                } else {
-                    console.log("Tournoi supprimé côté serveur:", tournamentId);
-                }
-            } catch (error) {
-                console.error("Erreur réseau lors de la suppression du tournoi:", error);
-            }
-        }
-
+        //         // if (!response.ok) {
+        //             // const errorData = await response.json();
+        //             console.error("Erreur lors de la suppression du tournoi:", errorData);
+        //             // On remet quand même à null côté front pour éviter les fuites d'état locales
+        //         } else {
+        //             console.log("Tournoi supprimé côté serveur:", tournamentId);
+        //         }
+        //     } catch (error) {
+        //         console.error("Erreur réseau lors de la suppression du tournoi:", error);
+        //     }
+        // }
         this.tournament = null;
         return true;
     }
@@ -609,7 +594,7 @@ export class UserX
     }
 
     set setMatch(
-        match: Match
+        match: Match | null
     )
     {
         this.match = match;

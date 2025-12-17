@@ -110,6 +110,16 @@ export async function tournamentRoutes(fastify: FastifyInstance) {
 
       fastify.log.info(`Tournoi créé: ID ${tournament.id}`);
 
+      console.log(await fastify.prisma.tournament.findUnique({
+        where: {
+          id: tournament.id,
+        },
+        include: {
+          participants: true,
+        },
+      }));
+
+
       return reply.code(200).send({
         success: true,
         tournamentId: tournament.id,
@@ -301,30 +311,39 @@ export async function tournamentRoutes(fastify: FastifyInstance) {
         });
       }
 
+      console.log(await fastify.prisma.tournament.findUnique({
+        where: {
+          id: tournament.id,
+        },
+        include: {
+          participants: true,
+        },
+      }));
+
       const participants = tournament.participants;
       const participantCount = participants.length;
 
       // Validation: nombre de participants doit être une puissance de 2, minimum 4
-      if (participantCount < 4) {
-        return reply.code(400).send({
-          success: false,
-          message: 'Le tournoi nécessite au moins 4 participants',
-        });
-      }
+      // if (participantCount < 4) {
+      //   return reply.code(400).send({
+      //     success: false,
+      //     message: 'Le tournoi nécessite au moins 4 participants',
+      //   });
+      // }
 
-      if (participantCount % 2 !== 0) {
-        return reply.code(400).send({
-          success: false,
-          message: 'Le nombre de participants doit être pair',
-        });
-      }
+      // if (participantCount % 2 !== 0) {
+      //   return reply.code(400).send({
+      //     success: false,
+      //     message: 'Le nombre de participants doit être pair',
+      //   });
+      // }
 
-      if ((participantCount & (participantCount - 1)) !== 0) {
-        return reply.code(400).send({
-          success: false,
-          message: 'Le nombre de participants doit être une puissance de 2 (4, 8, 16, 32...)',
-        });
-      }
+      // if ((participantCount & (participantCount - 1)) !== 0) {
+      //   return reply.code(400).send({
+      //     success: false,
+      //     message: 'Le nombre de participants doit être une puissance de 2 (4, 8, 16, 32...)',
+      //   });
+      // }
 
       // Vérifier que tous les participants sont prêts
       const unreadyParticipants = participants.filter((p: any) => !p.ready);

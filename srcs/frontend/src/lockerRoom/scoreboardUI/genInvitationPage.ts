@@ -88,17 +88,13 @@ function genWaitingList(
 ) : void
 {
     if (!userX.getTournament)
-    {
-        console.warn("⚠️ Aucun tournoi trouvé dans genWaitingList");
         return ;
-    }
     
     // Vérification que l'utilisateur connecté est dans la liste
     const currentUser = userX.getUser;
     if (currentUser) {
         const userInList = userX.getTournament.getParticipants.find((p: any) => p.login === currentUser.username);
         if (!userInList) {
-            console.warn(`⚠️ L'utilisateur ${currentUser.username} n'est pas dans la liste des participants. Ajout automatique...`);
             // Ajouter l'utilisateur s'il n'est pas dans la liste
             const participant = {
                 login: currentUser.username,
@@ -220,7 +216,7 @@ function genRowLogin(
     button.onPointerClickObservable.add(() => {
         if (login.text === "")
         {
-            button.background = "red";
+            button.background = "rgba(206, 115, 138, 1)";
             return ;
         }
         else

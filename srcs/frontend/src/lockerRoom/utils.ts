@@ -34,29 +34,29 @@ export interface Participant
 
 export const UIData = {
     title: {
-        color: "rgba(221, 16, 16, 1)",
+        color: "rgba(172, 76, 100, 1)",
         fontSize: 30,
         fontFamily: "Arial",
         width: "250px"
     },
     text: {
-        color: "rgba(16,16,221,1)",
+        color: "#3f8b95",
         fontSize: 24,
         fontFamily: "Arial"
     },
     inputText: {
         fontSize: 24,
         fontFamily: "Arial",
-        color: "rgba(16,16,221,1)",
+        color: "#3f8b95",
         background: "transparent",
         focusedBackground: "rgba(227, 227, 255, 1)",
         thickness: 1
     },
     button: {
-        color: "rgba(16,16,221,1)",
+        color: "#3f8b95",
         background: "transparent",
         clickedBackground: "rgba(159, 159, 222, 1)",
-        hoveredBackground: "rgba(227, 227, 255, 1)",
+        hoveredBackground: "#4ca0aca1",
         thickness: 1,
     }
 }

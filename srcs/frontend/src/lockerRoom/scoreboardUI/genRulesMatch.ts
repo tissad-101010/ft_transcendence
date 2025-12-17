@@ -74,7 +74,7 @@ function genRowSpeed(env: DataMatchBlock) : StackPanel
     row.spacing = 5;
 
     const speed = new TextBlock();
-    speed.text = "Vitesse";
+    speed.text = "Speed";
     speed.width = "450px";
     speed.color = env.graph.text.color;
     speed.fontSize = env.graph.text.fontSize;
@@ -145,7 +145,7 @@ function genRowScore(env: DataMatchBlock) : StackPanel
     row.paddingRight = "5px";
 
     const text = new TextBlock();
-    text.text = "Score a atteindre";
+    text.text = "Score";
     text.width = "450px";
     text.height = row.height + "px";
     text.color = env.graph.text.color;
@@ -187,7 +187,7 @@ function genRowScore(env: DataMatchBlock) : StackPanel
         if (error === null && (isNaN(value) || value <= 0 || value >= 100))
         {
             error = new TextBlock();
-            error.color = "red";
+            error.color = "#ce8a8d";
             error.fontSize = env.graph.text.fontSize;
             error.width = "100px";
             error.fontFamily = env.graph.text.fontFamily;
@@ -216,7 +216,7 @@ function genRowTime(env: DataMatchBlock) : StackPanel
     row.paddingRight = "5px";
 
     const text = new TextBlock();
-    text.text = "Temps avant engagement (sec)";
+    text.text = "Time before engagement (sec)";
     text.textHorizontalAlignment = Control.HORIZONTAL_ALIGNMENT_LEFT;
     text.width = "450px";
     text.height = row.height + "px";
@@ -258,7 +258,7 @@ function genRowTime(env: DataMatchBlock) : StackPanel
         if (error === null && (isNaN(value) || value < 0 || value >= 10))
         {
             error = new TextBlock();
-            error.color = "red";
+            error.color = "#ce8a8d";
             error.fontSize = env.graph.text.fontSize;
             error.textHorizontalAlignment = Control.HORIZONTAL_ALIGNMENT_LEFT;
             error.width = "100px";
@@ -287,7 +287,7 @@ function genRowMode(env: DataMatchBlock) : StackPanel
     row.paddingRight = "5px";
 
     const text = new TextBlock();
-    text.text = "Adversaire : ";
+    text.text = "Mode";
     text.textHorizontalAlignment = Control.HORIZONTAL_ALIGNMENT_LEFT;
     text.width = "450px";
     text.height = row.height + "px";
@@ -323,7 +323,7 @@ function genRowMode(env: DataMatchBlock) : StackPanel
             button.background = env.graph.button.clickedBackground;
             if (label === "Local" && env.mode !== 0)
                     env.mode = 0;
-            else if (label === "En ligne" && env.mode !== 1)
+            else if (label === "OnLine" && env.mode !== 1)
                     env.mode = 1;
         });
 
@@ -333,7 +333,7 @@ function genRowMode(env: DataMatchBlock) : StackPanel
 
         button.onPointerOutObservable.add(() => {
             if ((env.mode === 0 && label === "Local") ||
-                    (env.mode === 1 && label === "En ligne"))
+                    (env.mode === 1 && label === "OnLine"))
                 button.background = env.graph.button.clickedBackground;
             else
                 button.background = env.graph.button.background;
@@ -341,7 +341,7 @@ function genRowMode(env: DataMatchBlock) : StackPanel
         return (button);
     };
 
-    const labels = ["Local", "En ligne"];
+    const labels = ["Local", "OnLine"];
     labels.forEach((l) => {
         const b = createButton(l);
         buttons.push(b);
@@ -362,21 +362,21 @@ function isValid(
     }
     env.errorMsg.text = "";
     if (env.data.score === "")
-        env.errorMsg.text = "Score non renseigne";
+        env.errorMsg.text = "Missing score";
     else if (env.data.speed === "")
-        env.errorMsg.text = "Vitesse non renseigne";
+        env.errorMsg.text = "Missing speed";
     else if (env.data.timeBefore === "")
-        env.errorMsg.text = "Temps avant engagement non renseigne";
+        env.errorMsg.text = "Missing time before engagement";
     else if (env.mode === -1)
-        env.errorMsg.text = "Mode de jeu non renseigne";
+        env.errorMsg.text = "Missing game mode";
 
     if (env.errorMsg.text !== "")
     {
-        env.errorMsg.color = "red";
+        env.errorMsg.color = "#ce8a8d";
         env.errorMsg.fontSize = env.graph.text.fontSize;
         env.errorMsg.fontFamily = env.graph.text.fontFamily;
         env.errorMsg.width = "100%";
-        env.errorMsg.height = "100px";
+        env.errorMsg.height = "110px";
         return (false);
     }
     else
@@ -424,7 +424,7 @@ export function genRulesMatchBlock(env: DataMatchBlock, selectMode: boolean) : R
         panel.addControl(button);
     
         const text = new TextBlock();
-        text.text = "Creer";
+        text.text = "Create";
         text.width = "100%";
         text.height = "100%";
         text.color = env.graph.text.color;
@@ -453,7 +453,6 @@ export function genRulesMatchBlock(env: DataMatchBlock, selectMode: boolean) : R
                     try {
                         const result = await env.onCreateMatch(rules);
                         if (result === true || result === undefined) {
-                            console.log("✅ Match amical créé avec succès");
                             if (env.errorMsg) {
                                 env.errorMsg.dispose();
                                 env.errorMsg = null;
@@ -471,48 +470,30 @@ export function genRulesMatchBlock(env: DataMatchBlock, selectMode: boolean) : R
                                 successMsg.dispose();
                             }, 2000);
                         } else {
-                            console.error("❌ Échec de la création du match amical");
                             if (!env.errorMsg) {
                                 env.errorMsg = new TextBlock();
                                 panel.addControl(env.errorMsg);
                             }
-                            env.errorMsg.text = "Erreur lors de la création du match";
-                            env.errorMsg.color = "red";
+                            env.errorMsg.text = "Error during match creation";
+                            env.errorMsg.color = "#ce8a8d";
                             env.errorMsg.fontSize = env.graph.text.fontSize;
                             env.errorMsg.fontFamily = env.graph.text.fontFamily;
                             env.errorMsg.width = "100%";
                             env.errorMsg.height = "50px";
                         }
                     } catch (error) {
-                        console.error("❌ Erreur lors de la création du match amical:", error);
                         if (!env.errorMsg) {
                             env.errorMsg = new TextBlock();
                             panel.addControl(env.errorMsg);
                         }
-                        env.errorMsg.text = "Erreur: " + (error instanceof Error ? error.message : String(error));
-                        env.errorMsg.color = "red";
+                        env.errorMsg.text = "Error: " + (error instanceof Error ? error.message : String(error));
+                        env.errorMsg.color = "#ce8a8d";
                         env.errorMsg.fontSize = env.graph.text.fontSize;
                         env.errorMsg.fontFamily = env.graph.text.fontFamily;
                         env.errorMsg.width = "100%";
                         env.errorMsg.height = "50px";
                     }
-                } else {
-                    console.warn("⚠️ onCreateMatch callback non défini");
-                    if (!env.errorMsg) {
-                        env.errorMsg = new TextBlock();
-                        panel.addControl(env.errorMsg);
-                    }
-                    env.errorMsg.text = "Erreur: fonction de création non disponible";
-                    env.errorMsg.color = "red";
-                    env.errorMsg.fontSize = env.graph.text.fontSize;
-                    env.errorMsg.fontFamily = env.graph.text.fontFamily;
-                    env.errorMsg.width = "100%";
-                    env.errorMsg.height = "50px";
                 }
-            }
-            else
-            {
-                console.log("❌ Formulaire invalide");
             }
         });
     

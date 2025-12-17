@@ -15,9 +15,9 @@ export class MatchTournamentOnline extends MatchBase {
     constructor(id: number, rules: MatchRules, sceneManager: SceneManager, matchInfo: MatchTournament) {
         super(id, rules, sceneManager);
         this.matchInfo = matchInfo;
+        console.log("DEIJIFJEIFJEJFE");
         // Récupérer l'ID utilisateur depuis le système d'auth (currentUser hérité de MatchBase)
         this.myUserId = this.currentUser?.id || null;
-        console.log("🏗️ MatchTournamentOnline construit avec currentUser:", this.currentUser);
     }
 
     init(players?: MatchParticipant[]): boolean {
@@ -26,13 +26,6 @@ export class MatchTournamentOnline extends MatchBase {
             this.matchInfo.sloatA = players[0];
             this.matchInfo.sloatB = players[1];
         }
-        
-        console.log("🎮 MatchTournamentOnline.init() appelé avec:", { 
-            sloatA: this.matchInfo.sloatA,
-            sloatB: this.matchInfo.sloatB,
-            currentUser: this.currentUser
-        });
-        
         return true;
     }
 
@@ -41,12 +34,6 @@ export class MatchTournamentOnline extends MatchBase {
             console.error("Les participants ne sont pas prêts");
             return false;
         }
-
-        console.log("▶️ MatchTournamentOnline.play() - Participants:", {
-            sloatA: this.matchInfo.sloatA,
-            sloatB: this.matchInfo.sloatB,
-            myUserId: this.myUserId
-        });
 
         // Déterminer quel joueur est l'utilisateur courant
         const isUserSloatA = this.matchInfo.sloatA.id === this.myUserId;
@@ -84,20 +71,13 @@ export class MatchTournamentOnline extends MatchBase {
 
         this.game.logic.getPlayers.forEach((player, index) => {
             this.game?.interface.initPlayer(player, index);
-            console.log(`🎮 Joueur ${index} initialisé:`, { 
-                gameId: player.getId, 
-                team: player.getTeam, 
-                alias: player.getAlias
-            });
         });
 
         this.game.interface.initScoreBoard();
         this.game.interface.initTimeBefore();
 
-        if (!this.gameReady()) {
-            console.error("Le jeu n'est pas prêt");
+        if (!this.gameReady())
             return false;
-        }
 
         // Ajouter les event listeners pour les touches
         this.keyDownHandler = this.keyDownHandler.bind(this);

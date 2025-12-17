@@ -139,6 +139,8 @@ export class ScoreboardHandler {
                 moveSponge(pickedMesh, this.scene);
                 if (this.interval.id !== -1)
                     clearInterval(this.interval.id);
+                if (this.userX.getTournament && this.userX.getTournament.getStatus === 0)
+                    this.userX.deleteTournament();
                 this.leaveMenu();
                 this.sceneInteractor.disableInteractions();
                 navigateToZone(this.sceneManager, ZoneName.LOCKER_ROOM, () => {
