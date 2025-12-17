@@ -1,4 +1,5 @@
 #!/bin/sh
+set -e
 # **************************************************************************** #
 #                                                                              #
 #                                                         :::      ::::::::    #
@@ -11,21 +12,67 @@
 #                                                                              #
 # **************************************************************************** #
 
-set -e
+
+## service-friendss entrypoint script
 
 
-set -e
 
 
-# echo "🔄 Generating Prisma client..."
+VAULT_ADDR=https://hashicorp_vault:8200
+
+echo "⏳ Waiting for Vault to be unsealed..."
+
+while true; do
+  STATUS=$(curl -k https://hashicorp_vault:8200/v1/sys/health | sed -n 's/.*"sealed":\([a-z]*\).*/\1/p')
+  echo "Vault sealed status: $STATUS"
+  if [ "$STATUS" = "false" ]; then
+    echo "✅ Vault is unsealed!"
+    break
+  fi
+
+  echo "🔒 Vault still sealed... retrying"
+  sleep 2
+done
+
+
+
+# Récupérer secrets KV v2 et exporter en variables d'environnement
+vault agent -config=/app/vault_agent/vault_agent.hcl &
+
+VAULT_PID=$!
+
+sleep 1
+
+trap "kill $VAULT_PID" SIGTERM SIGINT
+
+
+# attendre que Vault Agent écrive les secrets
+while [ ! -f /secrets/friends/secrets.env ]; do
+  echo "⏳ Waiting for Vault Agent..."
+  sleep 1
+done
+
+set -a
+. /secrets/friends/secrets.env 
+set +a
+
+
+export DATABASE_URL="postgresql://${DB_USER}:${FRIENDS_SERVICE_DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}"
+echo $DATABASE_URL
+
+echo "✅ Secrets loaded and environment variables set."
+
+
+
+
+# echo "pg_isready -h postgreSQL -p $DB_PORT -U admin: PostgreSQL is ready!"
+echo "🔄 Generating Prisma client..."
 # npx prisma generate
-
 until pg_isready -h postgreSQL -p $DB_PORT -U admin; do
   # echo "connecting to PostgreSQL at $DB_HOST:$DB_PORT as $DB_USER..."
   echo "🔄 Waiting for PostgreSQL to be ready..."
   sleep 2
 done
-# echo "pg_isready -h postgreSQL -p $DB_PORT -U admin: PostgreSQL is ready!"
 echo "🚀 Starting service-users app..."
 npm run prisma:generate
 npm run prisma:reset

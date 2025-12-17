@@ -91,7 +91,7 @@ services:
     volumes:
       - ./backend/services/service-users/app:/app
       - /app/node_modules
-      - DataUserService:/data
+      - DataUserService:/secrets
     networks:
       - vault_shared-network
       - global-net
@@ -188,7 +188,7 @@ services:
     volumes:
       - ./backend/services/service-chat/app:/app
       - /app/node_modules
-      - DataUserService:/data
+      - DataUserService:/secrets
     networks:
       - vault_shared-network
       - global-net
@@ -228,7 +228,7 @@ services:
     volumes:
       - ./backend/services/service-friends/app:/app
       - /app/node_modules
-      - DataUserService:/data
+      - DataUserService:/secrets
     networks:
       - vault_shared-network
       - global-net

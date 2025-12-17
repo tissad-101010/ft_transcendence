@@ -39,7 +39,9 @@ echo "🚀 Loading secrets from Vault path: $VAULT_PATH"
 
 # Récupérer secrets KV v2 et exporter en variables d'environnement
 vault agent -config=/app/vault_agent/vault_agent.hcl &
-
+VAULT_PID=$!
+# kill "$VAULT_PID" if signal SIGTERM or SIGINT is received
+trap kill $AGENT_PID SIGTERM SIGINT
 echo "🚀 Loading secrets from Vault path: $VAULT_PATH"
 # attendre que Vault Agent écrive les secrets
 while [ ! -f /secrets/user/secrets.env ]; do
@@ -48,7 +50,7 @@ while [ ! -f /secrets/user/secrets.env ]; do
 done
 
 set -a
-. /data/secrets.env 
+. /secrets/user/secrets.env 
 set +a
 export DATABASE_URL="postgresql://${DB_USER}:${USER_SERVICE_DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}"
 
