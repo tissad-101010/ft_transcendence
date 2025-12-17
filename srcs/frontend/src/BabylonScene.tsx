@@ -1,31 +1,42 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { SceneManager } from './scene/SceneManager';
 import { useAuth } from "./auth/context";
 import {handlePopState} from './CameraHistory';
 
 const BabylonScene = () => {
-  const { user, isAuthenticated, pending2FA,  } = useAuth();
+  const { user, isAuthenticated, pending2FA, isLoading } = useAuth();
   const canvasRef = useRef(null);
   const managerRef = useRef<SceneManager | null>(null);
+  const [managerReady, setManagerReady] = useState(false);
 
-  // Création une seule fois
+  // Initialisation et nettoyage du SceneManager
   useEffect(() => {
-    if (!canvasRef.current) return;
+    if (!canvasRef.current) {
+      return;
+    }
 
     const manager = new SceneManager(canvasRef.current);
     managerRef.current = manager;
+    let isMounted = true;
 
     (async () => {
       await manager.setupEnvironment();
+      if (!isMounted) {
+        return;
+      }
       manager.startRenderLoop();
+      setManagerReady(true);
     })();
 
     return () => {
+      isMounted = false;
+      setManagerReady(false);
       manager.cleanRender();
+      managerRef.current = null;
     };
   }, []);
 
-  // Mise à jour de l'utilisateur sans recréer la scène
+  // Propagation de l'utilisateur courant vers UserX quand prêt ET session chargée
   useEffect(() => {
     if (isAuthenticated && user && managerRef.current) {
       managerRef.current.setUser = user;
@@ -34,7 +45,11 @@ const BabylonScene = () => {
       console.log("Is authenticated:", isAuthenticated);
       console.log("Current user in SceneManager:", managerRef.current.getUserX);
     }
-  }, [isAuthenticated, user]);
+    console.log("BabylonScene: propagation de l'utilisateur vers UserX:", user);
+    if (managerRef.current) {
+      managerRef.current.setUser = user;
+    }
+  }, [user, managerReady, isLoading]);
 
 // Gestion back/forward navigateur
 useEffect(() => {

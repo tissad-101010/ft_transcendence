@@ -67,7 +67,7 @@ interface CameraConfig {
 }
 
 //Toutes les configurations pour le dplacement de ma camra
-export const CAMERA_CONFIGS: Record<ZoneName, CameraConfig> = {
+export const CAMERA_CONFIGS: Partial<Record<ZoneName, CameraConfig>> = {
     [ZoneName.FIELD]: {
         position: new Vector3(1, 57.61, 25.21),
         rotation: new Vector3(
@@ -160,5 +160,4 @@ export const CAMERA_CONFIGS: Record<ZoneName, CameraConfig> = {
             0
         ),
     },
-
 };

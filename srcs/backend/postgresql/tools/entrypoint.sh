@@ -39,9 +39,7 @@ while true; do
 done
 
 echo "🚀 Starting Vault Agent to fetch PostgreSQL secrets..."
-rm -rf /vault/secrets/*
-mkdir -p /vault/secrets/
-chmod 750 /vault/secrets/
+
 
 
 
@@ -49,7 +47,7 @@ vault agent -config=/tmp/vault_agent.hcl &
 VAULT_PID=$!
 # kill "$VAULT_PID" if signal SIGTERM or SIGINT is received
 trap kill $VAULT_PID SIGTERM SIGINT
-
+sleep 2
 
 echo "🚀 Loading secrets from Vault path: $VAULT_PATH"
 # attendre que Vault Agent écrive les secrets
@@ -69,7 +67,7 @@ set -a
 set +a
 
 echo "✅ Vault Agent has fetched the secrets."
-
+echo "======================================================++>$GLOBAL_DB_ADMIN_PASSWORD"
 # exec tail -f /dev/null 
 
 
@@ -298,39 +296,12 @@ wait "$PG_PID"
 
 chmod 750 "$DATA_DIR"
 
-
+set -a
+. /var/lib/postgresql/data/postgresql/vault_agent/secrets.env
+set +a
 # Create the init.sql script that will be executed on the first run
 echo "🚀 Starting PostgreSQL server..."
-exec su-exec postgres postgres -D "$DATA_DIR"  
+exec su-exec postgres postgres -D "$DATA_DIR"
 # exec tail -f /dev/null
 
 #*****************************************************************************#
-
-
-# -- 6. Create a sample table
-# CREATE TABLE IF NOT EXISTS $DB_SAMPLE_NAME ( 
-#     id SERIAL PRIMARY KEY,
-#     username VARCHAR(50) UNIQUE,
-#     email VARCHAR(100) UNIQUE,
-#     password VARCHAR(255),
-#     provider VARCHAR(50) DEFAULT 'local',
-#     github_id VARCHAR(50),
-#     google_id VARCHAR(50),
-#     oauth42_id VARCHAR(50),
-#     name VARCHAR(100),
-#     first_name VARCHAR(50),
-#     last_name VARCHAR(50),
-#     avatar_url TEXT,
-#     email_2fa BOOLEAN DEFAULT FALSE,
-#     autenticator_2fa BOOLEAN DEFAULT FALSE,
-#     phone_2fa BOOLEAN DEFAULT FALSE,
-#     email_verified BOOLEAN DEFAULT FALSE,
-#     phone_verified BOOLEAN DEFAULT FALSE,
-#     vault_token VARCHAR(255),
-#     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-#     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMPDATA_DIR
-# );
-
-# -- 8. Grant privileges to $DB_USER
-# GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE $DB_SAMPLE_NAME TO $DB_USER;
-# GRANT USAGE, SELECT, UPDATE ON SEQUENCE ${DB_SAMPLE_NAME}_id_seq TO $DB_USER;

@@ -1,6 +1,5 @@
 
 import {
-    AdvancedDynamicTexture,
     StackPanel,
     TextBlock,
     Control,
@@ -21,6 +20,7 @@ interface SectionTitleOptions {
     textHorizontalAlignment?: number;
     textVerticalAlignment?: number;
     paddingLeft?: string;
+    iconName?: "mail" | "security" | "user"; // ajouter toutes les icônes possibles
 }
 
 interface MsgInfoOptions {
@@ -74,6 +74,8 @@ export function createButton(options: ButtonOptions): Button {
         button.textBlock.textVerticalAlignment = options.textVerticalAlignment ?? Control.VERTICAL_ALIGNMENT_CENTER;
         button.textBlock.color = options.color ?? "white";
         button.textBlock.fontSize = options.fontSize ?? 24;
+        button.thickness = 1;
+        button.color = "white";
     }
 
     // Event click
@@ -99,16 +101,20 @@ export function create2faButton(options: {
     fontSize?: number,
     width?: string,
     height?: string,
+    urlImg: string,
     cornerRadius?: number,
     onActivate?: () => void
     onDeactivate?: () => void,
 }) {
-    const btn = Button.CreateSimpleButton(options.id, "");
+    const btn = Button.CreateImageButton(options.id, "", options.urlImg);
     btn.height = options.height ?? "50px";
     btn.width = options.width ?? "70%";
     btn.color = "white";
     btn.fontSize = options.fontSize ?? 20;
     btn.cornerRadius = options.cornerRadius ?? 10;
+    (btn.image as Image).width = "42px";
+    (btn.image as Image).height = "42px";
+    (btn.image as Image).paddingLeft = 10;
 
     // Fonction pour mettre à jour le texte et la couleur
     const updateButton = () => {
@@ -176,16 +182,18 @@ export function createInputFieldPwd(placeholderText: string, panelPwd : StackPan
 
   export function createInputField2fa(parent: StackPanel): InputText {
     const input = new InputText();
-    input.width = "300px";
-    input.height = "100%";
-    input.color = "red";
-    input.fontSize = 20;
+    input.width = "600px";
+    input.height = "85%";
+    input.color = "#ce8a8d";
+    input.fontSize = 35;
     input.thickness = 0;
     input.background = "white";
     input.focusedBackground = "white";
-    input.placeholderText = "code de verification";
+    input.placeholderText = "Verification code";
     input.placeholderColor = "gray";
-    input.paddingLeft = 100;
+    input.horizontalAlignment = Control.HORIZONTAL_ALIGNMENT_CENTER;
+    input.verticalAlignment = Control.VERTICAL_ALIGNMENT_CENTER;
+    input.paddingLeft = 300;
     input.onTextChangedObservable.add(() => {
         if (input.text.length > 6) {
             input.text = input.text.slice(0, 6);
@@ -216,6 +224,33 @@ export function createSectionTitle(options: SectionTitleOptions): Rectangle {
     if (options.paddingLeft) txt.paddingLeft = options.paddingLeft;
     rect.addControl(txt);
 
+    // Icône
+    if (options.iconName) {
+        const iconMap: Record<string, string> = {
+            user: "/icon/user.png",
+            mail: "/icon/mail.png",
+            security: "/icon/security.png"
+        };
+        const imgPath = iconMap[options.iconName];
+        if (imgPath) {
+            const img = new Image("icon", imgPath);
+            img.width = "25px";
+            img.height = "25px";
+            img.horizontalAlignment = Control.HORIZONTAL_ALIGNMENT_CENTER;
+            img.verticalAlignment = Control.VERTICAL_ALIGNMENT_CENTER;
+
+            const rectImg = new Rectangle();
+            rectImg.height = options.height ?? "50px";
+            rectImg.width = "75px";
+            rectImg.thickness = 0;
+            if (options.iconName === "security")
+                rectImg.paddingLeft = 260;
+            else
+                rectImg.paddingLeft = 20;
+            rectImg.addControl(img);
+            rect.addControl(rectImg);
+        }
+    }
     return rect;
 }
 

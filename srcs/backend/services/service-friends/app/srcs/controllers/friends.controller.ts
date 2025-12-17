@@ -10,31 +10,15 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-// AXIOS
-import axios from "axios";
-
 // FASTIFY
 import { FastifyReply, FastifyRequest } from "fastify";
 
 // SERVICE
 import { FriendsService } from "../services/friends.service";
 
-// MODELS
-import {
-  UserInfo,
-  invitationFriend
-} from "../types/friends.type";
-
-// GET USER FROM USER-SERVICE
-import { 
-  getUserById,
-  getUserByUsername
-} from "./remote/clients/remoteGetUser.controller";
-
 // TOKEN UTILS
 import {
   verifyToken,
-  sendErrorToken
 } from "./remote/clients/verifyToken";
 import { AuthError, handleError } from "../errors/friends.error";
 
@@ -51,16 +35,16 @@ export async function removeFriendController(
     // VERIF PARAMS //
     const {fromUser, toUser} = request.params;
     if (!fromUser || !toUser)
-      return (reply.code(400).send({success: false, message: "Parametre invalide"}));
+      return (reply.code(400).send({success: false, message: "Invalid parameter"}));
     // CALL SERVICE //
     const service = new FriendsService(request.server);
     const deleted = await service.removeInvitation(fromUser, toUser);
     if (deleted.count === 1)
-      return reply.code(200).send({ success: true, message: "Invitation supprimee"});
+      return reply.code(200).send({ success: true, message: "Invitation removed"});
     else if (deleted.count === 0)
-      return (reply.code(404).send({success: false, message: "L'invitation n'existe pas"}));
+      return (reply.code(404).send({success: false, message: "Invitation doesn't exist"}));
     else
-      return (reply.code(500).send({success: false, message: `Houlalala tu viens de supprimer ${deleted.count} invitations`}));
+      return (reply.code(500).send({success: false, message: `${deleted.count} invitations deleted, serious problem`}));
   } catch (err: any) {
     console.error(err);
     return reply.code(400).send({ success: false, message: err.message });
@@ -100,7 +84,7 @@ export async function sendInviteController(
     // CALL SERVICE USER //
     const { friendUsername }  = request.body;
     if (!friendUsername)
-      return (reply.code(400).send({sucess: false, message: "Paramètre username manquant"}));
+      return (reply.code(400).send({sucess: false, message: "Parameter username is missing"}));
     // CALL SERVICE
     const service             = new FriendsService(request.server);
     const data                = await service.sendInvitation(token.data.id, friendUsername,);
@@ -126,11 +110,11 @@ export async function acceptInviteController(
     // VERIF PARAMS
     const {user1, user2} = request.body;
     if (!user1 || !user2) 
-      return (reply.code(400).send({success: false, message: "Paramètres invalides"}))
+      return (reply.code(400).send({success: false, message: "Invalid parameters"}))
     const service = new FriendsService(request.server);
     const response = await service.acceptInvitation(user1, user2);
     // SUCCESS
-    return (reply.code(200).send({success: true, message: "Invitation acceptee"}));
+    return (reply.code(200).send({success: true, message: "Invitation accepted"}));
   } catch (err: any)
   {
     console.error("/!\\ ACCEPT INVITE CONTROLLER ERROR /!\\");
@@ -150,11 +134,11 @@ export async function blockUserController(
     // VERIF PARAMS
     const {user1, user2} = request.body;
     if (!user1 || !user2) 
-      return (reply.code(400).send({success: false, message: "Paramètres invalides"}))
+      return (reply.code(400).send({success: false, message: "Invalid parameters"}))
     const service = new FriendsService(request.server);
     const response = await service.blockInvitation(user1, user2);
     // SUCCESS
-    return (reply.code(200).send({success: true, message: "Invitation acceptee"}));
+    return (reply.code(200).send({success: true, message: "Invitation accepted"}));
   } catch (err: any)
   {
     console.error("/!\\ ACCEPT INVITE CONTROLLER ERROR /!\\");
@@ -176,7 +160,3 @@ export async function declineInviteController(
     return reply.status(400).send({ success: false, message: err.message });
   }
 }
-
-
-
-

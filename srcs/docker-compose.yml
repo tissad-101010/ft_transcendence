@@ -18,7 +18,6 @@ services:
     volumes:
       # Nginx HTML files
       - ./frontend/build:/usr/share/nginx/html
-      # Nginx SSL certificates
       - ./proxy/nginx/certs/server.crt:/etc/nginx/ssl/server.crt:ro
       - ./proxy/nginx/certs/server.key:/etc/nginx/ssl/server.key:ro
       # Nginx configuration files
@@ -140,38 +139,38 @@ services:
   #********************************************************************************#
   # Game service for managing game sessions, matchmaking, and real-time interactions
 
-  # service-game:
-  #   image: service-game
-  #   build:
-  #     context: ./backend/services/service-game
-  #     dockerfile: Dockerfile
-  #   container_name: service-game
-  #   volumes:
-  #     - ./backend/services/service-game/app:/app
-  #     - /app/node_modules
-  #     - DataUserService:/data
-  #   networks:
-  #     - vault_shared-network
-  #     - global-net
-  #     - security-net
-  #   depends_on:
-  #     # - hashicorp_vault
-  #     - postgreSQL
-  #     - redis
-  #   ports:
-  #     - "4001:4001"
-  #   environment:
-  #     - NODE_ENV=production
-  #     - VAULT_ADDR=http://hashicorp_vault:8200
-  #     - DB_HOST=${GAME_SERVICE_DB_HOST}
-  #     - DB_NAME=${GAME_SERVICE_DB_NAME}
-  #     - DB_USER=${GAME_SERVICE_DB_USER}
-  #     - DB_PASSWORD=${GAME_SERVICE_DB_PASSWORD}
-  #     - DB_ROOT_PASSWORD=${GAME_SERVICE_DB_ROOT_PASSWORD}
-  #     - DB_PORT=${GAME_SERVICE_DB_PORT}
-  #     - DB_SAMPLE_NAME=${GAME_SERVICE_DB_SAMPLE_NAME}
-  #     - GAME_SERVICE_DATABASE_URL=${GAME_SERVICE_DATABASE_URL}
-  #   restart: unless-stopped
+  service-game:
+    image: service-game
+    build:
+      context: ./backend/services/service-game
+      dockerfile: Dockerfile
+    container_name: service-game
+    volumes:
+      - ./backend/services/service-game/app:/app
+      - /app/node_modules
+      - DataUserService:/secrets
+    networks:
+      - vault_shared-network
+      - global-net
+      - security-net
+    depends_on:
+      vault-init:
+        condition: service_completed_successfully
+      redis:
+        condition: service_started
+      postgreSQL:
+        condition: service_started
+    ports:
+      - "4001:4001"
+    environment:
+      - NODE_ENV=production
+      - VAULT_ADDR=http://hashicorp_vault:8200
+      - DB_HOST=${GAME_SERVICE_DB_HOST}
+      - DB_NAME=${GAME_SERVICE_DB_NAME}
+      - DB_USER=${GAME_SERVICE_DB_USER}
+      - DB_PORT=${GAME_SERVICE_DB_PORT}
+      - DB_SAMPLE_NAME=${GAME_SERVICE_DB_SAMPLE_NAME}
+    restart: unless-stopped
   
 
   #********************************************************************************#

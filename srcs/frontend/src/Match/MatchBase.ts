@@ -3,14 +3,10 @@ import { Observer } from "@babylonjs/core/Misc/observable";
 
 import { SceneManager } from "../scene/SceneManager.ts";
 
-import { 
-    MatchParticipant,
-    MatchRules 
-} from "../types.ts";
+import { MatchParticipant, MatchRules, User } from "../types.ts";
 
 import Game3D from "../gameplay/Game3D.ts";
 import GameLogic from "../gameplay/GameLogic.ts";
-import { Participant } from "../lockerRoom/utils.js";
 
 export enum MatchStatus {
     PENDING,
@@ -34,11 +30,16 @@ export abstract class MatchBase {
     protected participants: MatchParticipant[] = [];
     protected keys: Set<string> = new Set<string>();
     protected game: IGame | null = null;
+    
+    // Utilisateur courant (du système d'authentification)
+    protected currentUser: User | null = null;
 
     constructor(id: number, rules: MatchRules, sceneManager: SceneManager) {
         this.id = id;
         this.rules = rules;
         this.sceneManager = sceneManager;
+        // Récupérer l'utilisateur courant depuis UserX
+        this.currentUser = sceneManager.getUserX.getUser;
     }
 
     protected keyDownHandler(e: KeyboardEvent): void {

@@ -47,12 +47,29 @@ export default class PlayerLogic
         this.team = team;
         this.type = type;
         this.alias = player.alias;
-        if (player.me)
-            this.control = {up: "q", down: "a"};
-        else if (this.type === 0)
-            this.control = {up: "ArrowUp", down: "ArrowDown"};
-        else 
+        // Assigner les contrôles en fonction de l'équipe pour les matchs locaux
+        // Team 1 (gauche) : touches Q et A
+        // Team 2 (droite) : flèches haut/bas
+        if (this.type === 0) {
+            if (this.team === 1) {
+                this.control = {up: "q", down: "a"};
+            } else if (this.team === 2) {
+                this.control = {up: "ArrowUp", down: "ArrowDown"};
+            } else {
+                this.control = null;
+            }
+        } else if (this.type === 1) {
+            // Pour les matchs en ligne (type 1), assigner les contrôles selon si c'est moi ou l'adversaire
+            if (player.me) {
+                // Mon joueur : utiliser les flèches haut/bas pour tous les joueurs en ligne
+                this.control = {up: "ArrowUp", down: "ArrowDown"};
+            } else {
+                // Joueur distant : pas de contrôles locaux (sera contrôlé via websocket)
+                this.control = null;
+            }
+        } else {
             this.control = null;
+        }
     };
 
     get getTeam()
@@ -87,6 +104,11 @@ export default class PlayerLogic
     get getAlias() : string
     {
         return (this.alias);
+    }
+
+    get getId() : number
+    {
+        return (this.id);
     }
 
     set setWidth(value: number)

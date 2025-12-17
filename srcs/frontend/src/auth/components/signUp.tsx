@@ -8,16 +8,22 @@ const SignUp: React.FC<SignUpProps> = ({ onSwitch }) => {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
 
 
   const handleRegister = async () => {
     try {
-      const result = await registerUser(username, email, password);
-      if (result.success) {
-        onSwitch(); // retourne vers le login
-      } else {
-        setErrorMessage(result.message ?? "Registration failed");
+      if (password !== confirmPassword)
+        setErrorMessage("Passwords don't match");
+      else
+      {
+        const result = await registerUser(username, email, password);
+        if (result.success) {
+          onSwitch(); // retourne vers le login
+        } else {
+          setErrorMessage(result.message ?? "Registration failed");
+        }
       }
     } catch {
       setErrorMessage("Network error during registration");
@@ -43,6 +49,11 @@ const SignUp: React.FC<SignUpProps> = ({ onSwitch }) => {
       <div className="authPage-input-container">
         <label>Password</label>
         <input type="password" onChange={(e) => setPassword(e.target.value)} />
+      </div>
+
+      <div className="authPage-input-container">
+        <label>Confirm password</label>
+        <input type="password" onChange={(e) => setConfirmPassword(e.target.value)} />
       </div>
 
       {errorMessage && <p className="error">{errorMessage}</p>}

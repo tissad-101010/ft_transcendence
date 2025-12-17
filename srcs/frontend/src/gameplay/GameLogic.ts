@@ -57,8 +57,13 @@ export default class GameLogic
         this.ball = new BallLogic(this.rules.ballSpeed);    
         this.countDownGoal = {active: false, value: this.rules.countDownGoalTime, id: 0};
         if (mode === 0)
+            // Mode local : deux joueurs sur le même clavier
             this.players = [new PlayerLogic(p[0], this.rules.playerSpeed, 1, 0),
                 new PlayerLogic(p[1], this.rules.playerSpeed, 2, 0)];
+        else if (mode === 1)
+            // Mode remote : joueurs en ligne via websockets
+            this.players = [new PlayerLogic(p[0], this.rules.playerSpeed, 1, 1),
+                new PlayerLogic(p[1], this.rules.playerSpeed, 2, 1)];
         else
             this.players = [];
         this.winner = 0;
@@ -109,6 +114,21 @@ export default class GameLogic
             this.winner = 2;
     };
 
+    /**
+     * Force la fin de partie avec un gagnant (utile pour les abandons).
+     * team: 1 pour la gauche, 2 pour la droite.
+     */
+    forceEndWithWinner(team: number): void
+    {
+        if (team !== 1 && team !== 2)
+            return;
+        this.winner = team;
+        this.state = 3;
+        this.countDownGoal.active = false;
+        if (this.countDownGoal.id)
+            clearInterval(this.countDownGoal.id);
+    }
+
     // Methode qui met a jour l'etat de la partie a chaque appel de window.requestAnimationFrame
     update(keys: Set<string>) : void
     {
@@ -128,7 +148,7 @@ export default class GameLogic
                         this.state = 3;
                     else
                     {
-                        this.ball.reset();
+                        this.ball.reset(this.scored);
                         this.countDownGoal.value = this.rules.countDownGoalTime;
                         this.countDownGoal.active = true;
                         this.startCountDown();
@@ -232,4 +252,37 @@ export default class GameLogic
         this.field = field;
     }
 
+    /**
+     * Force le score à une valeur donnée (utilisé pour resynchroniser les matchs en ligne).
+     * scoringTeam : 1 si l'équipe gauche vient de marquer, 2 pour la droite, 0 sinon.
+     */
+    syncScore(
+        score1: number,
+        score2: number,
+        scoringTeam: number = 0
+    ) : void
+    {
+        this.score.team1 = score1;
+        this.score.team2 = score2;
+        this.scored = scoringTeam;
+
+        if (this.ball)
+            this.ball.reset(scoringTeam);
+
+        if (this.countDownGoal.id)
+            clearInterval(this.countDownGoal.id);
+
+        // Si un joueur a atteint le score maximum, terminer immédiatement la partie
+        if (this.score.team1 >= this.rules.scoreMax || this.score.team2 >= this.rules.scoreMax)
+        {
+            this.hasWinner();
+            this.state = 3;
+            this.countDownGoal.active = false;
+            return;
+        }
+
+        this.countDownGoal.value = this.rules.countDownGoalTime;
+        this.countDownGoal.active = true;
+        this.startCountDown();
+    }
 };

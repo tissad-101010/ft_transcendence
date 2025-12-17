@@ -1,4 +1,8 @@
-import { PointerInfo, AbstractMesh } from '@babylonjs/core';
+import { 
+    PointerInfo,
+    AbstractMesh,
+    Mesh 
+} from '@babylonjs/core';
 
 export interface SpecificInteraction {
     handlePointer(pointerInfo: PointerInfo, isClick: boolean, mesh: AbstractMesh): void;

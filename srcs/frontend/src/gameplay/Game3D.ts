@@ -471,7 +471,7 @@ export default class Game3D
         // ball.light.position.copyFrom(ball.mesh.getAbsolutePosition().add(new Vector3(0, 0.1, 0)));
     };
 
-    showWinner() {
+    showWinner(shouldReturnToMainMenu: boolean = false) {
         this.sceneManager.getSceneInteractor?.disableInteractions();
         this.sceneManager.moveCameraTo(ZoneName.WINNERPOV, () => {
             // this.sceneManager.getSceneInteractor?.enableInteractions();
@@ -566,12 +566,14 @@ export default class Game3D
 
         setTimeout(() => clearInterval(interval), 10000);
 
-        this.showWinnerUI(
-            this.game?.logic.getPlayers[this.game?.logic.getWinner - 1].getAlias
-        );
+        const winnerIdx = Math.max(0, (this.game?.logic.getWinner ?? 1) - 1);
+        const winnerName =
+            this.game?.logic.getPlayers[winnerIdx]?.getAlias ?? "Victoire par forfait";
+
+        this.showWinnerUI(winnerName, shouldReturnToMainMenu);
     }
 
-    showWinnerUI(winnerName) {
+    showWinnerUI(winnerName, shouldReturnToMainMenu: boolean = false) {
         const ui = AdvancedDynamicTexture.CreateFullscreenUI("WinnerUI", true, this.scene);
 
         const panel = new StackPanel();
@@ -588,22 +590,38 @@ export default class Game3D
         text.outlineWidth = 4;
         panel.addControl(text);
 
+        const returnDelay = shouldReturnToMainMenu ? 4000 : 12000;
         setTimeout(() => {
             if (this.sceneManager.getSceneInteractor)
             {
+                ui.dispose();
                 this.highlights.forEach((h) => h.dispose());
                 this.advancedTLeft.dispose();
                 this.advancedTRight.dispose();
                 this.advancedTTime.dispose();
                 this.sceneManager.getSceneInteractor.disableInteractions();
-                this.sceneManager.moveCameraTo(ZoneName.LOCKER_ROOM, () => {
-                    this.sceneManager.setSpecificMesh(false);
-                    this.sceneManager.getSceneInteractor?.enableInteractions();
-                    this.sceneManager.getLights().turnOnLights(); //ici
-                });
-                // this.sceneManager.getSceneInteractor.handleMainZoneClick(this.sceneManager.getMesh("furniture")[0], true);
+                
+                // Nettoyer les interfaces de tournoi/match amical si nécessaire
+                if (shouldReturnToMainMenu && this.sceneManager.getUserX) {
+                    // Nettoyer le tournoi et le match pour éviter les interfaces restantes
+                    this.sceneManager.getUserX.setTournament = null;
+                    this.sceneManager.getUserX.setMatch = null;
+                }
+                
+                // Rediriger vers le menu principal si tournoi terminé ou match amical
+                const interactor = this.sceneManager.getSceneInteractor;
+                const lockerMesh = this.scene.getMeshByName(ZoneName.LOCKER_ROOM);
+                if (shouldReturnToMainMenu && lockerMesh && interactor) {
+                    interactor.handleMainZoneClick(lockerMesh, true);
+                } else {
+                    this.sceneManager.moveCameraTo(ZoneName.LOCKER_ROOM, () => {
+                        this.sceneManager.setSpecificMesh(false);
+                        interactor?.enableInteractions();
+                        this.sceneManager.getLights().turnOnLights();
+                    });
+                }
             }
-        }, 12000);
+        }, returnDelay);
     }
 
     // MET A JOUR TOUS LES ELEMENTS 3D

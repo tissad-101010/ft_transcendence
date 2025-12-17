@@ -1,6 +1,7 @@
-import { SceneInteractor } from './scene/SceneInteractor.ts';
-import { SceneManager } from './scene/SceneManager.ts';
-import { SpecificInteraction } from './scene/SpecificInteraction.ts';
+import { SceneInteractor } from '../scene/SceneInteractor.ts';
+import { SceneManager } from '../scene/SceneManager.ts';
+import { SpecificInteraction } from '../scene/SpecificInteraction.ts';
+
 import { 
 PointerInfo, 
 Scene,
@@ -9,14 +10,15 @@ Color3,
 HighlightLayer,
 DynamicTexture,
 PBRMaterial,
-Material
+Material,
+Nullable,
+Mesh
 } from '@babylonjs/core';
 
 import { ZoneName } from '../config.ts';
 import {getCurrentGroup, setCurrentGroup, getTotalGroups, displayFriendsWithEmpty} from '../utils.ts';
 import { FriendUI } from './FriendUI.ts';
 import { MyProfilUI } from './MyProfilUI.ts';
-import { Friend } from '../friends/Friend.ts';
 import { navigateToZone } from '../CameraHistory.ts';
 
 
@@ -32,7 +34,7 @@ export class StandsInteraction implements SpecificInteraction {
     private buttonHighlightLayer : HighlightLayer;
     private test: boolean = false;
     private friendUI: FriendUI | null;
-    private materials: Material[];
+    private materials: Nullable<Material>[];
     private myProfilUI: MyProfilUI | null = null;
 
     /**************************************************
@@ -63,10 +65,10 @@ export class StandsInteraction implements SpecificInteraction {
     {
         if (active) {
             mesh.isPickable = true;
-            this.buttonHighlightLayer.addMesh(mesh, new Color3(0.53, 0.81, 0.92)); // bleu ciel
+            this.buttonHighlightLayer.addMesh((mesh as Mesh), new Color3(63, 139, 149)); // bleu ciel
         } else {
             mesh.isPickable = false;
-            this.buttonHighlightLayer.removeMesh(mesh);
+            this.buttonHighlightLayer.removeMesh((mesh as Mesh));
         }
     }
 
@@ -97,7 +99,7 @@ export class StandsInteraction implements SpecificInteraction {
 }
 
 
-    private handleFriendsProfile(
+    public handleFriendsProfile(
         mesh: AbstractMesh,
         buttonMeshes: AbstractMesh[]
     ): void 
@@ -143,6 +145,12 @@ export class StandsInteraction implements SpecificInteraction {
         this.buttonHighlightLayer.removeAllMeshes();
         this.sceneInteractor.getHighlightLayer().removeAllMeshes();
     }
+
+
+    get getFriendUI()
+    {
+        return (this.friendUI);
+    }
     
     
     /**************************************************
@@ -172,7 +180,7 @@ export class StandsInteraction implements SpecificInteraction {
         mesh: AbstractMesh
     ): void 
     {
-        console.log(mesh.name);
+        console.log(mesh);
         if (!this.sceneInteractor.areInteractionsEnabled()) return;
         const pickedMesh = mesh;
         if (!pickedMesh)return;
@@ -232,36 +240,36 @@ export class StandsInteraction implements SpecificInteraction {
                                 {
                                     this.myProfilUI.dispose();
                                     this.myProfilUI = null;
-                                    this.sceneManager.getScene().getMeshByName("logo").isVisible = true;
+                                    this.sceneManager.getScene().getMeshByName("logo")!.isVisible = true;
                                 }
                                 this.clicArbitrator = false;
                             }
                             this.sceneInteractor.enableInteractions();
-                        }, this.sceneInteractor);
+                        });
                 }
             }
         } else {
             this.sceneInteractor.getHighlightLayer().removeAllMeshes();
             if (spectatorMeshes.includes(pickedMesh) && !this.clicSeat){
                 spectatorMeshes.forEach((mesh: AbstractMesh) => {
-                    this.sceneInteractor.getHighlightLayer().addMesh(mesh, new Color3(1, 0.75, 0.8));
+                    this.sceneInteractor.getHighlightLayer().addMesh((mesh as Mesh), new Color3(0.807, 0.541, 0.553));
                 });
             }
             if (arbitratorMeshes.includes(pickedMesh))
             {
-                this.sceneInteractor.getHighlightLayer().addMesh(pickedMesh, new Color3(1, 0.75, 0.8));
+                this.sceneInteractor.getHighlightLayer().addMesh((pickedMesh as Mesh), new Color3(63/255, 139/255, 149/255));
             }
             if (friendMeshes.includes(pickedMesh) && this.clicSeat)
             {
-                this.sceneInteractor.getHighlightLayer().addMesh(pickedMesh, new Color3(1, 0.75, 0.8));
+                this.sceneInteractor.getHighlightLayer().addMesh((pickedMesh as Mesh), new Color3(0.807, 0.541, 0.553));
             }
             if (pickedMesh === buttonMeshes[2] && this.clicSeat)
             {
-                this.sceneInteractor.getHighlightLayer().addMesh(buttonMeshes[2], new Color3(1, 0.75, 0.8));
+                this.sceneInteractor.getHighlightLayer().addMesh((buttonMeshes[2] as Mesh), new Color3(0.807, 0.541, 0.553));
             }
             if (pickedMesh === buttonMeshes[3] && this.clicArbitrator) 
             {
-                this.sceneInteractor.getHighlightLayer().addMesh(buttonMeshes[3], new Color3(1, 0.75, 0.8));
+                this.sceneInteractor.getHighlightLayer().addMesh((buttonMeshes[3] as Mesh), new Color3(63/255, 139/255, 149/255));
             }
         }
     }
@@ -278,17 +286,6 @@ export class StandsInteraction implements SpecificInteraction {
 
         this.clicSeat = false;
         this.clicArbitrator = false;
-
-        // const arbitratorMeshes = this.sceneManager.getLoadedMeshes["arbitrator"];
-        // const spectatorMeshes = this.sceneManager.getLoadedMeshes["spectator"];
-        // const friendMeshes = this.sceneManager.getLoadedMeshes["seatsFriends"];
-        // const buttonMeshes = this.sceneManager.getLoadedMeshes["buttonsField"];
-
-        // [arbitratorMeshes, spectatorMeshes, friendMeshes, buttonMeshes].forEach(meshArray => {
-        //     if (meshArray && Array.isArray(meshArray)) {
-        //         meshArray.forEach(mesh => mesh.isPickable = false);
-        //     }
-        // });
 
         this.sceneManager.getChair.forEach((mesh : AbstractMesh) => {
             const mat = mesh.material as PBRMaterial;

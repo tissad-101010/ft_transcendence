@@ -2,8 +2,9 @@ import {
   Scene,
 } from '@babylonjs/core';
 
-import { Match, MatchRules, MatchTournament, MatchParticipant } from "./Match.ts"
-import { shuffleArray } from "./utils.ts";
+import { Match } from "./Match.ts"
+import { MatchRules, MatchTournament, MatchParticipant } from "./types.ts";
+import { API_URL, shuffleArray } from "./utils.ts";
 
 import { SceneManager } from './scene/SceneManager.ts';
 import { displayPlayers } from './utils.ts';
@@ -14,7 +15,8 @@ export interface TournamentParticipant
     alias: string;
     ready: boolean;
     eliminate: boolean;
-    id: number;
+    id: number; // ID utilisateur
+    dbParticipantId?: number; // ID du participant dans tournament_participants (base de données)
 }
 
 interface TournamentRules
@@ -29,6 +31,7 @@ export class Tournament
     private rules: TournamentRules;
     private matchs: Match[];
     private sceneManager : SceneManager;
+    private dbTournamentId: number | null = null; // ID du tournoi dans la base de données
 
     constructor(sceneManager : SceneManager)
     {
@@ -54,24 +57,71 @@ export class Tournament
         return (match.play(id, sceneManager));
     }
 
-    matchFinish(
+    async matchFinish(
         match: Match
-    ) : void
+    ) : Promise<boolean>
     {
         if (!match.getSloatA || !match.getSloatB)
-            return ;
+            return false;
         if (match.getStatus !== 2 || !match.getWinner)
         {
             console.error("Le match n'est pas termine ou n'a pas de vainqueur");
-            return ;
+            return false;
         }
+
+        // Sauvegarder les résultats dans la base de données si le tournoi est synchronisé
+        const matchInfo = match.getMatchInfo;
+        if (matchInfo && matchInfo.type === "tournament" && matchInfo.dbMatchId && matchInfo.dbTournamentId) {
+            try {
+                // Trouver l'ID du participant gagnant dans la base de données
+                const winnerParticipant = this.participants.find((p) => p.id === match.getWinner?.id);
+                if (!winnerParticipant) {
+                    console.error("Participant gagnant non trouvé");
+                    return false;
+                }
+
+                // Utiliser dbParticipantId si disponible, sinon id utilisateur
+                const winnerParticipantId = winnerParticipant.dbParticipantId || winnerParticipant.id;
+
+                // Appeler l'API pour sauvegarder les résultats
+                const response = await fetch(`${API_URL}/api/tournament/${matchInfo.dbTournamentId}/match/${matchInfo.dbMatchId}/finish`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Accept: "application/json",
+                    },
+                    credentials: "include",
+                    body: JSON.stringify({
+                        winnerId: winnerParticipantId,
+                        score1: match.getScore[0],
+                        score2: match.getScore[1],
+                    }),
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    console.error("Erreur lors de la sauvegarde du match:", errorData);
+                } else {
+                    console.log("Résultats du match sauvegardés dans la base de données");
+                }
+            } catch (error) {
+                console.error("Erreur lors de l'appel API pour sauvegarder le match:", error);
+            }
+        } else {
+            console.log("Match non synchronisé avec la base de données, résultats non sauvegardés");
+        }
+
         const nextMatchId = match.getMatchInfo?.nextMatchId;
         const nextMatch = this.matchs.find((m) => m.getId === nextMatchId);
+        
+        // Si pas de match suivant, le tournoi est terminé
         if (nextMatch === undefined)
         {
-            console.error("Match suivant pas trouve");
-            return ;
+            console.log("Tournoi terminé !");
+            displayPlayers(this.sceneManager.getScene(), this.participants, this.sceneManager.getTshirt);
+            return true; // Tournoi terminé
         }
+        
         if (match.getMatchInfo?.nextMatchSlot === 0)
             nextMatch.setSloatA = match.getWinner;
         else
@@ -80,18 +130,19 @@ export class Tournament
         {
             const other = this.participants.find((p) => p.id === match.getSloatB?.id);
             if (!other)
-                return ;
+                return false;
             other.eliminate = true;
         }
         else
         {
             const other = this.participants.find((p) => p.id === match.getSloatA?.id);
             if (!other)
-                return ;
+                return false;
             other.eliminate = true;
         }
         displayPlayers(this.sceneManager.getScene(), this.participants, this.sceneManager.getTshirt);
         console.log("Le match est termine, etat de tournoi : ", this);
+        return false; // Tournoi pas encore terminé
     }
 
     addRules(
@@ -116,6 +167,18 @@ export class Tournament
         p: TournamentParticipant
     ) : number
     {
+        // Validation: le participant doit avoir un ID valide
+        if (p.id === undefined || p.id === null || typeof p.id !== 'number') {
+            console.error('Participant invalide: id manquant ou invalide', p);
+            return (1);
+        }
+        
+        // Validation: le participant doit avoir un login
+        if (!p.login || p.login.trim() === '') {
+            console.error('Participant invalide: login manquant', p);
+            return (1);
+        }
+        
         let stop = false;
         this.participants.forEach((a) => {
             if (a.login === p.login)
@@ -123,7 +186,15 @@ export class Tournament
         })
         if (stop)
             return (1);
-        p.eliminate = false;
+        
+        // S'assurer que eliminate est défini
+        if (p.eliminate === undefined)
+            p.eliminate = false;
+        
+        // En mode local, tous les participants sont prêts par défaut
+        if (p.ready === undefined)
+            p.ready = true;
+            
         this.participants.push(p);
         return (0);
     }
@@ -237,10 +308,57 @@ export class Tournament
         }
     }
 
-    start() : void
+    async start() : Promise<void>
     {
+        // Si le tournoi n'est pas encore créé dans la base de données, on crée d'abord les matchs localement
+        // puis on les synchronise avec la BDD
         this.createMatchs(shuffleArray(this.participants));
         displayPlayers(this.sceneManager.getScene(), this.participants, this.sceneManager.getTshirt);
+
+        // Si le tournoi est synchronisé avec la BDD, créer les matchs dans la BDD
+        if (this.dbTournamentId !== null) {
+            try {
+                // Préparer les participants pour l'API (besoin des IDs des participants dans la BDD)
+                const participantsForApi = this.participants.map(p => ({
+                    id: p.dbParticipantId || p.id, // Utiliser dbParticipantId si disponible, sinon id utilisateur
+                    ready: p.ready
+                }));
+
+                const response = await fetch(`${API_URL}/api/tournament/${this.dbTournamentId}/start`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Accept: "application/json",
+                    },
+                    credentials: "include",
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log("Tournoi démarré dans la base de données, matchs créés:", data.matches);
+
+                    // Mapper les IDs des matchs de la BDD aux matchs locaux
+                    if (data.matches && Array.isArray(data.matches)) {
+                        data.matches.forEach((dbMatch: any, index: number) => {
+                            if (index < this.matchs.length) {
+                                const localMatch = this.matchs[index];
+                                const matchInfo = localMatch.getMatchInfo;
+                                if (matchInfo && matchInfo.type === "tournament") {
+                                    matchInfo.dbMatchId = dbMatch.id;
+                                    matchInfo.dbTournamentId = this.dbTournamentId;
+                                    localMatch.setMatchInfo = matchInfo;
+                                }
+                            }
+                        });
+                    }
+                } else {
+                    const errorData = await response.json();
+                    console.error("Erreur lors du démarrage du tournoi:", errorData);
+                }
+            } catch (error) {
+                console.error("Erreur lors de l'appel API pour démarrer le tournoi:", error);
+            }
+        }
     }
 
     get getParticipants() : TournamentParticipant[]
@@ -256,5 +374,15 @@ export class Tournament
     get getMatchs() : Match[]
     {
         return (this.matchs);
+    }
+
+    get getDbTournamentId() : number | null
+    {
+        return (this.dbTournamentId);
+    }
+
+    set setDbTournamentId(id: number | null)
+    {
+        this.dbTournamentId = id;
     }
 }

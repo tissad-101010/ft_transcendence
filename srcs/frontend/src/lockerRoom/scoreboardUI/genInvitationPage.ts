@@ -65,7 +65,12 @@ function genFriendList(
         panel.addControl(test);
 
         test.onPointerClickObservable.add(() => {
-            if (!userX.getTournament?.addParticipant({login: test.text, alias: test.text, ready: true, id: friends[i].getId}))
+            const friendId = friends[i].getId;
+            if (friendId === undefined || friendId === null) {
+                console.error(`Friend ${test.text} n'a pas d'ID valide`);
+                return;
+            }
+            if (!userX.getTournament?.addParticipant({login: test.text, alias: test.text, ready: true, id: friendId, eliminate: false}))
                 genWaitingList(env, userX, container, lists);
         })
 
@@ -89,7 +94,28 @@ function genWaitingList(
 ) : void
 {
     if (!userX.getTournament)
+    {
+        console.warn("⚠️ Aucun tournoi trouvé dans genWaitingList");
         return ;
+    }
+    
+    // Vérification que l'utilisateur connecté est dans la liste
+    const currentUser = userX.getUser;
+    if (currentUser) {
+        const userInList = userX.getTournament.getParticipants.find((p: any) => p.login === currentUser.login);
+        if (!userInList) {
+            console.warn(`⚠️ L'utilisateur ${currentUser.login} n'est pas dans la liste des participants. Ajout automatique...`);
+            // Ajouter l'utilisateur s'il n'est pas dans la liste
+            const participant = {
+                login: currentUser.login,
+                alias: currentUser.login,
+                ready: true,
+                id: currentUser.id,
+                eliminate: false
+            };
+            userX.getTournament.addParticipant(participant);
+        }
+    }
     if (!container.scrollViewer)
     {
         container.scrollViewer = new ScrollViewer();
@@ -111,7 +137,8 @@ function genWaitingList(
     container.scrollViewer.addControl(panel);
 
     const text = new TextBlock();
-    text.text = "Invites (" + userX.getTournament.getParticipants.length + ")";
+    const participantCount = userX.getTournament.getParticipants.length;
+    text.text = "Invites (" + participantCount + ")";
     text.color = env.text.color;
     text.width = "100%";
     text.height = "50px";
@@ -119,6 +146,11 @@ function genWaitingList(
     text.fontFamily = env.text.fontFamily;
     text.textHorizontalAlignment = Control.HORIZONTAL_ALIGNMENT_CENTER;
     panel.addControl(text);    
+
+    // Log pour débogage
+    console.log("📋 Liste des participants du tournoi:", userX.getTournament.getParticipants.map((p: any) => p.login));
+    console.log("👤 Utilisateur connecté:", userX.getUser?.login);
+    console.log("🔍 Vérification présence utilisateur:", userX.getTournament.getParticipants.some((p: any) => p.login === userX.getUser?.login));
 
     for (let i = 0; i < userX.getTournament.getParticipants.length; i++)
     {
@@ -240,10 +272,15 @@ function genRowLogin(
             error = null;
         }
         /* RECHERCHE DANS LA BDD SI L'UTILISATEUR EXISTE */
+        // Note: Pour l'instant, on génère un ID temporaire négatif pour les participants ajoutés manuellement
+        // En production, il faudrait chercher l'utilisateur dans la BDD pour obtenir son vrai ID
+        const tempId = -(Date.now() % 1000000); // ID temporaire négatif pour éviter les conflits
         const participant = {
             login: login.text,
             alias: login.text,
-            ready: false
+            ready: true,
+            id: tempId,
+            eliminate: false
         };
         login.text = "";
         if (!userX.getTournament?.addParticipant(participant))

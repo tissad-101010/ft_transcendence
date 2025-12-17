@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   authFetch.ts                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
+/*   By: glions <glions@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/18 19:06:30 by tissad            #+#    #+#             */
-/*   Updated: 2025/12/11 19:02:16 by tissad           ###   ########.fr       */
+/*   Updated: 2025/12/16 09:28:39 by glions           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,7 +26,7 @@ async function refreshAccessToken(): Promise<void> {
         refreshPromise = (async () => {
             try {
                 isRefreshing = true;
-
+                
                 const res = await fetch(`${API_URL}/api/user/auth/refresh`, {
                     method: "POST",
                     credentials: "include",

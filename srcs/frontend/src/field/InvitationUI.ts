@@ -13,9 +13,7 @@ import {
 import { FriendUI } from "./FriendUI";
 import { ContainerUI } from "./FriendUI";
 import { FriendInvitation } from "../friends/FriendInvitation";
-import { P } from "framer-motion/dist/types.d-BJcRxCew";
 import { PromiseUpdateResponse, StatusInvitation } from "../friends/api/friends.api";
-import { url } from "inspector";
 
 enum Page
 {
@@ -81,7 +79,7 @@ export class InvitationUI
         inputText.background = "rgba(51, 51, 51, 1)";
         inputText.color = "white";
         inputText.focusedBackground = "gray";
-        inputText.placeholderText = "Ajouter un amis";
+        inputText.placeholderText = "Add friend";
         inputText.thickness = 0;
         containerInput.addControl(inputText);
 
@@ -155,19 +153,19 @@ export class InvitationUI
                 console.log(res);
                 if (res.success)
                 {
-                    this.textLog!.text = "Invitation envoyée";
+                    this.textLog!.text = "Invitation sent";
                     this.textLog!.color = "rgba(40, 80, 112, 1)";
                 }
                 else
                 {
                     this.textLog!.text = res.message || "error";
-                    this.textLog!.color = "rgba(177, 67, 168, 1)";
+                    this.textLog!.color = "#ce8a8d";
                 }
             })
             .catch ((err: any) => {
-                console.error("Problème lors de l'appel à sendFriendInvite", err);
+                console.error("Error sendFriendInvite", err);
                 this.textLog!.text = err.message;
-                this.textLog!.color = "rgba(177, 67, 168, 1)";
+                this.textLog!.color = "#ce8a8d";
             });
         });
 
@@ -225,9 +223,9 @@ export class InvitationUI
                 .then((response) => {
                     this.textLog!.text = response.message;
                     if (response.success)
-                        this.textLog!.color = "rgba(63, 124, 173, 1)";
+                        this.textLog!.color = "rgba(0, 124, 155, 1)";
                     else
-                        this.textLog!.color = "rgba(177, 67, 168, 1)";
+                        this.textLog!.color = "#ce8a8d";
                     this.displayContainerR();
                 });
         });
@@ -253,7 +251,7 @@ export class InvitationUI
         this.friendUI.resetHeader();
 
         const text = new TextBlock();
-        text.text = "Gestion amis";
+        text.text = "Friends";
         text.color = "black";
         text.fontSize = 100;
         text.paddingTop = "125px";
@@ -336,9 +334,9 @@ export class InvitationUI
                             .then((response : PromiseUpdateResponse) => {
                                 this.textLog!.text = response.message;
                                 if (response.success)
-                                    this.textLog!.color = "rgba(63, 124, 173, 1)";
+                                    this.textLog!.color = "#3f8b95";
                                 else
-                                    this.textLog!.color = "rgba(177, 67, 168, 1)";
+                                    this.textLog!.color = "#ce8a8d";
                                 this.displayContainerR();
                             }
                     )
@@ -350,14 +348,14 @@ export class InvitationUI
                             .then((response : PromiseUpdateResponse) => {
                                 this.textLog!.text = response.message;
                                 if (response.success)
-                                    this.textLog!.color = "rgba(63, 124, 173, 1)";
+                                    this.textLog!.color = "#3f8b95";
                                 else
-                                    this.textLog!.color = "rgba(177, 67, 168, 1)";
+                                    this.textLog!.color = "#ce8a8d";
                                 this.displayContainerR();
                             }
                     )
                 });
-            applyStyle("rgba(177, 67, 168, 1)", cancel);
+            applyStyle("#ce8a8d", cancel);
             b.push(cancel);
         }
         else if (this.currView === Page.RECEIVED)
@@ -369,9 +367,9 @@ export class InvitationUI
                         .then((response) => {
                             this.textLog!.text = response.message;
                                 if (response.success)
-                                    this.textLog!.color = "rgba(63, 124, 173, 1)";
+                                    this.textLog!.color = "#3f8b95";
                                 else
-                                    this.textLog!.color = "rgba(177, 67, 168, 1)";
+                                    this.textLog!.color = "#ce8a8d";
                                 this.friendUI.getUpdateChair(this.friendUI.getButtonMeshes);
                                 this.friendUI.leaveFriend();
                         })
@@ -384,9 +382,9 @@ export class InvitationUI
                         .then((response) => {
                             this.textLog!.text = response.message;
                                 if (response.success)
-                                    this.textLog!.color = "rgba(63, 124, 173, 1)";
+                                    this.textLog!.color = "#3f8b95";
                                 else
-                                    this.textLog!.color = "rgba(177, 67, 168, 1)";
+                                    this.textLog!.color = "#ce8a8d";
                             this.displayContainerR();
                         })
             });
@@ -398,9 +396,9 @@ export class InvitationUI
                         .then((response) => {
                             this.textLog!.text = response.message;
                                 if (response.success)
-                                    this.textLog!.color = "rgba(63, 124, 173, 1)";
+                                    this.textLog!.color = "#3f8b95";
                                 else
-                                    this.textLog!.color = "rgba(177, 67, 168, 1)";
+                                    this.textLog!.color = "#ce8a8d";
                             this.displayContainerR();
                         })
             });

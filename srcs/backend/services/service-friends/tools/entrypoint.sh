@@ -73,7 +73,7 @@ until pg_isready -h postgreSQL -p $DB_PORT -U admin; do
   echo "🔄 Waiting for PostgreSQL to be ready..."
   sleep 2
 done
-echo "🚀 Starting service-users app..."
+echo "🚀 Starting service-friends app..."
 npm run prisma:generate
 npm run prisma:reset
 npm run prisma:migrate

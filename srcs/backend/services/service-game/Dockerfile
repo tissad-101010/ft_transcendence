@@ -27,7 +27,12 @@ RUN echo "step II : run"
 
 RUN apt-get install -y bash 
 
-RUN apt-get update && apt-get install -y postgresql-client
+RUN apt-get update && apt-get install -y postgresql-client sed
+RUN apt-get install -y curl unzip bash jq zsh \
+    && curl -fsSL https://releases.hashicorp.com/vault/1.12.2/vault_1.12.2_linux_amd64.zip -o vault.zip \
+    && unzip vault.zip \
+    && mv vault /usr/local/bin/ \
+    && rm vault.zip
 # copy the entrypoint script
 COPY ./tools/entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh

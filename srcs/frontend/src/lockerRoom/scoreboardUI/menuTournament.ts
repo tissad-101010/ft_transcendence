@@ -244,10 +244,12 @@ function listMatch(
         }
         displayPlayer(panelRow, match.getSloatB, env);
 
-        // Match de l'utilisateur en attente
-        if (((match.getSloatA && match.getSloatA.id === env.userX.getUser.id ||
-                match.getSloatB && match.getSloatB.id === env.userX.getUser.id)
-                && match.getStatus === 0))
+        // En mode local, on peut lancer tous les matchs où les deux participants sont prêts
+        // Pas besoin de vérifier si l'utilisateur est dans le match en mode local
+        const bothReady = (match.getSloatA && match.getSloatA.ready && match.getSloatB && match.getSloatB.ready);
+        const canLaunch = match.getStatus === 0 && bothReady;
+        
+        if (canLaunch)
         {
             const start = new Rectangle();
             start.width = "100px";
@@ -286,6 +288,27 @@ function waitingScreen(
     match: Match
 ) : void
 {
+    // Pour un tournoi local, on lance directement le match sans attendre
+    // Vérifier si les deux participants sont prêts (mode local)
+    const bothReady = (match.getSloatA && match.getSloatA.ready && match.getSloatB && match.getSloatB.ready);
+    
+    if (bothReady) {
+        // Lancer directement le match en mode local
+        if (!env.userX.playTournamentMatch(utils.tournament, match, env.sceneManager))
+            console.error("Impossible de lancer le match");
+        else
+        {
+            env.sceneManager.getSceneInteractor?.disableInteractions();
+            env.scoreboard.setClic = false;
+            env.sceneManager.moveCameraTo(ZoneName.FIELD, () => {
+                env.sceneManager.setSpecificMesh(false);
+                env.sceneManager.getSceneInteractor?.enableInteractionScene();
+            });
+        }
+        return;
+    }
+
+    // Mode en ligne : attendre que l'adversaire soit prêt
     myClearControls(env.menuContainer);
     let panel = new StackPanel();
     panel.isVertical = true;
