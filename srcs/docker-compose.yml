@@ -373,7 +373,7 @@ volumes:
     driver: local
     driver_opts:
       type: none
-      device: ~/data/service-users
+      device: ~/data/secrets
       o: bind
   #*******************************************************************************#
   # Local volume for PostgreSQL data

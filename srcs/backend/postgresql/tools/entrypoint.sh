@@ -47,12 +47,21 @@ chmod 750 /vault/secrets/
 
 vault agent -config=/tmp/vault_agent.hcl &
 VAULT_PID=$!
+# kill "$VAULT_PID" if signal SIGTERM or SIGINT is received
+trap kill $AGENT_PID SIGTERM SIGINT
+
 
 echo "🚀 Loading secrets from Vault path: $VAULT_PATH"
 # attendre que Vault Agent écrive les secrets
 while [ ! -f /var/lib/postgresql/data/postgresql/vault_agent/secrets.env ]; do
   echo "⏳ Waiting for Vault Agent..."
   sleep 1
+  kill $VAULT_PID 2>/dev/null  && {
+    echo "❌ Vault Agent has exited unexpectedly."
+  }
+  sleep 1
+  vault agent -config=/tmp/vault_agent.hcl &
+  VAULT_PID=$!
 done
 
 set -a

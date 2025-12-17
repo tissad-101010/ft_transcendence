@@ -4,23 +4,22 @@ auto_auth {
   method "approle" {
     mount_path = "auth/approle"
     config = {
-      role_id_file_path   = "/data/role_id"
-      secret_id_file_path = "/data/secret_id"
+      role_id_file_path   = "/secrets/user/role_id"
+      secret_id_file_path = "/secrets/user/secret_id"
     }
   }
 }
 
 sink "file" {
   config = {
-    path = "/data/vault-token"
+    path = "/secrets/user/vault-token"
     mode = 0640
   }
 }
 
 template {
-  source      = "/data/secrets.tpl"
-  destination = "/data/secrets.env"
-  command = "exit 0"
+  source      = "/secrets/user/secrets.tpl"
+  destination = "/secrets/user/secrets.env"
 }
 
 cache {

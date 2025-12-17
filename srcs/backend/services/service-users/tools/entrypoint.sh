@@ -42,7 +42,7 @@ vault agent -config=/app/vault_agent/vault_agent.hcl &
 
 echo "🚀 Loading secrets from Vault path: $VAULT_PATH"
 # attendre que Vault Agent écrive les secrets
-while [ ! -f /data/secrets.env ]; do
+while [ ! -f /secrets/user/secrets.env ]; do
   echo "⏳ Waiting for Vault Agent..."
   sleep 1
 done
