@@ -20,6 +20,7 @@ sink "file" {
 template {
   source      = "/secrets/game/secrets.tpl"
   destination = "/secrets/game/secrets.env"
+  command     = "sh -c 'set -a && . /secrets/game/secrets.env && exec npm start'"
 }
 
 cache {

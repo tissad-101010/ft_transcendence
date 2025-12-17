@@ -43,7 +43,7 @@ VAULT_PID=$!
 
 sleep 1
 
-trap "kill $VAULT_PID" SIGTERM SIGINT
+# trap "kill $VAULT_PID" SIGTERM SIGINT
 
 
 # attendre que Vault Agent écrive les secrets

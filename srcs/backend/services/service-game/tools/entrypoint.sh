@@ -12,7 +12,7 @@
 # **************************************************************************** #
 
 
-## service-chat entrypoint script
+## service-game entrypoint script
 set -e
 
 
@@ -45,19 +45,17 @@ VAULT_PID=$!
 
 
 # attendre que Vault Agent écrive les secrets
-while [ ! -f /secrets/chat/secrets.env ]; do
+while [ ! -f /secrets/game/secrets.env ]; do
   echo "⏳ Waiting for Vault Agent..."
   sleep 1
 done
 
 set -a
-. /secrets/chat/secrets.env
+. /secrets/game/secrets.env
 set +a
-export DATABASE_URL="postgresql://${DB_USER}:${GAME_SERVICE_DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}"
-echo "========================================================================================>$DATABASE_URL"
+
 echo "✅ Secrets loaded and environment variables set."
 
-exec tail -f /dev/null
 
 
 # echo "pg_isready -h postgreSQL -p $DB_PORT -U admin: PostgreSQL is ready!"
@@ -68,19 +66,13 @@ until pg_isready -h postgreSQL -p $DB_PORT -U admin; do
   echo "🔄 Waiting for PostgreSQL to be ready..."
   sleep 2
 done
-echo "🚀 Starting service-chat app..."
-npm run prisma:generate
-npm run prisma:reset
-npm run prisma:migrate
-npm run dev 
+
+export DATABASE_URL="postgresql://${DB_USER}:${GAME_SERVICE_DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}"
+echo "========================================================================================>$DATABASE_URL"
+echo "🚀 Starting service-game app..."
+# npm run prisma:generate
+# npm run prisma:reset
+# npm run prisma:migrate
+npm run dev
+
 # exec tail -f /dev/null 
-
-vault read -tls-skip-verify auth/approle/role/service-game/role-id
-
-vault write -f -tls-skip-verify auth/approle/role/service-game/secret-id
-
-
-vault write -tls-skip-verify auth/approle/role/service-game \
-  token_policies="service-game-read" \
-  token_ttl=1h \
-  token_max_ttl=4h

@@ -6,7 +6,7 @@
 /*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/23 15:58:35 by tissad            #+#    #+#             */
-/*   Updated: 2025/12/17 17:18:53 by tissad           ###   ########.fr       */
+/*   Updated: 2025/12/17 20:46:05 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,7 +54,7 @@ app.register(fastifyCookie, {
 
 
 // Register plugins (database, redis, etc.)
-app.register(vaultPlugin);
+// app.register(vaultPlugin);
 app.register(prismaPlugin);
 app.register(redisPlugin);
 app.register(requestLoggerPlugin);
@@ -73,11 +73,11 @@ app.register(fastifyStatic, {
   prefix: '/uploads/',
 });
 
+console.log("===============================================", process.env);
 
 
 
-
-console.log('🚀 Loading secrets from Vault...', process.env.TOTO);
+// console.log('🚀 Loading secrets from Vault...', process.env.TOTO);
 // Register routes
 app.register(authRoutes, { prefix: '/user/auth' });
 app.register(oauthRoutes, { prefix: '/user/oauth' });

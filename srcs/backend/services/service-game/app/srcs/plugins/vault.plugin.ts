@@ -63,5 +63,3 @@ const secretsPlugin: FastifyPluginAsync = async (fastify) => {
 export default fp(secretsPlugin, {
   name: "secrets-file-plugin",
 });
-
-

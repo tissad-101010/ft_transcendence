@@ -42,7 +42,7 @@ vault agent -config=/app/vault_agent/vault_agent.hcl &
 
 VAULT_PID=$!
 # kill "$VAULT_PID" if signal SIGTERM or SIGINT is received
-trap "kill $VAULT_PID" SIGTERM SIGINT
+# trap "kill $VAULT_PID" SIGTERM SIGINT
 
 echo "🚀 Loading secrets from Vault path: $VAULT_PATH"
 # attendre que Vault Agent écrive les secrets

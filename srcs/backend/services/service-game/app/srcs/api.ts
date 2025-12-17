@@ -6,14 +6,19 @@
 /*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/23 15:58:35 by tissad            #+#    #+#             */
-/*   Updated: 2025/12/17 17:19:13 by tissad           ###   ########.fr       */
+/*   Updated: 2025/12/17 20:47:01 by tissad           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
+
+
+// service game
+
 
 import Fastify from 'fastify';
 import cors from '@fastify/cors';
 import fastifyCookie from '@fastify/cookie';
 import websocket from '@fastify/websocket'; //rp: enable wesocket plugin
+
 
 type FastifyRequest = any; // ts
 type FastifyReply = any; //ts 
@@ -37,12 +42,13 @@ app.register(fastifyCookie, {
   secret: process.env.COOKIE_SECRET || 'supersecret', // optionnel (pour signer les cookies)
 });
 
-
+console.log("===============================================", process.env);
 // Register plugins (database, redis, etc.)
+// app.register(secretsPlugin);
 app.register(redisPlugin);
 app.register(prismaPlugin);
 app.register(websocket); // rp : register websocket plugin
-
+console.log("===============================================", process.env);
 // Start the Fastify server
 const start = async () => {
   try {

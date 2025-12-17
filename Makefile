@@ -43,7 +43,7 @@ local:
 # 	cp ~/sgoinfre/local/strucField.glb srcs/frontend/public/field/strucField.glb
 
 
-vault_init:
+vault_start:
 	docker compose -f vault/docker-compose.yml up --build -d
 vault_down:
 	docker compose -f vault/docker-compose.yml down -v
