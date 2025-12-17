@@ -5,10 +5,10 @@ import
   TextBlock,
   InputText,
   Control,
-  AdvancedDynamicTexture,
-  Button,
-  Grid
+  Button
 } from "@babylonjs/gui";
+
+import { IKeyboardEvent } from "@babylonjs/core";
 
 import { UIData } from "../utils.ts";
 
@@ -158,7 +158,6 @@ function genRowScore(env: DataMatchBlock) : StackPanel
     const score = new InputText();
     score.width = "50px";
     score.height = "35px";
-    score.maxLength = 2;
     score.fontSize = env.graph.inputText.fontSize;
     score.fontFamily = env.graph.inputText.fontFamily;
     score.background = env.graph.inputText.background;
@@ -172,7 +171,7 @@ function genRowScore(env: DataMatchBlock) : StackPanel
     let error : TextBlock | null = null;
     let previousText : string = "";
 
-    score.onBeforeKeyAddObservable.add((key: string) => {
+    score.onBeforeKeyAddObservable.add((input: InputText) => {
         previousText = score.text;
     });
 
@@ -231,7 +230,6 @@ function genRowTime(env: DataMatchBlock) : StackPanel
     const time = new InputText();
     time.width = "40px";
     time.height = "35px";
-    time.maxLength = 2;
     time.fontSize = env.graph.inputText.fontSize;
     time.fontFamily = env.graph.inputText.fontFamily;
     time.background = env.graph.inputText.background;
@@ -245,7 +243,7 @@ function genRowTime(env: DataMatchBlock) : StackPanel
     let error : TextBlock | null = null;
 
     let previousText : string = "";
-    time.onBeforeKeyAddObservable.add((key: string) => {
+    time.onBeforeKeyAddObservable.add((input : InputText) => {
         previousText = time.text;
     });
     time.onTextChangedObservable.add(() => {
@@ -300,7 +298,7 @@ function genRowMode(env: DataMatchBlock) : StackPanel
     text.horizontalAlignment = Control.HORIZONTAL_ALIGNMENT_LEFT;
     row.addControl(text);
 
-    const buttons : Button = [];
+    const buttons : Rectangle[] = [];
 
     function createButton(label: string) 
     {
@@ -319,7 +317,7 @@ function genRowMode(env: DataMatchBlock) : StackPanel
 
 
         button.onPointerClickObservable.add(() => {
-            buttons.forEach((b : Button) => {
+            buttons.forEach((b : Rectangle) => {
                 b.background = env.graph.button.background;
             })
             button.background = env.graph.button.clickedBackground;
@@ -392,14 +390,23 @@ export function genRulesMatchBlock(env: DataMatchBlock, selectMode: boolean) : R
     container.paddingTop = "50px";
     container.width =  env.graph.container.width;
     container.height = env.graph.container.height;
-    container.thickness = env.graph.container.thickness;
+    container.thickness = 0;
     container.color = env.graph.container.color;
 
     const panel = new StackPanel();
     panel.isVertical = true;
     panel.width = "100%";
-
     container.addControl(panel);
+
+    const title = new TextBlock();
+    title.text = "Rules";
+    title.color = UIData.title.color;
+    title.fontSize = UIData.title.fontSize;
+    title.fontFamily = UIData.title.fontFamily;
+    title.width = "200px";
+    title.height = "80px";
+    panel.addControl(title);
+
     panel.addControl(genRowSpeed(env));
     panel.addControl(genRowScore(env));
     panel.addControl(genRowTime(env));

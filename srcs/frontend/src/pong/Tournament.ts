@@ -23,16 +23,10 @@ export interface TournamentParticipant
     dbParticipantId?: number; // ID du participant dans tournament_participants (base de données)
 }
 
-interface TournamentRules
-{
-    mode: number;
-    match: MatchRules;
-}
-
 export class Tournament
 {
     private participants : TournamentParticipant[];
-    private rules: TournamentRules;
+    private rules: MatchRules;
     private matchs: Match[];
     private sceneManager : SceneManager;
     private dbTournamentId: number | null = null; // ID du tournoi dans la base de données
@@ -41,12 +35,9 @@ export class Tournament
     {
         this.participants = [];
         this.rules = {
-            mode : -1,
-            match : {
-                speed : "",
-                score : "",
-                timeBefore : ""
-            }
+            speed : "",
+            score : "",
+            timeBefore : ""
         }
         this.matchs = [];
         this.sceneManager = sceneManager;
@@ -157,13 +148,13 @@ export class Tournament
         switch (m)
         {
             case 0: 
-                this.rules.match.speed = v;
+                this.rules.speed = v;
                 break;
             case 1:
-                this.rules.match.score = v;
+                this.rules.score = v;
                 break;
             case 2:
-                this.rules.match.timeBefore = v;
+                this.rules.timeBefore = v;
         }
     }
 
@@ -216,12 +207,12 @@ export class Tournament
 
     checkReady() : number
     {
-        if (this.rules.match.speed !== "1" && this.rules.match.speed !== "2" &&
-            this.rules.match.speed !== "3")
+        if (this.rules.speed !== "1" && this.rules.speed !== "2" &&
+            this.rules.speed !== "3")
             return (1);
-        if (this.rules.match.score === "")
+        if (this.rules.score === "")
             return (2);
-        if (this.rules.match.timeBefore === "")
+        if (this.rules.timeBefore === "")
             return (3);
         if (this.participants.length < 4)
             return (4);
@@ -253,7 +244,7 @@ export class Tournament
         {
             if (i % 2 === 0 && i !== 0)
                 targetMatch += 1;
-            const match = new Match(this.rules.match, "tournament", indexM, this.sceneManager);
+            const match = new Match(this.rules, "tournament", indexM, this.sceneManager);
             const settings : MatchTournament = {
                 round: 1,
                 sloatA: {
@@ -295,7 +286,7 @@ export class Tournament
                     targetSlot = 0;
                 else
                     targetSlot = 1;
-                const match = new Match(this.rules.match, "tournament", indexM, this.sceneManager);
+                const match = new Match(this.rules, "tournament", indexM, this.sceneManager);
                 const settings : MatchTournament = {
                     round: i,
                     sloatA: null,
@@ -372,7 +363,7 @@ export class Tournament
 
     get getRules() : MatchRules
     {
-        return (this.rules.match);
+        return (this.rules);
     }
 
     get getMatchs() : Match[]

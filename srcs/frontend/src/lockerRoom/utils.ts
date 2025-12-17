@@ -17,7 +17,6 @@ import {
     TextBlock
 } from '@babylonjs/gui';
 import { UserX } from '../UserX';
-import { Tournament } from '../pong/Tournament';
 import { ScoreboardHandler } from './ScoreboardHandler';
 import { SceneManager } from '../scene/SceneManager';
 
@@ -37,17 +36,17 @@ export const UIData = {
     title: {
         color: "rgba(221, 16, 16, 1)",
         fontSize: 30,
-        fontFamily: "Gloria Hallelujah",
+        fontFamily: "Arial",
         width: "250px"
     },
     text: {
         color: "rgba(16,16,221,1)",
         fontSize: 24,
-        fontFamily: "Gloria Hallelujah"
+        fontFamily: "Arial"
     },
     inputText: {
         fontSize: 24,
-        fontFamily: "Gloria Hallelujah",
+        fontFamily: "Arial",
         color: "rgba(16,16,221,1)",
         background: "transparent",
         focusedBackground: "rgba(227, 227, 255, 1)",

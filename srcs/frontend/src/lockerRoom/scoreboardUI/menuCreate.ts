@@ -7,20 +7,17 @@ import {
   TextBlock,
   Control,
   Grid,
-  ScrollViewer
+  ScrollViewer,
+  Image
 } from "@babylonjs/gui";
 
-import { UserX } from '../../UserX.ts';
-
 import { DataMatchBlock, genRulesMatchBlock } from './genRulesMatch.ts';
-import { Tournament } from '../../pong/Tournament.ts';
 
 import { backButton, createButton, invitationButton, joinButton, rulesButton, newButton, startButton } from './navigationButton.ts';
 
 import { API_URL } from "../../utils.ts";
-import { ScoreboardHandler } from '../ScoreboardHandler.ts';
 
-import { Match, MatchRules } from '../../pong/Match.ts';
+import { MatchRules } from '../../pong/Match.ts';
 
 import { Env, UIData } from '../utils.ts';
 
@@ -35,7 +32,7 @@ function buttonNavigation(
     const button = new Rectangle();
     button.height = "80px";
     button.width = "140px";
-    button.thickness = UIData.button.thickness + 4;
+    button.thickness = UIData.button.thickness + 2;
     button.color = UIData.text.color;
     if (label === settings.currPage)
         button.background = UIData.button.clickedBackground;
@@ -69,7 +66,7 @@ function buttonNavigation(
                 newButton(label, env, settings, grid);
                 break;
             case "Rejoindre" :
-                joinButton(label, env, grid);
+                joinButton(label, env, settings, grid);
                 break;
             case "Participants" :
                 invitationButton(label, env, settings, grid);
@@ -97,34 +94,17 @@ function buttonNavigation(
     return (button);
 }
 
-export function genJoinMatch(env: Env) : StackPanel
+export function genJoinMatch(env: Env) : Rectangle
 {
-    // Vérifier que env.advancedTexture existe et a une scène associée
-    if (!env.advancedTexture) {
-        console.error("❌ genJoinMatch: advancedTexture n'est pas défini");
-        const errorPage = new StackPanel();
-        errorPage.isVertical = true;
-        const errorText = new TextBlock();
-        errorText.text = "Erreur: Texture GUI non disponible";
-        errorText.color = "red";
-        errorPage.addControl(errorText);
-        return errorPage;
-    }
-
-    const page = new StackPanel();
-    page.isVertical = true;
+    const page = new Rectangle();
     page.paddingTop = "70px";
     page.width = "90%";
+    page.thickness = 0;
 
-    const title = new TextBlock();
-    title.text = "Rejoindre un match";
-    title.color = UIData.title.color;
-    title.fontSize = UIData.title.fontSize;
-    title.fontFamily = UIData.title.fontFamily;
-    title.width = "500px";
-    title.height = "80px";
-    
-    page.addControl(title);
+    const panel = new StackPanel();
+    panel.isVertical = true;
+    panel.paddingTop = "70px";
+    panel.width = "90%";
    
     const scrollViewer = new ScrollViewer();
     scrollViewer.width = "100%";
@@ -145,9 +125,9 @@ export function genJoinMatch(env: Env) : StackPanel
     const headerRect = new Rectangle();
     headerRect.width = "500px";
     headerRect.height = "50px";
-    headerRect.background = "white";
     headerRect.thickness = 5;
     headerRect.color = "black";
+    headerRect.background = "white";
     headerRect.horizontalAlignment = Control.HORIZONTAL_ALIGNMENT_CENTER;
     container.addControl(headerRect);
 
@@ -193,10 +173,21 @@ export function genJoinMatch(env: Env) : StackPanel
     headerScore.color = "black";
     headerPanel.addControl(headerScore);
 
+    const buttonUpdate = Button.CreateImageOnlyButton("update", "/icon/update.png");
+    buttonUpdate.width = "30px";
+    buttonUpdate.height = "30px";
+    buttonUpdate.thickness = 0;
+    buttonUpdate.cornerRadius = 50;
+    buttonUpdate.background = "black";
+    (buttonUpdate.image as Image).width = "15px";
+    (buttonUpdate.image as Image).height = "15px";
+    (buttonUpdate.image as Image).stretch = Image.STRETCH_UNIFORM;
+    (buttonUpdate.image as Image).horizontalAlignment = Control.HORIZONTAL_ALIGNMENT_CENTER;
+    (buttonUpdate.image as Image).verticalAlignment = Control.VERTICAL_ALIGNMENT_CENTER;
+    headerPanel.addControl(buttonUpdate);
+
     // Fonction pour charger les matchs depuis l'API
     const loadMatches = async () => {
-        console.log("🔄 Chargement des matchs amicaux...");
-        
         // Nettoyer le conteneur (garder seulement l'en-tête)
         // On récupère tous les contrôles du conteneur sauf headerRect
         const controlsToRemove: Control[] = [];
@@ -215,7 +206,6 @@ export function genJoinMatch(env: Env) : StackPanel
         });
 
         try {
-            console.log("🔄 Tentative de récupération des matchs amicaux...");
             const response = await fetch(`${API_URL}/api/friendly/list`, {
                 method: "GET",
                 headers: {
@@ -225,7 +215,6 @@ export function genJoinMatch(env: Env) : StackPanel
                 credentials: "include",
             });
 
-            console.log("📡 Réponse reçue:", response.status, response.statusText);
 
             if (!response.ok) {
                 console.error("❌ Erreur lors de la récupération des matchs amicaux:", response.status, response.statusText);
@@ -282,7 +271,6 @@ export function genJoinMatch(env: Env) : StackPanel
             console.log("📦 Conteneur avant ajout des matchs:", container.children?.length || 0, "contrôles");
             
             matchs.forEach((m: any, index: number) => {
-                console.log(`  📋 Match ${index + 1}:`, m);
                 const rect = new Rectangle();
                 rect.width = "500px";
                 rect.height = "100px";
@@ -291,7 +279,6 @@ export function genJoinMatch(env: Env) : StackPanel
                 rect.color = "black";
                 rect.horizontalAlignment = Control.HORIZONTAL_ALIGNMENT_CENTER;
                 container.addControl(rect);
-                console.log(`  ✅ Rectangle du match ${index + 1} ajouté au conteneur (total: ${container.children?.length || 0} contrôles)`);
 
                 const panel = new StackPanel();
                 panel.isVertical = false;
@@ -301,12 +288,12 @@ export function genJoinMatch(env: Env) : StackPanel
 
                 const login = new TextBlock();
                 // Afficher "R" si le match est en ligne
-                login.text = m.isOnline ? `${m.login} (R)` : m.login;
+                login.text = m.login;
                 login.fontSize = UIData.text.fontSize;
                 login.fontFamily = UIData.text.fontFamily;
                 login.width = "100px";
                 login.height = "100px";
-                login.color = m.isOnline ? "blue" : "black"; // Bleu pour les matchs en ligne
+                login.color = "black"; // Bleu pour les matchs en ligne
                 panel.addControl(login);
 
                 const speed = new TextBlock();
@@ -337,8 +324,8 @@ export function genJoinMatch(env: Env) : StackPanel
                 panel.addControl(score);
 
                 const button = new Rectangle();
-                button.height = "50px";
-                button.width = "80px";
+                button.height = "40px";
+                button.width = "40px";
                 button.thickness = UIData.button.thickness;
                 button.color = UIData.text.color;
                 button.background = UIData.button.background;
@@ -369,58 +356,68 @@ export function genJoinMatch(env: Env) : StackPanel
                     });
                 });
 
+                button.onPointerEnterObservable.add(() => {
+                    button.background = UIData.button.hoveredBackground;
+                });
+
+                button.onPointerOutObservable.add(() => {
+                    button.background = UIData.button.background;
+                });
+
                 // Bouton Supprimer
-                const deleteButton = new Rectangle();
-                deleteButton.height = "50px";
-                deleteButton.width = "80px";
-                deleteButton.thickness = UIData.button.thickness;
-                deleteButton.color = "white";
-                deleteButton.background = "red";
-                panel.addControl(deleteButton);
-
-                const deleteText = new TextBlock();
-                deleteText.text = "Supprimer";
-                deleteText.color = "white";
-                deleteText.fontSize = UIData.text.fontSize - 6;
-                deleteText.fontFamily = UIData.text.fontFamily;
-                deleteButton.addControl(deleteText);
-                
-                deleteButton.onPointerClickObservable.add(async () => {
-                    console.log("🗑️ Suppression du match:", m.idMatch);
-                    // Désactiver le bouton pendant la suppression
-                    deleteButton.isEnabled = false;
-                    deleteButton.background = "gray";
+                if (m.login === env.userX.getUser?.username)
+                {
+                    const deleteButton = new Rectangle();
+                    deleteButton.height = "40px";
+                    deleteButton.width = "50px";
+                    deleteButton.paddingLeft = 10;
+                    deleteButton.thickness = UIData.button.thickness;
+                    deleteButton.color = UIData.button.color;
+                    deleteButton.background = UIData.button.background;
+                    panel.addControl(deleteButton);
+    
+                    const deleteText = new TextBlock();
+                    deleteText.text = "X";
+                    deleteText.color = "red";
+                    deleteText.fontSize = UIData.text.fontSize - 6;
+                    deleteText.fontFamily = UIData.text.fontFamily;
+                    deleteButton.addControl(deleteText);
                     
-                    const success = await env.userX.deleteFriendlyMatch(m.idMatch);
-                    if (success) {
-                        console.log("✅ Match supprimé, rafraîchissement de la liste...");
-                        // Rafraîchir immédiatement la liste des matchs
-                        if ((env as any).refreshJoinMatchList) {
-                            // Appeler immédiatement puis attendre un peu pour un second rafraîchissement
-                            (env as any).refreshJoinMatchList();
-                            setTimeout(() => {
+                    deleteButton.onPointerClickObservable.add(async () => {
+                        // Désactiver le bouton pendant la suppression
+                        deleteButton.isEnabled = false;
+                        deleteButton.background = "gray";
+                        
+                        const success = await env.userX.deleteFriendlyMatch(m.idMatch);
+                        if (success) {
+                            // Rafraîchir immédiatement la liste des matchs
+                            if ((env as any).refreshJoinMatchList) {
+                                // Appeler immédiatement puis attendre un peu pour un second rafraîchissement
                                 (env as any).refreshJoinMatchList();
-                            }, 500);
+                                setTimeout(() => {
+                                    (env as any).refreshJoinMatchList();
+                                }, 500);
+                            } else {
+                                console.warn("⚠️ refreshJoinMatchList n'est pas défini");
+                            }
                         } else {
-                            console.warn("⚠️ refreshJoinMatchList n'est pas défini");
+                            console.error("❌ Échec de la suppression du match");
+                            deleteButton.background = UIData.button.hoveredBackground;
+                            deleteButton.isEnabled = true;
+                            setTimeout(() => {
+                                deleteButton.background = UIData.button.background;
+                            }, 2000);
                         }
-                    } else {
-                        console.error("❌ Échec de la suppression du match");
-                        deleteButton.background = "darkred";
-                        deleteButton.isEnabled = true;
-                        setTimeout(() => {
-                            deleteButton.background = "red";
-                        }, 2000);
-                    }
-                });
-
-                deleteButton.onPointerEnterObservable.add(() => {
-                    deleteButton.background = "darkred";
-                });
-
-                deleteButton.onPointerOutObservable.add(() => {
-                    deleteButton.background = "red";
-                });
+                    });
+    
+                    deleteButton.onPointerEnterObservable.add(() => {
+                        deleteButton.background = UIData.button.hoveredBackground;
+                    });
+    
+                    deleteButton.onPointerOutObservable.add(() => {
+                        deleteButton.background = UIData.button.background;
+                    });
+                }
             });
         } catch (error) {
             console.error("❌ Erreur lors du chargement des matchs:", error);
@@ -577,11 +574,11 @@ function tournament(
 
     const grid = new Grid();
     grid.width = "100%";
-    grid.height = "60%";
+    grid.height = "70%";
     grid.addColumnDefinition(1);
-    grid.addRowDefinition(0.7);
-    grid.addRowDefinition(0.1);
-    grid.addRowDefinition(0.2);
+    grid.addRowDefinition(0.6);
+    grid.addRowDefinition(0.025);
+    grid.addRowDefinition(0.275);
     env.menuContainer!.addControl(grid);
     const settings : DataMatchBlock = {
         data: env.userX.getTournament!.getRules,
@@ -649,11 +646,9 @@ export function menuCreate(
     });
 
     button1.onPointerUpObservable.add(async () => {
-        // Utiliser le login de l'utilisateur connecté comme alias
-        const userLogin = env.userX.getUser!.username || "Player";
         // Nettoyer un éventuel tournoi brouillon déjà créé côté serveur
         await env.userX.deleteTournament();
-        await env.userX.createTournament(userLogin);
+        await env.userX.createTournament(env.userX.getUser!.username);
         tournament(env);
     });
 

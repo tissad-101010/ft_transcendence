@@ -14,7 +14,7 @@ import { genInvitationPage } from './genInvitationPage.ts';
 import { ScoreboardHandler } from '../ScoreboardHandler.ts';
 import { genJoinMatch } from './menuCreate.ts';
 
-import { Env } from './menuCreate.ts';
+import { Env } from '../utils.ts';
 
 function swapPage(
     label: string,
@@ -37,7 +37,9 @@ export function createButton(
     grid: Grid    
 ) : void
 {
-    const value = env.tournament.checkReady();
+    const value = env.userX.getTournament?.checkReady();
+    if (value === undefined)
+        return ;
     if (value !== 0)
     {
         if (env.errorMsg !== null)
@@ -50,8 +52,8 @@ export function createButton(
         env.errorMsg.color = "red";
         env.errorMsg.width = "100%";
         env.errorMsg.height = "40px";
-        env.errorMsg.fontSize = env.UIData.text.fontSize;
-        env.errorMsg.fontFamily = env.UIData.text.fontFamily;
+        env.errorMsg.fontSize = UIData.text.fontSize;
+        env.errorMsg.fontFamily = UIData.text.fontFamily;
         grid.addControl(env.errorMsg, 1, 0);
         switch(value)
         {
@@ -79,11 +81,11 @@ export function createButton(
     }
     else
     {
-        env.tournament.start().then(() => {
-            env.control.selectMenu(env.meshScoreboard);
+        env.userX.getTournament!.start().then(() => {
+            env.scoreboard.selectMenu(env.meshScoreboard);
         }).catch((error) => {
             console.error("Erreur lors du démarrage du tournoi:", error);
-            env.control.selectMenu(env.meshScoreboard);
+            env.scoreboard.selectMenu(env.meshScoreboard);
         });
     }
 }
@@ -97,7 +99,7 @@ export function invitationButton(
 {
     if (swapPage(label, env, settings) === true)
     {
-        env.page = genInvitationPage(env.UIData, env.userX);
+        env.page = genInvitationPage(env.userX);
         grid.addControl(env.page, 0, 0);
     }
     else
@@ -107,10 +109,11 @@ export function invitationButton(
 export function joinButton(
     label: string,
     env: Env,
+    settings: DataMatchBlock,
     grid: Grid
 ) : void
 {
-    if (swapPage(label, env, grid) === true)
+    if (swapPage(label, env, settings) === true)
     {
         env.page = genJoinMatch(env);
         grid.addControl(env.page, 0, 0);
@@ -126,7 +129,7 @@ export function newButton(
     grid: Grid
 ) : void
 {
-    if (swapPage(label, env, grid) === true)
+    if (swapPage(label, env, settings) === true)
     {
         env.page = genRulesMatchBlock(settings, true);
         grid.addControl(env.page, 0, 0);

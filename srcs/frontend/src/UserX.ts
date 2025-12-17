@@ -62,7 +62,6 @@ export class UserX
     {
         this.sceneManager = sceneManager;
         this.friendManager = new FriendManager(this);
-        console.log("UserX initialisé, en attente de l'utilisateur depuis le contexte React");
     }
 
 
