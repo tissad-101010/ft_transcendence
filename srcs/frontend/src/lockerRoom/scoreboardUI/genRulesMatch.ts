@@ -4,11 +4,8 @@ import
   Rectangle,
   TextBlock,
   InputText,
-  Control,
-  Button
+  Control
 } from "@babylonjs/gui";
-
-import { IKeyboardEvent } from "@babylonjs/core";
 
 import { UIData } from "../utils.ts";
 
@@ -164,7 +161,7 @@ function genRowScore(env: DataMatchBlock) : StackPanel
     score.color = env.graph.inputText.color;
     score.focusedBackground = env.graph.inputText.focusedBackground;
     score.thickness = env.graph.inputText.thickness;
-    if (env.data.score != "")
+    if (env.data.score !== "")
         score.text = env.data.score;
     row.addControl(score);
 

@@ -6,14 +6,12 @@
 /*   By: glions <glions@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/18 19:09:22 by tissad            #+#    #+#             */
-/*   Updated: 2025/12/18 08:43:21 by glions           ###   ########.fr       */
+/*   Updated: 2025/12/18 11:16:57 by glions           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 import { getApiUrl } from '../../utils';
 import { authFetch } from '../authFetch';
-
-const API_URL = window.__ENV__.BACKEND_URL;
 
 export async function registerUser(
   username: string,

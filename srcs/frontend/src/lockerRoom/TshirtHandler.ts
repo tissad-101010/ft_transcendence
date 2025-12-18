@@ -10,29 +10,10 @@ import {
     PBRMaterial
 } from '@babylonjs/core';
 
-import { 
-    AdvancedDynamicTexture,
-    ScrollViewer,
-    StackPanel,
-    TextBlock,
-    Control,
-    Rectangle,
-    Grid,
-    Ellipse,
-    Button,
-    InputTextArea,
-    Line
-} from "@babylonjs/gui";
-
-
 import { SceneInteractor } from '../scene/SceneInteractor.ts';
 import { SceneManager } from '../scene/SceneManager.ts';
 import { getCurrentGroup, getTotalGroups, setCurrentGroup } from '../utils.ts';
-import { TournamentParticipant } from '../Tournament/Match/Tournament.ts';
 import { navigateToZone } from '../CameraHistory.ts';
-
-
-
 
 export class TshirtHandler {
     /**************************************************
@@ -166,20 +147,11 @@ export class TshirtHandler {
      */
     // Clic sur un t-shirt
     if (pickedMesh.name.includes(ZoneName.TSHIRT)) {
-        console.log("----------------->0")
         this.updateButtons(tshirtMeshes);
 
-        const nb = parseInt(pickedMesh.name[pickedMesh.name.length - 1]);
-        const index = (getCurrentGroup(ZoneName.TSHIRT) * 10) + nb;
         this.sceneInteractor.disableInteractions();
-        if (this.clicTshirt)
+        if (!this.clicTshirt)
         {
-            console.log("-------------------------_>1")
-            this.sceneInteractor.enableInteractions();
-        }
-        else
-        {
-            console.log("-----------------------------_>2")
             navigateToZone(this.sceneManager, ZoneName.TSHIRT, () => {
                 this.clicTshirt = true;
                 this.turnOnExit(tshirtMeshes[12]);

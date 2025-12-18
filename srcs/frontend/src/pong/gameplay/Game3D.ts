@@ -42,7 +42,7 @@ interface IBall
     logic: BallLogic,
     mesh: Mesh | null,
     size: Vector3 | null
-    light: PointLight
+    light: PointLight | null
 };
 
 interface IGame
@@ -62,9 +62,9 @@ export default class Game3D
     private advancedTLeft: AdvancedDynamicTexture | null;
     private advancedTRight: AdvancedDynamicTexture | null;
     private advancedTTime: AdvancedDynamicTexture | null;
-    private score1: TextBlock;
-    private score2: TextBlock;
-    private time: TextBlock;
+    private score1: TextBlock | null = null;
+    private score2: TextBlock | null = null;
+    private time: TextBlock | null = null;
     private highlights: HighlightLayer[];
     constructor(sceneManager: SceneManager)
     {
@@ -100,7 +100,7 @@ export default class Game3D
             if (logic.getTeam === 1)
             {
                 box.position = new Vector3(
-                    (0 - this.game.size.x / 2) + (this.game.size.x / 10),
+                    (0 - this.game.size!.x / 2) + (this.game.size!.x / 10),
                     0,
                     0
                 );
@@ -109,7 +109,7 @@ export default class Game3D
             else
             {
                 box.position = new Vector3(
-                    (this.game.size.x / 2) - (this.game.size.x / 10),
+                    (this.game.size!.x / 2) - (this.game.size!.x / 10),
                     0,
                     0
                 );
@@ -128,8 +128,8 @@ export default class Game3D
             mesh: box,
             size: this.getSizeMesh(box)
         });
-        logic.setWidth = this.players[index].size.x;
-        logic.setHeight = this.players[index].size.z;
+        logic.setWidth = this.players[index].size!.x;
+        logic.setHeight = this.players[index].size!.z;
         logic.setPosX = box.position.x;
         logic.setPosY = box.position.y;
         if (!this.game.logic.getField)
@@ -143,7 +143,7 @@ export default class Game3D
         console.log(this.scene);
         this.game = {
             logic: logic,
-            mesh: this.scene.getMeshByName("field"),
+            mesh: this.scene.getMeshByName("field") as Mesh,
             size: null
         };
         if (!this.game.mesh)
@@ -173,19 +173,19 @@ export default class Game3D
         }
         this.ball = {
             logic: logic,
-            mesh: mesh,
+            mesh: mesh as Mesh,
             size: null,
             light: null
         };
-        this.ball.mesh.parent = this.game.mesh;
-        this.ball.size = this.getSizeMesh(this.ball.mesh);
+        this.ball.mesh!.parent = this.game.mesh;
+        this.ball.size = this.getSizeMesh(this.ball.mesh!);
         if (!this.ball.size)
         {
             console.error("Error : size pas recuperee dans initBall");
             return (false);
         }
 
-        this.ball.mesh.position = new Vector3(0, this.ball.size.z, 0);
+        this.ball.mesh!.position = new Vector3(0, this.ball.size.z, 0);
         
         // Matériau simple
         // const mat = new StandardMaterial("ballMat", this.scene);
@@ -228,13 +228,13 @@ export default class Game3D
         this.advancedTTime.addControl(panel);
 
         const h = new HighlightLayer("hTime", this.scene);
-        h.addMesh(this.sceneManager.getMesh("scoreBoard")[0], new Color3(1, 1, 1));
+        h.addMesh(this.sceneManager.getMesh("scoreBoard")[0] as Mesh, new Color3(1, 1, 1));
         h.blurHorizontalSize = 1;
         h.blurVerticalSize = 1;
         this.highlights.push(h);
 
         this.time = new TextBlock();
-        this.time.text = this.game?.logic.getTime;
+        this.time.text = this.game!.logic.getTime.toString();
         this.time.fontSize = 500;
         this.time.color = "black";
         this.time.height = "100%";
@@ -257,13 +257,13 @@ export default class Game3D
         const panelLeft = new Rectangle();
         panelLeft.width = "100%";
         panelLeft.height = "800px";
-        panelLeft.background = "rgba(233, 165, 191, 1)";
+        panelLeft.background = "#caaba8";
         panelLeft.horizontalAlignment = Control.HORIZONTAL_ALIGNMENT_CENTER;
         panelLeft.verticalAlignment = Control.VERTICAL_ALIGNMENT_CENTER;
         this.advancedTLeft.addControl(panelLeft);
 
         const hLeft = new HighlightLayer("hLeft", this.scene);
-        hLeft.addMesh(this.sceneManager.getMesh("scoreBoard")[1], new Color3(1, 1, 1));
+        hLeft.addMesh(this.sceneManager.getMesh("scoreBoard")[1] as Mesh, new Color3(1, 1, 1));
         hLeft.blurHorizontalSize = 1;
         hLeft.blurVerticalSize = 1;
         this.highlights.push(hLeft);
@@ -272,7 +272,7 @@ export default class Game3D
         this.score1 = new TextBlock();
         this.score1.text = this.game?.logic.getScore1.toString() ?? "0";
         this.score1.fontSize = 750;
-        this.score1.color = "rgba(91, 113, 201, 1)";
+        this.score1.color = "white";
         this.score1.width = "100%";
         this.score1.height = "100%";
         // this.score1.fontFamily = "Jersey 15";
@@ -291,13 +291,13 @@ export default class Game3D
         const panelRight = new Rectangle();
         panelRight.width = "100%";
         panelRight.height = "800px";
-        panelRight.background = "rgba(233, 165, 191, 1)";
+        panelRight.background = "#caaba8";
         panelRight.horizontalAlignment = Control.HORIZONTAL_ALIGNMENT_CENTER;
         panelRight.verticalAlignment = Control.VERTICAL_ALIGNMENT_CENTER;
         this.advancedTRight.addControl(panelRight);
 
         const hRight = new HighlightLayer("hRight", this.scene);
-        hRight.addMesh(this.sceneManager.getMesh("scoreBoard")[2], new Color3(1, 1, 1));
+        hRight.addMesh(this.sceneManager.getMesh("scoreBoard")[2] as Mesh, new Color3(1, 1, 1));
         hRight.blurHorizontalSize = 1;
         hRight.blurVerticalSize = 1;
         this.highlights.push(hRight);
@@ -326,9 +326,9 @@ export default class Game3D
             newScore.text = this.game?.logic.getScore2.toString() ?? "0";
         newScore.fontSize = 750;
         if (this.game?.logic.getScored === 1)
-            newScore.color = "rgba(64, 90, 195, 1)";
+            newScore.color = "white";
         else
-            newScore.color = "rgba(202, 86, 196, 1)";
+            newScore.color = "white";
         newScore.width = "100%";
         newScore.height = "100%";
         // newScore.fontFamily = "Jersey 15";
@@ -383,14 +383,14 @@ export default class Game3D
 
     updateTimeBefore()
     {
-        if (this.game?.logic.getTime == parseInt(this.time.text, 10))
+        if (this.game?.logic.getTime === parseInt(this.time!.text, 10))
             return;
 
         const oldTime = this.time;
 
         // Nouveau texte
         const newTime = new TextBlock();
-        newTime.text = this.game?.logic.getTime;
+        newTime.text = this.game!.logic.getTime.toString();
         newTime.color = "black";
         newTime.width = "100%";
         newTime.height = "100%";
@@ -399,7 +399,7 @@ export default class Game3D
         newTime.textVerticalAlignment = Control.VERTICAL_ALIGNMENT_CENTER;
         newTime.alpha = 0; // invisible au départ
         newTime.top = 50;
-        this.time.parent.addControl(newTime);
+        this.time!.parent!.addControl(newTime);
 
         // Animation de disparition de l'ancien (fade out + petit shrink)
         const animFadeOut = new Animation("fadeOut", "alpha", 60, Animation.ANIMATIONTYPE_FLOAT, Animation.ANIMATIONLOOPMODE_CONSTANT);
@@ -414,9 +414,9 @@ export default class Game3D
             { frame: 15, value: 100 } // léger rétrécissement
         ]);
 
-        oldTime.animations = [animFadeOut, animShrink];
+        oldTime!.animations = [animFadeOut, animShrink];
         this.scene.beginAnimation(oldTime, 0, 15, false, 1, () => {
-            oldTime.dispose();
+            oldTime!.dispose();
         });
 
         // Animation d’apparition du nouveau (fade in + petit grow)
@@ -439,7 +439,7 @@ export default class Game3D
     }
 
     // RETOURNE UN VECTOR3 QUI CONTIENT LA TAILLE DE L'ELEMENT DONNE EN PARAMETRE
-    getSizeMesh(mesh: Mesh | TransformNode) : Vector3
+    getSizeMesh(mesh: Mesh | TransformNode) : Vector3 | null
     {
         if (mesh instanceof Mesh)
         {
@@ -454,8 +454,6 @@ export default class Game3D
         }
         return (null);
     }
-
-    
 
     // MET A JOUR LA POSITION DU PLAYER
     updatePlayer(player: IPlayer)
@@ -573,29 +571,10 @@ export default class Game3D
     }
 
     showWinnerUI(winnerName: string, shouldReturnToMainMenu: boolean = false, mode: number) {
-        const ui = AdvancedDynamicTexture.CreateFullscreenUI("WinnerUI", true, this.scene);
-
-        const panel = new StackPanel();
-        panel.verticalAlignment = Control.VERTICAL_ALIGNMENT_CENTER;
-        panel.width = "400px";
-        panel.height = "400px";
-        panel.spacing = 10;
-        ui.addControl(panel);
-
-        const text = new TextBlock();
-        text.text = `🏆 ${winnerName} a gagné ! 🏆`;
-        text.color = "white";
-        text.fontSize = 48;
-        text.fontWeight = "bold";
-        text.outlineColor = "black";
-        text.outlineWidth = 4;
-        panel.addControl(text);
-
-        const returnDelay = shouldReturnToMainMenu ? 4000 : 3000;
+        const returnDelay = shouldReturnToMainMenu ? 5000 : 5000;
         setTimeout(() => {
             if (this.sceneManager.getSceneInteractor)
             {
-                ui.dispose();
                 this.highlights.forEach((h) => h.dispose());
                 this.advancedTLeft?.dispose();
                 this.advancedTRight?.dispose();
@@ -605,10 +584,8 @@ export default class Game3D
                 // Nettoyer les interfaces de tournoi/match amical si nécessaire
                 if (shouldReturnToMainMenu && this.sceneManager.getUserX) {
                     // Nettoyer le tournoi et le match pour éviter les interfaces restantes
-                    if (mode === 0)
-                        this.sceneManager.getUserX.deleteTournament();
-                    else if (mode === 1)
-                        this.sceneManager.getUserX!.setMatch = null;
+                    this.sceneManager.getUserX.deleteTournament();
+                    this.sceneManager.getUserX!.setMatch = null;
                 }
                 
                 // Rediriger vers le menu principal si tournoi terminé ou match amical
@@ -631,7 +608,6 @@ export default class Game3D
     update(keys: Set<string>) : void
     {
         // Update logic
-        let goal = {b: false};
         this.game?.logic.update(keys);
         if (this.game?.logic.getState === 3)
             this.showWinner();

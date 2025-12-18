@@ -1,5 +1,9 @@
-import { AbstractMesh, Vector3, Matrix } from "@babylonjs/core";
-import { AdvancedDynamicTexture, ScrollViewer, StackPanel, TextBlock, Control, Rectangle, InputText, Button } from "@babylonjs/gui";
+import { AbstractMesh} from "@babylonjs/core";
+import { 
+    AdvancedDynamicTexture,
+    StackPanel,
+    Control
+} from "@babylonjs/gui";
 
 import {
   Chart,
@@ -16,9 +20,6 @@ import {
 
 import { Friend } from "../friends/Friend.ts";
 import { SceneManager } from "../scene/SceneManager.ts";
-
-// import { IMatch } from "../Friend.ts";
-import { StandsInteraction } from "./StandsInteraction.ts";
 
 import { InvitationUI } from "./InvitationUI.ts";
 import { DataFriendUI } from "./DataFriendUI.ts";

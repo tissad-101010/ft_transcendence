@@ -1,15 +1,12 @@
 import { 
-Vector3, 
-Scene, 
-PBRMaterial, 
-DynamicTexture, 
-Color3, 
-AbstractMesh 
+    Vector3, 
+    Scene, 
+    PBRMaterial, 
+    DynamicTexture, 
+    Color3, 
+    AbstractMesh 
 } from '@babylonjs/core';
 
-import {
-Container,
-} from "@babylonjs/gui";
 
 
 import { ZoneName } from './config.ts';
@@ -22,14 +19,7 @@ export const WS_URL = window.__ENV__.WS_URL;
 export function getApiUrl()
 {
     const host = window.location.hostname;
-    const protocol = "https:";
-    let port: string;
-    
-    if (window.location.protocol === 'https:')
-        port = window.location.port || '80';
-    else 
-        port = '8443';
-    return (`${protocol}//${host}:${port}`);
+    return (`https://${host}:8443`);
 }
 
 /***********************

@@ -1,6 +1,4 @@
-import { AbstractMesh, Scene} from '@babylonjs/core';
 import { 
-  AdvancedDynamicTexture, 
   StackPanel, 
   Rectangle, 
   Button,

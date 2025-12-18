@@ -3,8 +3,6 @@ import { loginUser, fetchUserProfile } from "../controllers/auth.api";
 import { providerOAuth } from "../controllers/oauth.api";
 import { useAuth } from "../context";
 
-
-
 interface SignInProps {
   onSwitch: () => void;
 }
@@ -114,9 +112,14 @@ const SignIn: React.FC<SignInProps> = ({ onSwitch }) => {
 
       <p>
         New to Moonset?{" "}
-        <a href="#" onClick={onSwitch}>
+        <button
+          type="button"
+          onClick={onSwitch}
+          className="link-button"
+        >
           Create an account
-        </a>
+        </button>
+
       </p>
     </div>
   );

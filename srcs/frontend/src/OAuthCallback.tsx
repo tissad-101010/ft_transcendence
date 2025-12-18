@@ -3,8 +3,6 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "./auth/context.tsx";
 import { getApiUrl } from "./utils.ts";
 
-const API_URL = window.__ENV__.BACKEND_URL;
-
 export default function OAuthCallback() {
   const navigate = useNavigate();
   const { setPending2FA, login } = useAuth();

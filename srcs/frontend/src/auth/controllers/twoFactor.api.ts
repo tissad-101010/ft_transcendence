@@ -6,23 +6,14 @@
 /*   By: glions <glions@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/22 12:58:29 by issad             #+#    #+#             */
-/*   Updated: 2025/12/18 09:20:59 by glions           ###   ########.fr       */
+/*   Updated: 2025/12/18 11:17:09 by glions           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
-
-
-
-
-
 
 import { getApiUrl } from '../../utils';
 import { authFetch } from '../authFetch';
 import { fetchUserProfile } from './auth.api';
 // src/auth/controllers/twoFactor.api.ts
-
-
-const API_URL = window.__ENV__.BACKEND_URL;
-const BASE_URL = `${API_URL}/api/user/2fa`;
 
 /**
  * Send OTP to enable 2FA via email

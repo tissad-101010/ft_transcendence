@@ -51,7 +51,7 @@ export class Match
         this.id = id;
         this.mode = m;
         this.rules = r;
-        if (this.mode = "tournament")
+        if (this.mode === "tournament")
         {
             this.matchInfo = {
                 round: undefined,

@@ -12,11 +12,6 @@ import { Tournament } from '../../pong/Tournament.ts';
 import { Match, MatchParticipant } from "../../pong/Match.ts";
 import { ZoneName } from "../../config.ts";
 
-interface Interval
-{
-    id: number
-}
-
 interface DataUtils
 {
     panelRound: StackPanel | null,

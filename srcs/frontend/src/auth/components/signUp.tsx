@@ -64,9 +64,13 @@ const SignUp: React.FC<SignUpProps> = ({ onSwitch }) => {
 
       <p>
         Already have an account?{" "}
-        <a href="#" onClick={onSwitch}>
+        <button
+          type="button"
+          onClick={onSwitch}
+          className="link-button"
+        >
           Sign in
-        </a>
+        </button>
       </p>
 
       {/* <div className="authPage-logos">

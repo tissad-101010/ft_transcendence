@@ -49,7 +49,7 @@ const BabylonScene = () => {
     if (managerRef.current) {
       managerRef.current.setUser = user;
     }
-  }, [user, managerReady, isLoading]);
+  }, [user, isAuthenticated, pending2FA, managerReady, isLoading]);
 
 // Gestion back/forward navigateur
 useEffect(() => {

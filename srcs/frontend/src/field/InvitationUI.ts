@@ -83,7 +83,6 @@ export class InvitationUI
         inputText.thickness = 0;
         containerInput.addControl(inputText);
 
-        let msgInfo : TextBlock | null = null;
         let login : string = "";
 
         // INPUTTEXT EVENT

@@ -1,6 +1,5 @@
 
-import { MatchParticipant, MatchRules } from "../Match.ts";
-import { SceneManager } from "../../scene/SceneManager.ts";
+import { MatchParticipant } from "../Match.ts";
 import { MatchBase, MatchStatus } from "./MatchBase.ts";
 
 import Game3D from "../gameplay/Game3D.ts";
@@ -33,15 +32,10 @@ export class MatchFriendlyOnline extends MatchBase
     private myGamePlayerId: number | null = null;  // 1 or 2 - position dans le jeu (gauche/droite)
     private lastScoreSnapshot = { score1: 0, score2: 0 };
 
-    constructor(id : number, rules : MatchRules, sceneManager: SceneManager)
-    {
-        super(id, rules, sceneManager);
-    }
-
     init(players: MatchParticipant[], isOnline: boolean = false): boolean
     {
         console.log("🎮 MatchFriendlyOnline.init() appelé avec:", { players, isOnline, currentUser: this.currentUser });
-        if (players.length != 2)
+        if (players.length !== 2)
             return (false);
         this.participants = players;
         this.isOnline = isOnline;

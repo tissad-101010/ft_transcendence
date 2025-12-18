@@ -1,5 +1,3 @@
-import { AbstractMesh} from '@babylonjs/core';
-
 import 
 {
   TextBlock,
