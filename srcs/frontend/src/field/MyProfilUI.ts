@@ -54,6 +54,7 @@ import { SceneManager } from "../scene/SceneManager.ts";
 import { UserX } from "../UserX.ts";
 import { listMatch } from "../friends/api/friends.api";
 import { getApiUrl } from "../utils.ts";
+import { authFetch } from "../auth/authFetch.ts";
 
 Chart.register(
     LineController,
@@ -544,7 +545,7 @@ export class MyProfilUI
                     const formData = new FormData();
                     formData.append("avatar", file);  // OBLIGATOIRE : "avatar"
     
-                    const res = await fetch(`${getApiUrl()}/api/user/upload-avatar`, {
+                    const res = await authFetch(`${getApiUrl()}/api/user/upload-avatar`, {
                         method: "POST",
                         body: formData,
                         credentials: "include"

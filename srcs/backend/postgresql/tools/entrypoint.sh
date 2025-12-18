@@ -15,9 +15,62 @@ set -e
 #******************************************************************************#
 
 # Define the data directory
-DATA_DIR="/var/lib/postgresql/data"
+DATA_DIR="/var/lib/postgresql/data/postgresql/data"
 # Define the configuration directory
 CONF_DIR="/etc/postgresql"
+chown -R postgres:postgres "$DATA_DIR"
+chmod 750 "$DATA_DIR"
+
+VAULT_ADDR=https://hashicorp_vault:8200
+VAULT_PATH="secret/postgresql"
+
+echo "⏳ Waiting for Vault to be unsealed..."
+
+while true; do
+  STATUS=$(curl -k https://hashicorp_vault:8200/v1/sys/health | sed -n 's/.*"sealed":\([a-z]*\).*/\1/p')
+  echo "Vault sealed status: $STATUS"
+  if [ "$STATUS" = "false" ]; then
+    echo "✅ Vault is unsealed!"
+    break
+  fi
+
+  echo "🔒 Vault still sealed... retrying"
+  sleep 2
+done
+
+echo "🚀 Starting Vault Agent to fetch PostgreSQL secrets..."
+
+
+
+
+vault agent -config=/tmp/vault_agent.hcl &
+VAULT_PID=$!
+# kill "$VAULT_PID" if signal SIGTERM or SIGINT is received
+trap kill $VAULT_PID SIGTERM SIGINT
+sleep 2
+
+echo "🚀 Loading secrets from Vault path: $VAULT_PATH"
+# attendre que Vault Agent écrive les secrets
+while [ ! -f /var/lib/postgresql/data/postgresql/vault_agent/secrets.env ]; do
+  echo "⏳ Waiting for Vault Agent..."
+  sleep 1
+  kill $VAULT_PID 2>/dev/null  && {
+    echo "❌ Vault Agent has exited unexpectedly."
+  }
+  sleep 1
+  vault agent -config=/tmp/vault_agent.hcl &
+  VAULT_PID=$!
+done
+
+set -a
+. /var/lib/postgresql/data/postgresql/vault_agent/secrets.env 
+set +a
+
+echo "✅ Vault Agent has fetched the secrets."
+echo "======================================================++>$GLOBAL_DB_ADMIN_PASSWORD"
+# exec tail -f /dev/null 
+
+
 
 # Create the data directory if it does not exist
 if [ ! -d "$DATA_DIR" ]; then
@@ -25,7 +78,7 @@ if [ ! -d "$DATA_DIR" ]; then
   mkdir -p "$DATA_DIR"
 fi
 chown -R postgres:postgres "$DATA_DIR"
-chmod 700 "$DATA_DIR"
+chmod 750 "$DATA_DIR"
 
 
 # Create the configuration directory if it does not exist
@@ -220,7 +273,7 @@ echo "▶️   Starting PostgreSQL temporarily."
 su-exec postgres postgres -D "$DATA_DIR"   &
 PG_PID=$!
 
-# 
+# /var/lib/postgresql/data
 until su-exec postgres pg_isready -q   ; do 
   echo "⏳  Waiting for PostgreSQL to be ready..."
   sleep 1  
@@ -243,39 +296,12 @@ wait "$PG_PID"
 
 chmod 750 "$DATA_DIR"
 
-
+set -a
+. /var/lib/postgresql/data/postgresql/vault_agent/secrets.env
+set +a
 # Create the init.sql script that will be executed on the first run
 echo "🚀 Starting PostgreSQL server..."
-exec su-exec postgres postgres -D "$DATA_DIR"  
+exec su-exec postgres postgres -D "$DATA_DIR"
 # exec tail -f /dev/null
 
 #*****************************************************************************#
-
-
-# -- 6. Create a sample table
-# CREATE TABLE IF NOT EXISTS $DB_SAMPLE_NAME ( 
-#     id SERIAL PRIMARY KEY,
-#     username VARCHAR(50) UNIQUE,
-#     email VARCHAR(100) UNIQUE,
-#     password VARCHAR(255),
-#     provider VARCHAR(50) DEFAULT 'local',
-#     github_id VARCHAR(50),
-#     google_id VARCHAR(50),
-#     oauth42_id VARCHAR(50),
-#     name VARCHAR(100),
-#     first_name VARCHAR(50),
-#     last_name VARCHAR(50),
-#     avatar_url TEXT,
-#     email_2fa BOOLEAN DEFAULT FALSE,
-#     autenticator_2fa BOOLEAN DEFAULT FALSE,
-#     phone_2fa BOOLEAN DEFAULT FALSE,
-#     email_verified BOOLEAN DEFAULT FALSE,
-#     phone_verified BOOLEAN DEFAULT FALSE,
-#     vault_token VARCHAR(255),
-#     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-#     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-# );
-
-# -- 8. Grant privileges to $DB_USER
-# GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE $DB_SAMPLE_NAME TO $DB_USER;
-# GRANT USAGE, SELECT, UPDATE ON SEQUENCE ${DB_SAMPLE_NAME}_id_seq TO $DB_USER;

@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "ts-node-dev --respawn --clear --transpile-only srcs/api.ts",
     "build": "tsc",
-    "start": "node dist/srcs/api.js",
+    "start": "node dist/api.js",
     "prisma:generate": "prisma generate --schema=./srcs/prisma/prisma/schema.prisma",
     "prisma:migrate": "prisma migrate dev --schema=./srcs/prisma/prisma/schema.prisma --name initUserTable",
     "prisma:deploy": "prisma db push --schema=./srcs/prisma/prisma/schema.prisma",
@@ -35,6 +35,7 @@
     "fs": "^0.0.1-security",
     "multipart": "^0.1.5",
     "node-fetch": "^3.3.2",
+    "node-vault": "^0.10.9",
     "path": "^0.12.7",
     "pg": "^8.16.3",
     "pump": "^3.0.3",

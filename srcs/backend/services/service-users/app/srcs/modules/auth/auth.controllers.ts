@@ -295,7 +295,7 @@ export async function uploadAvatarController(
         console.error("[Upload Avatar Controller] ERROR:", error);
 
         return reply.code(500).send({
-            message: "Internal server error during avatar upload",
+            message: error instanceof Error ? error.message : 'Internal server error during avatar upload',
             uploadComplete: false,
         });
     }

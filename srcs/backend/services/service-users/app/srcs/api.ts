@@ -32,22 +32,31 @@ import { internalSelectUserRoutes } from './internal-services-routes/internal-ro
 import { infoFriendRoute } from './modules/users/users.routes';
  
 // import plugins
+import vaultPlugin from  './plugins/vault.plugin';
 import redisPlugin from './plugins/redis.plugin';
 import { prismaPlugin } from './plugins/prisma.plugin';
 import requestLoggerPlugin from "./plugins/requestLogger.plugin";
-
 /* ************************************************************************** */
+
+
+
 // register the Fastify framework
+
+
+
 const app = Fastify({ logger: true });
 
-// Register cookie plugin
+// // Register cookie plugin
 app.register(fastifyCookie, {
   secret: process.env.COOKIE_SECRET || 'supersecret', // optionnel (pour signer les cookies)
 });
 
+
+
 // Register plugins (database, redis, etc.)
-app.register(redisPlugin);
+// app.register(vaultPlugin);
 app.register(prismaPlugin);
+app.register(redisPlugin);
 app.register(requestLoggerPlugin);
 
 app.register(fastifyMultipart, {
@@ -64,7 +73,11 @@ app.register(fastifyStatic, {
   prefix: '/uploads/',
 });
 
+console.log("===============================================", process.env);
 
+
+
+// console.log('🚀 Loading secrets from Vault...', process.env.TOTO);
 // Register routes
 app.register(authRoutes, { prefix: '/user/auth' });
 app.register(oauthRoutes, { prefix: '/user/oauth' });

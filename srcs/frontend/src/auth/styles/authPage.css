@@ -134,14 +134,14 @@
   margin-top: 20px;
   border-radius: 8px;
   border: none;
-  background-color: #f77cb9;
+  background-color: #3f8b95;
   color: white;
   cursor: pointer;
   font-size: 16px;
 }
 
 .guest-button:hover {
-  background-color: rgb(250, 158, 219);
+  background-color: #3f8b95;
 }
 
 a {

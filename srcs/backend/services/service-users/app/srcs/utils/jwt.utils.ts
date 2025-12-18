@@ -41,7 +41,7 @@ export class JwtUtils {
             payload,
             process.env.ACCESS_TOKEN_SECRET!,
             // process.env.ACCESS_TOKEN_EXPIRATION! ||
-            '1min' // for testing purpose
+            process.env.ACCESS_TOKEN_EXPIRATION! || '60m' // for testing purpose
         );
     }
 

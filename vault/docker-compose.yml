@@ -1,0 +1,38 @@
+services:
+  #********************************************************************************#
+  #                               HASHICORP VAULT                                  #
+  #********************************************************************************#
+  # HashiCorp Vault service for managing secrets and sensitive data
+  hashicorp_vault:
+    image: hashicorp_vault
+    build:
+      context: ./src
+      dockerfile: Dockerfile
+    container_name: hashicorp_vault
+    volumes:
+      - LocalVaultData:/vault/data
+      - ./src/config/vault.hcl:/vault/config/vault.hcl:ro
+      - ./src/certs/vault.crt:/vault/certs/vault.crt:ro
+      - ./src/certs/vault.key:/vault/certs/vault.key:ro
+    cap_add:
+      - IPC_LOCK
+    ports:
+      - "8200:8200"
+      - "8201:8201"
+    networks:
+      - shared-network
+    restart: unless-stopped
+
+volumes:
+  # Local volume for HashiCorp Vault data
+  # This volume is used to persist Vault data across container restarts
+  LocalVaultData:
+    driver: local
+    driver_opts:
+      type: none
+      device: ~/data/vault
+      o: bind
+
+networks:
+  shared-network:
+    driver: bridge

@@ -18,7 +18,7 @@ const storage = new Storage({
 
 const bucket = storage.bucket("pong-avatars");
 
-export async function uploadAvatar(buffer: Buffer, dest: string, mimetype: string) {
+export async function uploadAvatar(buffer: any, dest: string, mimetype: string) {
   const file = bucket.file(dest);
 
 //   await file.save(buffer, {
