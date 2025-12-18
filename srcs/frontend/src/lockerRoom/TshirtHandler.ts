@@ -166,7 +166,6 @@ export class TshirtHandler {
      */
     // Clic sur un t-shirt
     if (pickedMesh.name.includes(ZoneName.TSHIRT)) {
-        console.log("----------------->0")
         this.updateButtons(tshirtMeshes);
 
         const nb = parseInt(pickedMesh.name[pickedMesh.name.length - 1]);
@@ -174,12 +173,10 @@ export class TshirtHandler {
         this.sceneInteractor.disableInteractions();
         if (this.clicTshirt)
         {
-            console.log("-------------------------_>1")
             this.sceneInteractor.enableInteractions();
         }
         else
         {
-            console.log("-----------------------------_>2")
             navigateToZone(this.sceneManager, ZoneName.TSHIRT, () => {
                 this.clicTshirt = true;
                 this.turnOnExit(tshirtMeshes[12]);

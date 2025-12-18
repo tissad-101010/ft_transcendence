@@ -93,8 +93,6 @@ export class LockerInteraction implements SpecificInteraction {
     }
 
     public dispose(): void {
-        // console.log("LockerInteraction: nettoyage en cours...");
-
         // // this.sceneInteractor.getHighlightLayer().removeAllMeshes();
 
         // const tvMeshes = this.sceneManager.getLoadedMeshes["tv"];
@@ -110,7 +108,5 @@ export class LockerInteraction implements SpecificInteraction {
         // if (this.tshirtHandler) (this.tshirtHandler as any).clicTshirt = false;
 
         // this.sceneInteractor.enableInteractions();
-
-        // console.log("LockerInteraction: nettoyage terminé.");
     } 
 }

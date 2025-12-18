@@ -161,7 +161,6 @@ export class LightInteractor {
     }
 
     public turnOffLights(){
-        console.log("Lumieres eteintes");
         this.lights.forEach(light => {
             light.dispose();
         });

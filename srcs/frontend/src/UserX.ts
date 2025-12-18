@@ -206,11 +206,6 @@ export class UserX
             console.error("Impossible de créer un match amical: utilisateur non défini dans UserX");
             return (false);
         }
-        
-        console.log("Création d'un match amical avec l'utilisateur:", this.user);
-        console.log("Règles du match:", r);
-        console.log("Mode:", isOnline ? "En ligne" : "Local");
-        
         // Créer le match dans la base de données
         const backendUser = userToBackendFormat(this.user);
         try {
@@ -222,8 +217,6 @@ export class UserX
                 player1_login: backendUser.login, // Envoyer le login pour synchronisation avec le système d'auth
                 isOnline: isOnline,
             };
-            console.log("Envoi de la requête POST /api/friendly/create avec:", requestBody);
-            
             const response = await fetch(`${getApiUrl()}/api/friendly/create`, {
                 method: "POST",
                 headers: {
@@ -233,9 +226,6 @@ export class UserX
                 credentials: "include",
                 body: JSON.stringify(requestBody),
             });
-
-            console.log("Réponse reçue:", response.status, response.statusText);
-            
             if (!response.ok) {
                 const errorText = await response.text();
                 let errorData;
@@ -249,10 +239,6 @@ export class UserX
             }
 
             const data = await response.json();
-            console.log("Match amical créé dans la base de données:", data.matchId);
-            console.log("Détails du match créé:", data.match);
-            console.log("Statut du match créé:", data.match?.status || "N/A");
-
             // Important : synchroniser l'ID utilisateur local avec celui utilisé côté backend
             // Le service game peut créer / réutiliser un utilisateur avec un ID différent de this.user.id
             // (via prisma.user.upsert). On récupère donc l'ID réel pour que les prochains appels (join)
@@ -265,10 +251,6 @@ export class UserX
                 //     email: this.user.email,
 
                 // };
-                console.log("Synchronisation de l'utilisateur créateur avec la DB du service game:", {
-                    oldUser,
-                    newUser: this.user,
-                });
             }
             
             // Le match est créé et en attente d'un joueur
@@ -288,9 +270,7 @@ export class UserX
         env: Env
     ) : Promise<boolean>
     {
-        console.log("joinFriendlyMatch appelé avec:", { idMatch, idOpp, loginOpp, user: this.user });
         if (!this.user) {
-            console.error("this.user est null dans joinFriendlyMatch");
             return (false);
         }
         if (this.user.id === undefined || this.user.id === null || this.user.id === 0) {
@@ -321,9 +301,6 @@ export class UserX
             }
 
             const data = await response.json();
-            console.log("Match amical rejoint:", data.match);
-            console.log("Match en ligne:", data.match?.isOnline || false);
-
             const backendLogin = backendUser.login;
             const player1LoginDb = data.match?.player1?.login;
             const player2LoginDb = data.match?.player2?.login;
@@ -338,10 +315,6 @@ export class UserX
                 //     email: this.user.email,
                 //     avatar: this.user.avatar,
                 // };
-                console.log("Synchronisation (player1) avec la DB du service game dans joinFriendlyMatch:", {
-                    oldUser,
-                    newUser: this.user,
-                });
             } else if (isCurrentPlayer2 && data.match?.player2 && typeof data.match.player2.id === "number") {
                 const oldUser = { ...this.user };
                 // this.user = {
@@ -350,10 +323,6 @@ export class UserX
                 //     email: this.user.email,
                 //     avatar: this.user.avatar,
                 // };
-                console.log("Synchronisation (player2) avec la DB du service game dans joinFriendlyMatch:", {
-                    oldUser,
-                    newUser: this.user,
-                });
             } else {
                 console.warn("Impossible de déterminer le rôle player1/player2 pour l'utilisateur courant lors de joinFriendlyMatch:", {
                     backendLogin,
@@ -363,17 +332,7 @@ export class UserX
             }
 
             const match = new MatchFriendlyOnline(idMatch, r, this.sceneManager);
-            const isOnline = data.match?.isOnline || false;
-
-            console.log("Création des joueurs pour le match:", { 
-                user: this.user, 
-                loginOpp, 
-                idOpp,
-                isOnline,
-                player1Id: data.match?.player1Id,
-                player2Id: data.match?.player2Id
-            });
-            
+            const isOnline = data.match?.isOnline || false;       
             // Déterminer l'ordre des participants selon player1Id et player2Id
             // player1 → équipe 1 (gauche), player2 → équipe 2 (droite)
             // Dans GameLogic, p[0] → équipe 1, p[1] → équipe 2
@@ -384,18 +343,7 @@ export class UserX
             const player1Login = data.match?.player1?.login;
             const player2Login = data.match?.player2?.login;
             
-            console.log("Détails du match pour déterminer l'ordre:", {
-                player1Id,
-                player2Id,
-                player1Login,
-                player2Login,
-                myUserId: this.user.id,
-                loginOpp,
-                idOpp,
-                "player1Id === myUserId": player1Id === this.user.id,
-                "player2Id === myUserId": player2Id === this.user.id
-            });
-            
+    
             // Simplification: mapping déterministe et uniforme
             // Premier joueur (player1) → gauche (p[0])
             // Second joueur (player2) → droite (p[1])
@@ -415,30 +363,17 @@ export class UserX
 
             if (isPlayer1Me) {
                 players[0].me = true;
-                console.log("Utilisateur local est player1 → GAUCHE (match local/online)");
             } else if (isPlayer2Me) {
                 players[1].me = true;
-                console.log("Utilisateur local est player2 → DROITE (match local/online)");
             } else if (!player2Id && isPlayer1Me) {
                 // Fallback quand player2Id est encore null et que le créateur (player1) rejoint
                 players[0].me = true;
-                console.log("player2 absent mais utilisateur local est créateur → traité comme player1 (GAUCHE)");
             } else {
                 console.log("Utilisateur local n'est pas encore assigné player1/player2 (spectateur ou attente)");
             }
 
-            console.log("Tableau players créé:", players.map(p => ({ id: p.id, alias: p.alias, me: p.me })));
-
             // Conserver les IDs tels que fournis par le serveur (DB IDs).
             // Ne pas écraser `id` ici : le mapping jeu (1=gauche, 2=droite) sera fait côté `MatchFriendlyOnLine`.
-            console.log("Players prêts (IDs DB conservés):",
-                players.map((p, idx) => ({
-                    id: p.id,
-                    alias: p.alias,
-                    me: p.me,
-                    position: idx === 0 ? "gauche" : "droite",
-                }))
-            );
 
             if (!match.init(players, isOnline))
                 return (false);
@@ -502,9 +437,6 @@ export class UserX
             console.error("Impossible de supprimer un match amical: utilisateur non défini dans UserX");
             return (false);
         }
-        
-        console.log("Suppression du match amical:", matchId);
-        
         try {
             const response = await fetch(`${getApiUrl()}/api/friendly/${matchId}`, {
                 method: "DELETE",
@@ -514,8 +446,6 @@ export class UserX
                 credentials: "include",
             });
 
-            console.log("Réponse reçue:", response.status, response.statusText);
-            
             if (!response.ok) {
                 const errorText = await response.text();
                 let errorData;
@@ -529,8 +459,6 @@ export class UserX
             }
 
             const data = await response.json();
-            console.log("Match amical supprimé:", data.message);
-            
             return (true);
         } catch (error) {
             console.error("Erreur lors de l'appel API pour supprimer le match amical:", error);

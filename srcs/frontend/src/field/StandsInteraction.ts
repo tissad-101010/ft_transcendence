@@ -191,7 +191,6 @@ export class StandsInteraction implements SpecificInteraction {
             {
                 const nb = parseInt(pickedMesh.name[pickedMesh.name.length - 1]);
                 const index = (getCurrentGroup(ZoneName.SEAT) * 4) + nb;
-                console.log("valeur de index ->", index);
                 if (index >= this.sceneManager.getUserX.getFriends.length || (!index && index !== 0))
                     return ;
                 if (!this.friendUI)
@@ -271,7 +270,6 @@ export class StandsInteraction implements SpecificInteraction {
 
     public dispose(): void 
     {
-        console.log("StandsInteraction: nettoyage en cours...");
         this.buttonHighlightLayer.removeAllMeshes();
         this.sceneInteractor.getHighlightLayer().removeAllMeshes();
 
@@ -294,6 +292,5 @@ export class StandsInteraction implements SpecificInteraction {
             }
         });
         this.sceneInteractor.enableInteractions();
-        console.log("StandsInteraction: nettoyage terminé.");
     }
 }

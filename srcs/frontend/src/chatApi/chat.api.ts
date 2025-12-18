@@ -46,9 +46,6 @@ export class ChatApi {
 
     // send a message from one user to another
     async sendMessage(senderUsername: string, receiverUsername: string, content: string ): Promise<any> {
-
-        console.log("Envoi du message via chatApi:", content, "de", senderUsername, "à", receiverUsername);
-
         const message = {
             senderUsername,
             receiverUsername,

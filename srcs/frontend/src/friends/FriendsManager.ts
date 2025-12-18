@@ -244,7 +244,6 @@ export class FriendManager
                             StatusInvitation.PENDING
                         )); 
             }
-            console.log("VALEURS APRES LOADDATA : ", this.friends, this.blockeds, this.invitations);
             // SUCCESS //
             return ({success: true, message: "Loading complete"});
         }

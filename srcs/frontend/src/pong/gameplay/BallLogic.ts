@@ -42,7 +42,6 @@ export default class BallLogic
     {
         if (this.field && (this.posY + this.radius >= this.field.height / 2 || this.posY - this.radius <= 0 - this.field.height / 2))
         {
-            console.log("Colisions detectées !");
             this.directionY = -this.directionY;
         }
     };

@@ -68,7 +68,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   // 🔥 AJOUT : écoute du logout externe
   useEffect(() => {
     const handleExternalLogout = () => {
-      console.log("🔌 Logout reçu depuis l’extérieur (BabylonJS)");
       logout();
     };
 

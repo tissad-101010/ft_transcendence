@@ -150,7 +150,6 @@ export class InvitationUI
         button.onPointerClickObservable.add(() => {
             this.friendUI.getSceneManager.getUserX.sendFriendInvite(login)
             .then((res) => {
-                console.log(res);
                 if (res.success)
                 {
                     this.textLog!.text = "Invitation sent";

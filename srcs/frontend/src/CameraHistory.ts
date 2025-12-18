@@ -45,12 +45,6 @@ export function navigateToZone(
   currentActiveZone = zone;
   currentZoneIsSecondary = secondaryZones.includes(zone);
 
-  console.log(
-    currentZoneIsSecondary
-      ? `🔹 SecondaryZone : ${zone}`
-      : `🏷 MainZone active : ${zone}`
-  );
-
   manager.moveCameraTo(zone);
   callback();
 
@@ -67,9 +61,6 @@ export function navigateToZone(
     currentIndex++;
 
     window.history.pushState({ cameraState: zone }, "");
-
-    console.log("📷 Historique mainZones :", cameraHistory.map((e) => e.zone));
-    console.log("📌 currentIndex :", currentIndex);
   }
 }
 
@@ -80,14 +71,8 @@ export function navigateToZone(
 export function handlePopState(manager: SceneManager, state: any) {
   const zone = state?.cameraState as ZoneName;
   if (!zone) return;
-
-  console.log("🔙 popstate détecté :", zone);
-
   // Bloquer BACK/Forward si on est dans une secondaryZone
   if (currentZoneIsSecondary) {
-    console.log(
-      "🚫 BACK/FORWARD navigateur bloqué : utilisateur dans secondaryZone"
-    );
     return;
   }
 
@@ -114,12 +99,7 @@ export function back(manager: SceneManager) {
   const targetMesh = interactor.getMeshByZone(entry.zone);
   if (!targetMesh) return;
 
-  console.log("⬅️ BACK vers :", entry.zone);
-
   interactor.handleMainZoneClick(targetMesh, true, false); // <-- ne pas ajouter à l'historique
-
-  console.log("📷 Historique mainZones :", cameraHistory.map((e) => e.zone));
-  console.log("📌 currentIndex :", currentIndex);
 }
 
 export function forward(manager: SceneManager) {
@@ -132,8 +112,6 @@ export function forward(manager: SceneManager) {
   const targetMesh = interactor.getMeshByZone(entry.zone);
   if (!targetMesh) return;
 
-  console.log("➡️ FORWARD vers :", entry.zone);
-
   // Incrémenter l'index AVANT la navigation
   currentIndex++;
   currentActiveZone = entry.zone;
@@ -141,7 +119,4 @@ export function forward(manager: SceneManager) {
 
   // Naviguer sans toucher à l'historique
   interactor.handleMainZoneClick(targetMesh, true, false);
-
-  console.log("📷 Historique mainZones :", cameraHistory.map((e) => e.zone));
-  console.log("📌 currentIndex :", currentIndex);
 }

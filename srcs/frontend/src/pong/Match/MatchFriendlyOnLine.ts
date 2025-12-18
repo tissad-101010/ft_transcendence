@@ -40,7 +40,6 @@ export class MatchFriendlyOnline extends MatchBase
 
     init(players: MatchParticipant[], isOnline: boolean = false): boolean
     {
-        console.log("🎮 MatchFriendlyOnline.init() appelé avec:", { players, isOnline, currentUser: this.currentUser });
         if (players.length != 2)
             return (false);
         this.participants = players;
@@ -57,23 +56,12 @@ export class MatchFriendlyOnline extends MatchBase
         // L'ID du participant peut être celui de la DB du service game, pas l'ID auth
         if (this.currentUser && this.currentUser.id > 0) {
             this.myUserId = this.currentUser.id;
-            console.log("✅ myUserId défini depuis currentUser (système d'auth):", this.myUserId);
         } else {
             // Fallback: utiliser l'ID du participant marqué comme "me"
             const me = players.find(p => p.me);
             this.myUserId = me?.id || null;
             console.warn("⚠️ currentUser non disponible, fallback sur participant.id:", this.myUserId);
-        }
-
-        // Déterminer quel joueur est moi et quel est l'adversaire
-        console.log("🔍 Analyse des participants reçus:", players.map((p, idx) => ({ 
-            index: idx, 
-            id: p.id, 
-            alias: p.alias, 
-            me: p.me,
-            ready: p.ready
-        })));
-        
+        } 
         const me = players.find(p => p.me);
         const opponent = players.find(p => !p.me);
         
@@ -90,46 +78,11 @@ export class MatchFriendlyOnline extends MatchBase
         const meIndex = players.indexOf(me);
         this.myPlayerTeam = meIndex === 0 ? 1 : 2;
         
-        console.log("✅ Joueur 'me' trouvé:", { 
-            id: me.id, 
-            alias: me.alias, 
-            me: me.me, 
-            indexInArray: meIndex,
-            team: this.myPlayerTeam,
-            position: this.myPlayerTeam === 1 ? "gauche (score gauche)" : "droite (score droit)",
-            myUserId: this.myUserId
-        });
-        
         if (opponent) {
             const opponentIndex = players.indexOf(opponent);
             const opponentTeam = opponentIndex === 0 ? 1 : 2;
-            console.log("✅ Joueur 'opponent' trouvé:", { 
-                id: opponent.id, 
-                alias: opponent.alias, 
-                me: opponent.me, 
-                indexInArray: opponentIndex,
-                team: opponentTeam,
-                position: opponentTeam === 1 ? "gauche (score gauche)" : "droite (score droit)"
-            });
         }
-        
-        console.log("👤 Joueurs identifiés:", { 
-            myUserId: this.myUserId, 
-            remoteUserId: this.remoteUserId,
-            myPlayerTeam: this.myPlayerTeam,
-            areDifferent: this.myUserId !== this.remoteUserId,
-            isOnline,
-            participants: players.map((p, idx) => ({ 
-                index: idx, 
-                id: p.id, 
-                alias: p.alias, 
-                me: p.me,
-                team: idx === 0 ? 1 : 2,
-                position: idx === 0 ? "gauche (score gauche)" : "droite (score droit)"
-            }))
-        });
-
-        // Mode 0 = local (même clavier), Mode 1 = remote (websockets)
+     // Mode 0 = local (même clavier), Mode 1 = remote (websockets)
         const gameMode = isOnline ? 1 : 0;
 
         // Build a game-local participants array (ids 1 = left, 2 = right) for GameLogic
@@ -153,19 +106,10 @@ export class MatchFriendlyOnline extends MatchBase
         const myParticipantIndex = this.participants.findIndex(p => p.me);
         if (myParticipantIndex !== -1) {
             this.myGamePlayerId = myParticipantIndex === 0 ? 1 : 2;
-            console.log("✅ myGamePlayerId déterminé depuis la position 'me':", {
-                myGamePlayerId: this.myGamePlayerId,
-                myParticipantIndex,
-                myUserId: this.myUserId
-            });
         } else if (this.myPlayerTeam) {
             // fallback: infer from team
             this.myGamePlayerId = this.myPlayerTeam === 1 ? 1 : 2;
-            console.log("⚠️ myGamePlayerId déterminé depuis myPlayerTeam (fallback):", this.myGamePlayerId);
-        }
-        
-        console.log("📊 Mapping dbIdToGameId:", Array.from(this.dbIdToGameId.entries()));
-
+        }       
         this.game = {
             logic: new GameLogic(
                 {
@@ -198,13 +142,6 @@ export class MatchFriendlyOnline extends MatchBase
                     console.error("iniPlayer a échouée " + index);
                     return (false);
                 }
-                // Log pour vérifier l'ordre des joueurs créés
-                console.log(`🎮 Joueur ${index} initialisé:`, { 
-                    id: player.getId, 
-                    team: player.getTeam, 
-                    alias: player.getAlias,
-                    isMe: player.getId === this.myUserId
-                });
             });
         }
         this.game.interface.initScoreBoard();
@@ -225,7 +162,6 @@ export class MatchFriendlyOnline extends MatchBase
             // Si c'est un match en ligne, se connecter via websocket
             if (this.isOnline) {
                 if (this.myUserId && this.myUserId > 0) {
-                    console.log("🌐 Match en ligne détecté, connexion WebSocket...");
                     this.connectWebSocket();
                 } else {
                     console.error("❌ Match en ligne mais myUserId invalide:", { isOnline: this.isOnline, myUserId: this.myUserId, participants: this.participants });
@@ -301,7 +237,6 @@ export class MatchFriendlyOnline extends MatchBase
             timestamp: Date.now(),
         };
         this.websocket.send(JSON.stringify(payload));
-        console.log("📤 score_sync envoyé:", payload);
     }
 
     private handleRemoteScoreSync(message: any): void {
@@ -328,13 +263,6 @@ export class MatchFriendlyOnline extends MatchBase
 
         this.game.logic.syncScore(score1, score2, scoringTeam);
         this.game.interface.updateScoreBoard();
-
-        console.log("🔄 score_sync reçu et appliqué:", {
-            score1,
-            score2,
-            scoringTeam,
-            from: message.sourceUserId,
-        });
     }
 
     private handleOpponentDisconnected(message: any): void {
@@ -421,21 +349,12 @@ export class MatchFriendlyOnline extends MatchBase
                     score2,
                 }),
             });
-            console.log("✅ Forfait enregistré côté serveur");
         } catch (error) {
             console.error("Erreur lors de l'enregistrement du forfait:", error);
         }
     }
 
     private connectWebSocket(): void {
-        console.log("🔌 connectWebSocket() appelé", { 
-            myUserId: this.myUserId, 
-            myGamePlayerId: this.myGamePlayerId,
-            myPlayerTeam: this.myPlayerTeam,
-            gameId: this.id, 
-            isOnline: this.isOnline,
-            currentUser: this.currentUser
-        });
         if (!this.myUserId) {
             console.error("❌ Impossible de se connecter: myUserId non défini");
             return;
@@ -459,24 +378,10 @@ export class MatchFriendlyOnline extends MatchBase
         }
         
         const wsUrl = `${wsProtocol}//${host}:${wsPort}/ws`;
-        console.log("------------------ wsurl -> ", wsUrl);
-        
-        console.log("🔌 Connexion WebSocket à:", wsUrl);
-        console.log("🔌 Détails:", { 
-            pageProtocol: window.location.protocol,
-            wsProtocol, 
-            hostname: window.location.hostname, 
-            pagePort: window.location.port, 
-            wsPort,
-            fullUrl: window.location.href,
-            wsUrl 
-        });
-        
         try {
             this.websocket = new WebSocket(wsUrl);
             
             this.websocket.onopen = () => {
-                console.log("✅ WebSocket connecté");
                 // Envoyer un message pour rejoindre le match
                 if (this.websocket && this.myUserId) {
                     this.playersConnected.add(this.myUserId);
@@ -485,8 +390,6 @@ export class MatchFriendlyOnline extends MatchBase
                         gameId: this.id,
                         userId: this.myUserId,
                     }));
-                    console.log("📤 Message join_game envoyé:", { gameId: this.id, userId: this.myUserId });
-                    console.log(`👥 Joueurs connectés: ${this.playersConnected.size}/2`);
                 }
             };
 
@@ -510,7 +413,6 @@ export class MatchFriendlyOnline extends MatchBase
             };
 
             this.websocket.onclose = (event) => {
-                console.log("🔌 WebSocket fermé", { code: event.code, reason: event.reason, wasClean: event.wasClean });
                 this.websocket = null;
             };
         } catch (error) {
@@ -519,30 +421,15 @@ export class MatchFriendlyOnline extends MatchBase
     }
 
     private handleWebSocketMessage(message: any): void {
-        console.log("📥 Message WebSocket reçu:", message);
-        console.log("📊 État actuel:", {
-            isOnline: this.isOnline,
-            matchStarted: this.matchStarted,
-            gameExists: !!this.game,
-            gameLogicExists: !!this.game?.logic,
-            gameId: this.id,
-            messageGameId: message.gameId,
-            myUserId: this.myUserId,
-            remoteUserId: this.remoteUserId,
-            playersConnected: Array.from(this.playersConnected)
-        });
-        
         switch (message.type) {
             case 'players_already_connected':
                 // Message reçu quand on rejoint : liste des joueurs déjà connectés
-                console.log(`📋 Joueurs déjà connectés reçus:`, message.userIds);
                 if (this.isOnline && message.gameId === this.id && Array.isArray(message.userIds)) {
                     message.userIds.forEach((uid: number) => {
                         this.playersConnected.add(uid);
                         // Si remoteUserId n'est pas encore défini, le définir maintenant
                         if (this.remoteUserId === null && uid !== this.myUserId) {
                             this.remoteUserId = uid;
-                            console.log(`✅ remoteUserId défini: ${this.remoteUserId}`);
                         }
                     });
                     // Déterminer si ce client est le premier connecteur: si aucun userId n'existait avant
@@ -552,69 +439,33 @@ export class MatchFriendlyOnline extends MatchBase
                     // IMPORTANT: Ne pas écraser myGamePlayerId s'il a déjà été défini dans init()
                     // La position dans le jeu est déterminée par le serveur (player1/player2 dans la DB)
                     // pas par l'ordre de connexion WebSocket
-                    console.log('📊 État avant mise à jour WebSocket:', {
-                        isFirstConnector: this.isFirstConnector,
-                        myGamePlayerId: this.myGamePlayerId,
-                        myPlayerTeam: this.myPlayerTeam,
-                        myUserId: this.myUserId
-                    });
                     
                     // Garder myGamePlayerId tel que défini dans init() - c'est la position correcte
                     // basée sur player1Id/player2Id de la base de données
-                    console.log(`👥 Joueurs connectés après réception: ${this.playersConnected.size}/2`);
-                    console.log('✨ Position maintenue depuis init():', {
-                        myUserId: this.myUserId,
-                        myGamePlayerId: this.myGamePlayerId,
-                        myPlayerTeam: this.myPlayerTeam
-                    });
                     // Pour les matchs en ligne, attendre le message 'game_start' du serveur
                     // Ne pas démarrer le match ici, le serveur le fera quand les deux joueurs seront prêts
                 }
                 break;
             case 'player_joined':
-                console.log(`✅ Joueur ${message.userId} a rejoint le match ${message.gameId}`);
                 if (this.isOnline && message.gameId === this.id) {
                     this.playersConnected.add(message.userId);
                     // Si remoteUserId n'est pas encore défini, le définir maintenant
                     if (this.remoteUserId === null && message.userId !== this.myUserId) {
                         this.remoteUserId = message.userId;
-                        console.log(`✅ remoteUserId défini: ${this.remoteUserId}`);
                     }
                     
                     // IMPORTANT: Ne pas écraser myGamePlayerId ici
                     // La position est déterminée dans init() basée sur player1Id/player2Id de la DB
-                    console.log(`👥 Joueurs connectés: ${this.playersConnected.size}/2`, {
-                        myUserId: this.myUserId,
-                        myGamePlayerId: this.myGamePlayerId,
-                        newUserId: message.userId
-                    });
                     // Pour les matchs en ligne, attendre le message 'game_start' du serveur
                     // Ne pas démarrer le match ici, le serveur le fera quand les deux joueurs seront prêts
                 }
                 break;
             case 'game_start':
                 // Message du serveur indiquant que le match peut démarrer
-                console.log("🎮 Le serveur indique que le match peut démarrer");
-                console.log("📊 État avant démarrage:", { 
-                    matchStarted: this.matchStarted, 
-                    isOnline: this.isOnline,
-                    gameExists: !!this.game,
-                    gameLogicExists: !!this.game?.logic,
-                    gameState: this.game?.logic?.getState,
-                    myUserId: this.myUserId,
-                    remoteUserId: this.remoteUserId,
-                    playersConnected: Array.from(this.playersConnected)
-                });
                 if (this.isOnline && !this.matchStarted && this.game && this.game.logic) {
-                    console.log("✅ Conditions remplies pour démarrer le match");
                     this.matchStarted = true;
                     this.status = MatchStatus.ONGOING;
                     this.game.logic.start();
-                    console.log("✅ Match démarré via game_start! État:", { 
-                        matchStarted: this.matchStarted, 
-                        gameState: this.game.logic.getState,
-                        status: this.status
-                    });
                 } else {
                     console.warn("⚠️ Impossible de démarrer le match:", { 
                         isOnline: this.isOnline, 
@@ -680,7 +531,6 @@ export class MatchFriendlyOnline extends MatchBase
                 direction: direction,
             };
             this.websocket.send(JSON.stringify(message));
-            console.log("📤 Message player_move envoyé:", message);
         } else {
             console.warn("⚠️ WebSocket n'est pas ouvert, readyState:", this.websocket.readyState);
         }
@@ -688,14 +538,12 @@ export class MatchFriendlyOnline extends MatchBase
 
     play() : boolean
     {
-        console.log("▶️ MatchFriendlyOnline.play() appelé", { isOnline: this.isOnline, matchStarted: this.matchStarted, gameExists: !!this.game });
         if (!this.game)
             return (false);
 
         // Pour les matchs en ligne, ne pas démarrer immédiatement
         // Attendre que les deux joueurs soient connectés via websocket
         if (this.isOnline) {
-            console.log("⏳ Match en ligne: en attente de la connexion des deux joueurs...");
             console.log("📊 État actuel:", { 
                 myUserId: this.myUserId, 
                 remoteUserId: this.remoteUserId,
@@ -798,8 +646,6 @@ export class MatchFriendlyOnline extends MatchBase
             this.winner = this.participants[1];
 
         this.status = 2;
-            
-        console.log("Match amical terminé", this);
 
         // Enregistrer le résultat dans la base de données
         if (this.winner) {

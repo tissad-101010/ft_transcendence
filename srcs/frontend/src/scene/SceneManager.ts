@@ -317,8 +317,6 @@ private resetInteractions(): void {
                 this.freeCamera.detachControl();
             } else
                 this.enableRotationOnly();
-            // if (typeof onArrived === "function")
-                // console.log("Bien arrive 2");
         }
     }
 
