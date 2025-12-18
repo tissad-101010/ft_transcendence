@@ -13,7 +13,7 @@ Container,
 
 
 import { ZoneName } from './config.ts';
-import { TournamentParticipant } from './Tournament.ts';
+import { TournamentParticipant } from './pong/Tournament.ts';
 import { Friend } from './friends/Friend.ts';
 
 export const API_URL = window.__ENV__.BACKEND_URL;
@@ -22,13 +22,14 @@ export const WS_URL = window.__ENV__.WS_URL;
 export function getApiUrl()
 {
     const host = window.location.hostname;
+    const protocol = "https:";
     let port: string;
     
     if (window.location.protocol === 'https:')
         port = window.location.port || '80';
     else 
         port = '8443';
-    return (`${window.location.protocol}//${host}:${port}`);
+    return (`${protocol}//${host}:${port}`);
 }
 
 /***********************
@@ -69,18 +70,6 @@ export const groupConfigs: Record<ZoneName.TSHIRT | ZoneName.SEAT | ZoneName.LOU
 /***********************
  *   UTILITAIRES       *
  ***********************/
-export function myClearControls(container: Container)
-{
-    if (!container)
-        return;
-    if (container.children !== undefined)
-    {
-        const childs = [...container.children];
-        for (const c of childs)
-            c.dispose();     
-    }
-    container.clearControls();
-}
 
 export function shuffleArray<T>(array: T[]): T[] {
     for (let i = array.length - 1; i > 0; i--) {
@@ -193,41 +182,6 @@ export function setCurrentGroup(
 /***********************
  *  AFFICHAGE AVEC EMPTY
  ***********************/
-// export function displayPlayersWithEmpty(scene: Scene, players: Friend[] | TournamentParticipant[], meshes: AbstractMesh[]) {
-//     meshes.forEach((mesh, index) => {
-//         const mat = new PBRMaterial(`mat_${mesh.name}`, scene);
-//         mat.metallic = 0.0;
-//         mat.roughness = 0.4;
-
-//         const dynTex = new DynamicTexture(`dynTex_${mesh.name}`, { width: 1024, height: 1024 }, scene, true);
-//         const ctx = dynTex.getContext();
-//         ctx.clearRect(0, 0, 1024, 1024);
-
-//         const player = players[index];
-//         if (player) {
-//             mat.albedoColor = new Color3(1.0, 0.5, 0.4);
-//             if (player instanceof Friend)
-//             {
-//                 dynTex.drawText(player.getLogin, null, 280, "bold 80px Arial", "white", "transparent", true);
-//                 dynTex.drawText(player.getId.toString(), null, 600, "bold 250px Arial", "white", "transparent", true);
-//             }
-//             else
-//             {
-//                 dynTex.drawText(player.alias, null, 280, "bold 80px Arial", "white", "transparent", true);
-//                 dynTex.drawText(player.id.toString(), null, 600, "bold 250px Arial", "white", "transparent", true);
-//             }
-//         } else {
-//             mat.albedoColor = new Color3(0.5, 0.5, 0.5);
-//             ctx.fillStyle = "gray";
-//             ctx.fillRect(0, 0, 1024, 1024);
-//         }
-
-//         dynTex.update();
-//         mat.emissiveTexture = dynTex;
-//         mat.emissiveColor = Color3.White();
-//         mesh.material = mat;
-//     });
-// }
 
 export function displayFriendsWithEmpty(scene: Scene, friends: Friend[], meshes: AbstractMesh[]) {
     meshes.forEach((mesh, index) => {

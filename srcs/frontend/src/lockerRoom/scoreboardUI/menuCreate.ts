@@ -7,37 +7,20 @@ import {
   TextBlock,
   Control,
   Grid,
-  ScrollViewer
+  ScrollViewer,
+  Image
 } from "@babylonjs/gui";
 
-import { UserX } from '../../UserX.ts';
-
-import { UIData } from '../utils.ts';
-
 import { DataMatchBlock, genRulesMatchBlock } from './genRulesMatch.ts';
-import { Tournament } from '../../Tournament.ts';
 
 import { backButton, createButton, invitationButton, joinButton, rulesButton, newButton, startButton } from './navigationButton.ts';
 
-import { API_URL, myClearControls } from "../../utils.ts";
-import { ScoreboardHandler } from '../ScoreboardHandler.ts';
+import { API_URL } from "../../utils.ts";
 
-import { Match } from '../../Match.ts';
+import { MatchRules } from '../../pong/Match.ts';
 
+import { Env, UIData } from '../utils.ts';
 
-export interface Env
-{
-    page: Rectangle | null;
-    menuContainer: Rectangle | null;
-    advancedTexture: AdvancedDynamicTexture | null;
-    meshScoreboard: AbstractMesh;
-    userX: UserX;
-    UIData: UIData;
-    tournament: Tournament;
-    errorMsg: TextBlock | null;
-    control: ScoreboardHandler;
-    scoreboard: ScoreboardHandler;
-}
 
 function buttonNavigation(
     label: string,
@@ -49,105 +32,84 @@ function buttonNavigation(
     const button = new Rectangle();
     button.height = "80px";
     button.width = "140px";
-    button.thickness = env.UIData.button.thickness + 4;
-    button.color = env.UIData.text.color;
+    button.thickness = UIData.button.thickness + 2;
+    button.color = UIData.text.color;
     if (label === settings.currPage)
-        button.background = env.UIData.button.clickedBackground;
+        button.background = UIData.button.clickedBackground;
     else
-        button.background = env.UIData.button.background;
+        button.background = UIData.button.background;
 
     const text = new TextBlock();
     text.text = label;
-    text.color = env.UIData.text.color;
-    text.fontSize = env.UIData.text.fontSize - 2;
-    text.fontFamily = env.UIData.text.fontFamily;
+    text.color = UIData.text.color;
+    text.fontSize = UIData.text.fontSize - 2;
+    text.fontFamily = UIData.text.fontFamily;
     button.addControl(text);
 
     button.onPointerClickObservable.add(() => {
         if (settings.currPage !== label)
         {
             settings.controlButtons.forEach((b) => {
-                b.background = env.UIData.button.background;
+                b.background = UIData.button.background;
             })
-            button.background = env.UIData.button.clickedBackground;
+            button.background = UIData.button.clickedBackground;
         }
         switch (label)
         {
-            case "Retour" :
+            case "Back" :
                 backButton(env, menuCreate)
                 break;
             case "Match" :
                 rulesButton(label, env, settings, grid)
                 break;
-            case "Nouveau" :
+            case "New" :
                 newButton(label, env, settings, grid);
                 break;
-            case "Rejoindre" :
-                joinButton(label, env, grid);
+            case "Join" :
+                joinButton(label, env, settings, grid);
                 break;
             case "Participants" :
                 invitationButton(label, env, settings, grid);
                 break;
-            case "Créer" :
+            case "Create" :
                 createButton(env, grid);
                 break;
-            case "Lancer" :
-                /***** ***** */
-                /*  A FAIRE  */
-                /***** ***** */
+            case "Start" :
                 startButton(env, settings);
-                console.info("Ce bouton n'est pas encore fonctionnel");
                 break;
         }
     });
     button.onPointerEnterObservable.add(() => {
-        button.background = env.UIData.button.hoveredBackground;
+        button.background = UIData.button.hoveredBackground;
     });
 
     button.onPointerOutObservable.add(() => {
         if (label === settings.currPage)
-            button.background = env.UIData.button.clickedBackground;
+            button.background = UIData.button.clickedBackground;
         else
-            button.background = env.UIData.button.background;
+            button.background = UIData.button.background;
     })
     settings.controlButtons.push(button);
     return (button);
 }
 
-export function genJoinMatch(env: Env) : StackPanel
+export function genJoinMatch(env: Env) : Rectangle
 {
-    // Vérifier que env.advancedTexture existe et a une scène associée
-    if (!env.advancedTexture) {
-        console.error("❌ genJoinMatch: advancedTexture n'est pas défini");
-        const errorPage = new StackPanel();
-        errorPage.isVertical = true;
-        const errorText = new TextBlock();
-        errorText.text = "Erreur: Texture GUI non disponible";
-        errorText.color = "red";
-        errorPage.addControl(errorText);
-        return errorPage;
-    }
-
-    const page = new StackPanel();
-    page.isVertical = true;
+    const page = new Rectangle();
     page.paddingTop = "70px";
     page.width = "90%";
+    page.thickness = 0;
 
-    const title = new TextBlock();
-    title.text = "Rejoindre un match";
-    title.color = env.UIData.title.color;
-    title.fontSize = env.UIData.title.fontSize;
-    title.fontFamily = env.UIData.title.fontFamily;
-    title.width = "500px";
-    title.height = "80px";
-    
-    page.addControl(title);
+    const panel = new StackPanel();
+    panel.isVertical = true;
+    panel.paddingTop = "70px";
+    panel.width = "90%";
    
     const scrollViewer = new ScrollViewer();
     scrollViewer.width = "100%";
     scrollViewer.height = "300px";
     scrollViewer.background = "transparent";
-    scrollViewer.barColor = env.UIData.text.color;
+    scrollViewer.barColor = UIData.text.color;
     scrollViewer.thickness = 0;
     page.addControl(scrollViewer);
 
@@ -162,9 +124,9 @@ export function genJoinMatch(env: Env) : StackPanel
     const headerRect = new Rectangle();
     headerRect.width = "500px";
     headerRect.height = "50px";
-    headerRect.background = "white";
     headerRect.thickness = 5;
     headerRect.color = "black";
+    headerRect.background = "white";
     headerRect.horizontalAlignment = Control.HORIZONTAL_ALIGNMENT_CENTER;
     container.addControl(headerRect);
 
@@ -176,8 +138,8 @@ export function genJoinMatch(env: Env) : StackPanel
 
     const headerLogin = new TextBlock();
     headerLogin.text = "Login";
-    headerLogin.fontSize = env.UIData.text.fontSize;
-    headerLogin.fontFamily = env.UIData.text.fontFamily;
+    headerLogin.fontSize = UIData.text.fontSize;
+    headerLogin.fontFamily = UIData.text.fontFamily;
     headerLogin.width = "100px";
     headerLogin.height = "100px";
     headerLogin.color = "black";
@@ -185,8 +147,8 @@ export function genJoinMatch(env: Env) : StackPanel
 
     const headerSpeed = new TextBlock();
     headerSpeed.text = "Vitesse";
-    headerSpeed.fontSize = env.UIData.text.fontSize;
-    headerSpeed.fontFamily = env.UIData.text.fontFamily;
+    headerSpeed.fontSize = UIData.text.fontSize;
+    headerSpeed.fontFamily = UIData.text.fontFamily;
     headerSpeed.width = "100px";
     headerSpeed.height = "100px";
     headerSpeed.color = "black";
@@ -194,8 +156,8 @@ export function genJoinMatch(env: Env) : StackPanel
 
     const headerTime = new TextBlock();
     headerTime.text = "Delai";
-    headerTime.fontSize = env.UIData.text.fontSize;
-    headerTime.fontFamily = env.UIData.text.fontFamily;
+    headerTime.fontSize = UIData.text.fontSize;
+    headerTime.fontFamily = UIData.text.fontFamily;
     headerTime.width = "100px";
     headerTime.height = "100px";
     headerTime.color = "black";
@@ -203,17 +165,32 @@ export function genJoinMatch(env: Env) : StackPanel
 
     const headerScore = new TextBlock();
     headerScore.text = "Score";
-    headerScore.fontSize = env.UIData.text.fontSize;
-    headerScore.fontFamily = env.UIData.text.fontFamily;
+    headerScore.fontSize = UIData.text.fontSize;
+    headerScore.fontFamily = UIData.text.fontFamily;
     headerScore.width = "100px";
     headerScore.height = "100px";
     headerScore.color = "black";
     headerPanel.addControl(headerScore);
 
+    const buttonUpdate = Button.CreateImageOnlyButton("update", "/icon/update.png");
+    buttonUpdate.width = "30px";
+    buttonUpdate.height = "30px";
+    buttonUpdate.thickness = 0;
+    buttonUpdate.cornerRadius = 50;
+    buttonUpdate.background = "black";
+    (buttonUpdate.image as Image).width = "15px";
+    (buttonUpdate.image as Image).height = "15px";
+    (buttonUpdate.image as Image).stretch = Image.STRETCH_UNIFORM;
+    (buttonUpdate.image as Image).horizontalAlignment = Control.HORIZONTAL_ALIGNMENT_CENTER;
+    (buttonUpdate.image as Image).verticalAlignment = Control.VERTICAL_ALIGNMENT_CENTER;
+    headerPanel.addControl(buttonUpdate);
+
+    buttonUpdate.onPointerClickObservable.add(() => {
+        loadMatches();
+    })
+
     // Fonction pour charger les matchs depuis l'API
     const loadMatches = async () => {
-        console.log("🔄 Chargement des matchs amicaux...");
-        
         // Nettoyer le conteneur (garder seulement l'en-tête)
         // On récupère tous les contrôles du conteneur sauf headerRect
         const controlsToRemove: Control[] = [];
@@ -232,7 +209,6 @@ export function genJoinMatch(env: Env) : StackPanel
         });
 
         try {
-            console.log("🔄 Tentative de récupération des matchs amicaux...");
             const response = await fetch(`${API_URL}/api/friendly/list`, {
                 method: "GET",
                 headers: {
@@ -242,15 +218,13 @@ export function genJoinMatch(env: Env) : StackPanel
                 credentials: "include",
             });
 
-            console.log("📡 Réponse reçue:", response.status, response.statusText);
-
             if (!response.ok) {
                 console.error("❌ Erreur lors de la récupération des matchs amicaux:", response.status, response.statusText);
                 const errorText = new TextBlock();
                 errorText.text = `Erreur de chargement (${response.status})`;
                 errorText.color = "red";
-                errorText.fontSize = env.UIData.text.fontSize;
-                errorText.fontFamily = env.UIData.text.fontFamily;
+                errorText.fontSize = UIData.text.fontSize;
+                errorText.fontFamily = UIData.text.fontFamily;
                 errorText.width = "500px";
                 errorText.height = "50px";
                 container.addControl(errorText);
@@ -258,14 +232,9 @@ export function genJoinMatch(env: Env) : StackPanel
             }
 
             const data = await response.json();
-            console.log("✅ Données reçues:", data);
-            console.log("📦 Données brutes de l'API:", data);
             
             const matchs = data.matches || [];
             
-            console.log("📋 Matchs récupérés depuis l'API:", matchs);
-            console.log("📊 Nombre de matchs:", matchs.length);
-
             // Réajouter l'en-tête si nécessaire (au cas où il aurait été supprimé)
             let headerExists = false;
             if (container.children) {
@@ -281,12 +250,11 @@ export function genJoinMatch(env: Env) : StackPanel
 
             // Si aucun match, afficher un message
             if (matchs.length === 0) {
-                console.log("ℹ️ Aucun match disponible");
                 const noMatchText = new TextBlock();
-                noMatchText.text = "Aucun match disponible";
-                noMatchText.color = env.UIData.text.color;
-                noMatchText.fontSize = env.UIData.text.fontSize;
-                noMatchText.fontFamily = env.UIData.text.fontFamily;
+                noMatchText.text = "No match available";
+                noMatchText.color = UIData.text.color;
+                noMatchText.fontSize = UIData.text.fontSize;
+                noMatchText.fontFamily = UIData.text.fontFamily;
                 noMatchText.width = "500px";
                 noMatchText.height = "50px";
                 noMatchText.textHorizontalAlignment = Control.HORIZONTAL_ALIGNMENT_CENTER;
@@ -295,11 +263,7 @@ export function genJoinMatch(env: Env) : StackPanel
             }
 
             // Afficher les matchs
-            console.log("✅ Affichage de", matchs.length, "match(s)");
-            console.log("📦 Conteneur avant ajout des matchs:", container.children?.length || 0, "contrôles");
-            
             matchs.forEach((m: any, index: number) => {
-                console.log(`  📋 Match ${index + 1}:`, m);
                 const rect = new Rectangle();
                 rect.width = "500px";
                 rect.height = "100px";
@@ -308,7 +272,6 @@ export function genJoinMatch(env: Env) : StackPanel
                 rect.color = "black";
                 rect.horizontalAlignment = Control.HORIZONTAL_ALIGNMENT_CENTER;
                 container.addControl(rect);
-                console.log(`  ✅ Rectangle du match ${index + 1} ajouté au conteneur (total: ${container.children?.length || 0} contrôles)`);
 
                 const panel = new StackPanel();
                 panel.isVertical = false;
@@ -318,18 +281,18 @@ export function genJoinMatch(env: Env) : StackPanel
 
                 const login = new TextBlock();
                 // Afficher "R" si le match est en ligne
-                login.text = m.isOnline ? `${m.login} (R)` : m.login;
-                login.fontSize = env.UIData.text.fontSize;
-                login.fontFamily = env.UIData.text.fontFamily;
+                login.text = m.login;
+                login.fontSize = UIData.text.fontSize;
+                login.fontFamily = UIData.text.fontFamily;
                 login.width = "100px";
                 login.height = "100px";
-                login.color = m.isOnline ? "blue" : "black"; // Bleu pour les matchs en ligne
+                login.color = "black"; // Bleu pour les matchs en ligne
                 panel.addControl(login);
 
                 const speed = new TextBlock();
                 speed.text = m.speed;
-                speed.fontSize = env.UIData.text.fontSize;
-                speed.fontFamily = env.UIData.text.fontFamily;
+                speed.fontSize = UIData.text.fontSize;
+                speed.fontFamily = UIData.text.fontFamily;
                 speed.width = "100px";
                 speed.height = "100px";
                 speed.color = "black";
@@ -337,8 +300,8 @@ export function genJoinMatch(env: Env) : StackPanel
 
                 const time = new TextBlock();
                 time.text = m.time;
-                time.fontSize = env.UIData.text.fontSize;
-                time.fontFamily = env.UIData.text.fontFamily;
+                time.fontSize = UIData.text.fontSize;
+                time.fontFamily = UIData.text.fontFamily;
                 time.width = "100px";
                 time.height = "100px";
                 time.color = "black";
@@ -346,26 +309,26 @@ export function genJoinMatch(env: Env) : StackPanel
 
                 const score = new TextBlock();
                 score.text = m.score;
-                score.fontSize = env.UIData.text.fontSize;
-                score.fontFamily = env.UIData.text.fontFamily;
+                score.fontSize = UIData.text.fontSize;
+                score.fontFamily = UIData.text.fontFamily;
                 score.width = "100px";
                 score.height = "100px";
                 score.color = "black";
                 panel.addControl(score);
 
                 const button = new Rectangle();
-                button.height = "50px";
-                button.width = "80px";
-                button.thickness = env.UIData.button.thickness;
-                button.color = env.UIData.text.color;
-                button.background = env.UIData.button.background;
+                button.height = "40px";
+                button.width = "40px";
+                button.thickness = UIData.button.thickness;
+                button.color = UIData.text.color;
+                button.background = UIData.button.background;
                 panel.addControl(button);
 
                 const text = new TextBlock();
                 text.text = "Go";
-                text.color = env.UIData.text.color;
-                text.fontSize = env.UIData.text.fontSize - 4;
-                text.fontFamily = env.UIData.text.fontFamily;
+                text.color = UIData.text.color;
+                text.fontSize = UIData.text.fontSize - 4;
+                text.fontFamily = UIData.text.fontFamily;
                 button.addControl(text);
                 
                 button.onPointerClickObservable.add(() => {
@@ -376,139 +339,83 @@ export function genJoinMatch(env: Env) : StackPanel
                     };
                     env.userX.joinFriendlyMatch(rules, m.idMatch, m.idUser, m.login, env).then((success) => {
                         if (!success) {
-                            button.background = "red";
+                            button.background = "rgba(172, 76, 100, 1)";
                         } else {
                             env.scoreboard.leaveMenu();
                         }
                     }).catch((error) => {
                         console.error("Erreur lors de la jonction au match:", error);
-                        button.background = "red";
+                        button.background = "rgba(172, 76, 100, 1)";
                     });
                 });
 
+                button.onPointerEnterObservable.add(() => {
+                    button.background = UIData.button.hoveredBackground;
+                });
+
+                button.onPointerOutObservable.add(() => {
+                    button.background = UIData.button.background;
+                });
+
                 // Bouton Supprimer
-                const deleteButton = new Rectangle();
-                deleteButton.height = "50px";
-                deleteButton.width = "80px";
-                deleteButton.thickness = env.UIData.button.thickness;
-                deleteButton.color = "white";
-                deleteButton.background = "red";
-                panel.addControl(deleteButton);
-
-                const deleteText = new TextBlock();
-                deleteText.text = "Supprimer";
-                deleteText.color = "white";
-                deleteText.fontSize = env.UIData.text.fontSize - 6;
-                deleteText.fontFamily = env.UIData.text.fontFamily;
-                deleteButton.addControl(deleteText);
-                
-                deleteButton.onPointerClickObservable.add(async () => {
-                    console.log("🗑️ Suppression du match:", m.idMatch);
-                    // Désactiver le bouton pendant la suppression
-                    deleteButton.isEnabled = false;
-                    deleteButton.background = "gray";
+                if (m.login === env.userX.getUser?.username)
+                {
+                    const deleteButton = new Rectangle();
+                    deleteButton.height = "40px";
+                    deleteButton.width = "50px";
+                    deleteButton.paddingLeft = 10;
+                    deleteButton.thickness = UIData.button.thickness;
+                    deleteButton.color = UIData.button.color;
+                    deleteButton.background = UIData.button.background;
+                    panel.addControl(deleteButton);
+    
+                    const deleteText = new TextBlock();
+                    deleteText.text = "X";
+                    deleteText.color = "red";
+                    deleteText.fontSize = UIData.text.fontSize - 6;
+                    deleteText.fontFamily = UIData.text.fontFamily;
+                    deleteButton.addControl(deleteText);
                     
-                    const success = await env.userX.deleteFriendlyMatch(m.idMatch);
-                    if (success) {
-                        console.log("✅ Match supprimé, rafraîchissement de la liste...");
-                        // Rafraîchir immédiatement la liste des matchs
-                        if ((env as any).refreshJoinMatchList) {
-                            // Appeler immédiatement puis attendre un peu pour un second rafraîchissement
-                            (env as any).refreshJoinMatchList();
-                            setTimeout(() => {
-                                (env as any).refreshJoinMatchList();
-                            }, 500);
+                    deleteButton.onPointerClickObservable.add(async () => {
+                        // Désactiver le bouton pendant la suppression
+                        deleteButton.isEnabled = false;
+                        deleteButton.background = "gray";
+                        
+                        const success = await env.userX.deleteFriendlyMatch(m.idMatch);
+                        if (success) {
+                            loadMatches();
                         } else {
-                            console.warn("⚠️ refreshJoinMatchList n'est pas défini");
+                            deleteButton.background = UIData.button.hoveredBackground;
+                            deleteButton.isEnabled = true;
+                            setTimeout(() => {
+                                deleteButton.background = UIData.button.background;
+                            }, 2000);
                         }
-                    } else {
-                        console.error("❌ Échec de la suppression du match");
-                        deleteButton.background = "darkred";
-                        deleteButton.isEnabled = true;
-                        setTimeout(() => {
-                            deleteButton.background = "red";
-                        }, 2000);
-                    }
-                });
-
-                deleteButton.onPointerEnterObservable.add(() => {
-                    deleteButton.background = "darkred";
-                });
-
-                deleteButton.onPointerOutObservable.add(() => {
-                    deleteButton.background = "red";
-                });
+                    });
+    
+                    deleteButton.onPointerEnterObservable.add(() => {
+                        deleteButton.background = UIData.button.hoveredBackground;
+                    });
+    
+                    deleteButton.onPointerOutObservable.add(() => {
+                        deleteButton.background = UIData.button.background;
+                    });
+                }
             });
         } catch (error) {
             console.error("❌ Erreur lors du chargement des matchs:", error);
             const errorMessage = error instanceof Error ? error.message : String(error);
             console.error("❌ Détails de l'erreur:", errorMessage);
             const errorText = new TextBlock();
-            errorText.text = `Erreur de connexion: ${errorMessage.substring(0, 50)}`;
-            errorText.color = "red";
-            errorText.fontSize = env.UIData.text.fontSize;
-            errorText.fontFamily = env.UIData.text.fontFamily;
+            errorText.text = `Error connection: ${errorMessage.substring(0, 50)}`;
+            errorText.color = "rgba(172, 76, 100, 1)";
+            errorText.fontSize = UIData.text.fontSize;
+            errorText.fontFamily = UIData.text.fontFamily;
             errorText.width = "500px";
             errorText.height = "50px";
             container.addControl(errorText);
         }
     };
-
-    // Ne pas charger les matchs immédiatement, attendre que la page soit ajoutée à la grille
-    // Stocker la fonction de rafraîchissement dans l'environnement pour pouvoir l'appeler depuis l'extérieur
-    (env as any).refreshJoinMatchList = loadMatches;
-    
-    // Charger les matchs après un court délai pour s'assurer que la page est ajoutée à la grille
-    // Vérifier que le container est correctement attaché en vérifiant s'il a un parent
-    const tryLoadMatches = () => {
-        // Vérifier que le container a un parent (signifie qu'il est attaché à la hiérarchie GUI)
-        // Si parent est null, le contrôle n'est plus attaché
-        if (container.parent) {
-            try {
-                loadMatches();
-                
-                // Rafraîchir la liste toutes les 2 secondes pour une meilleure réactivité
-                const refreshInterval = setInterval(() => {
-                    // Vérifier que le container a toujours un parent
-                    // Si parent devient null, cela signifie que le contrôle a été supprimé
-                    if (container.parent) {
-                        try {
-                            loadMatches();
-                        } catch (error) {
-                            console.error("❌ Erreur lors du rafraîchissement des matchs:", error);
-                            // Arrêter l'intervalle en cas d'erreur
-                            clearInterval(refreshInterval);
-                        }
-                    } else {
-                        // Si le container n'est plus attaché (parent est null), arrêter l'intervalle
-                        clearInterval(refreshInterval);
-                    }
-                }, 2000);
-                
-                // Stocker aussi l'intervalle pour pouvoir le nettoyer si nécessaire
-                (env as any).refreshJoinMatchInterval = refreshInterval;
-            } catch (error) {
-                console.error("❌ Erreur lors du chargement initial des matchs:", error);
-            }
-        } else {
-            // Réessayer après un court délai (maximum 10 tentatives pour éviter une boucle infinie)
-            const maxRetries = 10;
-            let retryCount = (env as any).__loadMatchesRetryCount || 0;
-            if (retryCount < maxRetries) {
-                (env as any).__loadMatchesRetryCount = retryCount + 1;
-                setTimeout(tryLoadMatches, 50);
-            } else {
-                console.warn("⚠️ Impossible de charger les matchs après plusieurs tentatives");
-            }
-        }
-    };
-    
-    // Réinitialiser le compteur de tentatives
-    (env as any).__loadMatchesRetryCount = 0;
-    
-    // Démarrer la tentative de chargement après un court délai
-    setTimeout(tryLoadMatches, 100);
-
     return (page);
 }
 
@@ -517,7 +424,7 @@ function match(
     env: Env,
 ) : void
 {
-    myClearControls(env.menuContainer)
+    env.menuContainer?.clearControls();
 
     const grid = new Grid();
     grid.width = "100%";
@@ -526,7 +433,7 @@ function match(
     grid.addRowDefinition(0.8);
     grid.addRowDefinition(0.05);
     grid.addRowDefinition(0.15);
-    env.menuContainer.addControl(grid);
+    env.menuContainer?.addControl(grid);
     const settings : DataMatchBlock = {
         data: {
             speed: "",
@@ -540,22 +447,18 @@ function match(
                 thickness: 1,
                 color: "blue"
             },
-            text : env.UIData.text,
-            button: env.UIData.button,
-            inputText: env.UIData.inputText
+            text : UIData.text,
+            button: UIData.button,
+            inputText: UIData.inputText
         },
         controlButtons: [],
         currPage: "Menu",
         mode: -1,
         onCreateMatch: async (rules: MatchRules) => {
-            console.log("🚀 onCreateMatch appelé avec les règles:", rules);
             // mode: 0 = Local, 1 = En ligne
             const isOnline = settings.mode === 1;
-            console.log("🌐 Mode du match:", isOnline ? "En ligne" : "Local");
             const success = await env.userX.createFriendlyMatch(rules, isOnline);
             if (success) {
-                console.log("✅ Match créé, rafraîchissement de la liste...");
-                // Rafraîchir la liste des matchs si on est sur la page "Rejoindre"
                 if ((env as any).refreshJoinMatchList) {
                     setTimeout(() => {
                         (env as any).refreshJoinMatchList();
@@ -575,33 +478,27 @@ function match(
     rowButtons.spacing = 10;
     grid.addControl(rowButtons, 2, 0);
 
-    rowButtons.addControl(buttonNavigation("Nouveau", env, settings, grid));
-    rowButtons.addControl(buttonNavigation("Rejoindre", env, settings, grid));
-    rowButtons.addControl(buttonNavigation("Retour", env, settings, grid));
+    rowButtons.addControl(buttonNavigation("New", env, settings, grid));
+    rowButtons.addControl(buttonNavigation("Join", env, settings, grid));
+    rowButtons.addControl(buttonNavigation("Back", env, settings, grid));
 }
 
 function tournament(
     env: Env
 ) : void
 {
-    myClearControls(env.menuContainer);
-
-    if (env.tournament === undefined)
-    {
-        console.info("Tournament existe pas");
-        return ;
-    }
+    env.menuContainer!.clearControls();
 
     const grid = new Grid();
     grid.width = "100%";
-    grid.height = "60%";
+    grid.height = "70%";
     grid.addColumnDefinition(1);
-    grid.addRowDefinition(0.7);
-    grid.addRowDefinition(0.1);
-    grid.addRowDefinition(0.2);
-    env.menuContainer.addControl(grid);
+    grid.addRowDefinition(0.6);
+    grid.addRowDefinition(0.025);
+    grid.addRowDefinition(0.275);
+    env.menuContainer!.addControl(grid);
     const settings : DataMatchBlock = {
-        data: env.tournament.getRules,
+        data: env.userX.getTournament!.getRules,
         graph: {
             container: {
                 width: "100%",
@@ -609,9 +506,9 @@ function tournament(
                 thickness: 1,
                 color: "blue"
             },
-            text : env.UIData.text,
-            button: env.UIData.button,
-            inputText: env.UIData.inputText
+            text : UIData.text,
+            button: UIData.button,
+            inputText: UIData.inputText
         },
         controlButtons: [],
         currPage: "Match",
@@ -629,22 +526,22 @@ function tournament(
     env.errorMsg = null;
     rowButtons.addControl(buttonNavigation("Match", env, settings, grid));
     rowButtons.addControl(buttonNavigation("Participants", env, settings, grid));
-    rowButtons.addControl(buttonNavigation("Créer", env, settings, grid));
-    rowButtons.addControl(buttonNavigation("Retour", env, settings, grid));
+    rowButtons.addControl(buttonNavigation("Create", env, settings, grid));
+    rowButtons.addControl(buttonNavigation("Back", env, settings, grid));
 }
 
 export function menuCreate(
     env: Env
 ) : void
 {
-    myClearControls(env.menuContainer);
+    env.menuContainer!.clearControls();
     const panel = new StackPanel();
     panel.isVertical = false;
     panel.height = "90%";
     panel.horizontalAlignment = Control.HORIZONTAL_ALIGNMENT_CENTER;
     panel.verticalAlignment = Control.VERTICAL_ALIGNMENT_CENTER;
     panel.spacing = 10;
-    env.menuContainer.addControl(panel);
+    env.menuContainer!.addControl(panel);
 
     const button1 = Button.CreateImageOnlyButton("tournamentButton", "/lockerRoom/textures/trophy.png");
     button1.width = "200px";
@@ -666,13 +563,8 @@ export function menuCreate(
     });
 
     button1.onPointerUpObservable.add(async () => {
-        // Utiliser le login de l'utilisateur connecté comme alias
-        const userLogin = env.userX.getUser?.login || "Player";
-        // Nettoyer un éventuel tournoi brouillon déjà créé côté serveur
-        await env.userX.deleteTournament();
-        await env.userX.createTournament(userLogin);
-        if (env.userX.getTournament)
-            env.tournament = env.userX.getTournament;
+        env.userX.deleteTournament();
+        env.userX.createTournament();
         tournament(env);
     });
 

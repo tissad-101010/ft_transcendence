@@ -42,13 +42,11 @@ export class FriendUI
     private containerUI: ContainerUI;
     private sceneManager: SceneManager;
     private buttonMeshes: AbstractMesh[];
-    private standsInteraction: StandsInteraction;
  
     constructor(
         sceneManager: SceneManager,
         private updateChair : (buttonMeshes: AbstractMesh[]) => void,
         buttonMeshes: AbstractMesh[],
-        standsInteraction: StandsInteraction
     )
     {
         this.sceneManager = sceneManager;
@@ -72,7 +70,6 @@ export class FriendUI
                     ),
             viewPanel: null,
         };
-        this.standsInteraction = standsInteraction;
         this.buttonMeshes = buttonMeshes;
         this.invitationUI = new InvitationUI(this);
         this.invitationUI.display();

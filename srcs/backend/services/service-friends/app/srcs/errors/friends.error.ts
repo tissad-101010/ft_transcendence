@@ -1,13 +1,24 @@
 
 import { FastifyReply} from "fastify";
+import { AxiosError } from 'axios';
 
-export function handleError(reply: FastifyReply, err: unknown)
+export function handleError(reply: FastifyReply, err: any)
 {
-    if (err instanceof AuthError) return reply.code(401).send({ success: false, message: err.message });
-    if (err instanceof UserNotFoundError) return reply.code(404).send({ success: false, message: err.message });
-    if (err instanceof InvitationError) return reply.code(409).send({ success: false, message: err.message });
-    if (err instanceof RemoteServiceUnavailableError) return reply.code(503).send({ success: false, message: err.message });
+    if (err instanceof AuthError)
+    {
+        console.log("------------------------------ JE SORS ICI");
+        return reply.code(401).send({ success: false, message: err.message });
+    }
+    if (err instanceof UserNotFoundError) 
+        return reply.code(404).send({ success: false, message: err.message });
+    if (err instanceof InvitationError) 
+        return reply.code(409).send({ success: false, message: err.message });
+    if (err instanceof RemoteServiceUnavailableError) 
+        return reply.code(503).send({ success: false, message: err.message });
+    if (err instanceof AxiosError)
+        return reply.code(401).send({ success: false, message: err.message });
 
+    console.log("------------------------------ JE SORS ICI PAS NORMAL");
     console.error("Unexpected error:", err);
     return reply.code(500).send({ success: false, message: "Internal server error" });
 }

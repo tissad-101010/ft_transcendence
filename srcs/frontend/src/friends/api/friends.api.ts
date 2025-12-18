@@ -1,3 +1,4 @@
+import { authFetch } from "../../auth/authFetch";
 import { FriendInvitation } from "../FriendInvitation";
 
 export interface PromiseUpdateResponse
@@ -34,7 +35,7 @@ export async function getInfoFriend(username: string): Promise<PromiseGetInfoFri
 {
   try
   {
-    const call = await fetch(`${serviceUrl}/api/infoFriend?username=${username}`, {
+    const call = await authFetch(`${serviceUrl}/api/infoFriend?username=${username}`, {
       method: "GET",
       credentials: "include"
     });
@@ -56,7 +57,7 @@ export async function removeInvitation(
 {
   try
   {
-    const call = await fetch(`${serviceUrl}/friend/remove/${invitation.getUsernames[0]}/${invitation.getUsernames[1]}`, {
+    const call = await authFetch(`${serviceUrl}/friend/remove/${invitation.getUsernames[0]}/${invitation.getUsernames[1]}`, {
       method: "DELETE",
       credentials: "include"
     });
@@ -76,7 +77,7 @@ export async function removeFriend(
 {
   try
   {
-    const call = await fetch(`${serviceUrl}/friend/remove/${user1}/${user2}`, {
+    const call = await authFetch(`${serviceUrl}/friend/remove/${user1}/${user2}`, {
       method: "DELETE",
       credentials: "include"
     });
@@ -96,7 +97,7 @@ export async function removeBlocked(
 {
   try
   {
-    const call = await fetch(`${serviceUrl}/friend/remove/${user1}/${user2}`, {
+    const call = await authFetch(`${serviceUrl}/friend/remove/${user1}/${user2}`, {
       method: "DELETE",
       credentials: "include"
     });
@@ -113,7 +114,7 @@ export async function blockFriend(user1: string, user2: string)
 {
   try
   {
-    const call = await fetch(`${serviceUrl}/friend/invite/block`, {
+    const call = await authFetch(`${serviceUrl}/friend/invite/block`, {
       method: "POST",
       credentials: "include",
       headers: {
@@ -153,7 +154,7 @@ export async function updateInvitation(param: StatusInvitation, invitation: Frie
         mode = "/decline";
         break;
     }
-    const call = await fetch(`${serviceUrl}/friend/invite${mode}`, {
+    const call = await authFetch(`${serviceUrl}/friend/invite${mode}`, {
       method: "POST",
       credentials: "include",
       headers: {
@@ -180,7 +181,7 @@ export async function listInvitations() : Promise<{success:boolean; message?: st
 {
   try 
   {
-    const response = await fetch(`${serviceUrl}/friend/invitations`, {
+    const response = await authFetch(`${serviceUrl}/friend/invitations`, {
       method: "GET",
       credentials: "include"
     });
@@ -200,7 +201,7 @@ export async function listMatch(username: string)
 {
   try
   {
-    const call: any = await fetch(`${serviceUrl}/api/matches/user/${username}`, {
+    const call: any = await authFetch(`${serviceUrl}/api/matches/user/${username}`, {
       method: "GET",
       credentials: "include",
     });
@@ -221,8 +222,7 @@ export async function sendFriendInvitation(
 {
   try 
   {
-    console.log("API Username = " + username );
-    const call : any = await fetch(`${serviceUrl}/friend/invite`, {
+    const call : any = await authFetch(`${serviceUrl}/friend/invite`, {
       method: "POST",
       credentials: "include",
       headers: {

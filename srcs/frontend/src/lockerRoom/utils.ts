@@ -11,6 +11,20 @@ import {
     EasingFunction,
 } from '@babylonjs/core';
 
+import { 
+    Rectangle,
+    AdvancedDynamicTexture,
+    TextBlock
+} from '@babylonjs/gui';
+import { UserX } from '../UserX';
+import { ScoreboardHandler } from './ScoreboardHandler';
+import { SceneManager } from '../scene/SceneManager';
+
+export interface Interval
+{
+    id: number
+}
+
 export interface Participant
 {
     login: string,
@@ -18,35 +32,46 @@ export interface Participant
     status: number
 }
 
-export interface UIData
-{
+export const UIData = {
     title: {
-        width: string,
-        fontSize: number,
-        fontFamily: string,
-        color: string
+        color: "rgba(172, 76, 100, 1)",
+        fontSize: 30,
+        fontFamily: "Arial",
+        width: "250px"
     },
     text: {
-        color: string,
-        fontSize: number,
-        fontFamily: string,
+        color: "#3f8b95",
+        fontSize: 24,
+        fontFamily: "Arial"
     },
     inputText: {
-        fontSize: number,
-        fontFamily: string,
-        color: string,
-        background: string,
-        focusedBackground: string,
-        thickness: number
+        fontSize: 24,
+        fontFamily: "Arial",
+        color: "#3f8b95",
+        background: "transparent",
+        focusedBackground: "rgba(227, 227, 255, 1)",
+        thickness: 1
     },
-    button:
-    {
-        color: string,
-        background: string,
-        clickedBackground: string,
-        hoveredBackground: string,
-        thickness: number
+    button: {
+        color: "#3f8b95",
+        background: "transparent",
+        clickedBackground: "rgba(159, 159, 222, 1)",
+        hoveredBackground: "#4ca0aca1",
+        thickness: 1,
     }
+}
+
+export interface Env
+{
+    page: Rectangle | null;
+    menuContainer: Rectangle | null;
+    advancedTexture: AdvancedDynamicTexture | null;
+    meshScoreboard: AbstractMesh;
+    userX: UserX;
+    errorMsg: TextBlock | null;
+    scoreboard: ScoreboardHandler;
+    sceneManager: SceneManager;
+    interval: Interval;
 }
 
 /**************************************************

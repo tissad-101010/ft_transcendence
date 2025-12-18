@@ -5,9 +5,9 @@ import
   Grid
 } from "@babylonjs/gui";
 
-import { UIData } from "./utils.ts";
+import { UIData } from "../utils.ts";
 
-export function genMatchPage(env: UIData, grid : Grid) : StackPanel
+export function genMatchPage(grid : Grid) : StackPanel
 {
     const page = new StackPanel();
     page.isVertical = true;
@@ -16,13 +16,13 @@ export function genMatchPage(env: UIData, grid : Grid) : StackPanel
 
     const title = new TextBlock();
     title.text = "Match";
-    title.color = env.title.color;
-    title.fontSize = env.title.fontSize;
-    title.fontFamily = env.title.fontFamily;
+    title.color = UIData.title.color;
+    title.fontSize = UIData.title.fontSize;
+    title.fontFamily = UIData.title.fontFamily;
     title.width = "200px";
     title.height = "80px";
 
-    page.addControl(title);   
+    page.addControl(title);
 
     return (page);
 }

@@ -1,4 +1,4 @@
-import { Tournament } from './Tournament.ts';
+import { Tournament } from './pong/Tournament.ts';
 
 // ─── User Types ─────────────────────────────────────────────────────────
 // Type utilisateur unifié, compatible avec le contexte d'auth et le backend
@@ -49,13 +49,13 @@ export function userToBackendFormat(user: User): { id: number; login: string } {
 /**
  * Convertit un BackendUser vers le format User (frontend)
  */
-export function backendUserToFrontend(backendUser: BackendUser): User {
-    return {
-        id: backendUser.id,
-        username: backendUser.login,
-        email: backendUser.email
-    };
-}
+// export function backendUserToFrontend(backendUser: BackendUser): User {
+//     return {
+//         id: backendUser.id,
+//         username: backendUser.login,
+//         email: backendUser.email
+//     };
+// }
 
 // ─── Match Types ────────────────────────────────────────────────────────
 

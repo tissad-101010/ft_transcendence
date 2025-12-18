@@ -6,7 +6,7 @@
 /*   By: glions <glions@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/16 19:00:31 by tissad            #+#    #+#             */
-/*   Updated: 2025/12/03 15:24:19 by glions           ###   ########.fr       */
+/*   Updated: 2025/12/16 15:13:41 by glions           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,6 +22,20 @@ import {
 } from "./remote/clients/verifyToken";
 import { AuthError, handleError } from "../errors/friends.error";
 
+async function getToken(request: FastifyRequest)
+{
+  const accessToken = request.cookies["access_token"];
+  if (!accessToken) {
+    console.error("Aucun token présent dans les cookies");
+    throw new AuthError("Token manquant");
+  }
+  const tokenResponse = await verifyToken(accessToken);
+  if (!tokenResponse || !tokenResponse.success || !tokenResponse.data) {
+    console.error("Token invalide ou expiré :", tokenResponse);
+    throw new AuthError("Token invalide ou expiré");
+  }
+  return (tokenResponse.data.id);
+}
 
 export async function removeFriendController(
   request: FastifyRequest<{ Params: { fromUser: string, toUser: string } }>,
@@ -30,8 +44,7 @@ export async function removeFriendController(
 {
   try {
     // CHECK TOKEN //
-    const token               = await verifyToken(request.cookies["access_token"]!);
-    if (!token) throw new AuthError();
+    await getToken(request);
     // VERIF PARAMS //
     const {fromUser, toUser} = request.params;
     if (!fromUser || !toUser)
@@ -40,14 +53,16 @@ export async function removeFriendController(
     const service = new FriendsService(request.server);
     const deleted = await service.removeInvitation(fromUser, toUser);
     if (deleted.count === 1)
+      // SUCCESS //
       return reply.code(200).send({ success: true, message: "Invitation removed"});
     else if (deleted.count === 0)
+      // ERROR //
       return (reply.code(404).send({success: false, message: "Invitation doesn't exist"}));
     else
+      // BIG ERROR //
       return (reply.code(500).send({success: false, message: `${deleted.count} invitations deleted, serious problem`}));
   } catch (err: any) {
-    console.error(err);
-    return reply.code(400).send({ success: false, message: err.message });
+    return (handleError(reply, err));
   }
 }
 
@@ -58,11 +73,10 @@ export async function listInvitationsController(
 {
   try {
     // CHECK TOKEN //
-    const token               = await verifyToken(request.cookies["access_token"]!);
-    if (!token) throw new AuthError();
+    const userId = await getToken(request);
     // CALL SERVICE //
     const service             = new FriendsService(request.server);
-    const { result }  = await service.listInvitations(token.data.id);
+    const { result }  = await service.listInvitations(userId);
     // SUCCESS //
     return reply.code(200).send({ success: true, data: result });
   } catch (err: unknown) {
@@ -78,19 +92,18 @@ export async function sendInviteController(
 )
 {
   try {
-    // CHECK TOCKEN //
-    const token               = await verifyToken(request.cookies["access_token"]!);
-    if (!token) throw new AuthError();
+   // CHECK TOKEN //
+    const userId = await getToken(request);
     // CALL SERVICE USER //
     const { friendUsername }  = request.body;
     if (!friendUsername)
       return (reply.code(400).send({sucess: false, message: "Parameter username is missing"}));
-    // CALL SERVICE
+    // CALL SERVICE //
     const service             = new FriendsService(request.server);
-    const data                = await service.sendInvitation(token.data.id, friendUsername,);
-    // SUCCESS
+    const data                = await service.sendInvitation(userId, friendUsername,);
+    // SUCCESS //
     return (reply.code(200).send({success: true, data: data}));
-  // ERRORS
+  // ERRORS //
   } catch (err: any)
   {
     console.error('/!\\ SEND INVITE CONTROLLER ERROR /!\\', err);
@@ -104,16 +117,15 @@ export async function acceptInviteController(
 )
 {
   try {
-    // CHECK TOCKEN //
-    const token = await verifyToken(request.cookies["access_token"]!);
-    if (!token) throw new AuthError();
-    // VERIF PARAMS
+    // CHECK TOKEN //
+    await getToken(request);
+    // VERIF PARAMS //
     const {user1, user2} = request.body;
     if (!user1 || !user2) 
       return (reply.code(400).send({success: false, message: "Invalid parameters"}))
     const service = new FriendsService(request.server);
     const response = await service.acceptInvitation(user1, user2);
-    // SUCCESS
+    // SUCCESS //
     return (reply.code(200).send({success: true, message: "Invitation accepted"}));
   } catch (err: any)
   {
@@ -128,20 +140,20 @@ export async function blockUserController(
 )
 {
   try {
-    // CHECK TOCKEN //
-    const token = await verifyToken(request.cookies["access_token"]!);
-    if (!token) throw new AuthError();
+    // CHECK TOKEN //
+    await getToken(request);
     // VERIF PARAMS
     const {user1, user2} = request.body;
     if (!user1 || !user2) 
-      return (reply.code(400).send({success: false, message: "Invalid parameters"}))
+      return (reply.code(400).send({success: false, message: "Invalid parameters"}));
+    // CALL SERVICE //
     const service = new FriendsService(request.server);
     const response = await service.blockInvitation(user1, user2);
-    // SUCCESS
+    // SUCCESS //
     return (reply.code(200).send({success: true, message: "Invitation accepted"}));
   } catch (err: any)
   {
-    console.error("/!\\ ACCEPT INVITE CONTROLLER ERROR /!\\");
+    console.error(err);
     return (handleError(reply, err));
   }
 }
@@ -152,11 +164,18 @@ export async function declineInviteController(
 )
 {
   try {
+    // CHECK TOKEN //
+    await getToken(request);
+    // VERIF PARAMS //
+    const { id } = request.params;
+    if (!id)
+      return (reply.code(400).send({success: false, message: "Invalid parameters"}));
+    // CALL SERVICE //
     const service = new FriendsService(request.server);
-    const updated = await service.declineInvitation(Number(request.params.id));
+    const updated = await service.declineInvitation(Number(id));
     return reply.send({ success: true, data: updated });
   } catch (err: any) {
     console.error(err);
-    return reply.status(400).send({ success: false, message: err.message });
+    return (handleError(reply, err));
   }
 }

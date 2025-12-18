@@ -1,7 +1,3 @@
-import {
-  Scene,
-} from '@babylonjs/core';
-
 import { 
   StackPanel, 
   Rectangle, 
@@ -10,29 +6,15 @@ import {
   ScrollViewer
 } from "@babylonjs/gui";
 
-import { UserX } from '../../UserX.ts';
-import { UIData } from '../utils.ts';
-import { Tournament } from '../../Tournament.ts';
+import { Env, UIData } from '../utils.ts';
+import { Tournament } from '../../pong/Tournament.ts';
 
-import { myClearControls } from "../../utils.ts";
-import { Match, MatchParticipant } from "../../Match.ts";
-import { SceneManager } from "../../scene/SceneManager.ts";
+import { Match, MatchParticipant } from "../../pong/Match.ts";
 import { ZoneName } from "../../config.ts";
-import { ScoreboardHandler } from '../ScoreboardHandler.ts';
 
 interface Interval
 {
     id: number
-}
-
-interface Env
-{
-    menuContainer: Rectangle | null,
-    userX: UserX,
-    UIData: UIData,
-    sceneManager: SceneManager,
-    waitingInterval: Interval,
-    scoreboard: ScoreboardHandler
 }
 
 interface DataUtils
@@ -51,10 +33,8 @@ function rowRound(
 ) : void
 {
     if (utils.tournament === null)
-    {
-        console.error("tournament est null (très très bizarre de déclencher ceci");
         return ;
-    }
+
     if (utils.panelRound === null)
     {
         utils.panelRound = new StackPanel();
@@ -63,10 +43,9 @@ function rowRound(
         utils.panelRound.spacing = 5;
         container.addControl(utils.panelRound);
     } else
-       myClearControls(utils.panelRound);
+       utils.panelRound.clearControls();
 
     const nbRound = Math.log(utils.tournament.getParticipants.length) / Math.log(2); // Nombre de tour du tournoi
-    console.log("Nombre de round pour le tournoi -> ", nbRound);
     let nbMatch = utils.nbMatchFirstRound / Math.pow(2, utils.currRound);
     if (utils.currRound !== 0)
     {
@@ -74,13 +53,13 @@ function rowRound(
         buttonLeft.width = "50px";
         buttonLeft.height = "50px";
         buttonLeft.thickness = 1;
-        buttonLeft.color = env.UIData.button.color;
+        buttonLeft.color = UIData.button.color;
 
         const textLeft = new TextBlock();
         textLeft.text = "<";
-        textLeft.fontSize = env.UIData.text.fontSize;
-        textLeft.fontFamily = env.UIData.text.fontFamily;
-        textLeft.color = env.UIData.text.color;
+        textLeft.fontSize = UIData.text.fontSize;
+        textLeft.fontFamily = UIData.text.fontFamily;
+        textLeft.color = UIData.text.color;
         textLeft.width = "50px";
         textLeft.height = "50px";
         buttonLeft.addControl(textLeft);
@@ -91,19 +70,19 @@ function rowRound(
         });
 
         buttonLeft.onPointerEnterObservable.add(() => {
-            buttonLeft.background = env.UIData.button.hoveredBackground;
+            buttonLeft.background = UIData.button.hoveredBackground;
         });
         buttonLeft.onPointerOutObservable.add(() => {
-            buttonLeft.background = env.UIData.button.background;
+            buttonLeft.background = UIData.button.background;
         });
         utils.panelRound.addControl(buttonLeft);
     }
 
     const round = new TextBlock();
     round.text = "1/" + nbMatch;
-    round.fontSize = env.UIData.text.fontSize;
-    round.fontFamily = env.UIData.text.fontFamily;
-    round.color = env.UIData.text.color;
+    round.fontSize = UIData.text.fontSize;
+    round.fontFamily = UIData.text.fontFamily;
+    round.color = UIData.text.color;
     round.height = "100px";
     round.width = "100px";
     utils.panelRound.addControl(round);
@@ -114,13 +93,13 @@ function rowRound(
         buttonRight.width = "50px";
         buttonRight.height = "50px";
         buttonRight.thickness = 1;
-        buttonRight.color = env.UIData.button.color;
+        buttonRight.color = UIData.button.color;
 
         const textRight = new TextBlock();
         textRight.text = ">";
-        textRight.fontSize = env.UIData.text.fontSize;
-        textRight.fontFamily = env.UIData.text.fontFamily;
-        textRight.color = env.UIData.text.color;
+        textRight.fontSize = UIData.text.fontSize;
+        textRight.fontFamily = UIData.text.fontFamily;
+        textRight.color = UIData.text.color;
         textRight.width = "50px";
         textRight.height = "50px";
         buttonRight.addControl(textRight);
@@ -132,11 +111,11 @@ function rowRound(
         });
 
         buttonRight.onPointerEnterObservable.add(() => {
-            buttonRight.background = env.UIData.button.hoveredBackground;
+            buttonRight.background = UIData.button.hoveredBackground;
         });
 
         buttonRight.onPointerOutObservable.add(() => {
-            buttonRight.background = env.UIData.button.background;
+            buttonRight.background = UIData.button.background;
         });
         utils.panelRound.addControl(buttonRight);
     }
@@ -148,15 +127,14 @@ function displayPlayer(
     env: Env
 ) : void
 {
-    console.log("player : ", p);
     const player = new TextBlock();
     if (p)
         player.text = p.alias;
     else
         player.text = "?";
-        player.fontSize = env.UIData.text.fontSize;
-        player.fontFamily = env.UIData.text.fontFamily;
-        player.color = env.UIData.text.color;
+        player.fontSize = UIData.text.fontSize;
+        player.fontFamily = UIData.text.fontFamily;
+        player.color = UIData.text.color;
         player.width = "200px";
         player.height = "70px";
         c.addControl(player);
@@ -169,16 +147,15 @@ function listMatch(
 ) : void
 {
     if (utils.scrollViewerMatch !== null)
-       myClearControls(utils.scrollViewerMatch);
+       utils.scrollViewerMatch.clearControls();
     else
     {
         utils.scrollViewerMatch = new ScrollViewer("scrollViewerMatch");
         utils.scrollViewerMatch.width = "90%";
         utils.scrollViewerMatch.height = "400px";
         utils.scrollViewerMatch.background = "transparent";
-        utils.scrollViewerMatch.barColor = env.UIData.text.color;
+        utils.scrollViewerMatch.barColor = UIData.text.color;
         utils.scrollViewerMatch.thickness = 0;
-        utils.scrollViewerMatch.horizontalBarVisible = false;
         container.addControl(utils.scrollViewerMatch);
     }
 
@@ -199,7 +176,7 @@ function listMatch(
         matchRow.height = "70px";
         matchRow.width = "70%";
         matchRow.thickness = 1;
-        matchRow.color = env.UIData.text.color;
+        matchRow.color = UIData.text.color;
         panelMatch.addControl(matchRow);
 
         const panelRow = new StackPanel();
@@ -213,10 +190,10 @@ function listMatch(
         if (match.getWinner)
         {
             const score = new TextBlock();
-            score.text = match.getScore[0];
+            score.text = match.getScore[0].toString();
             score.color = "black";
-            score.fontSize = env.UIData.text.fontSize;
-            score.fontFamily = env.UIData.text.fontFamily;
+            score.fontSize = UIData.text.fontSize;
+            score.fontFamily = UIData.text.fontFamily;
             score.width = "50px";
             score.height = "70px";
             panelRow.addControl(score);
@@ -224,8 +201,8 @@ function listMatch(
 
         const vs = new TextBlock();
         vs.text = "VS";
-        vs.fontSize = env.UIData.text.fontSize;
-        vs.fontFamily = env.UIData.text.fontFamily;
+        vs.fontSize = UIData.text.fontSize;
+        vs.fontFamily = UIData.text.fontFamily;
         vs.color = "rgb(0,0,0)";
         vs.width = "50px";
         vs.height = "50px";
@@ -234,10 +211,10 @@ function listMatch(
         if (match.getWinner)
         {
             const score = new TextBlock();
-            score.text = match.getScore[1];
+            score.text = match.getScore[1].toString();
             score.color = "black";
-            score.fontSize = env.UIData.text.fontSize;
-            score.fontFamily = env.UIData.text.fontFamily;
+            score.fontSize = UIData.text.fontSize;
+            score.fontFamily = UIData.text.fontFamily;
             score.width = "50px";
             score.height = "70px";
             panelRow.addControl(score);
@@ -254,8 +231,8 @@ function listMatch(
             const start = new Rectangle();
             start.width = "100px";
             start.height = "50px";
-            start.color = env.UIData.button.color;
-            start.background = env.UIData.button.background;
+            start.color = UIData.button.color;
+            start.background = UIData.button.background;
             start.thickness = 1;
             panelRow.addControl(start);
 
@@ -263,8 +240,8 @@ function listMatch(
             textStart.text = "Lancer";
             textStart.width = "100px";
             textStart.height = "50px";
-            textStart.fontFamily = env.UIData.text.fontFamily;
-            textStart.fontSize = env.UIData.text.fontSize;
+            textStart.fontFamily = UIData.text.fontFamily;
+            textStart.fontSize = UIData.text.fontSize;
             start.addControl(textStart);
 
             start.onPointerClickObservable.add(() => {
@@ -272,11 +249,11 @@ function listMatch(
             });
 
             start.onPointerEnterObservable.add(() => {
-                start.background = env.UIData.button.hoveredBackground;
+                start.background = UIData.button.hoveredBackground;
             });
 
             start.onPointerOutObservable.add(() => {
-                start.background = env.UIData.button.background;
+                start.background = UIData.button.background;
             });
         }
     }
@@ -298,6 +275,7 @@ function waitingScreen(
             console.error("Impossible de lancer le match");
         else
         {
+            env.scoreboard.leaveMenu();
             env.sceneManager.getSceneInteractor?.disableInteractions();
             env.scoreboard.setClic = false;
             env.sceneManager.moveCameraTo(ZoneName.FIELD, () => {
@@ -309,35 +287,34 @@ function waitingScreen(
     }
 
     // Mode en ligne : attendre que l'adversaire soit prêt
-    myClearControls(env.menuContainer);
+    env.menuContainer?.clearControls();
     let panel = new StackPanel();
     panel.isVertical = true;
     panel.width = "100%";
     panel.spacing = 5;
-    env.menuContainer.addControl(panel);
+    env.menuContainer?.addControl(panel);
 
     const info = new TextBlock();
-    info.color = env.UIData.text.color;
-    info.fontSize = env.UIData.text.fontSize + 10;
+    info.color = UIData.text.color;
+    info.fontSize = UIData.text.fontSize + 10;
     info.paddingLeft = 100;
-    info.fontFamily = env.UIData.text.fontFamily;
+    info.fontFamily = UIData.text.fontFamily;
     info.width = "100%";
     info.height = "100px";
     info.textHorizontalAlignment = Control.HORIZONTAL_ALIGNMENT_LEFT;
-    env.menuContainer.addControl(info);
+    env.menuContainer?.addControl(info);
 
     let i = 0;
-    env.waitingInterval.id = setInterval(() => {
+    env.interval.id = setInterval(() => {
         if (i===5)
             i = 0;
         i++;
-        if (match.getSloatA && match.getSloatA.id === env.userX.getUser.id && match.getSloatB)
+        if (match.getSloatA && match.getSloatA.id === env.userX.getUser?.id && match.getSloatB)
             info.text = "En attente de l'adversaire " + match.getSloatB.alias + " .".repeat(i);
-        else if (match.getSloatB && match.getSloatB.id === env.userX.getUser.id && match.getSloatA)
+        else if (match.getSloatB && match.getSloatB.id === env.userX.getUser?.id && match.getSloatA)
             info.text = "En attente de l'adversaire " + match.getSloatA.alias + " .".repeat(i);
         else
         {
-            console.error("Bizarre bizarre");
             info.text = "Oupsi quelque chose ne va pas :(";
             return ;
         }
@@ -348,8 +325,7 @@ function waitingScreen(
             && match.getSloatA && match.getSloatA.ready))
         )
         {
-            clearInterval(env.waitingInterval.id);
-            // env.menuContainer.dispose();
+            clearInterval(env.interval.id);
             if (!env.userX.playTournamentMatch(utils.tournament, match, env.sceneManager))
                 console.error("Impossible de lancer le match");
             else
@@ -361,7 +337,7 @@ function waitingScreen(
                     env.sceneManager.getSceneInteractor?.enableInteractionScene();
                 });
             }
-            env.waitingInterval.id = -1;
+            env.interval.id = -1;
         }
     }, 1000);
 }
@@ -375,12 +351,12 @@ export function menuTournament(
     if (env.userX.getTournament === null)
         return ;
 
-    myClearControls(env.menuContainer);
+    env.menuContainer?.clearControls();
     let panel = new StackPanel();
     panel.isVertical = true;
     panel.width = "100%";
     panel.spacing = 5;
-    env.menuContainer.addControl(panel);
+    env.menuContainer?.addControl(panel);
     if (!refresh && utils === undefined)
     {
         utils = {

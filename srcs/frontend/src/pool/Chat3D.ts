@@ -21,7 +21,6 @@ import {
 import { UserX } from "../UserX.ts";
 import { Friend } from "../friends/Friend.ts";
 
-import WebSocket from "isomorphic-ws";
 import { chatApi } from "../chatApi/chat.api.ts";
 import { SceneManager } from "../scene/SceneManager.ts";
 import { ZoneName } from "../config.ts";
@@ -46,6 +45,8 @@ export class Chat3D {
     private lastDate: Date | null;
     private userX: UserX;
     private sceneManager: SceneManager;
+    private interval: any = -1;
+    private closeInterval: boolean = false;
     private poolInteraction: PoolInteraction;
 
     private ws: WebSocket | null = null;
@@ -102,14 +103,6 @@ export class Chat3D {
         this.loginText.textHorizontalAlignment = Control.HORIZONTAL_ALIGNMENT_LEFT;
         this.loginText.verticalAlignment = Control.VERTICAL_ALIGNMENT_CENTER;
         headerGrid.addControl(this.loginText, 0, 0);
-
-        this.onlineIcon = new Ellipse();
-        this.onlineIcon.width = "26px";
-        this.onlineIcon.height = "26px";
-        this.onlineIcon.background = friend.getOnline ? "#1f9e69ff" : "#cc6475ff";
-        this.onlineIcon.thickness = 2;
-        this.onlineIcon.verticalAlignment = Control.VERTICAL_ALIGNMENT_CENTER;
-        headerGrid.addControl(this.onlineIcon, 0, 1);
 
         const msgContainer = new Rectangle();
         msgContainer.width = "100%";
@@ -271,7 +264,10 @@ export class Chat3D {
 
         this.ws.onclose = () => {
             console.warn("WebSocket fermé. Reconnexion dans 2s…");
-            setTimeout(() => this.initWebSocket(), 2000);
+            if (!this.closeInterval)
+                this.interval = setTimeout(() => {
+                    this.initWebSocket() 
+                } , 2000);
         };
     }
 
@@ -319,7 +315,6 @@ export class Chat3D {
 
     updateChat(friend: Friend): void {
         this.loginText.text = friend.getUsername;
-        this.onlineIcon.background = friend.getOnline ? "#1f9e69ff" : "#cc6475ff";
         this.chatContainer.clearControls();
         this.friend = friend;
         this.lastDate = null;
@@ -523,6 +518,9 @@ export class Chat3D {
         }
 
         if (this.ws) {
+            this.closeInterval = true;
+            clearTimeout(this.interval);
+            console.log("JE CLOSE LE SOCKET");
             this.ws.close();
             this.ws = null;
         }

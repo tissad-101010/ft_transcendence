@@ -116,8 +116,7 @@ export class StandsInteraction implements SpecificInteraction {
                 this.friendUI = new FriendUI(   
                                     this.sceneManager,
                                     this.updateChair.bind(this),
-                                    buttonMeshes,
-                                    this
+                                    buttonMeshes
                                 );
             }
             else
@@ -163,8 +162,6 @@ export class StandsInteraction implements SpecificInteraction {
             this.resetState(buttonMeshes);
             this.updateButtons(buttonMeshes);
             displayFriendsWithEmpty(this.scene, this.sceneManager.getUserX.getFriends, this.sceneManager.getChair);
-            this.friendUI = null;
-            this.resetMaterialForScoreboard();
     }
 
     public resetMaterialForScoreboard() : void
@@ -180,7 +177,6 @@ export class StandsInteraction implements SpecificInteraction {
         mesh: AbstractMesh
     ): void 
     {
-        console.log(mesh);
         if (!this.sceneInteractor.areInteractionsEnabled()) return;
         const pickedMesh = mesh;
         if (!pickedMesh)return;
@@ -203,7 +199,6 @@ export class StandsInteraction implements SpecificInteraction {
                         this.sceneManager,
                         this.updateChair.bind(this),
                         buttonMeshes,
-                        this
                     );
                 this.friendUI.displayFriend(this.sceneManager.getUserX.getFriends[index]);
             } else if (arbitratorMeshes.includes(pickedMesh)) {

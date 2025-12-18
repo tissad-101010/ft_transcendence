@@ -2,21 +2,16 @@ import { AbstractMesh} from '@babylonjs/core';
 
 import 
 {
-  Rectangle,
   TextBlock,
-  AdvancedDynamicTexture,
   Grid
 } from "@babylonjs/gui";
 
-import { UserX } from "../../UserX.ts";
 import { UIData } from "../utils.ts";
-import { Tournament } from "../../Tournament.ts";
 import { DataMatchBlock, genRulesMatchBlock } from './genRulesMatch.ts';
 import { genInvitationPage } from './genInvitationPage.ts';
-import { ScoreboardHandler } from '../ScoreboardHandler.ts';
 import { genJoinMatch } from './menuCreate.ts';
 
-import { Env } from './menuCreate.ts';
+import { Env } from '../utils.ts';
 
 function swapPage(
     label: string,
@@ -39,7 +34,9 @@ export function createButton(
     grid: Grid    
 ) : void
 {
-    const value = env.tournament.checkReady();
+    const value = env.userX.getTournament?.checkReady();
+    if (value === undefined)
+        return ;
     if (value !== 0)
     {
         if (env.errorMsg !== null)
@@ -52,40 +49,37 @@ export function createButton(
         env.errorMsg.color = "red";
         env.errorMsg.width = "100%";
         env.errorMsg.height = "40px";
-        env.errorMsg.fontSize = env.UIData.text.fontSize;
-        env.errorMsg.fontFamily = env.UIData.text.fontFamily;
+        env.errorMsg.fontSize = UIData.text.fontSize;
+        env.errorMsg.fontFamily = UIData.text.fontFamily;
         grid.addControl(env.errorMsg, 1, 0);
         switch(value)
         {
             case 1 :
-                env.errorMsg.text = "Vitesse non renseignee";
+                env.errorMsg.text = "Missing speed";
                 break;
             case 2 :
-                env.errorMsg.text = "Score non renseigne";
+                env.errorMsg.text = "Missing score";
                 break;
             case 3 :
-                env.errorMsg.text = "Temps avant engagement non renseigne";
+                env.errorMsg.text = "Missing time before engagement";
                 break;
             case 4 :
-                env.errorMsg.text = "Pas suffisament de participants (4 minimum)";
+                env.errorMsg.text = "Not enough participant (4 min)";
                 break;
             case 5 :
-                env.errorMsg.text = "Le nombre de participants doit etre pair";
-                break;
-            case 6 :
-                env.errorMsg.text = "Des participants ne sont pas pret";
+                env.errorMsg.text = "Number of participants must be odd";
                 break;
             case 7 :
-                env.errorMsg.text = "Le nombre de participants doit etre une puissance de 2 (4, 8, 16, ...)";
+                env.errorMsg.text = "Number must be power of 2 (4, 8, 16, ...)";
+                break;
         }
     }
     else
     {
-        env.tournament.start().then(() => {
-            env.control.selectMenu(env.meshScoreboard);
+        env.userX.getTournament!.start().then(() => {
+            env.scoreboard.selectMenu(env.meshScoreboard);
         }).catch((error) => {
-            console.error("Erreur lors du démarrage du tournoi:", error);
-            env.control.selectMenu(env.meshScoreboard);
+            env.scoreboard.selectMenu(env.meshScoreboard);
         });
     }
 }
@@ -99,7 +93,7 @@ export function invitationButton(
 {
     if (swapPage(label, env, settings) === true)
     {
-        env.page = genInvitationPage(env.UIData, env.userX);
+        env.page = genInvitationPage(env.userX);
         grid.addControl(env.page, 0, 0);
     }
     else
@@ -109,10 +103,11 @@ export function invitationButton(
 export function joinButton(
     label: string,
     env: Env,
+    settings: DataMatchBlock,
     grid: Grid
 ) : void
 {
-    if (swapPage(label, env, grid) === true)
+    if (swapPage(label, env, settings) === true)
     {
         env.page = genJoinMatch(env);
         grid.addControl(env.page, 0, 0);
@@ -128,7 +123,7 @@ export function newButton(
     grid: Grid
 ) : void
 {
-    if (swapPage(label, env, grid) === true)
+    if (swapPage(label, env, settings) === true)
     {
         env.page = genRulesMatchBlock(settings, true);
         grid.addControl(env.page, 0, 0);
@@ -163,7 +158,6 @@ export function startButton(
     const user = (env.userX as any).getUser;
     if (!user) {
         console.error("❌ Impossible de créer un match: utilisateur non défini dans UserX");
-        alert("Erreur: Vous devez être connecté pour créer un match amical");
         return;
     }
     
@@ -175,17 +169,11 @@ export function startButton(
         score: setting.data.score
     }
     
-    console.log("📋 Règles du match:", rules);
-    
-    console.log("🚀 Appel de createFriendlyMatch avec les règles:", rules);
-    
     env.userX.createFriendlyMatch(rules).then((success) => {
         console.log("📥 Réponse de createFriendlyMatch:", success);
         if (success) {
-            console.log("✅ Match amical créé avec succès");
             // Rafraîchir la liste des matchs si on est sur la page "Rejoindre"
             if ((env as any).refreshJoinMatchList) {
-                console.log("🔄 Rafraîchissement de la liste des matchs...");
                 // Augmenter le délai pour s'assurer que le match est bien enregistré
                 setTimeout(() => {
                     console.log("🔄 Exécution du rafraîchissement de la liste...");
@@ -196,11 +184,11 @@ export function startButton(
             }
         } else {
             console.error("❌ Échec de la création du match amical (success = false)");
-            alert("Erreur lors de la création du match amical. Vérifiez la console pour plus de détails.");
+            alert("Error");
         }
     }).catch((error) => {
         console.error("❌ Erreur lors de la création du match amical:", error);
-        alert("Erreur lors de la création du match amical: " + (error.message || String(error)));
+        alert("Error " + (error.message || String(error)));
     });
 }
 
@@ -211,9 +199,5 @@ export async function backButton(
     if (env.page !== null)
         env.page.dispose();
     env.page = null;
-
-    // Si un tournoi est en cours de création côté serveur (statut waiting), le nettoyer
-    await env.userX.deleteTournament();
-
     fn(env);
 }
