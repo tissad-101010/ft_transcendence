@@ -1,7 +1,8 @@
 // IMPORT FOR SCENE BABYLON
 import { ZoneName } from "./config.ts";
 import { SceneManager } from "./scene/SceneManager.ts";
-import { Env } from "./lockerRoom/scoreboardUI/menuCreate.ts";
+
+import { Env } from "./lockerRoom/utils.ts";
 
 // IMPORT FOR TOURNAMENT
 import { 
@@ -33,7 +34,7 @@ import {
     StatusInvitation 
 } from "./friends/api/friends.api.ts";
 
-import { API_URL } from "./utils.ts";
+import { getApiUrl } from "./utils.ts";
 
 // TYPES
 import { 
@@ -223,7 +224,7 @@ export class UserX
             };
             console.log("Envoi de la requête POST /api/friendly/create avec:", requestBody);
             
-            const response = await fetch(`${API_URL}/api/friendly/create`, {
+            const response = await fetch(`${getApiUrl()}/api/friendly/create`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -300,7 +301,7 @@ export class UserX
         // Appeler l'API pour rejoindre le match
         const backendUser = userToBackendFormat(this.user);
         try {
-            const response = await fetch(`${API_URL}/api/friendly/${idMatch}/join`, {
+            const response = await fetch(`${getApiUrl()}/api/friendly/${idMatch}/join`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -505,7 +506,7 @@ export class UserX
         console.log("Suppression du match amical:", matchId);
         
         try {
-            const response = await fetch(`${API_URL}/api/friendly/${matchId}`, {
+            const response = await fetch(`${getApiUrl()}/api/friendly/${matchId}`, {
                 method: "DELETE",
                 headers: {
                     Accept: "application/json",

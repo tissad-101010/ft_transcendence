@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "./auth/context.tsx";
+import { getApiUrl } from "./utils.ts";
 
 const API_URL = window.__ENV__.BACKEND_URL;
 
@@ -21,7 +22,7 @@ export default function OAuthCallback() {
         //   return;
         // }
 
-        const response = await fetch(`${API_URL}/api/user/oauth/callback`,
+        const response = await fetch(`${getApiUrl()}/api/user/oauth/callback`,
           {
             method: "GET",
             credentials: "include", // important to include cookies

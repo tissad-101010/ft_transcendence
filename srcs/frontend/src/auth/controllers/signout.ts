@@ -3,14 +3,15 @@
 /*                                                        :::      ::::::::   */
 /*   signout.ts                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: tissad <tissad@student.42.fr>              +#+  +:+       +#+        */
+/*   By: glions <glions@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/20 12:26:37 by tissad            #+#    #+#             */
-/*   Updated: 2025/12/11 19:15:12 by tissad           ###   ########.fr       */
+/*   Updated: 2025/12/18 08:43:49 by glions           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 // src/utils/logoutUser.ts
+import { getApiUrl } from "../../utils";
 import { authFetch } from "../authFetch";
 
 
@@ -22,7 +23,7 @@ export async function logoutUser() : Promise<boolean> {
       method: "POST",
       credentials: "include", // indispensable pour les cookies
     };
-    const response = await authFetch(`${API_URL}/api/user/auth/logout`, requestOptions);
+    const response = await authFetch(`${getApiUrl()}/api/user/auth/logout`, requestOptions);
 
 
     if (!response.ok) {

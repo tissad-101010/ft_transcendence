@@ -6,9 +6,11 @@
 /*   By: glions <glions@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/18 19:06:30 by tissad            #+#    #+#             */
-/*   Updated: 2025/12/16 09:28:39 by glions           ###   ########.fr       */
+/*   Updated: 2025/12/18 08:46:01 by glions           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
+
+import { getApiUrl } from "../utils";
 
 // ==============================
 //  fetchWrapper - gère le refresh auto
@@ -27,7 +29,7 @@ async function refreshAccessToken(): Promise<void> {
             try {
                 isRefreshing = true;
                 
-                const res = await fetch(`${API_URL}/api/user/auth/refresh`, {
+                const res = await fetch(`${getApiUrl()}/api/user/auth/refresh`, {
                     method: "POST",
                     credentials: "include",
                 });
