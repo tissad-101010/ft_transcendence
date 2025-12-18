@@ -9,11 +9,10 @@ import {
   AbstractMesh,
   FreeCameraMouseInput,
   Texture,
-  ParticleSystem,
-  Mesh
+  ParticleSystem
 } from '@babylonjs/core';
 import "@babylonjs/inspector";
-import { AdvancedDynamicTexture, TextBlock } from "@babylonjs/gui";
+import { AdvancedDynamicTexture } from "@babylonjs/gui";
 
 import { SceneInteractor } from './SceneInteractor.ts';
 import { CAMERA_CONFIGS, ZoneName, meshNamesByZone } from "../config.ts";
@@ -21,8 +20,7 @@ import { CAMERA_CONFIGS, ZoneName, meshNamesByZone } from "../config.ts";
 import { 
 normalizeRotation,
 displayPlayers, 
-groupConfigs,
-Player
+groupConfigs
  } from '../utils.ts';
 
 import { UserX } from '../UserX.ts';
@@ -119,7 +117,7 @@ export class SceneManager {
     {
         const hdrTexture = new HDRCubeTexture("env.hdr", this.scene, 2048);
         this.scene.environmentTexture = hdrTexture;
-        const skybox = this.scene.createDefaultSkybox(hdrTexture, true, 2500, 0);
+        this.scene.createDefaultSkybox(hdrTexture, true, 2500, 0);
         this.scene.imageProcessingConfiguration.exposure = 0.9;
     }
 
@@ -317,8 +315,6 @@ private resetInteractions(): void {
                 this.freeCamera.detachControl();
             } else
                 this.enableRotationOnly();
-            // if (typeof onArrived === "function")
-                // console.log("Bien arrive 2");
         }
     }
 

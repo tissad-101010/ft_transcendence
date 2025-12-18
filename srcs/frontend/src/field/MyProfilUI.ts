@@ -2,20 +2,19 @@
 // fuuction that logout user from the application
 import { logoutUser } from "../auth/controllers/signout.ts";
 import { changePassword } from "../auth/controllers/auth.api.ts";
-import {    sendEnableEmailOtp,
-            enable2faEmail,
-            disable2faEmail,
-            getTotpSecret,
-            enableTotp,
-            disableTotp,
-            getTwoFactorMethods
-        } from "../auth/controllers/twoFactor.api.ts";
+import {    
+    sendEnableEmailOtp,
+    enable2faEmail,
+    disable2faEmail,
+    getTotpSecret,
+    enableTotp,
+    disableTotp,
+    getTwoFactorMethods
+} from "../auth/controllers/twoFactor.api.ts";
 
 import { ZoneName } from "../config.ts";
 
 import { 
-    StandardMaterial,
-    Mesh,
     AbstractMesh,
     Material
 } from "@babylonjs/core";
@@ -27,8 +26,7 @@ import {
     Control,
     Rectangle,
     Button,
-    Image,
-    InputText
+    Image
 } from "@babylonjs/gui";
 
 import {
@@ -54,7 +52,9 @@ import {
 } from "./utilsUI.ts";
 import { SceneManager } from "../scene/SceneManager.ts";
 import { UserX } from "../UserX.ts";
-const API_URL = window.__ENV__.BACKEND_URL;
+import { listMatch } from "../friends/api/friends.api";
+import { getApiUrl } from "../utils.ts";
+import { authFetch } from "../auth/authFetch.ts";
 
 Chart.register(
     LineController,
@@ -75,8 +75,6 @@ const BG_DARK = "#1a1a1a";
 const TEXT_BRIGHT = "#ffffff";
 const BTN_NORMAL = "#caaba8"
 const BTN_ACTIVE = "#3f8b95";
-const BTN_BACK = "#1b1b1b";
-
 
 export class MyProfilUI
 {
@@ -94,6 +92,9 @@ export class MyProfilUI
     private mesh : AbstractMesh | null= null;
     private logoMesh : AbstractMesh | null = null;
     private ballPong : AbstractMesh | null = null;
+    private totalGames : number = 0;
+    private victories : number = 0;
+    private defeats : number = 0;
 
     constructor(sceneManager: SceneManager, userX: UserX)
     {
@@ -139,12 +140,12 @@ export class MyProfilUI
         stackElements1.isVertical = true;
         panel2fa.addControl(stackElements1);
 
-        const { textBlock: infoMsg } = createMsgInfo({
-            parent: stackElements1,
-            text: "Please enter the code sent to your email.",
-            fontSize: 30,
-            color: TEXT_BRIGHT
-        });
+        // const { textBlock: infoMsg } = createMsgInfo({
+        //     parent: stackElements1,
+        //     text: "Please enter the code sent to your email.",
+        //     fontSize: 30,
+        //     color: TEXT_BRIGHT
+        // });
 
         const qrImgRec = new Rectangle("mailRec");
         qrImgRec.width = "200px";
@@ -217,19 +218,18 @@ export class MyProfilUI
         stackElements1.isVertical = true;
         panel2fa.addControl(stackElements1);
 
-        const { textBlock: infoMsg } = createMsgInfo({
-            parent: stackElements1,
-            text: "Scan the QR code and confirm.",
-            fontSize: 30,
-            color: TEXT_BRIGHT
-        });
+        // const { textBlock: infoMsg } = createMsgInfo({
+        //     parent: stackElements1,
+        //     text: "Scan the QR code and confirm.",
+        //     fontSize: 30,
+        //     color: TEXT_BRIGHT
+        // });
 
         const qrImgRec = new Rectangle("qrImgRec");
         qrImgRec.width = "200px";
         qrImgRec.height = "200px";
         qrImgRec.thickness = 0;
         stackElements1.addControl(qrImgRec);
-        console.log("QR Code URL:", qrCodeUrl.qrCodeUrl);
         const qrImg = new Image("qrImgImg", qrCodeUrl.qrCodeUrl);
         qrImg.width = 1;
         qrImg.height = 1;
@@ -264,7 +264,6 @@ export class MyProfilUI
             background: BTN_ACTIVE,
             onClick: async () => {
                 const code = input.text?.trim();
-                console.log("Code entered for TOTP enabling:", code);
                 if (!code) return infoMsg1.text = "The field is empty.";
                 if (code.length !== 6) return infoMsg1.text = "Incorrect code. Please check and try again.";
                 const res = await enableTotp(code);
@@ -390,7 +389,6 @@ export class MyProfilUI
         // change this with 2fa user methods request/!\
          //get 2fa methods from request
         const methods = await getTwoFactorMethods();
-        console.log("User 2FA methods:", methods);
         if (!methods){
             console.error("No 2FA methods found for user.");
             this.enable2faApp = false;
@@ -398,18 +396,13 @@ export class MyProfilUI
         }else{
             for (const method of methods) {
                 if (method.type === "TOTP" && method.enabled) {
-                    console.log("TOTP 2FA is enabled for user.");
                     this.enable2faApp = true;
                 }
                 if (method.type === "EMAIL" && method.enabled) {     
-                    console.log("Email 2FA is enabled for user."); 
                     this.enable2faMail = true;
                 }
             }  
         }
-
-
-        console.log("App 2FA enabled state:", this.enable2faApp);
 
         enable2faBtn = create2faButton({ // warning merge conflict
             id: "enable2FAApp",
@@ -423,7 +416,6 @@ export class MyProfilUI
             onActivate: () => {
                 getTotpSecret().then((data) => {
                     if (data) {
-                        console.log("TOTP Secret fetched:", data.qrCodeUrl);
                         // Here you would typically generate a QR code from data.qrCodeUrl
                         // and display it in the UI for the user to scan.
                         this.flag = true;
@@ -436,7 +428,6 @@ export class MyProfilUI
                 });
             },
             onDeactivate: () => {
-                console.log("Disabling 2FA app...");
                 disableTotp();
                 this.flag = false;
             }
@@ -464,7 +455,6 @@ export class MyProfilUI
                 this.enable2FaMailInterface();
             },
             onDeactivate: async () => {
-                console.log("Disabling 2FA email...");
                 await disable2faEmail();
                 this.flag = false;
 
@@ -555,14 +545,13 @@ export class MyProfilUI
                     const formData = new FormData();
                     formData.append("avatar", file);  // OBLIGATOIRE : "avatar"
     
-                    const res = await fetch(`${API_URL}/api/user/upload-avatar`, {
+                    const res = await authFetch(`${getApiUrl()}/api/user/upload-avatar`, {
                         method: "POST",
                         body: formData,
                         credentials: "include"
                     });
     
                     const data = await res.json();
-                    console.log("uploaded:", data);
                 };
 
                 input.click();
@@ -583,7 +572,28 @@ export class MyProfilUI
     // =============================================================
     //  CAT 1 (LEFT)
     // =============================================================
-    private displayMainCat1(): void {
+    async updateGames() {
+        if (!this.userX.getUser) return;
+
+        const result = await listMatch(this.userX.getUser.username);
+
+        if (result.success && Array.isArray(result.data)) {
+            this.totalGames = result.data.length;
+            this.victories = 0;
+            this.defeats = 0;
+
+            result.data.forEach(match => {
+                if (match.winnerId === this.userX.getUser!.id) this.victories++;
+                else if (match.winnerId != null) this.defeats++;
+            });
+        } else {
+            this.totalGames = 0;
+            this.victories = 0;
+            this.defeats = 0;
+        }
+    }
+
+    private async displayMainCat1(): Promise<void> {
         const leftPanel = new StackPanel();
         leftPanel.isVertical = true;
         leftPanel.background = "#2b2b2b";
@@ -648,9 +658,9 @@ export class MyProfilUI
         recSection2.addControl(titleSection2);
 
         const gamePlayed = new TextBlock();
-        gamePlayed.text = "Games played: " + this.userX.getUser?.gamesPlayed;
         gamePlayed.height = "40px";
         gamePlayed.paddingLeft = "5px";
+        gamePlayed.text = "Games played: loading...";
         gamePlayed.fontSize = 19;
         gamePlayed.color = TEXT_BRIGHT;
         gamePlayed.shadowColor = "#000";
@@ -659,7 +669,7 @@ export class MyProfilUI
         leftPanel.addControl(gamePlayed);
 
         const win = new TextBlock();
-        win.text = "Wins: " + this.userX.getUser?.wins;
+        win.text = "Wins: loading...";
         win.height = "25px";
         win.fontSize = 19;
         win.paddingLeft = "5px";
@@ -670,7 +680,7 @@ export class MyProfilUI
         leftPanel.addControl(win);
 
         const loss = new TextBlock();
-        loss.text = "Losses: " + this.userX.getUser?.loss;
+        loss.text = "Losses: loading...";
         loss.height = "40px";
         loss.fontSize = 19;
         loss.paddingLeft = "5px";
@@ -679,6 +689,12 @@ export class MyProfilUI
         loss.shadowBlur = 4;
         loss.textHorizontalAlignment = Control.HORIZONTAL_ALIGNMENT_LEFT;
         leftPanel.addControl(loss);
+
+        await this.updateGames(); // récupère totalGames, victories, defeats
+
+        gamePlayed.text = `Games played: ${this.totalGames}`;
+        win.text = `Wins: ${this.victories}`;
+        loss.text = `Losses: ${this.defeats}`;
     }
 
     // =============================================================

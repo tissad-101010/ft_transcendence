@@ -19,14 +19,9 @@ import { Env, Interval, moveSponge } from './utils.ts';
 /* UTILES POUR SUIVRE CE QUE FAIS L'UTILISATEUR DANS LES MENUS */
 import { UserX } from '../UserX.ts';
 
-/* Interface représentant un objet contenant des données pour l'UI */
-import { UIData } from './utils.ts';
-
 import { menuCreate } from './scoreboardUI/menuCreate.ts';
 import { menuTournament } from './scoreboardUI/menuTournament.ts';
 import { navigateToZone } from '../CameraHistory.ts';
-
-
 
 export class ScoreboardHandler {
     /**************************************************

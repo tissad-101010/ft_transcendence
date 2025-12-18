@@ -17,26 +17,11 @@ import {
     Image,
 } from "@babylonjs/gui";
 
-// IMPORTS FOR CHART.JS
-import {
-  Chart,
-  LineController,
-  LineElement,
-  PointElement,
-  LinearScale,
-  CategoryScale,
-  Title,
-  Tooltip,
-  Legend,
-  Filler,
-} from 'chart.js';
 
 import { Friend } from "../friends/Friend";
 import { FriendUI } from "./FriendUI";
 import { ContainerUI } from "./FriendUI";
 import { Match } from "../friends/Friend";
-
-Chart.register(LineController, LineElement, PointElement, LinearScale, CategoryScale, Title, Tooltip, Legend, Filler);
 
 export class DataFriendUI
 {
@@ -81,12 +66,18 @@ export class DataFriendUI
 
         let avatar : Image;
         if (this.friend.getAvatarUrl)
+        {
             avatar = new Image("imgAvatar", this.friend.getAvatarUrl);
+            avatar.width = "275px";
+            avatar.height = "350px";
+        }
         else
+        {
             avatar = new Image("imgAvatar", "icon/user.png");
+            avatar.width = "175px";
+            avatar.height = "250px";
+        }
         avatar.paddingTop = 100;
-        avatar.width = "175px";
-        avatar.height = "250px";
         avatar.horizontalAlignment = Control.HORIZONTAL_ALIGNMENT_CENTER;
         avatar.verticalAlignment = Control.VERTICAL_ALIGNMENT_CENTER;
         this.containerUI.headerPanel!.addControl(avatar);
@@ -126,7 +117,6 @@ export class DataFriendUI
         panelDown.spacing = 25;
         rectDown.addControl(panelDown);
 
-        const self = this;
         function createButton(label: string, urlImg: string, self: DataFriendUI) : Button
         {
             const button = Button.CreateImageOnlyButton("buttonMenu", urlImg);
@@ -341,10 +331,8 @@ export class DataFriendUI
         value: number
     ) : void
     {
-        const mesh = this.friendUI.getSceneManager.getMesh("scoreBoard")[1];
         const scene = this.friendUI.getSceneManager.getScene();
         const camera = scene.activeCamera;
-        const engine = scene.getEngine();
 
         if (camera === null)
             return ;

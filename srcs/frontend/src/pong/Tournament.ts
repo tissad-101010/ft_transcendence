@@ -108,7 +108,6 @@ export class Tournament
         // Si pas de match suivant, le tournoi est terminé
         if (nextMatch === undefined)
         {
-            console.log("Tournoi terminé !");
             displayPlayers(this.sceneManager.getScene(), this.participants, this.sceneManager.getTshirt);
             return true; // Tournoi terminé
         }

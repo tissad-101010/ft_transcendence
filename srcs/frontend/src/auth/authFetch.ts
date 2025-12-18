@@ -6,7 +6,7 @@
 /*   By: glions <glions@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/18 19:06:30 by tissad            #+#    #+#             */
-/*   Updated: 2025/12/18 08:46:01 by glions           ###   ########.fr       */
+/*   Updated: 2025/12/18 11:33:55 by glions           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,19 +16,12 @@ import { getApiUrl } from "../utils";
 //  fetchWrapper - gère le refresh auto
 // ==============================
 
-
-const API_URL = window.__ENV__.BACKEND_URL;
-
-
-let isRefreshing = false;
 let refreshPromise: Promise<void> | null = null;
 
 async function refreshAccessToken(): Promise<void> { 
     if (!refreshPromise) {
         refreshPromise = (async () => {
             try {
-                isRefreshing = true;
-                
                 const res = await fetch(`${getApiUrl()}/api/user/auth/refresh`, {
                     method: "POST",
                     credentials: "include",
@@ -39,7 +32,6 @@ async function refreshAccessToken(): Promise<void> {
                     throw new Error("Refresh failed");
                 }
             } finally {
-                isRefreshing = false;
                 refreshPromise = null;
             }
         })();

@@ -5,81 +5,12 @@ import
   TextBlock,
   InputText,
   Control,
-  Grid,
   Rectangle,
-  Ellipse,
   ScrollViewer
 } from "@babylonjs/gui";
 
 import { UIData } from "../utils.ts";
-
-import { Friend } from "../../friends/Friend.ts";
 import { UserX } from "../../UserX.ts";
-
-function genFriendList(
-    userX: UserX,
-    container: {scrollViewer: ScrollViewer | null},
-    lists: StackPanel
-) : ScrollViewer
-{
-
-    const blockFriend = new ScrollViewer();
-    blockFriend.width = "400px";
-    blockFriend.height = "200px";
-    blockFriend.background = "transparent";
-    blockFriend.barColor = UIData.text.color;
-    blockFriend.thickness = 1;
-
-    const panel = new StackPanel();
-    panel.width = "100%";
-    panel.isVertical = true;
-    panel.spacing = 5;
-    blockFriend.addControl(panel);
-
-    const text = new TextBlock();
-    text.text = "Amis";
-    text.color = UIData.text.color;
-    text.width = "100%";
-    text.height = "30px";
-    text.fontSize = UIData.text.fontSize - 3;
-    text.fontFamily = UIData.text.fontFamily;
-    text.textHorizontalAlignment = Control.HORIZONTAL_ALIGNMENT_CENTER;
-    panel.addControl(text);    
-
-    const friends = userX.getFriends.filter((f : Friend) => f.getOnline === true);
-
-    for (let i = 0; i < friends.length; i++)
-    {
-        const test = new TextBlock();
-        test.text = friends[i].getUsername;
-        test.height = "30px";
-        test.width = "100%";
-        test.fontSize = UIData.text.fontSize - 3;
-        test.fontFamily = UIData.text.fontFamily;
-        test.color = UIData.text.color;
-        panel.addControl(test);
-
-        test.onPointerClickObservable.add(() => {
-            const friendId = friends[i].getId;
-            if (friendId === undefined || friendId === null) {
-                console.error(`Friend ${test.text} n'a pas d'ID valide`);
-                return;
-            }
-            if (!userX.getTournament?.addParticipant({login: test.text, alias: test.text, ready: true, id: friendId, eliminate: false}))
-                genWaitingList(userX, container, lists);
-        })
-
-        test.onPointerEnterObservable.add(() => {
-            test.color = UIData.button.hoveredBackground;
-        });
-
-        test.onPointerOutObservable.add(() => {
-            test.color = UIData.text.color;
-        })
-    }
-    return (blockFriend);
-}
-
 
 function genWaitingList(
     userX: UserX,

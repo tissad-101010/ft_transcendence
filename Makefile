@@ -41,10 +41,10 @@ local:
 	cp ~/secret/service_chat/secret_id ~/data/secrets/chat/secret_id             
 	cp ~/secret/service_friends/secret_id ~/data/secrets/friends/secret_id 
 	cp ~/secret/service_game/secret_id ~/data/secrets/game/secret_id
-	cp ~/sgoinfre/local/env.hdr ./srcs/frontend/public/env.hdr
-	cp ~/sgoinfre/local/strucLocker.glb srcs/frontend/public/lockerRoom/strucLocker.glb
-	cp ~/sgoinfre/local/strucPool.glb srcs/frontend/public/pool/strucPool.glb
-	cp ~/sgoinfre/local/strucField.glb srcs/frontend/public/field/strucField.glb
+# 	cp ~/sgoinfre/local/env.hdr ./srcs/frontend/public/env.hdr
+# 	cp ~/sgoinfre/local/strucLocker.glb srcs/frontend/public/lockerRoom/strucLocker.glb
+# 	cp ~/sgoinfre/local/strucPool.glb srcs/frontend/public/pool/strucPool.glb
+# 	cp ~/sgoinfre/local/strucField.glb srcs/frontend/public/field/strucField.glb
 
 
 vault_start:

@@ -83,7 +83,6 @@ export class InvitationUI
         inputText.thickness = 0;
         containerInput.addControl(inputText);
 
-        let msgInfo : TextBlock | null = null;
         let login : string = "";
 
         // INPUTTEXT EVENT
@@ -150,7 +149,6 @@ export class InvitationUI
         button.onPointerClickObservable.add(() => {
             this.friendUI.getSceneManager.getUserX.sendFriendInvite(login)
             .then((res) => {
-                console.log(res);
                 if (res.success)
                 {
                     this.textLog!.text = "Invitation sent";

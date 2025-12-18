@@ -40,16 +40,11 @@ const BabylonScene = () => {
   useEffect(() => {
     if (isAuthenticated && user && managerRef.current) {
       managerRef.current.setUser = user;
-      console.log("User updated in SceneManager:", user);
-      console.log("2FA pending status:", pending2FA);
-      console.log("Is authenticated:", isAuthenticated);
-      console.log("Current user in SceneManager:", managerRef.current.getUserX);
     }
-    console.log("BabylonScene: propagation de l'utilisateur vers UserX:", user);
     if (managerRef.current) {
       managerRef.current.setUser = user;
     }
-  }, [user, managerReady, isLoading]);
+  }, [user, isAuthenticated, pending2FA, managerReady, isLoading]);
 
 // Gestion back/forward navigateur
 useEffect(() => {

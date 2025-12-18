@@ -4,11 +4,8 @@ import
   Rectangle,
   TextBlock,
   InputText,
-  Control,
-  Button
+  Control
 } from "@babylonjs/gui";
-
-import { IKeyboardEvent } from "@babylonjs/core";
 
 import { UIData } from "../utils.ts";
 
@@ -164,7 +161,7 @@ function genRowScore(env: DataMatchBlock) : StackPanel
     score.color = env.graph.inputText.color;
     score.focusedBackground = env.graph.inputText.focusedBackground;
     score.thickness = env.graph.inputText.thickness;
-    if (env.data.score != "")
+    if (env.data.score !== "")
         score.text = env.data.score;
     row.addControl(score);
 
@@ -435,19 +432,13 @@ export function genRulesMatchBlock(env: DataMatchBlock, selectMode: boolean) : R
         env.errorMsg = null;
     
         button.onPointerClickObservable.add(async () => {
-            console.log("🔄 Vérification du formulaire pour création de match amical...", env);
             if (isValid(env, panel))
             {
-                console.log("✅ Formulaire valide, création du match amical...");
-                
                 const rules: MatchRules = {
                     speed: env.data.speed || "1",
                     score: env.data.score || "5",
                     timeBefore: env.data.timeBefore || "3"
                 };
-                
-                console.log("📋 Règles du match à créer:", rules);
-                
                 // Appeler le callback de création si disponible
                 if (env.onCreateMatch) {
                     try {

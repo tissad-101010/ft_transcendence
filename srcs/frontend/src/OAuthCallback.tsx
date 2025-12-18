@@ -3,8 +3,6 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "./auth/context.tsx";
 import { getApiUrl } from "./utils.ts";
 
-const API_URL = window.__ENV__.BACKEND_URL;
-
 export default function OAuthCallback() {
   const navigate = useNavigate();
   const { setPending2FA, login } = useAuth();
@@ -31,8 +29,6 @@ export default function OAuthCallback() {
 
         if (response.ok) {
           const data = await response.json();
-          console.log("OAuth callback data:", data);
-
           // On met à jour le contexte avec les données du backend
           if (data.twoFactorRequired) {
             setPending2FA({

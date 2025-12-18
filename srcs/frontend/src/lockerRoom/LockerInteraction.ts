@@ -6,18 +6,11 @@ PointerInfo,
 Scene, 
 Color3,
 AbstractMesh,
-Mesh,
-PointLight
+Mesh
 } from '@babylonjs/core';
+
 import { ScoreboardHandler } from "./ScoreboardHandler.ts";
 import { TshirtHandler } from "./TshirtHandler.ts";
-
-
-interface Lamp
-{
-    mesh: Mesh,
-    light: PointLight
-}
 
 export class LockerInteraction implements SpecificInteraction {
     /**************************************************
@@ -56,7 +49,6 @@ export class LockerInteraction implements SpecificInteraction {
         const pickedMesh = mesh;
         if (!pickedMesh) return;
 
-        const tvMeshes = this.sceneManager.getLoadedMeshes["tv"];
         const scoreMeshes = this.sceneManager.getLoadedMeshes["score"];
         const lockMeshes = this.sceneManager.getLoadedMeshes["locker"];
 
@@ -93,8 +85,6 @@ export class LockerInteraction implements SpecificInteraction {
     }
 
     public dispose(): void {
-        // console.log("LockerInteraction: nettoyage en cours...");
-
         // // this.sceneInteractor.getHighlightLayer().removeAllMeshes();
 
         // const tvMeshes = this.sceneManager.getLoadedMeshes["tv"];
@@ -110,7 +100,5 @@ export class LockerInteraction implements SpecificInteraction {
         // if (this.tshirtHandler) (this.tshirtHandler as any).clicTshirt = false;
 
         // this.sceneInteractor.enableInteractions();
-
-        // console.log("LockerInteraction: nettoyage terminé.");
     } 
 }

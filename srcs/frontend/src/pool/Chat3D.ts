@@ -235,8 +235,6 @@ export class Chat3D {
         this.ws = new WebSocket(`${WS_URL}/chat/ws`);
 
         this.ws.onopen = () => {
-            console.log("WebSocket connecté.");
-
             // ➜ ENVOYER ICI UNIQUEMENT
             this.ws!.send(JSON.stringify({
                 type: "init_connection",
@@ -246,7 +244,6 @@ export class Chat3D {
         };
 
         this.ws.onmessage = (event) => {
-            console.log("WebSocket message reçu:", event.data);
             try {
 
                 const data = JSON.parse(event.data.toString());
@@ -520,7 +517,6 @@ export class Chat3D {
         if (this.ws) {
             this.closeInterval = true;
             clearTimeout(this.interval);
-            console.log("JE CLOSE LE SOCKET");
             this.ws.close();
             this.ws = null;
         }

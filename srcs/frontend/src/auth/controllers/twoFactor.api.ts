@@ -6,14 +6,9 @@
 /*   By: glions <glions@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/22 12:58:29 by issad             #+#    #+#             */
-/*   Updated: 2025/12/18 09:20:59 by glions           ###   ########.fr       */
+/*   Updated: 2025/12/18 11:17:09 by glions           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
-
-
-
-
-
 
 import { getApiUrl } from '../../utils';
 import { authFetch } from '../authFetch';
@@ -113,10 +108,8 @@ export async function verifyEmailOtp(code: string): Promise<boolean> {
       body: JSON.stringify({ code }),
     });
     const data = await res.json();
-    console.log("verifyEmailOtp response data:", data);
     return data?.success === true;
   } catch (err) {
-    console.error("Error verifying email OTP:", err);
     return false;
   } 
 }
@@ -135,7 +128,6 @@ export async function getTotpSecret(): Promise<{ qrCodeUrl: string, message:stri
       return null;
     }
     const data = await res.json();
-    console.log("TOTP Secret data:", data);
     return { qrCodeUrl:data.qrCodeUrl , message: data.message };
   } catch (err) {
     console.error("Error getting TOTP secret:", err);

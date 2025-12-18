@@ -73,7 +73,6 @@ export class Friend
                     startedAt: new Date(m.startedAt)
                 });
             });
-            console.log("Etat des matchs: ", this.matchs);
             return ({success: true, message: "Matchs recuperes"});
         }
         else

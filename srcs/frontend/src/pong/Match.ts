@@ -51,7 +51,7 @@ export class Match
         this.id = id;
         this.mode = m;
         this.rules = r;
-        if (this.mode = "tournament")
+        if (this.mode === "tournament")
         {
             this.matchInfo = {
                 round: undefined,
@@ -219,7 +219,6 @@ export class Match
             isTournamentFinished = this.matchInfo.tournament.matchFinish(this);
         } else if (this.matchInfo && this.matchInfo.type === "friendly") {
             isFriendlyMatch = true;
-            console.log("Match amical terminé");
         }
         
         window.removeEventListener("keydown", this.keyDownHandler);

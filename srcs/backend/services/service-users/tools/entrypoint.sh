@@ -69,7 +69,7 @@ until pg_isready -h postgreSQL -p $DB_PORT -U admin; do
 done
 echo "🚀 Starting service-users app..."
 npm run prisma:generate
-npm run prisma:reset
+# npm run prisma:reset
 npm run prisma:migrate
-npm run dev 
+npm run build  && npm start
 # exec tail -f /dev/null 

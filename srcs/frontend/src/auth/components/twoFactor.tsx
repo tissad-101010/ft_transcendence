@@ -20,8 +20,7 @@ const TwoFactor: React.FC<TwoFactorProps> = ({ methodsEnabled, onSuccess }) => {
   const [code, setCode] = useState("");
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
-  const { login, setPending2FA } = useAuth();
-  const [errorMessage, setErrorMessage] = useState("");
+  const { login } = useAuth();
   const { resetPending2FA } = useAuth();
 
 
