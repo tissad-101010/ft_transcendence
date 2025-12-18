@@ -71,5 +71,5 @@ echo "🚀 Starting service-users app..."
 npm run prisma:generate
 # npm run prisma:reset
 npm run prisma:migrate
-npm run build  && npm start
+npm run start
 # exec tail -f /dev/null 
