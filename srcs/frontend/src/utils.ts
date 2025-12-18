@@ -112,7 +112,6 @@ export function displayPlayers(scene: Scene, players: TournamentParticipant[], m
                 else
                     mat.albedoColor = new Color3(0.5, 1, 0.4); // couleur éliminé
                 dynTex.drawText(player.alias || player.login || "?", null, 280, "bold 80px Arial", "white", "transparent", true);
-                dynTex.drawText(player.id.toString(), null, 600, "bold 250px Arial", "white", "transparent", true);
             }
         } else {
             mat.albedoColor = new Color3(0.25, 0.9, 0.9); // couleur alternative

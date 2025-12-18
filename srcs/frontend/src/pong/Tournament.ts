@@ -295,55 +295,9 @@ export class Tournament
 
     async start() : Promise<void>
     {
-        // Si le tournoi n'est pas encore créé dans la base de données, on crée d'abord les matchs localement
-        // puis on les synchronise avec la BDD
         this.createMatchs(shuffleArray(this.participants));
         displayPlayers(this.sceneManager.getScene(), this.participants, this.sceneManager.getTshirt);
         this.status = 1;
-        // Si le tournoi est synchronisé avec la BDD, créer les matchs dans la BDD
-        // if (this.dbTournamentId !== null) {
-        //     try {
-        //         // Préparer les participants pour l'API (besoin des IDs des participants dans la BDD)
-        //         const participantsForApi = this.participants.map(p => ({
-        //             id: p.dbParticipantId || p.id, // Utiliser dbParticipantId si disponible, sinon id utilisateur
-        //             ready: p.ready
-        //         }));
-
-        //         const response = await fetch(`${API_URL}/api/tournament/${this.dbTournamentId}/start`, {
-        //             method: "POST",
-        //             headers: {
-        //                 Accept: "application/json"
-        //             },
-        //             credentials: "include"
-        //         });
-
-        //         if (response.ok) {
-        //             const data = await response.json();
-        //             console.log("Tournoi démarré dans la base de données, matchs créés:", data.matches);
-
-        //             // Mapper les IDs des matchs de la BDD aux matchs locaux
-        //             if (data.matches && Array.isArray(data.matches)) {
-        //                 data.matches.forEach((dbMatch: any, index: number) => {
-        //                     if (index < this.matchs.length) {
-        //                         const localMatch = this.matchs[index];
-        //                         const matchInfo = localMatch.getMatchInfo;
-        //                         if (matchInfo && matchInfo.type === "tournament") {
-        //                             matchInfo.dbMatchId = dbMatch.id;
-        //                             matchInfo.dbTournamentId = this.dbTournamentId!;
-        //                             localMatch.setMatchInfo = matchInfo;
-        //                         }
-        //                     }
-        //                 });
-        //             }
-        //             this.status = 1;
-        //         } else {
-        //             const errorData = await response.json();
-        //             console.error("Erreur lors du démarrage du tournoi:", errorData);
-        //         }
-        //     } catch (error) {
-        //         console.error("Erreur lors de l'appel API pour démarrer le tournoi:", error);
-        //     }
-        // }
     }
 
     get getParticipants() : TournamentParticipant[]

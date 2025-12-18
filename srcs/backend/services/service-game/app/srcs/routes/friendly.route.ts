@@ -192,8 +192,6 @@ export async function friendlyRoutes(fastify: FastifyInstance) {
   fastify.get('/api/matches/user/:username', async (request: any, reply: any) => {
 
     const { username } = request.params;
-    console.log("MATCHS ENREGISTRES : ", await fastify.prisma.friendlyMatch.findMany());
-    console.log("Username ->", username);
     try {
       const call = await (fastify.prisma as any).user.findMany({
         where: {
@@ -201,7 +199,7 @@ export async function friendlyRoutes(fastify: FastifyInstance) {
         }
       });
 
-      if (!call)
+      if (!call.data)
         return ({success: false, message: "User non trouve"});
 
       const user = call[0];

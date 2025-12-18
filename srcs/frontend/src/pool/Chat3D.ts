@@ -180,35 +180,9 @@ export class Chat3D {
         optionsGrid.width = "100%";
         optionsGrid.height = "100%";
         optionsGrid.background = "#1f1f1fAA";
-        optionsGrid.addColumnDefinition(0.33);
-        optionsGrid.addColumnDefinition(0.34);
+        optionsGrid.addColumnDefinition(1);
         mainGrid.addControl(optionsGrid, 3, 0);
 
-        const blockBtn = Button.CreateSimpleButton("blockBtn", "Block");
-        blockBtn.width = "90%";
-        blockBtn.height = "70%";
-        blockBtn.color = "white";
-        blockBtn.background = "#c06e7cff";
-        blockBtn.fontSize = 22;
-        blockBtn.cornerRadius = 10;
-        optionsGrid.addControl(blockBtn, 0, 0);
-
-        blockBtn.onPointerClickObservable.add(() => {
-            this.userX.blockFriend(this.friend).then((response) => {
-                // METTRE A JOUR L"AFFICHAGE SELON REPONSE
-                if (response.success)
-                {
-                    const testRect = new Rectangle();
-                    testRect.width = "50%";
-                    testRect.height = "100%";
-                    testRect.background = "rgba(82, 82, 82, 0.81)";
-                    this.advancedTexture.addControl(testRect);
-                }
-                else
-                    console.log(response.message);
-            }
-            );
-        });
 
         const profileBtn = Button.CreateSimpleButton("profileBtn", "Profile");
         profileBtn.width = "90%";

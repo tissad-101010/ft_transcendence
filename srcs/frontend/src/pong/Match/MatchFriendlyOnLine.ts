@@ -34,7 +34,7 @@ export class MatchFriendlyOnline extends MatchBase
 
     init(players: MatchParticipant[], isOnline: boolean = false): boolean
     {
-        if (players.length != 2)
+        if (players.length !== 2)
             return (false);
         this.participants = players;
         this.isOnline = isOnline;
@@ -72,10 +72,6 @@ export class MatchFriendlyOnline extends MatchBase
         const meIndex = players.indexOf(me);
         this.myPlayerTeam = meIndex === 0 ? 1 : 2;
         
-        if (opponent) {
-            const opponentIndex = players.indexOf(opponent);
-            const opponentTeam = opponentIndex === 0 ? 1 : 2;
-        }
      // Mode 0 = local (même clavier), Mode 1 = remote (websockets)
         const gameMode = isOnline ? 1 : 0;
 

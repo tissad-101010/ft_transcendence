@@ -221,7 +221,7 @@ export class DataFriendUI
         rect.addControl(panel);
 
         const text = new TextBlock();
-        text.text = "Consequences de la suppresion :";
+        text.text = "Consequences of deleting :";
         text.color = "white";
         text.width = "100%";
         text.height = "100px";
@@ -229,7 +229,7 @@ export class DataFriendUI
         panel.addControl(text);
 
         const elem1 = new TextBlock();
-        elem1.text = "- Perte du chat si existant";
+        elem1.text = "- Lost chat discussion";
         elem1.width = "100%";
         elem1.height = "100px";
         elem1.color = "white";
@@ -237,14 +237,14 @@ export class DataFriendUI
         panel.addControl(elem1);
 
         const elem2 = new TextBlock();
-        elem2.text = "- Perte de l'acces au profil de cet utilisateur";
+        elem2.text = "- Can't access profile";
         elem2.width = "100%";
         elem2.height = "100px";
         elem2.color = "white";
         elem2.fontSize = 30;
         panel.addControl(elem2);
 
-        const button = Button.CreateSimpleButton("confirm", "Confirmer");
+        const button = Button.CreateSimpleButton("confirm", "Delete");
         button.width = "200px";
         button.paddingTop = 50;
         button.height = "150px";
