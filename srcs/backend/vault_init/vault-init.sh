@@ -12,9 +12,10 @@ while true; do
   echo "Vault sealed status: $STATUS"
   if [ "$STATUS" = "false" ]; then
     echo "✅ Vault is unsealed!"
-    break
+    exit 0
   fi
 
   echo "🔒 Vault still sealed... retrying"
   sleep 2
 done
+exit 1

@@ -10,8 +10,16 @@ services:
       dockerfile: Dockerfile
     container_name: proxy
     depends_on:
-      - service-users
-      - service-friends
+      service-users:
+        condition: service_started
+      service-game:
+        condition: service_started
+      service-chat:
+        condition: service_started
+      service-friends:
+        condition: service_started
+      frontend:
+        condition: service_started
     environment:
       - SSL_CERT=/etc/nginx/ssl/server.crt
       - SSL_CERT_KEY=/etc/nginx/ssl/server.key
@@ -48,7 +56,7 @@ services:
     networks:
       - vault_shared-network
       - global-net
-    restart: "no"
+    restart: no
 
 
   #********************************************************************************#
