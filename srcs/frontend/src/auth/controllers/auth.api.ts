@@ -18,9 +18,6 @@ export async function registerUser(
   email: string,
   password: string
 ): Promise<{ success: boolean; message?: string, data?: any }> {
-  console.log("username ", username);
-  console.log("email ", email);
-  console.log("password ", password);
   try {
     const response = await fetch(`${getApiUrl()}/api/user/auth/signup`, {
       method: "POST",
@@ -49,9 +46,6 @@ export async function loginUser(
     username: string,
     password: string
 ): Promise<{ success: boolean; message?: string, data?: any }> {
-    console.log("username ", username);
-    console.log("password ", password);
-
     try {
         const response = await fetch(`${getApiUrl()}/api/user/auth/signin`, {
             method: "POST",

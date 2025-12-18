@@ -229,7 +229,6 @@ export class MyProfilUI
         qrImgRec.height = "200px";
         qrImgRec.thickness = 0;
         stackElements1.addControl(qrImgRec);
-        console.log("QR Code URL:", qrCodeUrl.qrCodeUrl);
         const qrImg = new Image("qrImgImg", qrCodeUrl.qrCodeUrl);
         qrImg.width = 1;
         qrImg.height = 1;
@@ -264,7 +263,6 @@ export class MyProfilUI
             background: BTN_ACTIVE,
             onClick: async () => {
                 const code = input.text?.trim();
-                console.log("Code entered for TOTP enabling:", code);
                 if (!code) return infoMsg1.text = "The field is empty.";
                 if (code.length !== 6) return infoMsg1.text = "Incorrect code. Please check and try again.";
                 const res = await enableTotp(code);
@@ -390,7 +388,6 @@ export class MyProfilUI
         // change this with 2fa user methods request/!\
          //get 2fa methods from request
         const methods = await getTwoFactorMethods();
-        console.log("User 2FA methods:", methods);
         if (!methods){
             console.error("No 2FA methods found for user.");
             this.enable2faApp = false;
@@ -398,18 +395,13 @@ export class MyProfilUI
         }else{
             for (const method of methods) {
                 if (method.type === "TOTP" && method.enabled) {
-                    console.log("TOTP 2FA is enabled for user.");
                     this.enable2faApp = true;
                 }
                 if (method.type === "EMAIL" && method.enabled) {     
-                    console.log("Email 2FA is enabled for user."); 
                     this.enable2faMail = true;
                 }
             }  
         }
-
-
-        console.log("App 2FA enabled state:", this.enable2faApp);
 
         enable2faBtn = create2faButton({ // warning merge conflict
             id: "enable2FAApp",
@@ -423,7 +415,6 @@ export class MyProfilUI
             onActivate: () => {
                 getTotpSecret().then((data) => {
                     if (data) {
-                        console.log("TOTP Secret fetched:", data.qrCodeUrl);
                         // Here you would typically generate a QR code from data.qrCodeUrl
                         // and display it in the UI for the user to scan.
                         this.flag = true;
@@ -436,7 +427,6 @@ export class MyProfilUI
                 });
             },
             onDeactivate: () => {
-                console.log("Disabling 2FA app...");
                 disableTotp();
                 this.flag = false;
             }
@@ -464,7 +454,6 @@ export class MyProfilUI
                 this.enable2FaMailInterface();
             },
             onDeactivate: async () => {
-                console.log("Disabling 2FA email...");
                 await disable2faEmail();
                 this.flag = false;
 
@@ -562,7 +551,6 @@ export class MyProfilUI
                     });
     
                     const data = await res.json();
-                    console.log("uploaded:", data);
                 };
 
                 input.click();

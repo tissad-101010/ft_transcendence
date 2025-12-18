@@ -29,8 +29,6 @@ export default function OAuthCallback() {
 
         if (response.ok) {
           const data = await response.json();
-          console.log("OAuth callback data:", data);
-
           // On met à jour le contexte avec les données du backend
           if (data.twoFactorRequired) {
             setPending2FA({

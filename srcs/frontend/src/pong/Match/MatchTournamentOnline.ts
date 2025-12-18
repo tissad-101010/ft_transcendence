@@ -15,7 +15,6 @@ export class MatchTournamentOnline extends MatchBase {
     constructor(id: number, rules: MatchRules, sceneManager: SceneManager, matchInfo: MatchTournament) {
         super(id, rules, sceneManager);
         this.matchInfo = matchInfo;
-        console.log("DEIJIFJEIFJEJFE");
         // Récupérer l'ID utilisateur depuis le système d'auth (currentUser hérité de MatchBase)
         this.myUserId = this.currentUser?.id || null;
     }
@@ -115,13 +114,7 @@ export class MatchTournamentOnline extends MatchBase {
                 ? this.matchInfo.sloatA
                 : this.matchInfo.sloatB;
         this.status = MatchStatus.FINISHED;
-        
-        console.log("Match de tournoi terminé:", {
-            myUserId: this.myUserId,
-            score: this.score,
-            winner: this.winner
-        });
-        
+
         // Nettoyer les event listeners
         window.removeEventListener("keydown", this.keyDownHandler);
         window.removeEventListener("keyup", this.keyUpHandler);

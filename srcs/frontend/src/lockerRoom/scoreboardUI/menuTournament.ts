@@ -101,7 +101,6 @@ function rowRound(
 
         buttonRight.onPointerClickObservable.add(() => {
             utils.currRound++;
-            console.log(utils.currRound, nbRound);
             menuTournament(env, true, utils);
         });
 

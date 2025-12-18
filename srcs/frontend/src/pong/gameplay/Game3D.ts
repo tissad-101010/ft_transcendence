@@ -139,7 +139,6 @@ export default class Game3D
 
     initField(logic: GameLogic) : boolean
     {
-        console.log(this.scene);
         this.game = {
             logic: logic,
             mesh: this.scene.getMeshByName("field") as Mesh,

@@ -219,7 +219,6 @@ export class Match
             isTournamentFinished = this.matchInfo.tournament.matchFinish(this);
         } else if (this.matchInfo && this.matchInfo.type === "friendly") {
             isFriendlyMatch = true;
-            console.log("Match amical terminé");
         }
         
         window.removeEventListener("keydown", this.keyDownHandler);

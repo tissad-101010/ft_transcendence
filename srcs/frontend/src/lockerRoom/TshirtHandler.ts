@@ -148,7 +148,6 @@ export class TshirtHandler {
     // Clic sur un t-shirt
     if (pickedMesh.name.includes(ZoneName.TSHIRT)) {
         this.updateButtons(tshirtMeshes);
-
         this.sceneInteractor.disableInteractions();
         if (!this.clicTshirt)
         {

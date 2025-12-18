@@ -158,9 +158,6 @@ export function startButton(
         console.error("❌ Impossible de créer un match: utilisateur non défini dans UserX");
         return;
     }
-    
-    console.log("🔄 Création d'un match amical avec l'utilisateur:", user);
-    
     const rules = {
         speed: setting.data.speed,
         timeBefore: setting.data.timeBefore,
@@ -168,13 +165,11 @@ export function startButton(
     }
     
     env.userX.createFriendlyMatch(rules).then((success) => {
-        console.log("📥 Réponse de createFriendlyMatch:", success);
         if (success) {
             // Rafraîchir la liste des matchs si on est sur la page "Rejoindre"
             if ((env as any).refreshJoinMatchList) {
                 // Augmenter le délai pour s'assurer que le match est bien enregistré
                 setTimeout(() => {
-                    console.log("🔄 Exécution du rafraîchissement de la liste...");
                     (env as any).refreshJoinMatchList();
                 }, 1000); // Augmenter à 1 seconde pour être sûr
             } else {
