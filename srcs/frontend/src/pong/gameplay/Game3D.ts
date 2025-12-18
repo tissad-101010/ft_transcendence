@@ -19,8 +19,7 @@ import {
   AdvancedDynamicTexture, 
   Rectangle, 
   Control,
-  TextBlock,
-  StackPanel,
+  TextBlock
 } from "@babylonjs/gui";
 import '@babylonjs/loaders/glTF'; // important : chargeur pour .glb et .gltf
 
