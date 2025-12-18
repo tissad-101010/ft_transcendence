@@ -74,13 +74,14 @@ export class GoogleOAuthProvider {
     // connection ok + jwt token, not user data
     async findOrCreateUser(google_profile: any): Promise<any> {
         console.log("[google.service]================> Google profile data:", google_profile);
-        let  user = await this.userService.getUserByEmail(google_profile.email);
+        const gusername = google_profile.email.split('@')[0];
+        let  user = await this.userService.getUserByUsername(gusername) || await this.userService.getUserByEmail(google_profile.email);
         console.log("[google.service] Searching for user by email:", google_profile.email);  
         if (!user) {
             console.log("[google.service] No existing user found, creating new user");
             const DB_profile: UserProfile = {
                 email: google_profile.email,
-                username: google_profile.name,
+                username: gusername,
                 // firstName: google_profile.given_name,
                 // lastName: google_profile.family_name,
                 passwordHash: undefined,

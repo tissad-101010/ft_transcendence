@@ -69,3 +69,6 @@ game:
 proxy:
 	docker compose -f srcs/docker-compose.yml up proxy --build
 .PHONY: start down restart up clean prune
+
+
+# vault read -tls-skip-verify auth/approle/role/postgres-role/role-id

@@ -1,46 +1,31 @@
-FROM node:22.17.1 AS build
-
-RUN echo "step I : build"
-
-
-
-RUN mkdir -p /data && chmod +rwx /data
+FROM node:22.17.1
 
 WORKDIR /app
 
 COPY ./app/package*.json ./
 
-RUN npm install @fastify/cors
-
 RUN npm install
 
+COPY ./app/vault_agent/vault_agent.hcl ./vault_agent/vault_agent.hcl
 COPY ./app/srcs /app/srcs
 COPY ./app/tsconfig.json .
-
+RUN mkdir -p /app/dist
 # COPY prisma schema and generate client
 COPY ./app/srcs/prisma/prisma /app/srcs/prisma/prisma
-RUN npm run prisma:generate && npm run build
+RUN rm -rf /app/srcs/prisma/prisma/generated && npm run prisma:generate && npm run build
 
-FROM node:22.17.1
 
-RUN echo "step II : run"
-
-RUN apt-get install -y bash 
-
-RUN apt-get update && apt-get install -y postgresql-client sed
-RUN apt-get install -y curl unzip bash jq zsh \
+RUN apt-get update && apt-get install -y bash curl sed grep zsh
+RUN apt-get update && apt-get install -y postgresql-client
+RUN apt-get install -y unzip bash jq \
     && curl -fsSL https://releases.hashicorp.com/vault/1.12.2/vault_1.12.2_linux_amd64.zip -o vault.zip \
     && unzip vault.zip \
     && mv vault /usr/local/bin/ \
     && rm vault.zip
+
 # copy the entrypoint script
 COPY ./tools/entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh
 
-
-WORKDIR /app
-
-COPY --from=build /app/node_modules ./node_modules
-COPY --from=build /app/dist /app/dist
-
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
+# CMD ["tail", "-f", "/dev/null"]

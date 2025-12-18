@@ -15,12 +15,6 @@
 ## service-game entrypoint script
 set -e
 
-
-
-VAULT_ADDR=https://hashicorp_vault:8200
-
-echo "⏳ Waiting for Vault to be unsealed..."
-
 while true; do
   STATUS=$(curl -k https://hashicorp_vault:8200/v1/sys/health | sed -n 's/.*"sealed":\([a-z]*\).*/\1/p')
   echo "Vault sealed status: $STATUS"
@@ -34,47 +28,32 @@ while true; do
 done
 
 
-
-
 # Récupérer secrets KV v2 et exporter en variables d'environnement
 vault agent -config=/app/vault_agent/vault_agent.hcl &
-
 VAULT_PID=$!
-# kill "$VAULT_PID" if signal SIGTERM or SIGINT is received
-# trap "kill $VAULT_PID" SIGTERM SIGINT
-
-
+sleep 1
 # attendre que Vault Agent écrive les secrets
 while [ ! -f /secrets/game/secrets.env ]; do
   echo "⏳ Waiting for Vault Agent..."
   sleep 1
 done
 
+
 set -a
-. /secrets/game/secrets.env
+. /secrets/game/secrets.env 
 set +a
+export DATABASE_URL="postgresql://${DB_USER}:${GAME_SERVICE_DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}"
 
 echo "✅ Secrets loaded and environment variables set."
 
-
-
-# echo "pg_isready -h postgreSQL -p $DB_PORT -U admin: PostgreSQL is ready!"
 echo "🔄 Generating Prisma client..."
 # npx prisma generate
 until pg_isready -h postgreSQL -p $DB_PORT -U admin; do
-  # echo "connecting to PostgreSQL at $DB_HOST:$DB_PORT as $DB_USER..."
+
   echo "🔄 Waiting for PostgreSQL to be ready..."
   sleep 2
 done
-
-export DATABASE_URL="postgresql://${DB_USER}:${GAME_SERVICE_DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}"
-
-echo "🚀 Starting service-game app..."
-npm run prisma:generate
-# npm run prisma:reset
+echo "✅ PostgreSQL is ready!"  
 npm run prisma:migrate:prod
-# npm run dev
-
-npm run start 
-
-# exec tail -f /dev/null 
+echo "🚀 Starting service-game app..."
+npm run start #> /dev/null 2>&1

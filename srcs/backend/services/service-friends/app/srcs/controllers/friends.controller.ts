@@ -98,6 +98,11 @@ export async function sendInviteController(
     const { friendUsername }  = request.body;
     if (!friendUsername)
       return (reply.code(400).send({sucess: false, message: "Parameter username is missing"}));
+    // VALID USERNAME FORMAT //
+    const usernameRegex = /^[a-zA-Z0-9_]{3,30}$/;// same as in credential.utils.ts
+    if (!usernameRegex.test(friendUsername))
+      return (reply.code(400).send({sucess: false, message: "Invalid username format"}));
+
     // CALL SERVICE //
     const service             = new FriendsService(request.server);
     const data                = await service.sendInvitation(userId, friendUsername,);

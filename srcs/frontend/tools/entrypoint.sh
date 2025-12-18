@@ -5,7 +5,9 @@ echo "starting frontend entrypoint script"
 export NODE_OPTIONS="--max-old-space-size=4096"
 npm install --no-cache
 npx update-browserslist-db@latest
+rm -rf ./build/*
+echo "building frontend..."
 npm run build
 echo "frontend build finished"
 echo "starting frontend dev server"
-npm start dev
+npm run start

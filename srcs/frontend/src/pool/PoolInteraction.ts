@@ -120,7 +120,7 @@ export class PoolInteraction implements SpecificInteraction {
         const nb = parseInt(pickedMesh.name[pickedMesh.name.length - 1]);
         const index = (getCurrentGroup(ZoneName.LOUNGE) * 6) + nb;
         if (isClick) {
-            if (loungeMeshes.includes(pickedMesh))
+            if (loungeMeshes.includes(pickedMesh) && this.userX.getFriends[index]) 
             {
                 if (index >= this.userX.getFriends.length)
                     return ;

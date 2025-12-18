@@ -73,10 +73,6 @@ app.register(fastifyStatic, {
   prefix: '/uploads/',
 });
 
-console.log("===============================================", process.env);
-
-
-
 // console.log('🚀 Loading secrets from Vault...', process.env.TOTO);
 // Register routes
 app.register(authRoutes, { prefix: '/user/auth' });

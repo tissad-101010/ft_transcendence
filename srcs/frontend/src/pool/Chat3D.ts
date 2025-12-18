@@ -54,6 +54,9 @@ export class Chat3D {
     constructor(scene: Scene, mesh: AbstractMesh, friend: Friend, userX: UserX, sceneManager: SceneManager, interaction: PoolInteraction) {
         this.mesh = mesh;
         this.online = false;
+        if (!mesh) throw new Error("Mesh not found for Chat3D");
+        if (!scene) throw new Error("Scene not found for Chat3D");
+        if (!friend) throw new Error("Friend not found for Chat3D");
         this.friend = friend;
         this.lastDate = null;
         this.userX = userX;
@@ -230,7 +233,9 @@ export class Chat3D {
         };
 
         this.ws.onerror = (err) => {
-            console.error("Erreur WebSocket", err);
+            // console.error("Erreur WebSocket", err);
+            clearTimeout(this.interval);
+            this.closeInterval = true;
         };
 
         this.ws.onclose = () => {
@@ -451,7 +456,7 @@ export class Chat3D {
         bubble.cornerRadius = 16;
         bubble.thickness = 0;
 
-        const isMe = sender !== this.friend.getUsername;
+        const isMe = sender !== this.friend.getUsername;clearTimeout(this.interval);
         bubble.background = isMe ? "#88bcc0ff" : "#c07985ff";
         bubble.horizontalAlignment = isMe
             ? Control.HORIZONTAL_ALIGNMENT_RIGHT
@@ -469,7 +474,7 @@ export class Chat3D {
         msgText.paddingBottom = "6px";
         msgText.textHorizontalAlignment = Control.HORIZONTAL_ALIGNMENT_LEFT
 
-        bubble.addControl(msgText);
+        bubble.addControl(msgText);clearTimeout(this.interval);
         this.chatContainer.addControl(bubble);
 
         this.scrollViewer.verticalBar.value = this.scrollViewer.verticalBar.maximum;

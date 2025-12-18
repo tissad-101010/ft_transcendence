@@ -4,7 +4,7 @@ URL="https://127.0.0.1:8443"
 
 declare -A tests=(
 	["XSS"]="<script>alert('xss')</script>"
-	["SQL Injection 1"]="' OR '1'='1"
+	["SQL Injection 1"]="' OR '1'='1;"
 	["SQL Injection 2"]="1; DROP TABLE users;"
 	["SQL Injection 3"]="SELECT * FROM users WHERE username = 'admin' AND password = 'password';"
 	["SQL Injection 4"]="UNION SELECT username, password FROM users;"

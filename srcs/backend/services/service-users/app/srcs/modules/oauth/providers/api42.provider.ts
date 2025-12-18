@@ -75,7 +75,7 @@ export class Api42OAuthProvider {
     async findOrCreateUser(fortytwo_profile: any): Promise<any> {
         console.log("[42.service]================> 42 profile data:", fortytwo_profile.image.link);
         // Placeholder logic to find or create user in your database
-        let user = await this.userService.getUserByEmail(fortytwo_profile.email);
+        let user = await this.userService.getUserByUsername(fortytwo_profile.login)  || await this.userService.getUserByEmail(fortytwo_profile.email);
         if (!user) {
             console.log("[google.service] No existing user found, creating new user");
             const DB_profile: UserProfile = {

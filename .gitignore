@@ -20,3 +20,4 @@
 *.env.local
 *.glb
 *.hdr
+*dist

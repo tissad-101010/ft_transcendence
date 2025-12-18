@@ -35,7 +35,7 @@ import {  OtpEmailRequest,
           VerifyOtpEmailRequest,
        } from "../../types/otp.type";
 import { AuthenticatedUserDTO } from "../../types/user.types";
-
+const rigexForOTP = /^[0-9]{6}$/;
 export class TwoFactorAuthController {
   private twoFactorAuthService: TwoFactorAuthService;
   private redisClient:any;
@@ -43,7 +43,7 @@ export class TwoFactorAuthController {
     this.twoFactorAuthService = new TwoFactorAuthService(server);
     this.redisClient = server.redis;
   }
-
+  
   sendOtpByEmailForEnableTfaController = async (
     req: FastifyRequest,
     reply: FastifyReply
@@ -96,6 +96,14 @@ export class TwoFactorAuthController {
     console.log("[2fa.controller.ts] Verifying OTP and enabling TFA for user ID:", userId, "email:", email);
     // verify otp
     const { code } = req.body;
+    if (!rigexForOTP.test(code)) {
+      console.error("❌ [2fa.controller.ts] Invalid OTP format");
+      return reply.status(400).send({ message: "Invalid OTP format ❌" });
+    }
+    if (!code) {
+      console.error("❌ [2fa.controller.ts] OTP not provided");
+      return reply.status(400).send({ message: "OTP not provided ❌" });
+    }
     console.log("[2fa.controller.ts] Verifying OTP for email:", email);
     console.log("[2fa.controller.ts] Provided OTP:", code);
     console.log("[2fa.controller.ts] request body:", req.body);
@@ -165,6 +173,13 @@ export class TwoFactorAuthController {
     const email   = user.email;
     console.log("[2fa.controller.ts] Verifying OTP for sign-in TFA for user ID:", userId, "email:", email);
     const { code } = req.body;
+    // verify otp if valid
+    
+    if (!rigexForOTP.test(code)) {
+      console.error("❌ [2fa.controller.ts] Invalid OTP format");
+      return reply.status(400).send({ message: "Invalid OTP format ❌" });
+    }
+
     console.log("[2fa.controller.ts] Verifying OTP for email:", email);
     console.log("[2fa.controller.ts] Provided OTP:", code);
     console.log("[2fa.controller.ts] request body:", req.body);
@@ -291,6 +306,14 @@ export class TwoFactorAuthController {
       return reply.status(401).send({ message: "Unauthorized ❌" });
     }
     const code = (req.body as any).code;
+    if (!rigexForOTP.test(code)) {
+      console.error("❌ [2fa.controller.ts] Invalid TOTP code format");
+      return reply.status(400).send({ message: "Invalid TOTP code format ❌" });
+    }
+    if (!code) {
+      console.error("❌ [2fa.controller.ts] TOTP code not provided");
+      return reply.status(400).send({ message: "TOTP code not provided ❌" });
+    }
     console.log("[2fa.controller.ts] TOTP code received for enabling TFA:", code);
     // verify TOTP code before enabling TFA
     const userId  = user.userId;
@@ -360,6 +383,14 @@ export class TwoFactorAuthController {
     const email   = user.email;
     console.log("[2fa.controller.ts] Verifying TFA TOTP for user ID:", userId, "email:", email);
     const { code } = req.body as { code: string };
+    if (!rigexForOTP.test(code)) {
+      console.error("❌ [2fa.controller.ts] Invalid TFA token format");
+      return reply.status(400).send({ message: "Invalid TFA token format ❌" });
+    }
+    if (!code) {
+      console.error("❌ [2fa.controller.ts] TFA token not provided");
+      return reply.status(400).send({ message: "TFA token not provided ❌" });
+    }
     try {
         const isValid = await this.twoFactorAuthService.verifyTotpToken(userId, code);
         if (!isValid) {

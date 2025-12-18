@@ -196,6 +196,10 @@ export class AuthService {
             console.log("[AuthService] User not found for password change:", userId);
             return {passwordChangeComplete: false, message: "User not found"};
         }
+        if (user.passwordHash === null) {
+            console.log("[AuthService] User has no password set (OAuth user) for user:", userId);
+            return {passwordChangeComplete: false, message: "User has no password set (OAuth user)"};
+        }
         // verify current password
         const isPasswordValid = await CryptUtils.verifyLongPassword(
             currentPassword,

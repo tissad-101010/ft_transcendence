@@ -5,7 +5,7 @@ import { usersClient,
          serviceUsersURL
  } from "../usersClient";
 
-
+const usernameRegex = /^[a-zA-Z0-9_]{3,30}$/;// same as in credential.utils.ts
 interface JwtPayload {
   userId: number;
   email: string;
@@ -157,16 +157,40 @@ export function handleWebSocketConnection(
       try {
         const message: MessagePayload = JSON.parse(data.toString());
         if (message.type === "init_connection") {
+          if (!message.from) {
+            console.error("WebSocket init_connection error: 'from' field is missing");
+            socket.close(1008, "'from' field is missing");
+            return;
+          }
+          
+          if (!usernameRegex.test(message.from)) {
+            console.error("WebSocket init_connection error: Invalid username format");
+            socket.close(1008, "Invalid username format");
+            return;
+          }
           await initConnection(clients, message.from, socket);
           console.log("=>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>WebSocket init_connection processed for username:", message.from);
         }
         if (message.type === "send_message") {
+          if (!message.from || !message.to || !message.text) {
+            console.error("WebSocket send_message error: 'from', 'to' or 'text' field is missing");
+            socket.close(1008, "'from', 'to' or 'text' field is missing");
+            return;
+          }
+          if (!usernameRegex.test(message.from) || !usernameRegex.test(message.to)) {
+            console.error("WebSocket send_message error: Invalid username format in 'from' or 'to' field");
+            socket.close(1008, "Invalid username format in 'from' or 'to' field");
+            return;
+          }
           const senderUser = await chatService.getUserByUsername(message.from);
           const receiverUser =  await chatService.getUserByUsername(message.to);
           if (!senderUser || !receiverUser) {
             console.error("WebSocket message error: Sender or receiver user not found");
+            socket.close(1008, "Sender or receiver user not found");
             return;
           }
+          // encrypt message.text here
+          
           // store message in database
           await storeMessageInDb(
             senderUser.id,
@@ -187,6 +211,7 @@ export function handleWebSocketConnection(
         }
       }catch (err) {
         console.error("WebSocket message handling error:", err);
+        socket.close(1011, "Internal server error");
       }
     });
   }

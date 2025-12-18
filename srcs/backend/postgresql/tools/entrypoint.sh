@@ -18,6 +18,7 @@ set -e
 DATA_DIR="/var/lib/postgresql/data/postgresql/data"
 # Define the configuration directory
 CONF_DIR="/etc/postgresql"
+mkdir -p "$DATA_DIR"
 chown -R postgres:postgres "$DATA_DIR"
 chmod 750 "$DATA_DIR"
 
@@ -67,7 +68,6 @@ set -a
 set +a
 
 echo "✅ Vault Agent has fetched the secrets."
-echo "======================================================++>$GLOBAL_DB_ADMIN_PASSWORD"
 # exec tail -f /dev/null 
 
 

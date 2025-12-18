@@ -96,7 +96,6 @@ services:
       dockerfile: Dockerfile
     container_name: service-users
     volumes:
-      - ./backend/services/service-users/app:/app
       - /app/node_modules
       - DataUserService:/secrets
     networks:
@@ -154,7 +153,6 @@ services:
       dockerfile: Dockerfile
     container_name: service-game
     volumes:
-      - ./backend/services/service-game/app:/app
       - /app/node_modules
       - DataUserService:/secrets
     networks:
@@ -193,7 +191,6 @@ services:
       dockerfile: Dockerfile
     container_name: service-chat
     volumes:
-      - ./backend/services/service-chat/app:/app
       - /app/node_modules
       - DataUserService:/secrets
     networks:
@@ -233,7 +230,6 @@ services:
       dockerfile: Dockerfile
     container_name: service-friends
     volumes:
-      - ./backend/services/service-friends/app:/app
       - /app/node_modules
       - DataUserService:/secrets
     networks:

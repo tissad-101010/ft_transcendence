@@ -224,6 +224,21 @@ export async function changePasswordController(
             passwordChangeComplete: false
          });
     }
+    if (currentPassword === newPassword) {
+        console.error('[Change Password Controller] New password cannot be the same as the current password');
+        return reply.code(400).send({
+            message: 'New password cannot be the same as the current password',
+            passwordChangeComplete: false,
+        });
+    }
+    if (CredentialUtils.isValidPassword(newPassword) === false) {
+        console.error('[Change Password Controller] New password does not meet complexity requirements');
+        return reply.code(400).send({
+            message: 'New password does not meet complexity requirements',
+            passwordChangeComplete: false,
+        });
+    }
+
     try {
         const changeResult = await authService.changeUserPassword(user.userId, currentPassword, newPassword);
         if (!changeResult.passwordChangeComplete) {

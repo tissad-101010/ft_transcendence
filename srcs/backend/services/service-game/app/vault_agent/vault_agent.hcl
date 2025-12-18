@@ -1,5 +1,8 @@
 pid_file = "/tmp/vault-agent.pid"
-
+vault {
+  address         = "https://hashicorp_vault:8200"
+  tls_skip_verify = true
+}
 auto_auth {
   method "approle" {
     mount_path = "auth/approle"
