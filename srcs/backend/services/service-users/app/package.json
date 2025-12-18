@@ -10,7 +10,8 @@
     "prisma:migrate": "prisma migrate dev --schema=./srcs/prisma/prisma/schema.prisma --name initUserTable",
     "prisma:deploy": "prisma db push --schema=./srcs/prisma/prisma/schema.prisma",
     "prisma:reset": "prisma migrate reset --force --schema=./srcs/prisma/prisma/schema.prisma",
-    "prisma:studio": "prisma studio --schema=./srcs/prisma/prisma/schema.prisma"
+    "prisma:studio": "prisma studio --schema=./srcs/prisma/prisma/schema.prisma",
+    "prisma:migrate:prod": "prisma migrate deploy --schema=./srcs/prisma/prisma/schema.prisma"
   },
   "keywords": [],
   "author": "tissad",

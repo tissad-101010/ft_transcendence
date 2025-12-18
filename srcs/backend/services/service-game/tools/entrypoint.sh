@@ -68,11 +68,13 @@ until pg_isready -h postgreSQL -p $DB_PORT -U admin; do
 done
 
 export DATABASE_URL="postgresql://${DB_USER}:${GAME_SERVICE_DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}"
-echo "========================================================================================>$DATABASE_URL"
+
 echo "🚀 Starting service-game app..."
-# npm run prisma:generate
+npm run prisma:generate
 # npm run prisma:reset
-# npm run prisma:migrate
-npm run dev
+npm run prisma:migrate:prod
+# npm run dev
+
+npm run start 
 
 # exec tail -f /dev/null 

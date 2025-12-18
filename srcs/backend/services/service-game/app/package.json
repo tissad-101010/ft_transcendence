@@ -5,11 +5,12 @@
   "scripts": {
     "dev": "ts-node-dev --respawn --clear --transpile-only srcs/api.ts",
     "build": "tsc",
-    "start": "node dist/srcs/api.js",
+    "start": "node dist/api.js",
     "prisma:generate": "prisma generate --schema=./srcs/prisma/prisma/schema.prisma",
     "prisma:migrate": "prisma migrate dev --schema=./srcs/prisma/prisma/schema.prisma --name init_game_table",
     "prisma:reset": "echo 'Skipping prisma reset'",
-    "prisma:studio": "prisma studio --schema=./srcs/prisma/prisma/schema.prisma"
+    "prisma:studio": "prisma studio --schema=./srcs/prisma/prisma/schema.prisma",
+    "prisma:migrate:prod": "prisma migrate deploy --schema=./srcs/prisma/prisma/schema.prisma"
   },
   "keywords": [],
   "author": "tissad",
