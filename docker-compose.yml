@@ -6,7 +6,7 @@ services:
   proxy:
     image: proxy
     build:
-      context: ./proxy
+      context: ./srcs/proxy
       dockerfile: Dockerfile
     container_name: proxy
     depends_on:
@@ -50,7 +50,7 @@ services:
   #                              VAULT INIT SERVICE                                #
   #********************************************************************************#
   vault-init:
-    build: ./backend/vault_init
+    build: ./srcs/backend/vault_init
     environment:
       VAULT_ADDR: https://hashicorp_vault:8200
     networks:
@@ -66,7 +66,7 @@ services:
     image : frontend
     container_name: frontend
     build:
-      context: ./frontend
+      context: ./srcs/frontend
       dockerfile: Dockerfile
     volumes:
       - frontend-src:/app:rw
@@ -92,7 +92,7 @@ services:
   service-users:
     image: service-users
     build:
-      context: ./backend/services/service-users
+      context: ./srcs/backend/services/service-users
       dockerfile: Dockerfile
     container_name: service-users
     volumes:
@@ -114,7 +114,7 @@ services:
       - "4000:4000"
     environment:
       - NODE_ENV=production
-      - VAULT_ADDR=http://hashicorp_vault:8200
+      - VAULT_ADDR=https://hashicorp_vault:8200
       - DB_HOST=${USER_SERVICE_DB_HOST}
       - DB_NAME=${USER_SERVICE_DB_NAME}
       - DB_USER=${USER_SERVICE_DB_USER}
@@ -134,9 +134,6 @@ services:
       - GCP_STORAGE_KEY_PATH=${GCP_STORAGE_KEY_PATH}
       - ORIGIN_URL=${ORIGIN_URL}
       - VAULT_ADDR=${VAULT_ADDR}
-      - VAULT_TOKEN=${VAULT_TOKEN}
-      - UNSEAL_KEY=${UNSEAL_KEY}
-
     restart: unless-stopped
   #********************************************************************************#
 
@@ -149,7 +146,7 @@ services:
   service-game:
     image: service-game
     build:
-      context: ./backend/services/service-game
+      context: ./srcs/backend/services/service-game
       dockerfile: Dockerfile
     container_name: service-game
     volumes:
@@ -170,7 +167,7 @@ services:
       - "4001:4001"
     environment:
       - NODE_ENV=production
-      - VAULT_ADDR=http://hashicorp_vault:8200
+      - VAULT_ADDR=https://hashicorp_vault:8200
       - DB_HOST=${GAME_SERVICE_DB_HOST}
       - DB_NAME=${GAME_SERVICE_DB_NAME}
       - DB_USER=${GAME_SERVICE_DB_USER}
@@ -187,7 +184,7 @@ services:
   service-chat:
     image: service-chat
     build:
-      context: ./backend/services/service-chat
+      context: ./srcs/backend/services/service-chat
       dockerfile: Dockerfile
     container_name: service-chat
     volumes:
@@ -208,7 +205,7 @@ services:
       - "4002:4002"
     environment:
       - NODE_ENV=production
-      - VAULT_ADDR=http://hashicorp_vault:8200
+      - VAULT_ADDR=https://hashicorp_vault:8200
       - DB_HOST=${CHAT_SERVICE_DB_HOST}
       - DB_NAME=${CHAT_SERVICE_DB_NAME}
       - DB_USER=${CHAT_SERVICE_DB_USER}
@@ -226,7 +223,7 @@ services:
   service-friends:
     image: service-friends
     build:
-      context: ./backend/services/service-friends
+      context: ./srcs/backend/services/service-friends
       dockerfile: Dockerfile
     container_name: service-friends
     volumes:
@@ -247,7 +244,7 @@ services:
       - "4003:4003"
     environment:
       - NODE_ENV=production
-      - VAULT_ADDR=http://hashicorp_vault:8200
+      - VAULT_ADDR=https://hashicorp_vault:8200
       - DB_HOST=${FRIENDS_SERVICE_DB_HOST}
       - DB_NAME=${FRIENDS_SERVICE_DB_NAME}
       - DB_USER=${FRIENDS_SERVICE_DB_USER}
@@ -263,7 +260,7 @@ services:
   postgreSQL:
     image: postgresql
     build:
-      context: ./backend/postgresql
+      context: ./srcs/backend/postgresql
       dockerfile: Dockerfile
     container_name: postgreSQL
     depends_on:
@@ -309,7 +306,7 @@ services:
   #****************************************************************************#
   redis: # Name of the Redis service
     build: # Build the image
-      context: ./backend/redis # Build the image using the Dockerfile
+      context: ./srcs/backend/redis # Build the image using the Dockerfile
     
     image: redis # Image name
 

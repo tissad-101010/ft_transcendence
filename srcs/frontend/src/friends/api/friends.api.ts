@@ -31,6 +31,7 @@ export enum StatusInvitation
 
 const serviceUrl = window.__ENV__.BACKEND_URL;
 
+
 export async function getInfoFriend(username: string): Promise<PromiseGetInfoFriendResponse>
 {
   try

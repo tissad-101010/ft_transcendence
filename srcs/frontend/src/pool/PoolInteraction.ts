@@ -133,8 +133,18 @@ export class PoolInteraction implements SpecificInteraction {
                         this.sceneManager,
                         this
                     );
-                else
-                    this.chat.updateChat(this.userX.getFriends[index]);
+                else{
+                    this.chat.dispose()
+                                      this.chat = new Chat3D(
+                        this.scene,
+                        buttonMeshes[2],
+                        this.userX.getFriends[index],
+                        this.userX,
+                        this.sceneManager,
+                        this
+                    );
+                    // this.chat.updateChat(this.userX.getFriends[index]);
+                }
             }
             else if (buttonMeshes.includes(pickedMesh)) {
                 const current = getCurrentGroup(ZoneName.LOUNGE);
