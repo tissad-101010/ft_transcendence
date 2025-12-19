@@ -84,11 +84,11 @@ export class TwoFactorAuthController {
     if (accessToken === null)
       {
       console.error("❌ [2fa.controller.ts] User not found");
-      return reply.status(401).send({ message: "Unauthorized ❌" });
+      return reply.status(401).send({ success: false, message: "Unauthorized ❌" });
     }
     if ( user === null) {
       console.error("❌ [2fa.controller.ts] User not found");
-      return reply.status(401).send({ message: "Unauthorized ❌" });
+      return reply.status(401).send({ success: false, message: "Unauthorized ❌" });
     }
     const userId  = user.userId;
     const email   = user.email;
@@ -98,11 +98,11 @@ export class TwoFactorAuthController {
     const { code } = req.body;
     if (!rigexForOTP.test(code)) {
       console.error("❌ [2fa.controller.ts] Invalid OTP format");
-      return reply.status(400).send({ message: "Invalid OTP format ❌" });
+      return reply.status(400).send({ success: false, message: "Invalid OTP format ❌" });
     }
     if (!code) {
       console.error("❌ [2fa.controller.ts] OTP not provided");
-      return reply.status(400).send({ message: "OTP not provided ❌" });
+      return reply.status(400).send({ success: false, message: "OTP not provided ❌" });
     }
     // console.log("[2fa.controller.ts] Verifying OTP for email:", email);
     // console.log("[2fa.controller.ts] Provided OTP:", code);
@@ -110,12 +110,12 @@ export class TwoFactorAuthController {
     const isValid = await this.twoFactorAuthService.verifyOtpEmail(email, code);
     if (!isValid) {
       console.error("❌ [2fa.controller.ts] OTP verification failed for email:", email);
-      return reply.status(400).send({ message: "Invalid or expired OTP ❌" });
+      return reply.status(400).send({ success: false,message: "Invalid or expired OTP ❌" });
     } else {
       // enable email otp for tfa
       await this.twoFactorAuthService.enableTwoFactorAuth(userId, type);
       // console.log("✅ [2fa.controller.ts] TFA enabled successfully for user ID:", userId);
-      return reply.send({ message: "Two-factor authentication enabled successfully ✅" });
+      return reply.send({ success: true, message: "Two-factor authentication enabled successfully ✅" });
     }
   };
   
@@ -303,16 +303,16 @@ export class TwoFactorAuthController {
     const user = JwtUtils.extractUserFromAccessToken(accessToken);
     if (accessToken === null || user === null) {
       console.error("❌ [2fa.controller.ts] User not found");
-      return reply.status(401).send({ message: "Unauthorized ❌" });
+      return reply.status(401).send({ success: false, message: "Unauthorized ❌" });
     }
     const code = (req.body as any).code;
     if (!rigexForOTP.test(code)) {
       console.error("❌ [2fa.controller.ts] Invalid TOTP code format");
-      return reply.status(400).send({ message: "Invalid TOTP code format ❌" });
+      return reply.status(400).send({ success: false, message: "Invalid TOTP code format ❌" });
     }
     if (!code) {
       console.error("❌ [2fa.controller.ts] TOTP code not provided");
-      return reply.status(400).send({ message: "TOTP code not provided ❌" });
+      return reply.status(400).send({ success: false, message: "TOTP code not provided ❌" });
     }
     // console.log("[2fa.controller.ts] TOTP code received for enabling TFA:", code);
     // verify TOTP code before enabling TFA
@@ -320,17 +320,17 @@ export class TwoFactorAuthController {
     const isValid = await this.twoFactorAuthService.verifyTotpToken(userId, code);
     if (!isValid) {
       console.error("❌ [2fa.controller.ts] TOTP verification failed for user ID:", userId);
-      return reply.status(400).send({ message: "Invalid TOTP code ❌" });
+      return reply.status(400).send({ success: false, message: "Invalid TOTP code ❌" });
     }
     const type = TwoFactorType.TOTP;
     // console.log("[2fa.controller.ts] Enabling TFA TOTP for user ID:", userId);
     try {
       await this.twoFactorAuthService.enableTwoFactorAuth(userId, type);
       // console.log("✅ [2fa.controller.ts] TFA TOTP enabled successfully for user ID:", userId);
-      return reply.send({ message: "Two-factor authentication TOTP enabled successfully ✅" });
+      return reply.send({ success: true, message: "Two-factor authentication TOTP enabled successfully ✅" });
     } catch (error: any) {
       console.error("❌ [2fa.controller.ts] Error enabling TFA TOTP for user ID:", userId, error);
-      return reply.status(500).send({ message: "Error enabling two-factor authentication TOTP ❌" });
+      return reply.status(500).send({ success: false, message: "Error enabling two-factor authentication TOTP ❌" });
     }
   }; 
         

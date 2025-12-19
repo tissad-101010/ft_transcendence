@@ -47,6 +47,7 @@ export default class BallLogic
     };
 
     hit(player: PlayerLogic): void {
+        console.log("RADIUS", this.radius);
         const ballLeft = this.posX - this.radius;
         const ballRight = this.posX + this.radius;
         const ballTop = this.posY - this.radius;

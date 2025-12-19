@@ -189,10 +189,11 @@ export class MyProfilUI
                 const code = input.text?.trim();
                 if (!code) return infoMsg1.text = "The field is empty.";
                 if (code.length !== 6) return infoMsg1.text = "Incorrect code. Please check and try again.";
-                await enable2faEmail(code);
+                const msg = await enable2faEmail(code);
                 this.flag = true;
                 this.enable2faMail = true;
-                this.displayMenu();
+                return infoMsg1.text = msg;
+                // this.displayMenu();
             }
         });
         stackElements2.addControl(confirmButtonMail);
@@ -266,11 +267,11 @@ export class MyProfilUI
                 const code = input.text?.trim();
                 if (!code) return infoMsg1.text = "The field is empty.";
                 if (code.length !== 6) return infoMsg1.text = "Incorrect code. Please check and try again.";
-                const res = await enableTotp(code);
+                const msg = await enableTotp(code);
                 this.flag = true;
-                if (!res) return infoMsg1.text = "2FA activation failed. Please try again.";
+                return infoMsg1.text = msg;
                 // this.enable2faApp = true;
-                this.displayMenu();
+                // this.displayMenu();
             }
         });
         stackElements2.addControl(confirmButton);
@@ -550,8 +551,22 @@ export class MyProfilUI
                         body: formData,
                         credentials: "include"
                     });
-    
-                    const data = await res.json();
+                    if (res.ok)
+                    {
+                        const data = await res.json();
+                        if (data && data.avatarUrl && this.userX.getUser)
+                        {
+                            this.userX.getUser.avatarUrl = data.avatarUrl;
+                            
+                            console.info(data.message);
+                        }else
+                        { 
+                            console.error(data.message);
+                        }
+
+                    } else {
+                        console.error("Failed to upload avatar:");
+                    }
                 };
 
                 input.click();

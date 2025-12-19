@@ -28,7 +28,7 @@ async function refreshAccessToken(): Promise<void> {
                 });
 
                 if (!res.ok) {
-                    console.warn("Refresh token invalid, logout required");
+                    // console.warn("Refresh token invalid, logout required");
                     throw new Error("Refresh failed");
                 }
             } finally {

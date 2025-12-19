@@ -222,7 +222,7 @@ export class AuthService {
     } 
 
     // upload user avatar
-    async uploadUserAvatar(userId: string, avatarUrl:string): Promise<{uploadComplete: boolean, message: string}> {
+    async uploadUserAvatar(userId: string, avatarUrl:string): Promise<{uploadComplete: boolean, message: string, avatarUrl?: string}> {
           // @fastify/multipart
           
         // delete cache or old avatar if exists
@@ -230,10 +230,10 @@ export class AuthService {
         const updateResult = await this.userService.uploadUserAvatar(userId, avatarUrl);
         if (!updateResult) {
             // console.log("[AuthService] Failed to update avatar for user:", userId);
-            return {uploadComplete: false, message: "Failed to update avatar"}
+            return {uploadComplete: false, message: "Failed to update avatar"};
         }
         // console.log("[AuthService] Avatar updated successfully for user:", userId);
-        return {uploadComplete: true, message: "Avatar updated successfully"};
+        return {uploadComplete: true, message: "Avatar updated successfully", avatarUrl: avatarUrl};
     }
     
 }

@@ -10,6 +10,7 @@
 /*                                                                            */
 /* ************************************************************************** */
 
+import { data } from 'react-router-dom';
 import { getApiUrl } from '../../utils';
 import { authFetch } from '../authFetch';
 import { fetchUserProfile } from './auth.api';
@@ -36,7 +37,7 @@ export async function sendEnableEmailOtp(): Promise<boolean> {
 }
 
 // enable 2fa mail
-export async function enable2faEmail(otp:string): Promise<boolean> {
+export async function enable2faEmail(otp:string): Promise<string> {
   try { 
     const requestOptions: RequestInit = {
       method: "POST",
@@ -46,14 +47,17 @@ export async function enable2faEmail(otp:string): Promise<boolean> {
     };
     const res = await authFetch(`${BASE_URL}/email-enable`, requestOptions);
     if (res.ok) {
-      // 
+      const data = await res.json();
       await fetchUserProfile();
+      if (data && data.success === true)
+        return (data.message as string);
+      return ("Two-factor authentication enabled successfully ✅");
     }
-    return res.ok;
+    return "Failed to enable 2FA email";
   }
-  catch (err) {
+  catch (err: any) {
     console.error("Error enabling 2FA email:", err);
-    return false;
+    return "Error enabling 2FA email";
   }
 }
 
@@ -136,7 +140,7 @@ export async function getTotpSecret(): Promise<{ qrCodeUrl: string, message:stri
 }
 
 // enable totp
-export async function enableTotp(code:string): Promise<boolean> {
+export async function enableTotp(code:string): Promise<string> {
   try {
     const requestOptions: RequestInit = {
       method: "POST",
@@ -146,13 +150,17 @@ export async function enableTotp(code:string): Promise<boolean> {
     };
     const res = await authFetch(`${BASE_URL}/totp-enable`, requestOptions);
     if (res.ok) {
-      // fetch updated user profile
-      await fetchUserProfile();
+      const data = await res.json();
+      if (data.success)
+      {
+        await fetchUserProfile();
+        return (data.message as string);
+      }
     }
-    return res.ok;
+    return "Failed to enable 2FA TOTP";
   } catch (err) {
     console.error("Error enabling TOTP:", err);
-    return false;
+    return "Error enabling TOTP";
   }
 }
 

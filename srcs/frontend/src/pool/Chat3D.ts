@@ -239,7 +239,7 @@ export class Chat3D {
         };
 
         this.ws.onclose = () => {
-            console.warn("WebSocket fermé. Reconnexion dans 2s…");
+            // console.warn("WebSocket fermé. Reconnexion dans 2s…");
             if (!this.closeInterval)
                 this.interval = setTimeout(() => {
                     this.initWebSocket() 

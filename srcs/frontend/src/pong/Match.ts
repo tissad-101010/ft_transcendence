@@ -108,7 +108,7 @@ export class Match
                 {
                     scoreMax: parseInt(this.rules.score),
                     ballSpeed: 0.3 * parseInt(this.rules.speed),
-                    playerSpeed: 1.25 * parseInt(this.rules.speed),
+                    playerSpeed: 0.5 * parseInt(this.rules.speed),
                     countDownGoalTime: parseInt(this.rules.timeBefore),
                     allowPause: false
                 },

@@ -280,11 +280,11 @@ until su-exec postgres pg_isready -q   ; do
 done
 
 # 
-# if [ -f /tmp/init.sql ]; then
-#     echo "📄  Running /tmp/init.sql"
-#     su-exec postgres psql -U postgres -f /tmp/init.sql  
-#     # rm /tmp/init.sql
-# fi
+if [ -f /tmp/init.sql ]; then
+    echo "📄  Running /tmp/init.sql"
+    su-exec postgres psql -U postgres -f /tmp/init.sql  
+    # rm /tmp/init.sql
+fi
 
 # 
 echo "🛑  Stopping temporary PostgreSQL"

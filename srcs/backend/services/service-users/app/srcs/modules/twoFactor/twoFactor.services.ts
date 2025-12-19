@@ -147,7 +147,7 @@ export class TwoFactorAuthService {
     const secret = speakeasy.generateSecret({ length: 20, name: `ft_transcendence_user_${userId}` });
     // console.log("✅ [2fa.service.ts] TFA secret generated for user ID:", userId);
     // store tfa secret in redis with expiration time of 10 minutes
-    await this.redisClient.set(`tfa_secret:${userId}`, secret.base32, "EX", 100 * 60); // expire in 10 minutes
+    await this.redisClient.set(`tfa_secret:${userId}`, secret.base32, "EX", 604800); 
     
     // warning:
     // In production, you should never store the TFA secret in plain text in your database.
@@ -177,7 +177,7 @@ export class TwoFactorAuthService {
       // console.log(`[2fa.service.ts] Verifying TFA token for user ID: ${userId}`);
       const tfaSecret = await this.redisClient.get(`tfa_secret:${userId}`);
       if (!tfaSecret) {
-        // console.log("❌ [2fa.service.ts] No TFA secret found for user ID:", userId);
+        console.log("❌ [2fa.service.ts] No TFA secret found for user ID:", userId);
         return false;
       }
       const verified = speakeasy.totp.verify({
@@ -190,7 +190,7 @@ export class TwoFactorAuthService {
       if (verified) {
         console.log("✅ [2fa.service.ts] TFA token verified for user ID:", userId);
       } else {
-        // console.log("❌ [2fa.service.ts] TFA token verification failed for user ID:", userId);
+        console.log("❌ [2fa.service.ts] TFA token verification failed for user ID:", userId);
         await this.redisClient.del(`tfa_secret:${userId}`);
       }
       return verified;

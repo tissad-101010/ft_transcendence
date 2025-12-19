@@ -200,7 +200,7 @@ export async function friendlyRoutes(fastify: FastifyInstance) {
       });
 
       if (!call.data)
-        return ({success: false, message: "User non trouve"});
+        return ({success: false, message: "there is no matches for this user"});
 
       const user = call[0];
 
