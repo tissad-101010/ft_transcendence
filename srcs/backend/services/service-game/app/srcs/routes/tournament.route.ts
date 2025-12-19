@@ -110,14 +110,14 @@ export async function tournamentRoutes(fastify: FastifyInstance) {
 
       fastify.log.info(`Tournoi créé: ID ${tournament.id}`);
 
-      console.log(await fastify.prisma.tournament.findUnique({
-        where: {
-          id: tournament.id,
-        },
-        include: {
-          participants: true,
-        },
-      }));
+      // console.log(await fastify.prisma.tournament.findUnique({
+      //   where: {
+      //     id: tournament.id,
+      //   },
+      //   include: {
+      //     participants: true,
+      //   },
+      // }));
 
 
       return reply.code(200).send({
@@ -311,14 +311,14 @@ export async function tournamentRoutes(fastify: FastifyInstance) {
         });
       }
 
-      console.log(await fastify.prisma.tournament.findUnique({
-        where: {
-          id: tournament.id,
-        },
-        include: {
-          participants: true,
-        },
-      }));
+      // console.log(await fastify.prisma.tournament.findUnique({
+      //   where: {
+      //     id: tournament.id,
+      //   },
+      //   include: {
+      //     participants: true,
+      //   },
+      // }));
 
       const participants = tournament.participants;
       const participantCount = participants.length;

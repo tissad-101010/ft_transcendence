@@ -18,11 +18,11 @@ let prisma: PrismaClient | null = null;
 
 const prismaPlugin = fp(async (fastify) => {
   if (!prisma) {
-    console.log("➡️ Initializing Prisma Client...");
+    // console.log("➡️ Initializing Prisma Client...");
     try {
         prisma = new PrismaClient();
         await prisma.$connect();
-        console.log("✅ Prisma Client connected successfully"); 
+        // console.log("✅ Prisma Client connected successfully"); 
     } catch (error) {
         
         console.error("❌ Error connecting Prisma Client:", error);

@@ -456,7 +456,7 @@ export class Chat3D {
         bubble.cornerRadius = 16;
         bubble.thickness = 0;
 
-        const isMe = sender !== this.friend.getUsername;clearTimeout(this.interval);
+        const isMe = sender !== this.friend.getUsername;
         bubble.background = isMe ? "#88bcc0ff" : "#c07985ff";
         bubble.horizontalAlignment = isMe
             ? Control.HORIZONTAL_ALIGNMENT_RIGHT
@@ -474,7 +474,7 @@ export class Chat3D {
         msgText.paddingBottom = "6px";
         msgText.textHorizontalAlignment = Control.HORIZONTAL_ALIGNMENT_LEFT
 
-        bubble.addControl(msgText);clearTimeout(this.interval);
+        bubble.addControl(msgText);
         this.chatContainer.addControl(bubble);
 
         this.scrollViewer.verticalBar.value = this.scrollViewer.verticalBar.maximum;

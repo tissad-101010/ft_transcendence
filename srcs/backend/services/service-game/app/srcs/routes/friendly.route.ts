@@ -216,9 +216,7 @@ export async function friendlyRoutes(fastify: FastifyInstance) {
         orderBy: { createdAt: 'desc' },
       });
 
-      console.log("USER RECUPERE -> ", user);
-      console.log("Type de l'id -> ", typeof user.id)
-      console.log("MATCH AMICAUX RECUPERES : ", friendlyMatches)
+  
 
       const friendly = friendlyMatches.map((m: any) => ({
         type: 'friendly',

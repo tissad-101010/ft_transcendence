@@ -32,7 +32,7 @@ export class OauthService {
             const user = await googleProvider.findOrCreateUser(profile);
             return user;
         } catch (error) {
-            console.log("[OAuth Service] Google OAuth error:", error);
+            // console.log("[OAuth Service] Google OAuth error:", error);
             return (null);
         }
     }
@@ -45,7 +45,7 @@ export class OauthService {
             const user = await githubProvider.findOrCreateUser(profile);
             return user;
         } catch (error) {
-            console.log("[OAuth Service] Google OAuth error:", error);
+            // console.log("[OAuth Service] Google OAuth error:", error);
             return (null);
         }
     }
@@ -58,7 +58,7 @@ export class OauthService {
             const user = await api42Provider.findOrCreateUser(profile);
             return user;
         } catch (error) {
-            console.log("[OAuth Service] 42 OAuth error:", error);
+            // console.log("[OAuth Service] 42 OAuth error:", error);
             return (null);
         }
     }

@@ -134,14 +134,14 @@ export class JwtUtils {
             return null;
           }
           const payload = JwtUtils.verifyAccessToken(access_token);
-          console.log("✅ [jwt.utils.ts] Extracted user from request:", payload);
+        //   console.log("✅ [jwt.utils.ts] Extracted user from request:", payload);
           if (!payload) {
             console.error("❌ [jwt.utils.ts] Invalid JWT token");
             return null;
           }
           const userId = payload.id;
           const email = payload.email;
-          console.log("✅ [jwt.utils.ts] Extracted userId and email:", userId, email);
+        //   console.log("✅ [jwt.utils.ts] Extracted userId and email:", userId, email);
           return { userId, email };
         } catch (error) {
           console.error("❌ [jwt.utils.ts] Error extracting user from request:", error);
@@ -155,14 +155,14 @@ export class JwtUtils {
             return null;
           }
           const payload = JwtUtils.verifyRefreshToken(refresh_token);
-          console.log("✅ [jwt.utils.ts] Extracted user from request:", payload);
+        //   console.log("✅ [jwt.utils.ts] Extracted user from request:", payload);
           if (!payload) {
             console.error("❌ [jwt.utils.ts] Invalid JWT token");
             return null;
           }
           const userId = payload.id;
           const email = payload.email;
-          console.log("✅ [jwt.utils.ts] Extracted userId and email:", userId, email);
+        //   console.log("✅ [jwt.utils.ts] Extracted userId and email:", userId, email);
           return { userId, email };
         } catch (error) {
           console.error("❌ [jwt.utils.ts] Error extracting user from request:", error);
@@ -176,14 +176,14 @@ export class JwtUtils {
                 return null;
             }
             const payload = JwtUtils.verifyTempToken(temp_token);
-            console.log("✅ [jwt.utils.ts] Extracted user from request:", payload);
+            // console.log("✅ [jwt.utils.ts] Extracted user from request:", payload);
             if (!payload) {
                 console.error("❌ [jwt.utils.ts] Invalid JWT token");
                 return null;
             }
             const userId = payload.id;
             const email = payload.email;
-            console.log("✅ [jwt.utils.ts] Extracted userId and email:", userId, email);
+            // console.log("✅ [jwt.utils.ts] Extracted userId and email:", userId, email);
             return { userId, email };
         } catch (error) {
             console.error("❌ [jwt.utils.ts] Error extracting user from request:", error);

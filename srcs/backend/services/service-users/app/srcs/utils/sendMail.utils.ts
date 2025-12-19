@@ -38,15 +38,15 @@ if (!transporter) {
 
 
 
-console.log("[sendMail.utils.ts] Email user:", process.env.EMAIL_USER);
-console.log("[sendMail.utils.ts] Gmail app password:", process.env.GMAIL_APP_PASSWORD ? "is set" : "not set");
-console.log("[sendMail.utils.ts] Transporter created");
+// console.log("[sendMail.utils.ts] Email user:", process.env.EMAIL_USER);
+// console.log("[sendMail.utils.ts] Gmail app password:", process.env.GMAIL_APP_PASSWORD ? "is set" : "not set");
+// console.log("[sendMail.utils.ts] Transporter created");
 
 
 export async function sendMail(mailOptions: MailArgs): Promise<boolean> {
   try {
     const info = await transporter.sendMail(mailOptions);
-    console.log("✅ [sendMail.utils.ts] Email sent: " + info.response);
+    // console.log("✅ [sendMail.utils.ts] Email sent: " + info.response);
     return true;
   } catch (error) {
     console.error("❌ [sendMail.utils.ts] Error sending email:", error);

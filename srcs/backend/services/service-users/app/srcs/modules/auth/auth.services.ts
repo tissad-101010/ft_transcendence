@@ -48,7 +48,7 @@ export class AuthService {
     }
     // register a new user
     async registerUser(inputData: SignupUserDTO): Promise<SignupResponseDTO> {
-        console.log('[Signup authservice] Registering user:', inputData.username);
+        // console.log('[Signup authservice] Registering user:', inputData.username);
         // hash the password before storing
         const hashedPassword = await CryptUtils.hashLongPassword(inputData.password);
         // data that will be stored in the database
@@ -76,10 +76,10 @@ export class AuthService {
     
     async authenticateUser(inputData: LoginUserDTO) : Promise<LoginResponseDTO> {  
         // find user by username
-        console.log('[Signin authservice] Authenticating user:', inputData.username);
+        // console.log('[Signin authservice] Authenticating user:', inputData.username);
         const user = await this.userService.getUserByUsername(inputData.username) ||
         await this.userService.getUserByEmail(inputData.username);
-        console.log('[Signin authservice] User found:', user ? user.username : 'null');
+        // console.log('[Signin authservice] User found:', user ? user.username : 'null');
         if (!user) {
             return {
                 message: 'Authentication failed: User not found',
@@ -113,7 +113,7 @@ export class AuthService {
         if (isTwoFactorEnabled) {
             const tempToken = JwtUtils.generateTwoFactorTempToken(loginResponse);
             if (!tempToken) {
-                console.log('[Signin authservice] Failed to generate temp token for 2FA');
+                // console.log('[Signin authservice] Failed to generate temp token for 2FA');
                 return {
                     message: 'Authentication failed: Unable to generate temporary token for 2FA',
                     signinComplete: false,
@@ -150,7 +150,7 @@ export class AuthService {
             this.accessTimeout
         );
         
-        console.log('[Signin authservice] User authenticated successfully, tokens generated');
+        // console.log('[Signin authservice] User authenticated successfully, tokens generated');
         return {
             message: 'Authentication successful',
             signinComplete: true,
@@ -162,7 +162,7 @@ export class AuthService {
     }
 
     async getUserProfile(userId: string): Promise<UserProfile | null> {
-        console.log('(============================================[AuthService] Fetching profile for user ID:', userId);
+        // console.log('(============================================[AuthService] Fetching profile for user ID:', userId);
         const user = await this.userService.getUserById(userId);
         if (!user) {
             return null;
@@ -193,11 +193,11 @@ export class AuthService {
     async changeUserPassword(userId: string, currentPassword: string, newPassword: string): Promise<{passwordChangeComplete: boolean, message: string}> {
         const user = await this.userService.getUserById(userId);
         if (!user) {
-            console.log("[AuthService] User not found for password change:", userId);
+            // console.log("[AuthService] User not found for password change:", userId);
             return {passwordChangeComplete: false, message: "User not found"};
         }
         if (user.passwordHash === null) {
-            console.log("[AuthService] User has no password set (OAuth user) for user:", userId);
+            // console.log("[AuthService] User has no password set (OAuth user) for user:", userId);
             return {passwordChangeComplete: false, message: "User has no password set (OAuth user)"};
         }
         // verify current password
@@ -206,7 +206,7 @@ export class AuthService {
             user.passwordHash
         );
         if (!isPasswordValid) {
-            console.log("[AuthService] Current password is incorrect for user:", userId);
+            // console.log("[AuthService] Current password is incorrect for user:", userId);
             return {passwordChangeComplete: false, message: "Current password is incorrect"}
         }
         // hash new password
@@ -214,10 +214,10 @@ export class AuthService {
         // update password in database
         const updateResult = await this.userService.updateUserPassword(userId, hashedNewPassword);
         if (!updateResult) {
-            console.log("[AuthService] Failed to update password for user:", userId);
+            // console.log("[AuthService] Failed to update password for user:", userId);
             return {passwordChangeComplete: false, message: "Failed to update password"}
         }
-        console.log("[AuthService] Password updated successfully for user:", userId);
+        // console.log("[AuthService] Password updated successfully for user:", userId);
         return {passwordChangeComplete: true, message: "Password updated successfully"};
     } 
 
@@ -229,10 +229,10 @@ export class AuthService {
         await this.redisClient.del(`user_profile:${userId}`); 
         const updateResult = await this.userService.uploadUserAvatar(userId, avatarUrl);
         if (!updateResult) {
-            console.log("[AuthService] Failed to update avatar for user:", userId);
+            // console.log("[AuthService] Failed to update avatar for user:", userId);
             return {uploadComplete: false, message: "Failed to update avatar"}
         }
-        console.log("[AuthService] Avatar updated successfully for user:", userId);
+        // console.log("[AuthService] Avatar updated successfully for user:", userId);
         return {uploadComplete: true, message: "Avatar updated successfully"};
     }
     

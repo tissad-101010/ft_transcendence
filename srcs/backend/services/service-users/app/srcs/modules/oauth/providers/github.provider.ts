@@ -47,7 +47,7 @@ export class GitHubOAuthProvider {
     });
 
     if (response.data.error) {
-      console.log("[github.service] OAuth error:", response.data);
+      // console.log("[github.service] OAuth error:", response.data);
       throw new Error(response.data.error_description || "GitHub OAuth error");
     }
 
@@ -62,7 +62,7 @@ export class GitHubOAuthProvider {
       headers: { Authorization: `Bearer ${token}` },
     });
     if (response.status !== 200) {
-      console.log("[github.service] Failed to fetch GitHub profile:", response.data); 
+      // console.log("[github.service] Failed to fetch GitHub profile:", response.data); 
       throw new Error("Failed to fetch GitHub profile");
     }
     return response.data;
@@ -72,14 +72,14 @@ export class GitHubOAuthProvider {
   */
   async findOrCreateUser(github_profile: any): Promise<any> {
     // Placeholder logic to find or create user in your database
-    console.log("[github.service] Finding or creating user with GitHub profile:", github_profile);
+    // console.log("[github.service] Finding or creating user with GitHub profile:", github_profile);
     
     let  user = await this.userService.getUserByUsername(github_profile.login)||
                    await this.userService.getUserByEmail(github_profile.notification_email);
-    console.log("[google.service] Searching for user by userName:", github_profile.login);
-    console.log("[google.service] GitHub profile data:", github_profile.notification_email);
+    // console.log("[github.service] Searching for user by userName:", github_profile.login);
+    // console.log("[github.service] GitHub profile data:", github_profile.notification_email);
     if (!user) {
-      console.log("[google.service] No existing user found, creating new user");
+      // console.log("[github.service] No existing user found, creating new user");
       const DB_profile: UserProfile = {
           email: github_profile.notification_email,
           username: github_profile.login,
@@ -96,17 +96,17 @@ export class GitHubOAuthProvider {
           updatedAt: new Date(),
       };
       try {
-          console.log("[google.service] Creating user with profile:", DB_profile);
+          // console.log("[github.service] Creating user with profile:", DB_profile);
             user = await this.userService.createUser(DB_profile);
       } catch (error) {
-          console.log("[google.service] Error preparing user creation:", error);
+          // console.log("[github.service] Error preparing user creation:", error);
           return null;
       }
     }
     // link OAuth provider to the new user
     if (user)
     {
-      console.log("[google.service] Linking Google OAuth provider to user:", user.id);
+      // console.log("[google.service] Linking Google OAuth provider to user:", user.id);
       const DB_provider : OAuthProvider = {
         provider: OAuthProviderType.GITHUB,
         providerId: github_profile.id.toString(),
@@ -115,7 +115,7 @@ export class GitHubOAuthProvider {
       }
       try {
           await this.userService.linkOAuthProviderToUser(user.id, DB_provider);
-          console.log("[google.service] Successfully linked Google OAuth provider to user:", user.id);
+          // console.log("[google.service] Successfully linked Google OAuth provider to user:", user.id);
           const twoFactorMethods = await this.userService.getUserTwoFactorMethods(user.id);
           const isTwoFactorEnabled = twoFactorMethods.length > 0;
           return ({
@@ -127,7 +127,7 @@ export class GitHubOAuthProvider {
               twoFactorMethods: twoFactorMethods,
           });
       } catch (error) {
-          console.log("[google.service] Error linking OAuth provider to user:", error);
+          // console.log("[google.service] Error linking OAuth provider to user:", error);
           return null;
       }    
     }

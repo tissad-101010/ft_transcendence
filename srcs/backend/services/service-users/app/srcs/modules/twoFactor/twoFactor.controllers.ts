@@ -57,7 +57,7 @@ export class TwoFactorAuthController {
     }
     const userId  = user.userId;
     const email   = user.email;
-    console.log("[2fa.controller.ts] Enabling TFA for user ID:", userId, "email:", email);
+    // console.log("[2fa.controller.ts] Enabling TFA for user ID:", userId, "email:", email);
     // Tmp Token user id and email extraction from request
     const mailSent = await this.twoFactorAuthService.sendOtpByEmail(email);
     
@@ -67,7 +67,7 @@ export class TwoFactorAuthController {
       return reply.status(500).send({ message: "Failed to send OTP email", mailSent });
     }
     else{
-      console.log("✅ [otp.controller.ts] OTP email sent to:", email);
+      // console.log("✅ [otp.controller.ts] OTP email sent to:", email);
       return reply.send({ message: "OTP email sent successfully ✅", mailSent });
     }
   };
@@ -93,7 +93,7 @@ export class TwoFactorAuthController {
     const userId  = user.userId;
     const email   = user.email;
     const type = TwoFactorType.EMAIL;
-    console.log("[2fa.controller.ts] Verifying OTP and enabling TFA for user ID:", userId, "email:", email);
+    // console.log("[2fa.controller.ts] Verifying OTP and enabling TFA for user ID:", userId, "email:", email);
     // verify otp
     const { code } = req.body;
     if (!rigexForOTP.test(code)) {
@@ -104,9 +104,9 @@ export class TwoFactorAuthController {
       console.error("❌ [2fa.controller.ts] OTP not provided");
       return reply.status(400).send({ message: "OTP not provided ❌" });
     }
-    console.log("[2fa.controller.ts] Verifying OTP for email:", email);
-    console.log("[2fa.controller.ts] Provided OTP:", code);
-    console.log("[2fa.controller.ts] request body:", req.body);
+    // console.log("[2fa.controller.ts] Verifying OTP for email:", email);
+    // console.log("[2fa.controller.ts] Provided OTP:", code);
+    // console.log("[2fa.controller.ts] request body:", req.body);
     const isValid = await this.twoFactorAuthService.verifyOtpEmail(email, code);
     if (!isValid) {
       console.error("❌ [2fa.controller.ts] OTP verification failed for email:", email);
@@ -114,7 +114,7 @@ export class TwoFactorAuthController {
     } else {
       // enable email otp for tfa
       await this.twoFactorAuthService.enableTwoFactorAuth(userId, type);
-      console.log("✅ [2fa.controller.ts] TFA enabled successfully for user ID:", userId);
+      // console.log("✅ [2fa.controller.ts] TFA enabled successfully for user ID:", userId);
       return reply.send({ message: "Two-factor authentication enabled successfully ✅" });
     }
   };
@@ -126,9 +126,9 @@ export class TwoFactorAuthController {
   ) => {
     // Tmp Token user id and email extraction from request
     const cookies = JwtUtils.extractCookiesFromRequest(req);
-    console.log("[2fa.controller.ts] Cookies extracted from request:", cookies);
+    // console.log("[2fa.controller.ts] Cookies extracted from request:", cookies);
     const tempToken = JwtUtils.extractTokenFromCookies(cookies, 'temp_token');
-    console.log("[2fa.controller.ts] Temp token extracted from cookies:", tempToken);
+    // console.log("[2fa.controller.ts] Temp token extracted from cookies:", tempToken);
     const user = JwtUtils.extractUserFromTempToken(tempToken);
     if (tempToken === null || user === null) {
       console.error("❌ [2fa.controller.ts] User not found");
@@ -136,14 +136,14 @@ export class TwoFactorAuthController {
     }
     const userId  = user.userId;
     const email   = user.email;
-    console.log("[2fa.controller.ts] Sending OTP email for sign-in TFA for user ID:", userId, "email:", email);
+    // console.log("[2fa.controller.ts] Sending OTP email for sign-in TFA for user ID:", userId, "email:", email);
     const mailSent = await this.twoFactorAuthService.sendOtpByEmail(email); 
     if (!mailSent) {
       console.error("❌ [otp.controller.ts] Failed to send OTP email to:", email);
       return reply.status(500).send({ message: "Failed to send OTP email", mailSent });
     }
     else{
-      console.log("✅ [otp.controller.ts] OTP email sent to:", email);
+      // console.log("✅ [otp.controller.ts] OTP email sent to:", email);
       return reply.send({ message: "OTP email sent successfully ✅", mailSent });
     }
   }
@@ -156,9 +156,9 @@ export class TwoFactorAuthController {
   ) => {
     // Tmp Token user id and email extraction from request
     const cookies = JwtUtils.extractCookiesFromRequest(req);
-    console.log("[2fa.controller.ts] Cookies extracted from request:", cookies);
+    // console.log("[2fa.controller.ts] Cookies extracted from request:", cookies);
     const tempToken = JwtUtils.extractTokenFromCookies(cookies, 'temp_token');
-    console.log("[2fa.controller.ts] Temp token extracted from cookies:", tempToken);
+    // console.log("[2fa.controller.ts] Temp token extracted from cookies:", tempToken);
     const user = JwtUtils.extractUserFromTempToken(tempToken);
     if (tempToken === null) {
       console.error("❌ [2fa.controller.ts] Temp token not found");
@@ -169,9 +169,9 @@ export class TwoFactorAuthController {
       return reply.status(401).send({ message: "Unauthorized ❌" });
     }
     const userId  = user.userId;
-    console.log("================================================================================[2fa.controller.ts] User ID from temp token:", userId);
+    // console.log("================================================================================[2fa.controller.ts] User ID from temp token:", userId);
     const email   = user.email;
-    console.log("[2fa.controller.ts] Verifying OTP for sign-in TFA for user ID:", userId, "email:", email);
+    // console.log("[2fa.controller.ts] Verifying OTP for sign-in TFA for user ID:", userId, "email:", email);
     const { code } = req.body;
     // verify otp if valid
     
@@ -180,16 +180,16 @@ export class TwoFactorAuthController {
       return reply.status(400).send({ message: "Invalid OTP format ❌" });
     }
 
-    console.log("[2fa.controller.ts] Verifying OTP for email:", email);
-    console.log("[2fa.controller.ts] Provided OTP:", code);
-    console.log("[2fa.controller.ts] request body:", req.body);
+    // console.log("[2fa.controller.ts] Verifying OTP for email:", email);
+    // console.log("[2fa.controller.ts] Provided OTP:", code);
+    // console.log("[2fa.controller.ts] request body:", req.body);
     const isValid = await this.twoFactorAuthService.verifyOtpEmail(email, code);  
     if (!isValid) {
       console.error("❌ [2fa.controller.ts] OTP verification failed for email:", email);
       return reply.status(400).send({ message: "Invalid or expired OTP ❌" });
     }
     else {
-      console.log("✅ [2fa.controller.ts] OTP verified successfully for email:", email);
+      // console.log("✅ [2fa.controller.ts] OTP verified successfully for email:", email);
       
       const loginResponse: AuthenticatedUserDTO = {
           id: userId,
@@ -241,10 +241,10 @@ export class TwoFactorAuthController {
     const userId  = user.userId;
     const email   = user.email;
     const type = TwoFactorType.EMAIL;
-    console.log("[2fa.controller.ts] Disabling TFA for user ID:", userId, "email:", email);
+    // console.log("[2fa.controller.ts] Disabling TFA for user ID:", userId, "email:", email);
     await this.twoFactorAuthService.disableTwoFactorAuth(userId, type
     );
-    console.log("✅ [2fa.controller.ts] TFA disabled successfully for user ID:", userId);
+    // console.log("✅ [2fa.controller.ts] TFA disabled successfully for user ID:", userId);
     return reply.send({ message: "Two-factor authentication disabled successfully ✅" });
   }
     
@@ -255,14 +255,14 @@ export class TwoFactorAuthController {
     reply: FastifyReply
   ) => {
     const { email, code } = req.body;
-    console.log("[otp.controller.ts] Verifying OTP for email:", email);
+    // console.log("[otp.controller.ts] Verifying OTP for email:", email);
     const isValid = await this.twoFactorAuthService.verifyOtpEmail(email, code);
 
     if (!isValid) {
       console.error("❌ [otp.controller.ts] OTP verification failed for email:", email);
       return reply.status(400).send({ message: "Invalid or expired OTP ❌" });
     } else {
-      console.log("✅ [otp.controller.ts] OTP verified successfully for email:", email);
+      // console.log("✅ [otp.controller.ts] OTP verified successfully for email:", email);
       return reply.send({ message: "OTP verified successfully ✅" });
     }
   };
@@ -285,7 +285,7 @@ export class TwoFactorAuthController {
     }
       const userId  = user.userId;
       const qrCodeUrl = await this.twoFactorAuthService.generateTotpSecretAndQrCode(userId);
-      console.log("✅ [2fa.controller.ts] TFA setup successful for user ID:", userId);
+      // console.log("✅ [2fa.controller.ts] TFA setup successful for user ID:", userId);
       reply.send({ qrCodeUrl:qrCodeUrl, message: 'TFA setup successful ✅' });
     } catch (error: any) {
       console.error("❌ [2fa.controller.ts] Error setting up TFA for user ID:", error);
@@ -314,7 +314,7 @@ export class TwoFactorAuthController {
       console.error("❌ [2fa.controller.ts] TOTP code not provided");
       return reply.status(400).send({ message: "TOTP code not provided ❌" });
     }
-    console.log("[2fa.controller.ts] TOTP code received for enabling TFA:", code);
+    // console.log("[2fa.controller.ts] TOTP code received for enabling TFA:", code);
     // verify TOTP code before enabling TFA
     const userId  = user.userId;
     const isValid = await this.twoFactorAuthService.verifyTotpToken(userId, code);
@@ -323,10 +323,10 @@ export class TwoFactorAuthController {
       return reply.status(400).send({ message: "Invalid TOTP code ❌" });
     }
     const type = TwoFactorType.TOTP;
-    console.log("[2fa.controller.ts] Enabling TFA TOTP for user ID:", userId);
+    // console.log("[2fa.controller.ts] Enabling TFA TOTP for user ID:", userId);
     try {
       await this.twoFactorAuthService.enableTwoFactorAuth(userId, type);
-      console.log("✅ [2fa.controller.ts] TFA TOTP enabled successfully for user ID:", userId);
+      // console.log("✅ [2fa.controller.ts] TFA TOTP enabled successfully for user ID:", userId);
       return reply.send({ message: "Two-factor authentication TOTP enabled successfully ✅" });
     } catch (error: any) {
       console.error("❌ [2fa.controller.ts] Error enabling TFA TOTP for user ID:", userId, error);
@@ -349,10 +349,10 @@ export class TwoFactorAuthController {
     }
     const userId  = user.userId;
     const type = TwoFactorType.TOTP;
-    console.log("[2fa.controller.ts] Disabling TFA TOTP for user ID:", userId); 
+    // console.log("[2fa.controller.ts] Disabling TFA TOTP for user ID:", userId); 
     try {
       await this.twoFactorAuthService.disableTwoFactorAuth(userId, type);
-      console.log("✅ [2fa.controller.ts] TFA TOTP disabled successfully for user ID:", userId);
+      // console.log("✅ [2fa.controller.ts] TFA TOTP disabled successfully for user ID:", userId);
       return reply.send({ message: "Two-factor authentication TOTP disabled successfully ✅" });
     }
     catch (error: any) {
@@ -381,7 +381,7 @@ export class TwoFactorAuthController {
     }
     const userId  = user.userId;
     const email   = user.email;
-    console.log("[2fa.controller.ts] Verifying TFA TOTP for user ID:", userId, "email:", email);
+    // console.log("[2fa.controller.ts] Verifying TFA TOTP for user ID:", userId, "email:", email);
     const { code } = req.body as { code: string };
     if (!rigexForOTP.test(code)) {
       console.error("❌ [2fa.controller.ts] Invalid TFA token format");
@@ -445,10 +445,10 @@ export class TwoFactorAuthController {
       return reply.status(401).send({ message: "Unauthorized ❌" });
     }
     const userId  = user.userId;
-    console.log("[2fa.controller.ts] Getting TFA methods for user ID:", userId);
+    // console.log("[2fa.controller.ts] Getting TFA methods for user ID:", userId);
     try {
       const methods = await this.twoFactorAuthService.getTwoFactorAuthMethods(userId);
-      console.log("✅ [2fa.controller.ts] TFA methods retrieved successfully for user ID:", userId);
+      // console.log("✅ [2fa.controller.ts] TFA methods retrieved successfully for user ID:", userId);
       return reply.send({ methods });
     } catch (error: any) {
       console.error("❌ [2fa.controller.ts] Error getting TFA methods for user ID:", userId, error);

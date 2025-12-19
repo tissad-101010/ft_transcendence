@@ -18,6 +18,6 @@ import {
 
 export async function verifyToken(token: string) {
   const res = await usersClient.post(`${serviceUsersURL}/internal/verify-token`,{ token });
-  console.log("------------- RES VAUT", res.data);
+  // console.log("------------- RES VAUT", res.data);
   return (res.data);
 }

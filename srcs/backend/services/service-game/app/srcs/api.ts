@@ -42,13 +42,13 @@ app.register(fastifyCookie, {
   secret: process.env.COOKIE_SECRET || 'supersecret', // optionnel (pour signer les cookies)
 });
 
-console.log("===============================================", process.env);
+
 // Register plugins (database, redis, etc.)
 // app.register(secretsPlugin);
 app.register(redisPlugin);
 app.register(prismaPlugin);
 app.register(websocket); // rp : register websocket plugin
-console.log("===============================================", process.env);
+
 // Start the Fastify server
 const start = async () => {
   try {
@@ -65,18 +65,18 @@ const start = async () => {
     await app.register(tournamentRoutes); // rp : register function with all REST tournament routes
     await app.register(friendlyRoutes); // rp : register function with all REST friendly match routes
 
-    app.addHook('onRequest', async (req, reply) => {
-      console.log('Origin reçue :', req.headers.origin);
-      console.log('Méthode reçue :', req.method);
-      console.log('URL de la requête :', req.url);
-      console.log('Headers de la requête :', req.headers);
-    });
+    // app.addHook('onRequest', async (req, reply) => {
+    //   console.log('Origin reçue :', req.headers.origin);
+    //   console.log('Méthode reçue :', req.method);
+    //   console.log('URL de la requête :', req.url);
+    //   console.log('Headers de la requête :', req.headers);
+    // });
     
     setupWebSocketRoute(app);
 
     await app.listen({ port: 4001, host: '0.0.0.0' });
     console.log('🚀 Server is running');
-    console.log('websocket disponible sur ws://localhost:4001/ws');
+    // console.log('websocket disponible sur ws://localhost:4001/ws');
 
   } catch (err) {
     app.log.error(err);

@@ -22,18 +22,15 @@ export async function verifyTokenController(
   req: FastifyRequest<{ Body: VerifyTokenBody }>,
   reply: FastifyReply
 ) {
-  console.log("--------------------- VERIFIY TOKEN APPELEE");
+  // console.log(" VERIFIY TOKEN APPELEE");
   const { token } = req.body;
   try {
     const result = await internalVerifyTokenService(token);
     if (!result) {
-      console.log("JE SORS ICI 1");
       return reply.status(401).send({ success: false, data:null });
     }
-      console.log("JE SORS ICI 2");
     return reply.send({success:true, data: result});
   } catch (err) {
-      console.log("JE SORS ICI 3");
     return reply.status(401).send({ error: "Invalid token" });
   }
 }

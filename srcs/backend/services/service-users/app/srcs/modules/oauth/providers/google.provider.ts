@@ -43,26 +43,26 @@ export class GoogleOAuthProvider {
             grant_type: "authorization_code",
             redirect_uri: process.env.GOOGLE_REDIRECT_URI!,
         };
-        console.log("[google.service] Requesting access token from Google");
+        // console.log("[google.service] Requesting access token from Google");
         const response = await axios.post(url, params, {
             headers: { "Content-Type": "application/x-www-form-urlencoded" },
         });
         if (response.data.error) {
-            console.log("[google.service] OAuth error:", response.data);
+            // console.log("[google.service] OAuth error:", response.data);
             throw new Error(response.data.error_description || "Google OAuth error");
         }
-        console.log("[google.service] Received access token from Google");
+        // console.log("[google.service] Received access token from Google");
         return response.data.access_token;
     }
 
     
     async getGoogleProfile(token: string): Promise<any> {
-        console.log("[google.service] Fetching Google profile with access token");
+        // console.log("[google.service] Fetching Google profile with access token");
         const response = await axios.get("https://www.googleapis.com/oauth2/v2/userinfo", {
             headers: { Authorization: `Bearer ${token}` },
         }); 
         if (response.status !== 200) {
-            console.log("[google.service] Failed to fetch Google profile:", response.data);
+            // console.log("[google.service] Failed to fetch Google profile:", response.data);
             throw new Error("Failed to fetch Google profile");
         }
         // console.log("[google.service] ====>Successfully fetched Google profile", response);
@@ -73,12 +73,12 @@ export class GoogleOAuthProvider {
     */
     // connection ok + jwt token, not user data
     async findOrCreateUser(google_profile: any): Promise<any> {
-        console.log("[google.service]================> Google profile data:", google_profile);
+        // console.log("[google.service]================> Google profile data:", google_profile);
         const gusername = google_profile.email.split('@')[0];
         let  user = await this.userService.getUserByUsername(gusername) || await this.userService.getUserByEmail(google_profile.email);
-        console.log("[google.service] Searching for user by email:", google_profile.email);  
+        // console.log("[google.service] Searching for user by email:", google_profile.email);  
         if (!user) {
-            console.log("[google.service] No existing user found, creating new user");
+            // console.log("[google.service] No existing user found, creating new user");
             const DB_profile: UserProfile = {
                 email: google_profile.email,
                 username: gusername,
@@ -95,17 +95,17 @@ export class GoogleOAuthProvider {
                 updatedAt: new Date(),
             };
             try {
-                console.log("[google.service] Creating user with profile:", DB_profile);
+                // console.log("[google.service] Creating user with profile:", DB_profile);
                  user = await this.userService.createUser(DB_profile);
             } catch (error) {
-                console.log("[google.service] Error preparing user creation:", error);
+                // console.log("[google.service] Error preparing user creation:", error);
                 return null;
             }
         }
         // link OAuth provider to the new user
         if (user)
         {
-            console.log("[google.service] Linking Google OAuth provider to user:", user.id);
+            // console.log("[google.service] Linking Google OAuth provider to user:", user.id);
             const DB_provider : OAuthProvider = {
                 provider: OAuthProviderType.GOOGLE,
                 providerId: google_profile.id,// Google unique ID /!\
@@ -114,7 +114,7 @@ export class GoogleOAuthProvider {
             }
             try {
                 await this.userService.linkOAuthProviderToUser(user.id, DB_provider);
-                console.log("[google.service] Successfully linked Google OAuth provider to user:", user.id);
+                // console.log("[google.service] Successfully linked Google OAuth provider to user:", user.id);
                 const twoFactorMethods = await this.userService.getUserTwoFactorMethods(user.id);
                 const isTwoFactorEnabled = twoFactorMethods.length > 0;
                 return ({
@@ -126,7 +126,7 @@ export class GoogleOAuthProvider {
                     twoFactorMethods: twoFactorMethods,
                 });
             } catch (error) {
-                console.log("[google.service] Error linking OAuth provider to user:", error);
+                // console.log("[google.service] Error linking OAuth provider to user:", error);
                 return null;
             }    
         }

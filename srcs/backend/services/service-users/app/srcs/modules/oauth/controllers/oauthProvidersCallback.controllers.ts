@@ -39,7 +39,7 @@ export async function googleOAuthControllerCallback(
             JwtUtils.setTempTokenCookie(reply, temp_token);
             // handle 2FA if enabled
             if ( user.isTwoFactorEnabled ) {
-                console.log("User has 2FA enabled, redirecting to 2FA page");
+                // console.log("User has 2FA enabled, redirecting to 2FA page");
                 // add playload to temp token
   
                 
@@ -48,7 +48,7 @@ export async function googleOAuthControllerCallback(
             }
             // Successful authentication
             // generate JWT tokens
-            console.log("Google OAuth successful for user ID:", user.id);
+            // console.log("Google OAuth successful for user ID:", user.id);
             const accessToken = JwtUtils.generateAccessToken({ id: user.id, email: user.email });
             const refreshToken = JwtUtils.generateRefreshToken({ id: user.id, email: user.email });
             // store tokens in redis cache
@@ -75,7 +75,7 @@ export async function googleOAuthControllerCallback(
         }
     }
     catch (error) {
-        console.log("[OAuth Controller] Google OAuth error:", error);
+        // console.log("[OAuth Controller] Google OAuth error:", error);
         return reply.code(500).send({ message: "Google OAuth failed" });
     }
 }
@@ -97,13 +97,13 @@ export async function githubOAuthControllerCallback(
         else {
             if ( user.isTwoFactorEnabled ) {
                 // redirect to 2FA page
-                console.log("User has 2FA enabled, redirecting to 2FA page");
+                // console.log("User has 2FA enabled, redirecting to 2FA page");
                 const temp_token = JwtUtils.generateTwoFactorTempToken({ id: user.id, email: user.email });
                 JwtUtils.setTempTokenCookie(reply, temp_token);
                 return reply.redirect(`${originUrl}/oauth/callback`);
             }
             // Successful authentication
-            console.log("GitHub OAuth successful for user ID:", user.id);
+            // console.log("GitHub OAuth successful for user ID:", user.id);
             // generate JWT tokens
             const accessToken = JwtUtils.generateAccessToken({ id: user.id, email: user.email });
             const refreshToken = JwtUtils.generateRefreshToken({ id: user.id, email: user.email });
@@ -129,7 +129,7 @@ export async function githubOAuthControllerCallback(
         }
     }
     catch (error) {
-        console.log("[OAuth Controller] GitHub OAuth error:", error);
+        // console.log("[OAuth Controller] GitHub OAuth error:", error);
         return reply.code(500).send({ message: "GitHub OAuth failed" });
     }
 }
@@ -146,20 +146,20 @@ export async function fortyTwoOAuthControllerCallback(
         const user = await oauthService.handle42OAuth(code);    
         if (!user) {
             // Authentication failed
-            console.log("42 OAuth authentication failed");
+            // console.log("42 OAuth authentication failed");
             return reply.code(401).send({ message: "42 OAuth authentication failed" });  
         }   
         else {
             
             if ( user.isTwoFactorEnabled ) {
                 // redirect to 2FA page
-                console.log("User has 2FA enabled, redirecting to 2FA page");   
+                // console.log("User has 2FA enabled, redirecting to 2FA page");
                 const temp_token = JwtUtils.generateTwoFactorTempToken({ id: user.id, email: user.email });
                 JwtUtils.setTempTokenCookie(reply, temp_token);
                  return reply.redirect(`${originUrl}/oauth/callback`);
             }
             // Successful authentication
-            console.log("42 OAuth successful for user ID:", user.id);
+            // console.log("42 OAuth successful for user ID:", user.id);
             // generate JWT tokens
             const accessToken = JwtUtils.generateAccessToken({ id: user.id, email: user.email });
             const refreshToken = JwtUtils.generateRefreshToken({ id: user.id, email: user.email });
@@ -184,7 +184,7 @@ export async function fortyTwoOAuthControllerCallback(
         }   
     }
     catch (error) {
-        console.log("[OAuth Controller] 42 OAuth error:", error);
+        // console.log("[OAuth Controller] 42 OAuth error:", error);
         return reply.code(500).send({ message: "42 OAuth failed" + error });
     }
 } 

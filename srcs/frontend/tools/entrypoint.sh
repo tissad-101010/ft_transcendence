@@ -9,5 +9,6 @@ rm -rf ./build/*
 echo "building frontend..."
 npm run build
 echo "frontend build finished"
-echo "starting frontend dev server"
-npm run start
+# echo "starting frontend dev server"
+# npm run start
+exit 0

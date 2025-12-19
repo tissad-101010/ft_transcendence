@@ -26,7 +26,7 @@ export async function signoutController(
     request: FastifyRequest,
     reply: FastifyReply
 ) {
-    console.log('[Signout Controller] Received logout request');
+    // console.log('[Signout Controller] Received logout request');
     const signoutService = new SignoutService(request.server);
     const cookies = JwtUtils.extractCookiesFromRequest(request);
     const refresh_Token = JwtUtils.extractTokenFromCookies(cookies, 'refresh_token');
@@ -41,7 +41,7 @@ export async function signoutController(
             console.error('[Signout Controller] Error during logout process for user ID:', user.userId);
             return reply.code(500).send({ message: 'Error during logout ❌' });
         }
-        console.log('[Signout Controller] User logged out successfully, clearing cookies for user ID:', user.userId);
+        // console.log('[Signout Controller] User logged out successfully, clearing cookies for user ID:', user.userId);
         // Clear cookies
         reply.clearCookie('access_token', { path: '/' });
         reply.clearCookie('refresh_token', { path: '/' });

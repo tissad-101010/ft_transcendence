@@ -24,19 +24,19 @@ async function initConnection(
   username: string,
   socket: WebSocket
 ): Promise<void> {
-  console.log("===================================================>Processing to connecting user:", username);
+  // console.log("===================================================>Processing to connecting user:", username);
   let senderUser = await chatService.getUserByUsername(username);
   if (!senderUser) 
   {
-    console.log("create user:", username);
+    // console.log("create user:", username);
     senderUser = await chatService.addUser(username);
     if (!senderUser) {
-      console.log("Failed to create sender user:", username);
+      // console.log("Failed to create sender user:", username);
       return;
     }
   }
   clients.set(username, socket);
-  console.log("User connected:", username, "with ID:", senderUser.id);
+  // console.log("User connected:", username, "with ID:", senderUser.id);
 }
 
 
@@ -46,15 +46,15 @@ async function closeConnection(
   clients: Map<string, WebSocket>,
   username: string
 ): Promise<void> {
-  console.log("===================================================>Processing to disconnecting user:", username);
+  // console.log("===================================================>Processing to disconnecting user:", username);
   let senderUser = await chatService.getUserByUsername(username);
   if (!senderUser) 
   {
-    console.log("User not found during disconnection:", username);
+    // console.log("User not found during disconnection:", username);
     return;
   }
   clients.delete(username);
-  console.log("User disconnected:", username, "with ID:", senderUser.id);
+  // console.log("User disconnected:", username, "with ID:", senderUser.id);
 }
 
 
@@ -64,13 +64,14 @@ async function sendMessageToUser(
   toUsername: string,
   message: MessagePayload
 ): Promise<void> {
-  console.log("===================================================>Processing to send message to user:", toUsername);
+  // console.log("Processing to send message to user:", toUsername);
   const targetSocket = clients.get(toUsername);
   if (targetSocket) {
     targetSocket.send(JSON.stringify(message));
-    console.log("==========================================================================>Message sent to user:", toUsername, "Message:", message);
+    // console.log("Message sent to user:", toUsername, "Message:", message);
   }else{
-    console.log("===========================================================================>User", toUsername, "is not connected. Message not sent.");
+    // console.log("User", toUsername, "is not connected. Message not sent.");
+    return;
   }
 }
 
@@ -91,7 +92,7 @@ async function storeMessageInDb(
     throw new Error("Conversation not found");
   }
   const conversationId = conversation.id;
-  console.log("====================================================>Storing message in DB for conversation ID:", conversationId);
+  // console.log("Storing message in DB for conversation ID:", conversationId);
   return await chatService.storeMessageInDb(
     conversationId,
     senderId,
@@ -103,18 +104,18 @@ async function storeMessageInDb(
 
 // extract access token from cookies
 function extractAccessToken(cookies: string): string {
-  console.log("====================================================>Extracting access token from cookies:", cookies);
+  // console.log("Extracting access token from cookies:", cookies);
   const accessToken = cookies
     .split("; ")
     .find((row: string) => row.startsWith("access_token="))
     ?.split("=")[1] || "";
-  console.log("===================================================>Extracted access token:", accessToken);
+  // console.log("Extracted access token:", accessToken);
   return accessToken;
 }
 
 // verify access token and return json object with userId and email type any  or null
 async function verifyAccessToken(token: string): Promise<any | null> {
-  console.log("===================================================>Verifying access token:", token);
+  // console.log("Verifying access token:", token);
  if (!token) {
     console.error("No access token provided");
     return null;
@@ -124,7 +125,7 @@ async function verifyAccessToken(token: string): Promise<any | null> {
     console.error("Access token verification failed with status:", res.status, "and data:", res.data);
     return null;
   }
-  console.log("Access token verified successfully:", res.data);
+  // console.log("Access token verified successfully:", res.data);
   return (res.data.data);
 }
 
@@ -153,7 +154,7 @@ export function handleWebSocketConnection(
       console.log("WebSocket connection established for user ID:", payload);
     }
     socket.on("message", async (data :any) => {
-    console.log("===================================================>WebSocket message received:", data.toString());
+    // console.log("WebSocket message received:", data.toString());
       try {
         const message: MessagePayload = JSON.parse(data.toString());
         if (message.type === "init_connection") {
@@ -169,7 +170,7 @@ export function handleWebSocketConnection(
             return;
           }
           await initConnection(clients, message.from, socket);
-          console.log("=>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>WebSocket init_connection processed for username:", message.from);
+          // console.log("WebSocket init_connection processed for username:", message.from);
         }
         if (message.type === "send_message") {
           if (!message.from || !message.to || !message.text) {
@@ -207,7 +208,7 @@ export function handleWebSocketConnection(
             text: message.text,
             sentAt: new Date().toISOString()
           });
-          console.log("=>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>WebSocket send_message processed from:", message.from, "to:", message.to);
+          // console.log("WebSocket send_message processed from:", message.from, "to:", message.to);
         }
       }catch (err) {
         console.error("WebSocket message handling error:", err);

@@ -599,6 +599,7 @@ export class DataFriendUI
                     const text = new TextBlock();
                     text.text = response.message;
                     text.fontSize = 40;
+                    text.height = "100px";
                     text.fontFamily = "Arial";
                     text.color = "white";
                     this.containerUI.viewPanel?.addControl(text);

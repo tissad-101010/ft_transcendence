@@ -17,7 +17,7 @@ import { Server } from "socket.io";
 
 export async function getUserConversations(request: FastifyRequest, reply: FastifyReply) {
     const { username } = (request as any).query;
-    console.log("Request to get conversations for user:", username);
+    // console.log("Request to get conversations for user:", username);
     try {
         if (!username) {
             //send empty array
@@ -51,7 +51,7 @@ export async function getUserConversations(request: FastifyRequest, reply: Fasti
 export async function startConversation(request: FastifyRequest, reply: FastifyReply) {
     const { senderUsername, receiverUsername } = (request as any).body;
     // check if both users exist with userService (not implemented yet)
-    console.log("Request to start conversation between:", senderUsername, "and", receiverUsername);
+    // console.log("Request to start conversation between:", senderUsername, "and", receiverUsername);
     try {
         // add user existence check with userService here
         // if not exist, create user

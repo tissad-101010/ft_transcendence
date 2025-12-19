@@ -25,9 +25,9 @@ export async function oauthCallbackRedirectionController(
     const redisClient = request.server.redis;
     const userService = new UsersService(request.server.prisma);
     const cookies = JwtUtils.extractCookiesFromRequest(request);
-    console.log("[COLLBACK.controller.ts] Cookies extracted from request:", cookies);
+    // console.log("[COLLBACK.controller.ts] Cookies extracted from request:", cookies);
     const tempToken = JwtUtils.extractTokenFromCookies(cookies, 'temp_token');
-    console.log("[COLLBACK.controller.ts] Temp token extracted from cookies:", tempToken);
+    // console.log("[COLLBACK.controller.ts] Temp token extracted from cookies:", tempToken);
     const user = JwtUtils.extractUserFromTempToken(tempToken);
     if (tempToken === null || user === null) {
       console.error("❌ [CALLBACK.ts] User not found");
@@ -38,7 +38,7 @@ export async function oauthCallbackRedirectionController(
     const twoFactorMethods = await userService.getUserTwoFactorMethods(userId);
     const isTwoFactorEnabled = twoFactorMethods.length > 0;
     if ( isTwoFactorEnabled ) {
-        console.log("User has 2FA enabled, redirecting to 2FA page");
+        // console.log("User has 2FA enabled, redirecting to 2FA page");
         const temp_token = JwtUtils.generateTwoFactorTempToken({ id: userId, email: email });
 
         JwtUtils.setTempTokenCookie(reply, temp_token);

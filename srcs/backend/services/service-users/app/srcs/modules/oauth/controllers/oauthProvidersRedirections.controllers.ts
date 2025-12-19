@@ -30,7 +30,7 @@ export async function googleProviderRedirect(req: FastifyRequest,
     const googleAuthUrl = `https://accounts.google.com/o/oauth2/v2/auth?`+
         `client_id=${googleClientId}&redirect_uri=${googleredirectUri}&`+
         `response_type=code&scope=openid%20email%20profile`;
-    console.log("[OauthGoogle.controller] Redirecting to:", googleAuthUrl);
+    // console.log("[OauthGoogle.controller] Redirecting to:", googleAuthUrl);
     reply.clearCookie('access_token', {
   path: '/',
   secure: true,
@@ -54,7 +54,7 @@ export async function githubProviderRedirect(req: FastifyRequest,
     const githubAuthUrl = `https://github.com/login/oauth/authorize?`+
         `client_id=${githubClientId}&redirect_uri=${githubredirectUri}&`+
         `scope=user:email`;
-    console.log("[OauthGitHub.controller] Redirecting to:", githubAuthUrl);
+    // console.log("[OauthGitHub.controller] Redirecting to:", githubAuthUrl);
     return reply.redirect(githubAuthUrl);
 }
 
@@ -72,7 +72,7 @@ export async function fortyTwoProviderRedirect(req: FastifyRequest,
     const fortyTwoAuthUrl = `https://api.intra.42.fr/oauth/authorize?client_id=`+
         `${fortyTwoClientId}&redirect_uri=`+
         `${encodeURIComponent(fortyTworedirectUri)}&response_type=code&scope=public`;
-    console.log("[Oauth42.controller] Redirecting to:", fortyTwoAuthUrl);
+    // console.log("[Oauth42.controller] Redirecting to:", fortyTwoAuthUrl);
     return reply.redirect(fortyTwoAuthUrl);
 }
 /**************************************************************************************/

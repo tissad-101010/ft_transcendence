@@ -133,7 +133,7 @@ export class UsersService {
 
       if (existing) {
         // 3️⃣ — update existing OAuth provider link
-        console.log('🔄 Updating existing OAuth provider link for user ID:', userId);
+        // console.log('🔄 Updating existing OAuth provider link for user ID:', userId);
         result = await this.prismaClient.oAuthProvider.update({
           where: { id: existing.id },
           data: {
@@ -144,7 +144,7 @@ export class UsersService {
         });
       } else {
         // 4️⃣ — create new OAuth provider link
-        console.log('🔗 Linking new OAuth provider to user:', oauthData.provider, oauthData.providerId, 'for user ID:', userId);
+        // console.log('🔗 Linking new OAuth provider to user:', oauthData.provider, oauthData.providerId, 'for user ID:', userId);
         result = await this.prismaClient.oAuthProvider.create({ 
           data: {
             provider: oauthData.provider,

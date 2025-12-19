@@ -58,12 +58,12 @@ const start = async () => {
       credentials: true, // Allow credentials
     });
 
-    app.addHook('onRequest', async (req, reply) => {
-      console.log('Origin reçue :', req.headers.origin);
-      console.log('Méthode reçue :', req.method);
-      console.log('URL de la requête :', req.url);
-      console.log('Headers de la requête :', req.headers);
-    });
+    // app.addHook('onRequest', async (req, reply) => {
+    //   console.log('Origin reçue :', req.headers.origin);
+    //   console.log('Méthode reçue :', req.method);
+    //   console.log('URL de la requête :', req.url);
+    //   console.log('Headers de la requête :', req.headers);
+    // });
     
     await app.listen({ port: 4003, host: '0.0.0.0' });
     console.log('🚀 Server is running');

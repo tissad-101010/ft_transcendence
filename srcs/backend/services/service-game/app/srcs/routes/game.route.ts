@@ -28,19 +28,19 @@ function broadcastToGame(gameId: number, message: any) { // rp send a payload to
           ws.send(messageStr); // rp send the message as json string
           sentCount++; // rp increment success counter
         } else { // rp log if socket is not open
-          console.log(`Socket fermé, readyState: ${ws.readyState}`); // rp debug closed socket
+          // console.log(`Socket fermé, readyState: ${ws.readyState}`); // rp debug closed socket
           failedCount++; // rp increment failure counter
         } // rp end open guard
       } catch (error: any) { // rp catch send errors
-        console.error(`Erreur envoi message à socket:`, error); // rp log send failure
+        // console.error(`Erreur envoi message à socket:`, error); // rp log send failure
         failedCount++; // rp increment failure counter
       } // rp end error handling
     }); // rp finish broadcasting loop
     if (sentCount > 0 || failedCount > 0) { // rp log broadcast results
-      console.log(`Broadcast: ${sentCount} envoyé(s), ${failedCount} échec(s) sur ${room.size} socket(s)`); // rp log results
+      // console.log(`Broadcast: ${sentCount} envoyé(s), ${failedCount} échec(s) sur ${room.size} socket(s)`); // rp log results
     } // rp end logging
   } else { // rp log if room doesn't exist
-    console.log(`Aucune room trouvée pour gameId: ${gameId}`); // rp debug missing room
+    console.log(`Aucune room trouvée pour gameId`); // rp debug missing room
   } // rp nothing to send if room absent
 } // rp end broadcast helper
 
@@ -66,11 +66,11 @@ async function updateGameState( // rp persist paddle movement in database
 } // rp finish updateGameState
 
 async function handleJoinGame(fastify: FastifyInstance, ws: any, message: any) { // rp add a player websocket to a game room
-  console.log('handleJoinGame appelé avec:', message); // rp debug
+  // console.log('handleJoinGame appelé avec:', message); // rp debug
   const { gameId, userId } = message; // rp extract identifiers from payload
   if (!gameRooms.has(gameId)) { // rp create room if it does not exist yet
     gameRooms.set(gameId, new Set()); // rp initialize a new set for the room
-    console.log(`Nouvelle room créée pour gameId: ${gameId}`); // rp log room creation
+    // console.log(`Nouvelle room créée pour gameId: ${gameId}`); // rp log room creation
   } // rp end room creation
 
   gameRooms.get(gameId)!.add(ws); // rp place player socket inside room set
@@ -83,7 +83,7 @@ async function handleJoinGame(fastify: FastifyInstance, ws: any, message: any) {
   socketToUserId.set(ws, userId);
 
   const roomSize = gameRooms.get(gameId)!.size; // rp get current room size
-  console.log(`Joueur ${userId} a rejoint la partie ${gameId} (room size: ${roomSize})`); // rp keep server log for monitoring
+  // console.log(`Joueur ${userId} a rejoint la partie ${gameId} (room size: ${roomSize})`); // rp keep server log for monitoring
 
   // Envoyer au nouveau joueur la liste des joueurs déjà connectés
   const room = gameRooms.get(gameId)!;
@@ -106,7 +106,7 @@ async function handleJoinGame(fastify: FastifyInstance, ws: any, message: any) {
       });
       if (ws.readyState === 1 || (typeof WebSocket !== 'undefined' && ws.readyState === WebSocket.OPEN)) {
         ws.send(messageStr);
-        console.log(`Envoyé players_already_connected à ${userId}:`, connectedUserIds);
+        // console.log(`Envoyé players_already_connected à ${userId}:`, connectedUserIds);
       }
     } catch (error) {
       console.error(`Erreur envoi players_already_connected:`, error);
@@ -122,14 +122,6 @@ async function handleJoinGame(fastify: FastifyInstance, ws: any, message: any) {
         where: { id: gameId },
       });
 
-      console.log(`Vérification match amical ${gameId}:`, {
-        exists: !!friendlyMatch,
-        isOnline: friendlyMatch?.isOnline,
-        status: friendlyMatch?.status,
-        player1Id: friendlyMatch?.player1Id,
-        player2Id: friendlyMatch?.player2Id,
-      });
-
       if (friendlyMatch && friendlyMatch.isOnline && friendlyMatch.status === 'waiting') {
         // Les deux joueurs sont connectés, mettre à jour le statut
         await (fastify.prisma as any).friendlyMatch.update({
@@ -139,21 +131,21 @@ async function handleJoinGame(fastify: FastifyInstance, ws: any, message: any) {
             startedAt: new Date(),
           },
         });
-        console.log(`Match amical ${gameId} démarré (deux joueurs connectés)`);
+        // console.log(`Match amical ${gameId} démarré (deux joueurs connectés)`);
         
         // Envoyer un message à tous les joueurs pour démarrer le match
-        console.log(`Envoi message game_start pour match ${gameId}`);
+        // console.log(`Envoi message game_start pour match ${gameId}`);
         broadcastToGame(gameId, {
           type: 'game_start',
           gameId: gameId,
         });
-        console.log(`Message game_start envoyé pour match ${gameId}`);
+        // console.log(`Message game_start envoyé pour match ${gameId}`);
       } else {
-        console.log(`Match ${gameId} ne correspond pas aux critères:`, {
-          friendlyMatch: !!friendlyMatch,
-          isOnline: friendlyMatch?.isOnline,
-          status: friendlyMatch?.status,
-        });
+        // console.log(`Match ${gameId} ne correspond pas aux critères:`, {
+        //   friendlyMatch: !!friendlyMatch,
+        //   isOnline: friendlyMatch?.isOnline,
+        //   status: friendlyMatch?.status,
+        // });
       }
     } catch (error) {
       // Si ce n'est pas un match amical, ignorer l'erreur
@@ -161,7 +153,7 @@ async function handleJoinGame(fastify: FastifyInstance, ws: any, message: any) {
       fastify.log.debug('Match non trouvé ou erreur lors de la mise à jour du statut (peut être un match de tournoi)');
     }
   } else {
-    console.log(`Room size pour match ${gameId}: ${roomSize} (attendu: 2)`);
+    console.log(`Room size`);
   }
 
   broadcastToGame(gameId, { // rp notify other players about the join
@@ -178,13 +170,13 @@ async function handlePlayerMove( // rp process movement events from clients
 ) { // rp start move handler
   const { gameId, playerId, direction } = message; // rp destructure required fields
 
-  console.log(`Mouvement reçu: joueur ${playerId}, direction ${direction}, gameId ${gameId}`); // rp log received move
+  // console.log(`Mouvement reçu: joueur ${playerId}, direction ${direction}, gameId ${gameId}`); // rp log received move
 
   await updateGameState(fastify, gameId, playerId, direction); // rp persist movement in database
 
   const room = gameRooms.get(gameId); // rp get room for logging
   const roomSize = room ? room.size : 0; // rp get room size
-  console.log(`Diffusion mouvement à ${roomSize} socket(s) dans la room ${gameId}`); // rp log broadcast info
+  // console.log(`Diffusion mouvement à ${roomSize} socket(s) dans la room ${gameId}`); // rp log broadcast info
 
   broadcastToGame(gameId, { // rp notify all players about the move
     type: 'player_move', // rp message label for clients
@@ -216,7 +208,7 @@ async function handleWebSocketMessage( // rp route websocket messages by type
 
 export function setupWebSocketRoute(fastify: FastifyInstance) { // rp register websocket endpoint
   fastify.get('/ws', { websocket: true } as any, (connection: any) => { // rp expose websocket route on /ws
-    console.log('Nouvelle connexion WebSocket reçue'); // rp log new websocket connection
+    // console.log('Nouvelle connexion WebSocket reçue'); // rp log new websocket connection
     fastify.log.info('Nouvelle connexion WebSocket'); // rp log new websocket connection
 
     let socket: any = null; // rp placeholder to hold actual websocket object

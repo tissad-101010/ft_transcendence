@@ -52,7 +52,7 @@ export class Api42OAuthProvider {
             headers: { "Content-Type": "application/json" },
         });
         if (response.data.error) {
-            console.log("[42.service] OAuth error:", response.data);
+            // console.log("[42.service] OAuth error:", response.data);
             throw new Error(response.data.error_description || "42 OAuth error");
         }   
         return response.data.access_token;
@@ -66,18 +66,18 @@ export class Api42OAuthProvider {
             headers: { Authorization: `Bearer ${token}` },
         });
         if (response.status !== 200) {
-            console.log("[42.service] Failed to fetch 42 profile:", response.data);
+            // console.log("[42.service] Failed to fetch 42 profile:", response.data);
             throw new Error("Failed to fetch 42 profile");
         }
         return response.data;
     }
     // step 3 — find or create user in our database
     async findOrCreateUser(fortytwo_profile: any): Promise<any> {
-        console.log("[42.service]================> 42 profile data:", fortytwo_profile.image.link);
+        // console.log("[42.service]================> 42 profile data:", fortytwo_profile.image.link);
         // Placeholder logic to find or create user in your database
         let user = await this.userService.getUserByUsername(fortytwo_profile.login)  || await this.userService.getUserByEmail(fortytwo_profile.email);
         if (!user) {
-            console.log("[google.service] No existing user found, creating new user");
+            // console.log("[google.service] No existing user found, creating new user");
             const DB_profile: UserProfile = {
                 email: fortytwo_profile.email,
                 username: fortytwo_profile.login,
@@ -95,16 +95,16 @@ export class Api42OAuthProvider {
                 updatedAt: new Date(),
             };
             try {
-                console.log("[google.service] Creating user with profile:", DB_profile);
+                // console.log("[google.service] Creating user with profile:", DB_profile);
                     user = await this.userService.createUser(DB_profile);
             } catch (error) {
-                console.log("[google.service] Error preparing user creation:", error);
+                // console.log("[google.service] Error preparing user creation:", error);
                 return null;
             }
         }
         // link OAuth provider to user account
         if (user){
-                console.log("[google.service] Linking Google OAuth provider to user:", user.id);
+                // console.log("[google.service] Linking Google OAuth provider to user:", user.id);
                 const DB_provider : OAuthProvider = {
                 provider: OAuthProviderType.FORTYTWO,
                 providerId: fortytwo_profile.id.toString(),
@@ -113,7 +113,7 @@ export class Api42OAuthProvider {
             }
             try {
                 await this.userService.linkOAuthProviderToUser(user.id, DB_provider);
-                console.log("[google.service] Successfully linked Google OAuth provider to user:", user.id);
+                // console.log("[google.service] Successfully linked Google OAuth provider to user:", user.id);
                 const twoFactorMethods = await this.userService.getUserTwoFactorMethods(user.id);
                 const isTwoFactorEnabled = twoFactorMethods.length > 0;
                 return ({
@@ -125,7 +125,7 @@ export class Api42OAuthProvider {
                     twoFactorMethods: twoFactorMethods,
                 });
             } catch (error) {
-                console.log("[google.service] Error linking OAuth provider to user:", error);
+                // console.log("[google.service] Error linking OAuth provider to user:", error);
                 return null;
             }
         }

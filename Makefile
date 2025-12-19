@@ -1,5 +1,5 @@
 SRCS=./srcs
-COMPOSE=./docker-compose.yml
+COMPOSE=docker-compose.yml
 
 start : local
 	docker compose -f $(COMPOSE) up --build
@@ -35,7 +35,8 @@ local:
 	mkdir -p ~/data/service-game
 	mkdir -p ~/data/service-friends
 	mkdir -p ~/data/service-chat
-	cp ./.env ~/.env.local
+	mkdir -p ~/data/redis/data
+	cp .env ~/.env.local
 	cp ~/secret/postgres/secret_id ~/data/postgresql/vault_agent/secret_id
 	cp ~/secret/service_user/secret_id ~/data/secrets/user/secret_id
 	cp ~/secret/service_chat/secret_id ~/data/secrets/chat/secret_id             
