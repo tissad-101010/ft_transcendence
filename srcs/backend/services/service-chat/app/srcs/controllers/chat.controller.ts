@@ -13,9 +13,21 @@
 
 import { FastifyReply, FastifyRequest } from 'fastify';
 import { chatService } from "../services/chat.service";
-import { Server } from "socket.io";
-
+import { verifyAccessToken,
+         extractAccessToken
+} from '../ws/handleWebSocketConnection';
 export async function getUserConversations(request: FastifyRequest, reply: FastifyReply) {
+    const cookies = request.headers.cookie ?? "";
+    const accessToken = extractAccessToken(cookies);
+    const payload = await verifyAccessToken(accessToken);
+    if (!payload) {
+    // fastify.log.warn('Création match amical échouée : token invalide ou absent');
+    return reply.code(401).send({
+        success: false,
+        message: 'Unauthorized: token invalide ou absent',
+    });
+    }
+    
     const { username } = (request as any).query;
     // console.log("Request to get conversations for user:", username);
     try {
@@ -49,6 +61,16 @@ export async function getUserConversations(request: FastifyRequest, reply: Fasti
 }
 
 export async function startConversation(request: FastifyRequest, reply: FastifyReply) {
+    const cookies = request.headers.cookie ?? "";
+      const accessToken = extractAccessToken(cookies);
+      const payload = await verifyAccessToken(accessToken);
+      if (!payload) {
+        // fastify.log.warn('Création match amical échouée : token invalide ou absent');
+        return reply.code(401).send({
+          success: false,
+          message: 'Unauthorized: token invalide ou absent',
+        });
+      }
     const { senderUsername, receiverUsername } = (request as any).body;
     // check if both users exist with userService (not implemented yet)
     // console.log("Request to start conversation between:", senderUsername, "and", receiverUsername);
@@ -76,6 +98,16 @@ export async function startConversation(request: FastifyRequest, reply: FastifyR
 }
 
 export async function sendMessage(request: FastifyRequest, reply: FastifyReply) {
+          const cookies = request.headers.cookie ?? "";
+      const accessToken = extractAccessToken(cookies);
+      const payload = await verifyAccessToken(accessToken);
+      if (!payload) {
+        // fastify.log.warn('Création match amical échouée : token invalide ou absent');
+        return reply.code(401).send({
+          success: false,
+          message: 'Unauthorized: token invalide ou absent',
+        });
+      }
     
     const { senderUsername, receiverUsername, content } = (request as any).body;
     console.log("Request to send message from:", senderUsername, "to", receiverUsername, "with content:", content);

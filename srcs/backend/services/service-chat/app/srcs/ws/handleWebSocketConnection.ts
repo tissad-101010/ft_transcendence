@@ -103,7 +103,7 @@ async function storeMessageInDb(
 }
 
 // extract access token from cookies
-function extractAccessToken(cookies: string): string {
+export function extractAccessToken(cookies: string): string {
   // console.log("Extracting access token from cookies:", cookies);
   const accessToken = cookies
     .split("; ")
@@ -114,7 +114,7 @@ function extractAccessToken(cookies: string): string {
 }
 
 // verify access token and return json object with userId and email type any  or null
-async function verifyAccessToken(token: string): Promise<any | null> {
+export async function verifyAccessToken(token: string): Promise<any | null> {
   // console.log("Verifying access token:", token);
  if (!token) {
     console.error("No access token provided");

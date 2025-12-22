@@ -1,5 +1,5 @@
 import { FastifyInstance } from 'fastify';
-
+import { verifyAccessToken, extractAccessToken } from '../usersClient';
 // =====================
 // Tournament Routes
 // =====================
@@ -8,6 +8,17 @@ export async function tournamentRoutes(fastify: FastifyInstance) {
   // Créer un tournoi
   fastify.post('/api/tournament/create', async (request: any, reply: any) => {
     try {
+      const cookies = request.headers.cookie ?? "";
+      const accessToken = extractAccessToken(cookies);
+      const payload = await verifyAccessToken(accessToken);
+      if (!payload) {
+        // fastify.log.warn('Création match amical échouée : token invalide ou absent');
+        return reply.code(401).send({
+          success: false,
+          message: 'Unauthorized: token invalide ou absent',
+        });
+      }
+
       const body = request.body as {
         name?: string;
         speed: string;
@@ -142,6 +153,16 @@ export async function tournamentRoutes(fastify: FastifyInstance) {
   // Rejoindre un tournoi
   fastify.post('/api/tournament/:tournamentId/join', async (request: any, reply: any) => {
     try {
+      const cookies = request.headers.cookie ?? "";
+      const accessToken = extractAccessToken(cookies);
+      const payload = await verifyAccessToken(accessToken);
+      if (!payload) {
+        // fastify.log.warn('Création match amical échouée : token invalide ou absent');
+        return reply.code(401).send({
+          success: false,
+          message: 'Unauthorized: token invalide ou absent',
+        });
+      }
       const { tournamentId } = request.params as { tournamentId: string };
       const body = request.body as { 
         userId: number; 
@@ -262,6 +283,16 @@ export async function tournamentRoutes(fastify: FastifyInstance) {
   // Marquer un participant comme prêt
   fastify.post('/api/tournament/:tournamentId/participant/:participantId/ready', async (request: any, reply: any) => {
     try {
+      const cookies = request.headers.cookie ?? "";
+      const accessToken = extractAccessToken(cookies);
+      const payload = await verifyAccessToken(accessToken);
+      if (!payload) {
+        // fastify.log.warn('Création match amical échouée : token invalide ou absent');
+        return reply.code(401).send({
+          success: false,
+          message: 'Unauthorized: token invalide ou absent',
+        });
+      }      
       const { tournamentId, participantId } = request.params as { tournamentId: string; participantId: string };
 
       const participant = await (fastify.prisma as any).tournamentParticipant.update({
@@ -463,6 +494,16 @@ export async function tournamentRoutes(fastify: FastifyInstance) {
   // Obtenir l'état d'un tournoi
   fastify.get('/api/tournament/:tournamentId', async (request: any, reply: any) => {
     try {
+      const cookies = request.headers.cookie ?? "";
+      const accessToken = extractAccessToken(cookies);
+      const payload = await verifyAccessToken(accessToken);
+      if (!payload) {
+        // fastify.log.warn('Création match amical échouée : token invalide ou absent');
+        return reply.code(401).send({
+          success: false,
+          message: 'Unauthorized: token invalide ou absent',
+        });
+      }
       const { tournamentId } = request.params as { tournamentId: string };
 
       const tournament = await (fastify.prisma as any).tournament.findUnique({
@@ -531,6 +572,17 @@ export async function tournamentRoutes(fastify: FastifyInstance) {
   // Terminer un match et mettre à jour le match suivant
   fastify.post('/api/tournament/:tournamentId/match/:matchId/finish', async (request: any, reply: any) => {
     try {
+      const cookies = request.headers.cookie ?? "";
+      const accessToken = extractAccessToken(cookies);
+      const payload = await verifyAccessToken(accessToken);
+      if (!payload) {
+        // fastify.log.warn('Création match amical échouée : token invalide ou absent');
+        return reply.code(401).send({
+          success: false,
+          message: 'Unauthorized: token invalide ou absent',
+        });
+      }
+
       const { tournamentId, matchId } = request.params as { tournamentId: string; matchId: string };
       const body = request.body as {
         winnerId: number;
@@ -654,6 +706,17 @@ export async function tournamentRoutes(fastify: FastifyInstance) {
   // Lister les tournois en attente
   fastify.get('/api/tournaments/waiting', async (request: any, reply: any) => {
     try {
+      const cookies = request.headers.cookie ?? "";
+      const accessToken = extractAccessToken(cookies);
+      const payload = await verifyAccessToken(accessToken);
+      if (!payload) {
+        // fastify.log.warn('Création match amical échouée : token invalide ou absent');
+        return reply.code(401).send({
+          success: false,
+          message: 'Unauthorized: token invalide ou absent',
+        });
+      }
+
       const tournaments = await (fastify.prisma as any).tournament.findMany({
         where: { status: 'waiting' },
         include: {
@@ -684,6 +747,17 @@ export async function tournamentRoutes(fastify: FastifyInstance) {
   // Supprimer un tournoi (uniquement s'il est encore en attente)
   fastify.delete('/api/tournament/:tournamentId', async (request: any, reply: any) => {
     try {
+      const cookies = request.headers.cookie ?? "";
+      const accessToken = extractAccessToken(cookies);
+      const payload = await verifyAccessToken(accessToken);
+      if (!payload) {
+        // fastify.log.warn('Création match amical échouée : token invalide ou absent');
+        return reply.code(401).send({
+          success: false,
+          message: 'Unauthorized: token invalide ou absent',
+        });
+      }
+
       const { tournamentId } = request.params as { tournamentId: string };
       const id = parseInt(tournamentId, 10);
 
@@ -739,10 +813,3 @@ export async function tournamentRoutes(fastify: FastifyInstance) {
     }
   });
 }
-
-
-
-
-
-
-

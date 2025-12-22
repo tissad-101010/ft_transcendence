@@ -1,5 +1,5 @@
 import { FastifyInstance } from 'fastify';
-
+import { usersClient, extractAccessToken, verifyAccessToken } from '../usersClient';
 type UserInfo = {
     id: string;
     username: string;
@@ -16,6 +16,17 @@ export async function friendlyRoutes(fastify: FastifyInstance) {
   // Créer un match amical
   fastify.post('/api/friendly/create', async (request: any, reply: any) => {
     try {
+
+      const cookies = request.headers.cookie ?? "";
+      const accessToken = extractAccessToken(cookies);
+      const payload = await verifyAccessToken(accessToken);
+      if (!payload) {
+        // fastify.log.warn('Création match amical échouée : token invalide ou absent');
+        return reply.code(401).send({
+          success: false,
+          message: 'Unauthorized: token invalide ou absent',
+        });
+      }
       const body = request.body as {
         speed: string;
         scoreMax: string;
@@ -141,6 +152,16 @@ export async function friendlyRoutes(fastify: FastifyInstance) {
   // Récupérer la liste des matchs amicaux en attente
   fastify.get('/api/friendly/list', async (request: any, reply: any) => {
     try {
+      const cookies = request.headers.cookie ?? "";
+      const accessToken = extractAccessToken(cookies);
+      const payload = await verifyAccessToken(accessToken);
+      if (!payload) {
+        // fastify.log.warn('Création match amical échouée : token invalide ou absent');
+        return reply.code(401).send({
+          success: false,
+          message: 'Unauthorized: token invalide ou absent',
+        });
+      }
       // Récupérer uniquement les matchs en attente (status = 'waiting') et non terminés
       const matches = await (fastify.prisma as any).friendlyMatch.findMany({
         where: {
@@ -190,6 +211,17 @@ export async function friendlyRoutes(fastify: FastifyInstance) {
 
   // Récupérer tous les matchs (amicaux + tournois) joués par un utilisateur
   fastify.get('/api/matches/user/:username', async (request: any, reply: any) => {
+    const cookies = request.headers.cookie ?? "";
+    const accessToken = extractAccessToken(cookies);
+    const payload = await verifyAccessToken(accessToken);
+    if (!payload) {
+      // fastify.log.warn('Création match amical échouée : token invalide ou absent');
+      return reply.code(401).send({
+        success: false,
+        message: 'Unauthorized: token invalide ou absent',
+      });
+    }
+
 
     const { username } = request.params;
     try {
@@ -257,6 +289,17 @@ export async function friendlyRoutes(fastify: FastifyInstance) {
   // Rejoindre un match amical
   fastify.post('/api/friendly/:matchId/join', async (request: any, reply: any) => {
     try {
+      const cookies = request.headers.cookie ?? "";
+      const accessToken = extractAccessToken(cookies);
+      const payload = await verifyAccessToken(accessToken);
+      if (!payload) {
+        // fastify.log.warn('Création match amical échouée : token invalide ou absent');
+        return reply.code(401).send({
+          success: false,
+          message: 'Unauthorized: token invalide ou absent',
+        });
+      }
+
       const { matchId } = request.params as { matchId: string };
       const body = request.body as {
         player2_id: number;
@@ -585,6 +628,16 @@ export async function friendlyRoutes(fastify: FastifyInstance) {
   // Terminer un match amical
   fastify.post('/api/friendly/:matchId/finish', async (request: any, reply: any) => {
     try {
+      const cookies = request.headers.cookie ?? "";
+      const accessToken = extractAccessToken(cookies);
+      const payload = await verifyAccessToken(accessToken);
+      if (!payload) {
+        // fastify.log.warn('Création match amical échouée : token invalide ou absent');
+        return reply.code(401).send({
+          success: false,
+          message: 'Unauthorized: token invalide ou absent',
+        });
+      }
       const { matchId } = request.params as { matchId: string };
       const body = request.body as {
         winnerId: number;
@@ -645,6 +698,16 @@ export async function friendlyRoutes(fastify: FastifyInstance) {
   // Supprimer un match amical
   fastify.delete('/api/friendly/:matchId', async (request: any, reply: any) => {
     try {
+      const cookies = request.headers.cookie ?? "";
+      const accessToken = extractAccessToken(cookies);
+      const payload = await verifyAccessToken(accessToken);
+      if (!payload) {
+        // fastify.log.warn('Création match amical échouée : token invalide ou absent');
+        return reply.code(401).send({
+          success: false,
+          message: 'Unauthorized: token invalide ou absent',
+        });
+      }
       const { matchId } = request.params as { matchId: string };
       const matchIdInt = parseInt(matchId, 10);
 
