@@ -30,7 +30,7 @@ export async function googleOAuthControllerCallback(
         const user = await oauthService.handleGoogleOAuth(code);
         // Authentication failed
         if (!user) {
-            return reply.code(401).send({ message: "Google OAuth authentication failed" });
+           return reply.redirect(`${originUrl}`);
         }
         else {
             
@@ -65,7 +65,7 @@ export async function googleOAuthControllerCallback(
                 `access_token:${user.id}`,
                 accessToken,
                 'EX',
-                60 * 15// 15 minutes
+                60 * 60 // 1 hour
             );
             // set cookies
             JwtUtils.setAccessTokenCookie(reply, accessToken);
@@ -76,7 +76,7 @@ export async function googleOAuthControllerCallback(
     }
     catch (error) {
         // console.log("[OAuth Controller] Google OAuth error:", error);
-        return reply.code(500).send({ message: "Google OAuth failed" });
+        return reply.redirect(`${originUrl}`);
     }
 }
 
@@ -91,8 +91,8 @@ export async function githubOAuthControllerCallback(
     try {
         const user = await oauthService.handleGitHubOAuth(code);
         if (!user) {
-            // Authentication failed    
-            return reply.code(401).send({ message: "GitHub OAuth authentication failed" }); 
+            // Authentication failed
+            return reply.redirect(`${originUrl}`);
         }   
         else {
             if ( user.isTwoFactorEnabled ) {
@@ -123,14 +123,14 @@ export async function githubOAuthControllerCallback(
                 `access_token:${user.id}`,
                 accessToken,
                 'EX',
-                60 * 15// 15 minutes
+                60 * 60
             );
             return reply.redirect(originUrl);
         }
     }
     catch (error) {
         // console.log("[OAuth Controller] GitHub OAuth error:", error);
-        return reply.code(500).send({ message: "GitHub OAuth failed" });
+        return reply.redirect(`${originUrl}`);
     }
 }
 
@@ -147,7 +147,7 @@ export async function fortyTwoOAuthControllerCallback(
         if (!user) {
             // Authentication failed
             // console.log("42 OAuth authentication failed");
-            return reply.code(401).send({ message: "42 OAuth authentication failed" });  
+            return reply.redirect(`${originUrl}`);
         }   
         else {
             
@@ -178,14 +178,14 @@ export async function fortyTwoOAuthControllerCallback(
                 `access_token:${user.id}`,
                 accessToken,
                 'EX',
-                60 * 15// 15 minutes
+                60 * 60 // 1 hour
             );
              return reply.redirect(originUrl);
         }   
     }
     catch (error) {
         // console.log("[OAuth Controller] 42 OAuth error:", error);
-        return reply.code(500).send({ message: "42 OAuth failed" + error });
+        return reply.redirect(`${originUrl}`);
     }
 } 
 /* ************************************************************************** */

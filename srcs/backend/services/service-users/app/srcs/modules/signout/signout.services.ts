@@ -26,8 +26,8 @@ export class SignoutService {
     async logoutUser(userId: string): Promise<boolean> {
         try {
             // Supprimer le refresh token de Redis
-            await this.redisClient.del(`refresh_Token:${userId}`);
-            // await this.redisClient.del(`access_Token:${userId}`);// change set /!\ 
+            await this.redisClient.del(`refresh_token:${userId}`);
+            await this.redisClient.del(`access_token:${userId}`);// change set /!\ 
             // console.log(`[SignoutService] User ${userId} logged out successfully.`);
             return true;
         } catch (error) {

@@ -13,8 +13,6 @@ import { ZoneName } from './config.ts';
 import { TournamentParticipant } from './pong/Tournament.ts';
 import { Friend } from './friends/Friend.ts';
 
-export const API_URL = window.__ENV__.BACKEND_URL;
-export const WS_URL = window.__ENV__.WS_URL;
 
 export function getApiUrl()
 {
@@ -22,6 +20,11 @@ export function getApiUrl()
     return (`https://${host}:8443`);
 }
 
+export function getWsUrl()
+{
+    const host = window.location.hostname;
+    return (`wss://${host}:8443`);
+}
 /***********************
  *       INTERFACES    *
  ***********************/

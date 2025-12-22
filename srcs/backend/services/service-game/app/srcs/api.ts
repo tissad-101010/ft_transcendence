@@ -55,7 +55,7 @@ const start = async () => {
     // Register CORS plugin to allow cross-origin requests  
     const originURL = `${process.env.ORIGIN_URL}`;
     await app.register(cors, {
-      origin: [originURL, 'http://localhost:3000'],  // Allow specific origins
+      origin: [originURL, 'https://localhost:8443'],  // Allow specific origins
       methods: ['GET', 'POST','PUT', 'DELETE', 'OPTIONS'], // Allow specific methods
       credentials: true, // Allow credentials
     });

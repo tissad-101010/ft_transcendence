@@ -212,7 +212,7 @@ export class TwoFactorAuthController {
             `access_token:${userId}`,
             accessToken,
             'EX',
-            60 * 15// 15 minutes
+            60 * 60 // 1 hour
         );
       JwtUtils.setTempTokenCookie(reply, ''); // clear temp token cookie
       JwtUtils.setAccessTokenCookie(reply, accessToken); 
@@ -417,7 +417,7 @@ export class TwoFactorAuthController {
                 `access_token:${userId}`,
                 accessToken,
                 'EX',
-                60 * 15// 15 minutes
+                60 * 60 // 1 hour
             );
           JwtUtils.setTempTokenCookie(reply, ''); // clear temp token cookie
           JwtUtils.setAccessTokenCookie(reply, accessToken); 

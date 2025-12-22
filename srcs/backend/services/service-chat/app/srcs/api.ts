@@ -56,7 +56,7 @@ const start = async () => {
     // Register CORS plugin to allow cross-origin requests  
     // need more testing/!\
     await app.register(cors, {
-      origin: [originURL, 'http://localhost:3000'],  // Allow specific origins
+      origin: [originURL, 'https://localhost:8443'],  // Allow specific origins
       methods: ['GET', 'POST'], // Allow specific methods
       credentials: true, // Allow credentials
     });

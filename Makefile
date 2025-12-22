@@ -37,11 +37,11 @@ local:
 	mkdir -p ~/data/service-chat
 	mkdir -p ~/data/redis/data
 	cp .env ~/.env.local
-	cp ~/secret/postgres/secret_id ~/data/postgresql/vault_agent/secret_id
-	cp ~/secret/service_user/secret_id ~/data/secrets/user/secret_id
-	cp ~/secret/service_chat/secret_id ~/data/secrets/chat/secret_id             
-	cp ~/secret/service_friends/secret_id ~/data/secrets/friends/secret_id 
-	cp ~/secret/service_game/secret_id ~/data/secrets/game/secret_id
+	cp ~/sgoinfre/secret/postgres/secret_id ~/data/postgresql/vault_agent/secret_id
+	cp ~/sgoinfre/secret/service_user/secret_id ~/data/secrets/user/secret_id
+	cp ~/sgoinfre/secret/service_chat/secret_id ~/data/secrets/chat/secret_id             
+	cp ~/sgoinfre/secret/service_friends/secret_id ~/data/secrets/friends/secret_id 
+	cp ~/sgoinfre/secret/service_game/secret_id ~/data/secrets/game/secret_id
 	cp ~/sgoinfre/local/env.hdr ./srcs/frontend/public/env.hdr
 	cp ~/sgoinfre/local/strucLocker.glb srcs/frontend/public/lockerRoom/strucLocker.glb
 	cp ~/sgoinfre/local/strucPool.glb srcs/frontend/public/pool/strucPool.glb

@@ -17,11 +17,37 @@ import {
     Image,
 } from "@babylonjs/gui";
 
+import {
+  Chart,
+  LineController,
+  LineElement,
+  PointElement,
+  LinearScale,
+  CategoryScale,
+  Title,
+  Tooltip,
+  Legend,
+  Filler
+} from 'chart.js';
+
 
 import { Friend } from "../friends/Friend";
 import { FriendUI } from "./FriendUI";
 import { ContainerUI } from "./FriendUI";
 import { Match } from "../friends/Friend";
+
+
+Chart.register(
+    LineController,
+    LineElement,
+    PointElement,
+    LinearScale,
+    CategoryScale,
+    Title,
+    Tooltip,
+    Legend,
+    Filler
+);
 
 export class DataFriendUI
 {

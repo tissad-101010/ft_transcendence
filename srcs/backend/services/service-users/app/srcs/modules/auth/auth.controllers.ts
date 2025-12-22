@@ -137,6 +137,7 @@ export async function signinController(
         // no 2FA required, set JWT cookies
         // console.log('[Signin Controller] No 2FA required, setting JWT cookies');
         // set JWT cookies
+
         JwtUtils.setRefreshTokenCookie(reply, loginResponse.refreshToken!);
         JwtUtils.setAccessTokenCookie(reply, loginResponse.accessToken!);
         
@@ -147,7 +148,7 @@ export async function signinController(
         
     
     } catch (error) {
-        // console.error('[Signin Controller] Error during authentication:', error);
+        console.error('[Signin Controller] Error during authentication:', error);
         return reply.code(500).send({
             message: 'Internal server error during authentication',
             signinComplete: false,
@@ -189,7 +190,7 @@ export async function getProfileController(
                 `user_profile:${user.userId}`,
                 JSON.stringify(userProfile),
                 'EX',
-                15 * 60 // 15 minutes expiration
+                60 * 60 // 15 minutes expiration
             );
             // console.log('[Profile Controller] User profile retrieved successfully for user ID:', user.userId);
             return reply.code(200).send(userProfile);

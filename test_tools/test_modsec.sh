@@ -1,6 +1,6 @@
 #!/bin/bash
 
-URL="https://127.0.0.1:8443"
+URL="https://f6r7s10:8443/api/"
 
 declare -A tests=(
 	["XSS"]="<script>alert('xss')</script>"

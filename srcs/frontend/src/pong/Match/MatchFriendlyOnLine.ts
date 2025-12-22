@@ -4,7 +4,8 @@ import { MatchBase, MatchStatus } from "./MatchBase.ts";
 
 import Game3D from "../gameplay/Game3D.ts";
 import GameLogic from "../gameplay/GameLogic.ts";
-import { API_URL } from "../../utils.ts";
+import { getApiUrl } from "../../utils.ts";
+import { authFetch } from "../../auth/authFetch.ts";
 /*
     Classe pour gerer un match amical en ligne (remote players)
     
@@ -105,7 +106,7 @@ export class MatchFriendlyOnline extends MatchBase
                 {
                     scoreMax: parseInt(this.rules.score),
                     ballSpeed: 0.3 * parseInt(this.rules.speed),
-                    playerSpeed: 1.25 * parseInt(this.rules.speed),
+                    playerSpeed: 0.7,
                     countDownGoalTime: parseInt(this.rules.timeBefore),
                     allowPause: false
                 },
@@ -326,7 +327,7 @@ export class MatchFriendlyOnline extends MatchBase
             return;
         }
         try {
-            await fetch(`${API_URL}/api/friendly/${this.id}/finish`, {
+            await authFetch(`${getApiUrl()}/api/friendly/${this.id}/finish`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -640,7 +641,7 @@ export class MatchFriendlyOnline extends MatchBase
         // Enregistrer le résultat dans la base de données
         if (this.winner) {
             try {
-                const response = await fetch(`${API_URL}/api/friendly/${this.id}/finish`, {
+                const response = await authFetch(`${getApiUrl()}/api/friendly/${this.id}/finish`, {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",

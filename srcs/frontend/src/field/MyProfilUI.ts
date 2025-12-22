@@ -56,17 +56,7 @@ import { listMatch } from "../friends/api/friends.api";
 import { getApiUrl } from "../utils.ts";
 import { authFetch } from "../auth/authFetch.ts";
 
-Chart.register(
-    LineController,
-    LineElement,
-    PointElement,
-    LinearScale,
-    CategoryScale,
-    Title,
-    Tooltip,
-    Legend,
-    Filler
-);
+
 
 // =============================================================
 //  PALETTE SOMBRE

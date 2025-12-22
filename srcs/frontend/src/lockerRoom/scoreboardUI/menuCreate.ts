@@ -13,11 +13,11 @@ import { DataMatchBlock, genRulesMatchBlock } from './genRulesMatch.ts';
 
 import { backButton, createButton, invitationButton, joinButton, rulesButton, newButton, startButton } from './navigationButton.ts';
 
-import { API_URL } from "../../utils.ts";
-
 import { MatchRules } from '../../pong/Match.ts';
 
 import { Env, UIData } from '../utils.ts';
+import { getApiUrl } from "../../utils.ts";
+import { authFetch } from "../../auth/authFetch.ts";
 
 
 function buttonNavigation(
@@ -207,7 +207,7 @@ export function genJoinMatch(env: Env) : Rectangle
         });
 
         try {
-            const response = await fetch(`${API_URL}/api/friendly/list`, {
+            const response = await authFetch(`${getApiUrl()}/api/friendly/list`, {
                 method: "GET",
                 headers: {
                     "Content-Type": "application/json",

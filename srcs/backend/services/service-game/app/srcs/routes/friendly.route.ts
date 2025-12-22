@@ -230,8 +230,7 @@ export async function friendlyRoutes(fastify: FastifyInstance) {
           login: username
         }
       });
-
-      if (!call.data)
+      if (call.length === 0)
         return ({success: false, message: "there is no matches for this user"});
 
       const user = call[0];

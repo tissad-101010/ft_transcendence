@@ -96,7 +96,7 @@ const start = async () => {
     const originURL = `${process.env.ORIGIN_URL}`;
     await app.register(cors, {
       // reel origin is originURL
-      origin: [originURL, 'http://localhost:3000'], // Allow specific origins
+      origin: [originURL, 'https://localhost:8443'], // Allow specific origins
       methods: ['GET', 'POST', 'OPTIONS'], // Allow specific methods
       credentials: true, // Allow credentials
     });

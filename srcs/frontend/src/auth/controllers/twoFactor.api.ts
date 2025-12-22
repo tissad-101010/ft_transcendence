@@ -10,13 +10,11 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-import { data } from 'react-router-dom';
 import { getApiUrl } from '../../utils';
 import { authFetch } from '../authFetch';
 import { fetchUserProfile } from './auth.api';
 // src/auth/controllers/twoFactor.api.ts
 
-const API_URL = window.__ENV__.BACKEND_URL;
 const BASE_URL = `${getApiUrl()}/api/user/2fa`;
 
 /**

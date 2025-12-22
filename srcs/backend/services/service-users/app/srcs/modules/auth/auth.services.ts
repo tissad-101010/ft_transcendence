@@ -39,7 +39,7 @@ export class AuthService {
     private redisClient: any;
     private prismaClient: any;
     private refreshTimeout: number = 7 * 24 * 60 * 60; // 7 days in seconds
-    private accessTimeout: number = 15 * 60; // 15 minutes in seconds
+    private accessTimeout: number = 60 * 60; // 1 hour in seconds
     
     constructor(app: FastifyInstance) {
         this.prismaClient = app.prisma;
@@ -87,7 +87,14 @@ export class AuthService {
                 twoFactorRequired: false,
             };
         }
-        
+        console.log('[Signin authservice] Verifying password for user:', user);
+        if (user.passwordHash === null) {
+            return {
+                message: 'Authentication failed: No password set for this user',
+                signinComplete: false,
+                twoFactorRequired: false,
+            };
+        }
         // verify password  
         const isPasswordValid = await CryptUtils.verifyLongPassword(
             inputData.password,
@@ -135,6 +142,7 @@ export class AuthService {
         const refreshToken = JwtUtils.generateRefreshToken(loginResponse);
         
         // store refresh token in redis cache
+        await this.redisClient.del(`refresh_token:${user.id}`); // delete old refresh token if exists
         await this.redisClient.set(
             `refresh_token:${refreshToken}`,
             user.id,
@@ -143,11 +151,12 @@ export class AuthService {
         );
 
         // store access token in redis cache (optional)
+        await this.redisClient.del(`access_token:${user.id}`); // delete old access token if exists
         await this.redisClient.set(
             `access_token:${user.id}`,
             accessToken,
             'EX',
-            this.accessTimeout
+            this.accessTimeout || 60 * 60
         );
         
         // console.log('[Signin authservice] User authenticated successfully, tokens generated');

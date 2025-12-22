@@ -27,7 +27,7 @@ import { ZoneName } from "../config.ts";
 import { PoolInteraction } from "./PoolInteraction.ts";
 import { StandsInteraction } from "../field/StandsInteraction.ts";
 
-import { WS_URL } from "../utils.ts";
+import { getWsUrl } from "../utils.ts";
 
 export class Chat3D {
     private advancedTexture: AdvancedDynamicTexture;
@@ -38,7 +38,6 @@ export class Chat3D {
     private scrollViewer: ScrollViewer;
     private chatContainer: StackPanel;
     private loginText: TextBlock;
-    private onlineIcon: Ellipse;
     private sendBtn: Button;
 
     private friend: Friend;
@@ -209,7 +208,7 @@ export class Chat3D {
     }
 
     private initWebSocket() {
-        this.ws = new WebSocket(`${WS_URL}/chat/ws`);
+        this.ws = new WebSocket(`${getWsUrl()}/chat/ws`);
 
         this.ws.onopen = () => {
             // ➜ ENVOYER ICI UNIQUEMENT

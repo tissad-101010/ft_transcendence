@@ -53,7 +53,7 @@ const start = async () => {
     const originURL = `${process.env.ORIGIN_URL}`;
     await app.register(cors, {
       // reel origin is originURL
-      origin: [originURL, 'http://localhost:3000',],
+      origin: [originURL, 'https://localhost:8443',],
       methods: ['GET', 'POST', 'PATCH', 'DELETE'], // Allow specific methods
       credentials: true, // Allow credentials
     });

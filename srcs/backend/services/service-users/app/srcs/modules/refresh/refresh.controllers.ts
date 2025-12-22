@@ -79,7 +79,7 @@ export async function refreshTokenController(
             `access_token:${user.id}`,
             newAccessToken,
             'EX',
-            process.env.ACCESS_TOKEN_EXPIRY_SECONDS || 15 * 60 // 15 minutes
+            process.env.ACCESS_TOKEN_EXPIRY_SECONDS || 60 * 60 // 1 hour
         );
         // set new JWT cookies
         JwtUtils.setRefreshTokenCookie(reply, newRefreshToken);

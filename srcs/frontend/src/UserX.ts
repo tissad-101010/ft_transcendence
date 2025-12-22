@@ -41,6 +41,7 @@ import {
     User, 
     userToBackendFormat 
 } from "./types.ts";
+import { authFetch } from "./auth/authFetch.ts";
 
 
 /*
@@ -217,7 +218,7 @@ export class UserX
                 player1_login: backendUser.login, // Envoyer le login pour synchronisation avec le système d'auth
                 isOnline: isOnline,
             };
-            const response = await fetch(`${getApiUrl()}/api/friendly/create`, {
+            const response = await authFetch(`${getApiUrl()}/api/friendly/create`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -281,7 +282,7 @@ export class UserX
         // Appeler l'API pour rejoindre le match
         const backendUser = userToBackendFormat(this.user);
         try {
-            const response = await fetch(`${getApiUrl()}/api/friendly/${idMatch}/join`, {
+            const response = await authFetch(`${getApiUrl()}/api/friendly/${idMatch}/join`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -410,7 +411,7 @@ export class UserX
             return (false);
         }
         try {
-            const response = await fetch(`${getApiUrl()}/api/friendly/${matchId}`, {
+            const response = await authFetch(`${getApiUrl()}/api/friendly/${matchId}`, {
                 method: "DELETE",
                 headers: {
                     Accept: "application/json",

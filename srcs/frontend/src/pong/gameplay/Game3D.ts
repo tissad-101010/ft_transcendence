@@ -184,6 +184,8 @@ export default class Game3D
         }
 
         this.ball.mesh!.position = new Vector3(0, this.ball.size.z, 0);
+        this.ball.logic.setRadius = Math.max(this.ball.size.x, this.ball.size.z) / 2;
+
         
         // Matériau simple
         // const mat = new StandardMaterial("ballMat", this.scene);
