@@ -240,8 +240,50 @@ Users can enhance their account security with **two 2FA options**:
 - 2FA is enforced during login if enabled by the user
 - Access and refresh tokens are used together for **secure, long-lived sessions**
 
+## 🏗️ Module 8: Backend Microservices Architecture
 
-## 🐳 Docker Architecture
+**ft_transcendence** is designed using a **microservices architecture** to improve scalability, maintainability, and isolation of concerns. Each service is containerized using Docker and communicates securely with the others.
+
+### Services Overview
+
+1. **User Management Service**
+   - Handles authentication (username/password, OAuth 42)
+   - Manages sessions using JWT (access & refresh tokens)
+   - Stores user profiles and account settings
+   - Optional Two-Factor Authentication (2FA) support
+
+2. **Game & Remote Player Service**
+   - Manages real-time Pong matches via WebSockets
+   - Synchronizes game state between remote players
+   - Validates gameplay rules and scoring
+
+3. **Chat Service**
+   - Handles live messaging between friends
+   - Stores messages in a dedicated database
+   - Ensures real-time updates via WebSocket connections
+
+4. **Friends Service**
+   - Manages friend lists
+   - Supports adding, removing, and blocking users
+   - Provides endpoints for social features integration
+
+### Supporting Containers
+- **Database Container**
+  - Central PostgreSQL instance for all persistent data
+- **Vault Container**
+  - Secure storage of secrets, tokens, and credentials
+- **Reverse Proxy Container**
+  - Nginx + ModSecurity for HTTPS termination and WAF protection
+- **Frontend SPA**
+  - Served via Nginx, communicates with backend microservices
+
+### Architecture Highlights
+- Each microservice is **isolated** and independently deployable
+- Services communicate securely over the internal Docker network
+- Secrets and sensitive data are **never stored in code**
+- Enables **scalable and maintainable backend infrastructure**  
+
+### Diagram
 
 ```mermaid
 graph TD
@@ -250,17 +292,108 @@ graph TD
     end
 
     subgraph Docker Network
-        A --> B[Nginx + ModSecurity]
-        B --> C[Frontend SPA]
-        B --> D[Backend]
-        D --> E[(PostgreSQL DB)]
-        D --> F[WebSocket Game Server]
+        B[Nginx + ModSecurity]
+        C[Frontend SPA]
+        D[User Management Service]
+        E[Game & Remote Player Service]
+        F[Chat Service]
+        G[Friends Service]
+        H[(PostgreSQL DB)]
     end
+
+    subgraph Vault Network [External Vault Network]
+        I[Vault]
+    end
+
+    %% Client requests
+    A --> B
+    B --> C
+    B --> D
+    B --> E
+    B --> F
+    B --> G
+
+    %% Backend services access DB
+    D --> H
+    E --> H
+    F --> H
+    G --> H
+
+    %% Backend services access Vault via external network
+    D --- I
+    E --- I
+    F --- I
+    G --- I
+
 ```
+
+## 🎨 Module 8:Advanced 3D Graphics
+
+**ft_transcendence** integrates advanced 3D graphical elements to enhance the visual experience of the game and the user interface.
+
+### Tools & Libraries
+- **Blender**: for creating and exporting 3D models and assets
+- **Babylon.js**: for rendering 3D elements in the browser and managing interactions
+
+### Key Features
+- **3D models and environments** integrated into the game interface
+- **Camera management**: dynamic camera angles to follow gameplay action
+- **Visual effects**:
+  - Object shine and reflection
+  - Smooth animations and transitions
+  - Clickable 3D elements for interactive UI components
+- **Real-time rendering** in the frontend SPA
+
+## 🚀 How to Run the Project
+
+The project relies on **HashiCorp Vault** for secret management and must be initialized **before** starting the rest of the infrastructure.
+
+### 1️⃣ Start and Configure Vault / Set the required environment variables
+
+First, start the Vault service:
+
 ```bash
-./scripts/test_modsec.sh
+make vault_start
+```
+Then perform the following steps:
 
+  - Initialize Vault
 
-## 🐳 Docker Architecture
+  - Unseal Vault
+
+  - Create one secret for:
+
+      - Each backend service
+
+      - The database (credentials, connection details)
+
+  - Store the secrets in the paths specified in the Makefile
+  - Set the required environment variables
+      (see docker-compose.yml for the complete list)
+⚠️ Vault must be fully initialized and unsealed before proceeding.
+
+### 2️⃣ Start the Full Project
+
+Once Vault is ready and all secrets are configured, start the rest of the project:
+```bash
+  make start
 ```
 
+This will:
+
+  - Launch all backend microservices
+
+  - Start the database container
+
+  - Start Nginx with ModSecurity (reverse proxy + WAF)
+
+  - Serve the frontend SPA
+
+### 3️⃣ Access the Application
+
+Open your browser and navigate to:
+```bash
+  https://localhost:8443
+```
+
+The application is now up and running.
